@@ -1,4 +1,4 @@
-# flink-statefun-tasks
+# Flink Tasks
 Tasks API for Stateful Functions on Flink
 
 ## What is it?
