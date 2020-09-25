@@ -66,5 +66,5 @@ class _TaskContext(object):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        task_state = TaskState(type='statfun_tasks.task_state', data=_dumps(self._state))
+        task_state = TaskState(type='statefun_tasks.task_state', data=_dumps(self._state))
         self.pack_and_save('task_state', task_state)
