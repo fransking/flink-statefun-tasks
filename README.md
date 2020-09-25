@@ -23,7 +23,7 @@ def say_goodbye(greeting):
 
 ## Motivation
 
-I use Celery in my professional life to orchestrate distributed Python workflows.  These workflows are typically 1->N->1 cardinality such as:
+I use Celery in my professional life to orchestrate distributed Python workflows.  These workflows are typically 1-N-1 cardinality such as:
 
 * Load a portfolio of stocks
 * For each stock load a timeseries of historical prices
@@ -84,7 +84,6 @@ Let's re-vist our stocks example from a Flink perspective.
 @functions.bind('examples/load_timeseries')
 def load_timeseries(context, stock):
     prices = _load_prices(stock)
-
     context.send('examples/compute_std_dev', prices)
 
 
@@ -119,7 +118,7 @@ def load_timeseries(context, input):
 
 ### Flink Tasks
 
-Flink Tasks wraps up the orchestration function into a Pipeline so that developers can focus on writing simple functions that are combined into workflows using an inuitive API.  As each individual task in a workflow is run as a seperate Flink stateful function invocation, execution is still distributed and can be scaled up as required.
+Flink Tasks wraps up the orchestration function into a Pipeline so that developers can focus on writing simple functions that are combined into workflows using an intuitive API.  As each individual task in a workflow is run as a seperate Flink stateful function invocation, execution is still distributed and can be scaled up as required.
 
 ```
 tasks = FlinkTasks(
