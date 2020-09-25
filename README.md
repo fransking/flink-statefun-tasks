@@ -132,9 +132,9 @@ tasks = FlinkTasks(
 def timeseries_workflow():
     stocks = ['BT.L', 'DAIGn.DE', 'BP.L']
 
-    return in_parallel([
-       load_timeseries.send(stock).continue_with(compute_std_dev)
-    ] for stock in stocks).continue_with(compute_average)
+    return in_parallel(
+        [load_timeseries.send(stock).continue_with(compute_std_dev) for stock in stocks]
+    ).continue_with(compute_average)
 
 
 @tasks.bind()
