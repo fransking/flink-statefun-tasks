@@ -4,7 +4,7 @@ from statefun_tasks import FlinkTasks, TaskRequest, TaskResult, TaskException, i
 tasks = FlinkTasks(default_namespace="example", default_worker_name="worker", egress_type_name="example/kafka-generic-egress")
 
 
-# 1. simple work flow
+# 1. simple workflow
 
 @tasks.bind()
 def greeting_workflow(first_name, last_name):
@@ -54,7 +54,7 @@ def _count_results(results):
 
 
 
-# 4. pass through arguments - passing extra parameters though a function: 'f1(a,b) -> c' can be called as 'f1(a,b,1,2...n) -> (c,1,2,...n)
+# 4. pass through arguments - passing extra parameters through a function: 'f1(a,b) -> c' can be called as 'f1(a,b,1,2...n) -> (c,1,2,...n)
 # in the example below the result will be ('Hello Jane Doe', 3)
 
 @tasks.bind()
