@@ -128,9 +128,9 @@ tasks = FlinkTasks(default_namespace="example", default_worker_name="worker", eg
 @tasks.bind()
 def timeseries_workflow():
     stocks = ['BT.L', 'DAIGn.DE', 'BP.L']
-
+    
     return in_parallel([
-       _load_prices.send(stock).continue_with(compute_std_dev)
+       load_timeseries.send(stock).continue_with(compute_std_dev)
     ] for stock in stocks).continue_with(compute_average)
 
 
