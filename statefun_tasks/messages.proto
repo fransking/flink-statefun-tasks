@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package example;
+
+message TaskRequest {
+    string id = 1;
+    string type = 2;
+    string reply_topic = 3;
+    string content_type = 4;
+    bytes data = 5;
+}
+
+message TaskResult {
+    string id = 1;
+    string correlation_id = 2;
+    string type = 3;
+    string content_type = 4;
+    bytes data = 5;
+}
+
+message TaskException {
+    string id = 1;
+    string correlation_id = 2;
+    string type = 3;
+    string exception_type = 4;
+    string exception_message = 5;
+    string stacktrace = 6;
+}
+
+message TaskState {
+    string type = 1;
+    string content_type = 2;
+    bytes data = 3;
+}
