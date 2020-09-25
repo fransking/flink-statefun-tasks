@@ -16,10 +16,10 @@ _sym_db = _symbol_database.Default()
 
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='messages.proto',
-  package='example',
+  package='statefun_tasks',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x0emessages.proto\x12\x07\x65xample\"`\n\x0bTaskRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x13\n\x0breply_topic\x18\x03 \x01(\t\x12\x14\n\x0c\x63ontent_type\x18\x04 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x05 \x01(\x0c\"b\n\nTaskResult\x12\n\n\x02id\x18\x01 \x01(\t\x12\x16\n\x0e\x63orrelation_id\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12\x14\n\x0c\x63ontent_type\x18\x04 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x05 \x01(\x0c\"\x88\x01\n\rTaskException\x12\n\n\x02id\x18\x01 \x01(\t\x12\x16\n\x0e\x63orrelation_id\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12\x16\n\x0e\x65xception_type\x18\x04 \x01(\t\x12\x19\n\x11\x65xception_message\x18\x05 \x01(\t\x12\x12\n\nstacktrace\x18\x06 \x01(\t\"=\n\tTaskState\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x14\n\x0c\x63ontent_type\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\x0c\x62\x06proto3')
+  serialized_pb=_b('\n\x0emessages.proto\x12\x0estatefun_tasks\"`\n\x0bTaskRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x13\n\x0breply_topic\x18\x03 \x01(\t\x12\x14\n\x0c\x63ontent_type\x18\x04 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x05 \x01(\x0c\"b\n\nTaskResult\x12\n\n\x02id\x18\x01 \x01(\t\x12\x16\n\x0e\x63orrelation_id\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12\x14\n\x0c\x63ontent_type\x18\x04 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x05 \x01(\x0c\"\x88\x01\n\rTaskException\x12\n\n\x02id\x18\x01 \x01(\t\x12\x16\n\x0e\x63orrelation_id\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12\x16\n\x0e\x65xception_type\x18\x04 \x01(\t\x12\x19\n\x11\x65xception_message\x18\x05 \x01(\t\x12\x12\n\nstacktrace\x18\x06 \x01(\t\"=\n\tTaskState\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x14\n\x0c\x63ontent_type\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\x0c\x62\x06proto3')
 )
 
 
@@ -27,41 +27,41 @@ DESCRIPTOR = _descriptor.FileDescriptor(
 
 _TASKREQUEST = _descriptor.Descriptor(
   name='TaskRequest',
-  full_name='example.TaskRequest',
+  full_name='statefun_tasks.TaskRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='id', full_name='example.TaskRequest.id', index=0,
+      name='id', full_name='statefun_tasks.TaskRequest.id', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='type', full_name='example.TaskRequest.type', index=1,
+      name='type', full_name='statefun_tasks.TaskRequest.type', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='reply_topic', full_name='example.TaskRequest.reply_topic', index=2,
+      name='reply_topic', full_name='statefun_tasks.TaskRequest.reply_topic', index=2,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='content_type', full_name='example.TaskRequest.content_type', index=3,
+      name='content_type', full_name='statefun_tasks.TaskRequest.content_type', index=3,
       number=4, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='data', full_name='example.TaskRequest.data', index=4,
+      name='data', full_name='statefun_tasks.TaskRequest.data', index=4,
       number=5, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
@@ -79,48 +79,48 @@ _TASKREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=27,
-  serialized_end=123,
+  serialized_start=34,
+  serialized_end=130,
 )
 
 
 _TASKRESULT = _descriptor.Descriptor(
   name='TaskResult',
-  full_name='example.TaskResult',
+  full_name='statefun_tasks.TaskResult',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='id', full_name='example.TaskResult.id', index=0,
+      name='id', full_name='statefun_tasks.TaskResult.id', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='correlation_id', full_name='example.TaskResult.correlation_id', index=1,
+      name='correlation_id', full_name='statefun_tasks.TaskResult.correlation_id', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='type', full_name='example.TaskResult.type', index=2,
+      name='type', full_name='statefun_tasks.TaskResult.type', index=2,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='content_type', full_name='example.TaskResult.content_type', index=3,
+      name='content_type', full_name='statefun_tasks.TaskResult.content_type', index=3,
       number=4, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='data', full_name='example.TaskResult.data', index=4,
+      name='data', full_name='statefun_tasks.TaskResult.data', index=4,
       number=5, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
@@ -138,55 +138,55 @@ _TASKRESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=125,
-  serialized_end=223,
+  serialized_start=132,
+  serialized_end=230,
 )
 
 
 _TASKEXCEPTION = _descriptor.Descriptor(
   name='TaskException',
-  full_name='example.TaskException',
+  full_name='statefun_tasks.TaskException',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='id', full_name='example.TaskException.id', index=0,
+      name='id', full_name='statefun_tasks.TaskException.id', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='correlation_id', full_name='example.TaskException.correlation_id', index=1,
+      name='correlation_id', full_name='statefun_tasks.TaskException.correlation_id', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='type', full_name='example.TaskException.type', index=2,
+      name='type', full_name='statefun_tasks.TaskException.type', index=2,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='exception_type', full_name='example.TaskException.exception_type', index=3,
+      name='exception_type', full_name='statefun_tasks.TaskException.exception_type', index=3,
       number=4, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='exception_message', full_name='example.TaskException.exception_message', index=4,
+      name='exception_message', full_name='statefun_tasks.TaskException.exception_message', index=4,
       number=5, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='stacktrace', full_name='example.TaskException.stacktrace', index=5,
+      name='stacktrace', full_name='statefun_tasks.TaskException.stacktrace', index=5,
       number=6, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -204,34 +204,34 @@ _TASKEXCEPTION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=226,
-  serialized_end=362,
+  serialized_start=233,
+  serialized_end=369,
 )
 
 
 _TASKSTATE = _descriptor.Descriptor(
   name='TaskState',
-  full_name='example.TaskState',
+  full_name='statefun_tasks.TaskState',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='type', full_name='example.TaskState.type', index=0,
+      name='type', full_name='statefun_tasks.TaskState.type', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='content_type', full_name='example.TaskState.content_type', index=1,
+      name='content_type', full_name='statefun_tasks.TaskState.content_type', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='data', full_name='example.TaskState.data', index=2,
+      name='data', full_name='statefun_tasks.TaskState.data', index=2,
       number=3, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
@@ -249,8 +249,8 @@ _TASKSTATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=364,
-  serialized_end=425,
+  serialized_start=371,
+  serialized_end=432,
 )
 
 DESCRIPTOR.message_types_by_name['TaskRequest'] = _TASKREQUEST
@@ -262,28 +262,28 @@ _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 TaskRequest = _reflection.GeneratedProtocolMessageType('TaskRequest', (_message.Message,), dict(
   DESCRIPTOR = _TASKREQUEST,
   __module__ = 'messages_pb2'
-  # @@protoc_insertion_point(class_scope:example.TaskRequest)
+  # @@protoc_insertion_point(class_scope:statefun_tasks.TaskRequest)
   ))
 _sym_db.RegisterMessage(TaskRequest)
 
 TaskResult = _reflection.GeneratedProtocolMessageType('TaskResult', (_message.Message,), dict(
   DESCRIPTOR = _TASKRESULT,
   __module__ = 'messages_pb2'
-  # @@protoc_insertion_point(class_scope:example.TaskResult)
+  # @@protoc_insertion_point(class_scope:statefun_tasks.TaskResult)
   ))
 _sym_db.RegisterMessage(TaskResult)
 
 TaskException = _reflection.GeneratedProtocolMessageType('TaskException', (_message.Message,), dict(
   DESCRIPTOR = _TASKEXCEPTION,
   __module__ = 'messages_pb2'
-  # @@protoc_insertion_point(class_scope:example.TaskException)
+  # @@protoc_insertion_point(class_scope:statefun_tasks.TaskException)
   ))
 _sym_db.RegisterMessage(TaskException)
 
 TaskState = _reflection.GeneratedProtocolMessageType('TaskState', (_message.Message,), dict(
   DESCRIPTOR = _TASKSTATE,
   __module__ = 'messages_pb2'
-  # @@protoc_insertion_point(class_scope:example.TaskState)
+  # @@protoc_insertion_point(class_scope:statefun_tasks.TaskState)
   ))
 _sym_db.RegisterMessage(TaskState)
 

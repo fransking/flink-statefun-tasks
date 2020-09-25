@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package example;
+package statefun_tasks;
 
 message TaskRequest {
     string id = 1;
