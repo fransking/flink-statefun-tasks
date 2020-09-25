@@ -65,7 +65,7 @@ workflow =
 result = workflow.delay()
 ```
 
-Since the workflow is implemented as simple functions it also testable & debuggable without having to spin up Celery
+Since the workflow is implemented as simple functions it is also testable and debuggable without having to spin up Celery
 
 ```
 test_result = compute_average([compute_std_dev(load_timeseries('BT.L'))])
@@ -90,7 +90,7 @@ def load_timeseries(context, stock):
 
 @functions.bind('examples/compute_std_dev')
 def compute_std_dev(context, prices):
-    context.reply(np.mean(prices))
+    context.reply(np.std(prices))
 ```
 
 Some issues with this:
