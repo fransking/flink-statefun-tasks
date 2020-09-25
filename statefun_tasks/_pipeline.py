@@ -43,10 +43,11 @@ class _Pipeline(object):
         return self
 
     def resolve(self, context: _TaskContext, extra_args):
-        # 1. record all the continuations into a pipeline and save into state
+        # 1. record all the continuations into a pipeline and save into state with caller id and address
         state = {
             'pipeline': self._pipeline,
-            'caller_id': context.get_caller_id()
+            'caller_id': context.get_caller_id(),
+            'address': context.get_address()
         }
 
         context.set_state(state)
@@ -200,4 +201,4 @@ class _Pipeline(object):
             state = context.get_state()
 
             if 'caller_id' in state and state['caller_id'] != caller_id:
-                context.pack_and_send('example/worker', state['caller_id'], task_result_or_exception)
+                context.pack_and_send(state['address'], state['caller_id'], task_result_or_exception)

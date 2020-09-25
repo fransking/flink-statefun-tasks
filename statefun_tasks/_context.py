@@ -18,6 +18,9 @@ class _TaskContext(object):
         except:
             self._state = {}
 
+    def get_address(self):
+        return f'{self._context.address.namespace}/{self._context.address.type}'
+
     def get_task_id(self):
         return self._context.address.identity
 
