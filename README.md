@@ -76,7 +76,7 @@ Flink is interesting to me because unlike Celery, it is polygot and remote funct
 
 ### Flink Stateful Functions
 
-If you have read this far and haven't seen Flink Stateful functions before it would be worth reading the documentation on the Apacke Flink site.  Flink doesn't really have defined workflows.  Functions can call other functions, functions can reply to functions that called them and functions can emit results to some egress typically a Kakfa topic.  This makes it less constrained than Celery but at the same time puts more work on the developer.  
+If you have read this far and haven't seen Flink Stateful Functions before it would be worth reading the documentation on the Apacke Flink site.  Flink doesn't really have defined workflows.  Functions can call other functions, functions can reply to functions that called them and functions can emit results to some egress, typically a Kakfa topic.  This makes it less constrained than Celery but at the same time puts more work on the developer.  
 
 Let's re-vist our stocks example from a Flink perspective.  
 
