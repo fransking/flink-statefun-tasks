@@ -1,0 +1,55 @@
+version: "1.0"
+module:
+  meta:
+    type: remote
+  spec:
+    functions:
+      - function:
+          meta:
+            kind: http
+            type: example/worker
+          spec:
+            endpoint: SYNC_WORKER_ADDRESS
+            states:
+              - task_request
+              - task_state
+              - task_result
+              - task_exception
+            maxNumBatchRequests: 500
+            timeout: 10min
+      - function:
+          meta:
+            kind: http
+            type: example/async_worker
+          spec:
+            endpoint: ASYNC_WORKER_ADDRESS
+            states:
+              - task_request
+              - task_state
+              - task_result
+              - task_exception
+            maxNumBatchRequests: 500
+            timeout: 10min
+    ingresses:
+      - ingress:
+          meta:
+            type: statefun.kafka.io/routable-protobuf-ingress
+            id: example/requests
+          spec:
+            address: KAFKA_BROKER_ADDRESS
+            consumerGroupId: flink-cluster-id
+            topics:
+              - topic: statefun-test.requests
+                typeUrl: com.googleapis/statefun_tasks.TaskRequest
+                targets:
+                  - example/worker
+    egresses:
+      - egress:
+          meta:
+            type: statefun.kafka.io/generic-egress
+            id: example/kafka-generic-egress
+          spec:
+            address: KAFKA_BROKER_ADDRESS
+            deliverySemantic:
+              type: exactly-once
+              transactionTimeoutMillis: 100000
