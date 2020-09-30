@@ -8,8 +8,9 @@ from typing import Callable
 
 
 class _TaskContext(object):
-    def __init__(self, context: BatchContext, egress_type_name: str):
+    def __init__(self, context: BatchContext, task_name: str, egress_type_name: str):
         self._context = context
+        self._task_name = task_name
         self._egress_type_name = egress_type_name
 
         try:
@@ -68,3 +69,6 @@ class _TaskContext(object):
     def __exit__(self, exc_type, exc_value, traceback):
         task_state = TaskState(type='statefun_tasks.task_state', data=_dumps(self._state))
         self.pack_and_save('task_state', task_state)
+
+    def __str__(self):
+        return f'{self._task_name} [{self.get_task_id()}], caller: {self.get_caller_id()}]'

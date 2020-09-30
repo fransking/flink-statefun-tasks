@@ -1,5 +1,5 @@
 from ._serialisation import deserialise, serialise
-from ._utils import _gen_id, _task_type_for
+from ._utils import _gen_id, _task_type_for, _to_args_and_kwargs
 from ._types import _GroupEntry
 from ._pipeline import _Pipeline
 from ._context import _TaskContext
@@ -11,6 +11,7 @@ import logging
 import traceback as tb
 import inspect
 import ast
+import asyncio
 
 
 _log = logging.getLogger('FlinkTasks')
@@ -57,6 +58,48 @@ class FlinkTasks(object):
         else:
             raise ValueError(f'{task_type} is not a registered FlinkTask')
 
+    def run(self, context: BatchContext, task_request_or_result: Union[TaskRequest, TaskResult, TaskException]):
+        with _TaskContext(context, task_request_or_result.type, self._egress_type_name) as task_context:
+
+            # either we resume a pipeline (received TaskResult or TaskException) or we invoke a task (received TaskRequest)
+            task_request_result = self._begin_operation(task_context, task_request_or_result, is_async=False)
+
+            if task_request_result is not None:  # invoked a task
+                task_request, task_result = task_request_result
+
+                self._finalise_task_result(task_context, task_request, task_result)
+
+    async def run_async(self, context: BatchContext, task_request_or_result: Union[TaskRequest, TaskResult, TaskException]):
+        with _TaskContext(context, task_request_or_result.type, self._egress_type_name) as task_context:
+
+            # either we resume a pipeline (received TaskResult or TaskException) or we invoke a task (received TaskRequest)
+            task_request_result = self._begin_operation(task_context, task_request_or_result, is_async=True)
+
+            if task_request_result is not None:  # invoked a task which may be a coro
+                task_request, task_result = task_request_result
+
+                if asyncio.iscoroutine(task_result):
+                    task_result = await task_result
+
+                self._finalise_task_result(task_context, task_request, task_result)
+
+    def _begin_operation(self, task_context, task_request_or_result, is_async):
+        _log.info(f'Started {task_context}')
+
+        if isinstance(task_request_or_result, (TaskResult, TaskException)):
+            # we resume the pipeline passing this result into the next task
+            task_result_or_exception = task_request_or_result
+            self._resume_pipeline(task_context, task_result_or_exception)
+        else:
+            # otherwise we invoke the task
+            task_request = task_request_or_result
+            task_context.pack_and_save('task_request', task_request)
+
+            flink_task = self.get_task(task_request.type)
+            fn = flink_task.run_async if is_async else flink_task.run
+
+            return task_request, fn(task_context, task_request)
+
     def _get_pipeline(self, task_id, state):
         pipeline = state.get('pipeline', None)
 
@@ -65,69 +108,42 @@ class FlinkTasks(object):
         else:
             raise ValueError(f'Missing pipleline for task_id - {task_id}')
 
-
-    def _resume_pipeline(self, context, task_id, caller_id, state, task_result):
-        pipeline = self._get_pipeline(task_id, state)
-        pipeline.resume(context, caller_id, state, task_result)
-
-    def _terminate_pipeline(self, context, task_id, caller_id, state, task_exception):
-        pipeline = self._get_pipeline(task_id, state)
-        pipeline.terminate(context, caller_id, task_exception)
-
-
-    def _run(self, context: _TaskContext, task_request_or_result: Union[TaskRequest, TaskResult, TaskException]):   
-
+    def _resume_pipeline(self, context, task_result_or_exception: Union[TaskResult, TaskException]):
         task_id = context.get_task_id()
         caller_id = context.get_caller_id()
-        task_type = task_request_or_result.type
-        
-        _log.info(f'Started {task_type}[{task_id}], caller: {caller_id})')
-
-        # get existing state
         state = context.get_state()
 
-        if isinstance(task_request_or_result, TaskResult):
-            # we resume the pipeline passing this result into the next task
-            task_result = task_request_or_result
-            self._resume_pipeline(context, task_id, caller_id, state, task_result)
+        pipeline = self._get_pipeline(task_id, state)
 
-        elif isinstance(task_request_or_result, TaskException):
-            # we terminate the pipeline returning the exception to the final task
-            task_exception = task_request_or_result
-            self._terminate_pipeline(context, task_id, caller_id, state, task_exception)
-
+        # either we resume the pipeline or terminate it if we received an exception instead of a result
+        if isinstance(task_result_or_exception, TaskResult):
+            pipeline.resume(context, caller_id, state, task_result_or_exception)
         else:
-            task_request = task_request_or_result
-            context.pack_and_save('task_request', task_request)
+            pipeline.terminate(context, caller_id, task_result_or_exception)
 
-            # get the flink task to run
-            flink_task = self.get_task(task_request.type)
+    def _finalise_task_result(self, context, task_request, task_result):
 
-            # run the flink task
-            task_result, task_exception, pipeline, extra_args = flink_task.run(context, task_request)
+        task_result, task_exception, pipeline, extra_args = task_result  # unpack
 
-            if pipeline is not None:
-                pipeline.resolve(context, extra_args)
+        if pipeline is not None:
+            pipeline.resolve(context, extra_args)
+        else:
+
+            if task_exception is not None:
+                context.pack_and_save('task_exception', task_exception)
+                return_value = task_exception
             else:
+                context.pack_and_save('task_result', task_result)
+                return_value = task_result
 
-                if task_exception is not None:
-                    context.pack_and_save('task_exception', task_exception)
-                    return_value = task_exception
-                else:
-                    context.pack_and_save('task_result', task_result)
-                    return_value = task_result
- 
-                # then either we need to reply to a caller
-                if caller_id is not None:
-                    context.pack_and_reply(return_value)
+            # then either we need to reply to a caller
+            if context.get_caller_id() is not None:
+                context.pack_and_reply(return_value)
 
-                # or we need to send some egress
-                elif task_request.reply_topic is not None and task_request.reply_topic != "":
-                    context.pack_and_send_egress(topic=task_request.reply_topic, value=return_value)
+            # or we need to send some egress
+            elif task_request.reply_topic is not None and task_request.reply_topic != "":
+                context.pack_and_send_egress(topic=task_request.reply_topic, value=return_value)
 
-    def run(self, context: BatchContext, task_request_or_result: Union[TaskRequest, TaskResult, TaskException]):
-        with _TaskContext(context, self._egress_type_name) as task_context:
-            self._run(task_context, task_request_or_result)
 
 
 class _FlinkTask(object):
@@ -139,55 +155,77 @@ class _FlinkTask(object):
         self._num_args = len(self._args)
         self._explicit_return = any(isinstance(node, ast.Return) for node in ast.walk(ast.parse(inspect.getsource(fun))))
         
-    def _is_args_and_kwargs(self, test_args):
-        try:
-            args, kwargs = test_args
-            return isinstance(kwargs, dict)
-        except:
-            return False
-
-    def _to_args_and_kwargs(self, task_request: TaskRequest):
-            task_data = deserialise(task_request)
-
-            if self._is_args_and_kwargs(task_data):
-                return task_data
-            
-            elif task_data is None:
-                return (), {}
-            else:
-                return (task_data), {}
 
     def run(self, context: _TaskContext, task_request: TaskRequest):
         task_result, task_exception, pipeline, extra_args = None, None, None, None
 
         try:
             # run the flink task
-            fn_result = self._run(context, task_request)
+            task_args, kwargs, pass_through_args = self._to_task_args_and_kwargs(task_request)
 
-            # result of the task might be a Flink pipeline or tuple of Flink pipline + extra args to be passed through
-            possible_pipeline_result = fn_result[0] if isinstance(fn_result, Tuple) else fn_result
+            result = self._fun(*task_args, **kwargs)
+            
+            fn_result = self._add_passthrough_args(result, pass_through_args)
 
-            # in which case return the pipeline and these extra args (if present).
-            if isinstance(possible_pipeline_result, _Pipeline):
-                pipeline = possible_pipeline_result
-                extra_args = fn_result[1:] if isinstance(fn_result, Tuple) and len(fn_result) > 1 else () 
-
-            # else return the result of the task
-            else:
-
-                if not isinstance(fn_result, Tuple):  # if single result then wrap in tuple as this is the maximal case
-                    fn_result = (fn_result,)
-
-                task_result = TaskResult(
-                    id=_gen_id(), 
-                    correlation_id=task_request.id,
-                    type=f'{task_request.type}.result')
-                
-                serialise(task_result, fn_result, content_type=self._content_type)
+            pipeline, task_result, extra_args = self._to_pipeline_or_task_result(task_request, fn_result, extra_args)
 
         # we errored so return a task_exception instead
         except Exception as e:
-            task_exception = TaskException(
+            task_exception = self._to_task_exception(task_request, e)
+
+        return task_result, task_exception, pipeline, extra_args
+
+    async def run_async(self, context: _TaskContext, task_request: TaskRequest):
+        task_result, task_exception, pipeline, extra_args = None, None, None, None
+
+        try:
+            # run the flink task
+            task_args, kwargs, pass_through_args = self._to_task_args_and_kwargs(task_request)
+
+            result = self._fun(*task_args, **kwargs)
+
+            # await coro
+            if asyncio.iscoroutine(result):
+                result = await result
+            
+            fn_result = self._add_passthrough_args(result, pass_through_args)
+
+            pipeline, task_result, extra_args = self._to_pipeline_or_task_result(task_request, fn_result, extra_args)
+
+        # we errored so return a task_exception instead
+        except Exception as e:
+            task_exception = self._to_task_exception(task_request, e)
+
+        return task_result, task_exception, pipeline, extra_args
+
+
+    def _to_pipeline_or_task_result(self, task_request, fn_result, extra_args):
+        pipeline, task_result = None, None
+
+        # result of the task might be a Flink pipeline or tuple of Flink pipline + extra args to be passed through
+        possible_pipeline_result = fn_result[0] if isinstance(fn_result, Tuple) else fn_result
+
+        # in which case return the pipeline and these extra args (if present).
+        if isinstance(possible_pipeline_result, _Pipeline):
+            pipeline = possible_pipeline_result
+            extra_args = fn_result[1:] if isinstance(fn_result, Tuple) and len(fn_result) > 1 else () 
+
+        # else return the result of the task
+        else:
+            if not isinstance(fn_result, Tuple):  # if single result then wrap in tuple as this is the maximal case
+                fn_result = (fn_result,)
+
+            task_result = TaskResult(
+                id=_gen_id(), 
+                correlation_id=task_request.id,
+                type=f'{task_request.type}.result')
+            
+            serialise(task_result, fn_result, content_type=self._content_type)
+
+        return pipeline, task_result, extra_args
+
+    def _to_task_exception(self, task_request, e):
+        return TaskException(
                 id=_gen_id(),
                 correlation_id=task_request.id,
                 type=f'{task_request.type}.error',
@@ -195,10 +233,8 @@ class _FlinkTask(object):
                 exception_message=str(e),
                 stacktrace=tb.format_exc())
 
-        return task_result, task_exception, pipeline, extra_args
-
-    def _run(self, context: _TaskContext, task_request: TaskRequest):
-        args, kwargs = self._to_args_and_kwargs(task_request)
+    def _to_task_args_and_kwargs(self, task_request):
+        args, kwargs = _to_args_and_kwargs(deserialise(task_request))
         
         #listify
         args = [arg for arg in args]
@@ -217,8 +253,9 @@ class _FlinkTask(object):
             task_args = args
             pass_through_args = ()
 
-        result = self._fun(*task_args, **kwargs)
+        return task_args, kwargs, pass_through_args
 
+    def _add_passthrough_args(self, result, pass_through_args):
         if len(pass_through_args) > 0:
 
             if self._explicit_return:
@@ -229,7 +266,6 @@ class _FlinkTask(object):
             return return_value
         else:
             return result
-
 
 
 def in_parallel(group: list):
