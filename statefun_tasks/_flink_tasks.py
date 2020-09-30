@@ -1,6 +1,6 @@
 from ._serialisation import deserialise, serialise
 from ._utils import _gen_id, _task_type_for, _to_args_and_kwargs
-from ._types import _GroupEntry
+from ._types import _GroupEntry, TaskRetryPolicy
 from ._pipeline import _Pipeline
 from ._context import _TaskContext
 from .messages_pb2 import TaskRequest, TaskResult, TaskException
@@ -31,14 +31,15 @@ class FlinkTasks(object):
 
         self._bindings[_task_type_for(fun)] = _FlinkTask(fun, **params)
 
-    def bind(self, content_type=None, namespace=None, worker_name=None):
+    def bind(self, content_type:str=None, namespace:str=None, worker_name:str=None, retry_policy:TaskRetryPolicy=None):
         def wrapper(function):
 
             def defaults():
                 return {
                     'content_type': self._default_content_type if content_type is None else content_type,
                     'namespace': self._default_namespace if namespace is None else namespace,
-                    'worker_name': self._default_worker_name if worker_name is None else worker_name
+                    'worker_name': self._default_worker_name if worker_name is None else worker_name,
+                    'retry_policy': retry_policy
                 }
 
             def send(*args, **kwargs):
@@ -58,22 +59,22 @@ class FlinkTasks(object):
         else:
             raise ValueError(f'{task_type} is not a registered FlinkTask')
 
-    def run(self, context: BatchContext, task_request_or_result: Union[TaskRequest, TaskResult, TaskException]):
-        with _TaskContext(context, task_request_or_result.type, self._egress_type_name) as task_context:
+    def run(self, context: BatchContext, task_input: Union[TaskRequest, TaskResult, TaskException]):
+        with _TaskContext(context, task_input.type, self._egress_type_name) as task_context:
 
             # either we resume a pipeline (received TaskResult or TaskException) or we invoke a task (received TaskRequest)
-            task_request_result = self._begin_operation(task_context, task_request_or_result, is_async=False)
+            task_request_result = self._begin_operation(task_context, task_input, is_async=False)
 
             if task_request_result is not None:  # invoked a task
                 task_request, task_result = task_request_result
 
                 self._finalise_task_result(task_context, task_request, task_result)
 
-    async def run_async(self, context: BatchContext, task_request_or_result: Union[TaskRequest, TaskResult, TaskException]):
-        with _TaskContext(context, task_request_or_result.type, self._egress_type_name) as task_context:
+    async def run_async(self, context: BatchContext, task_input: Union[TaskRequest, TaskResult, TaskException]):
+        with _TaskContext(context, task_input.type, self._egress_type_name) as task_context:
 
             # either we resume a pipeline (received TaskResult or TaskException) or we invoke a task (received TaskRequest)
-            task_request_result = self._begin_operation(task_context, task_request_or_result, is_async=True)
+            task_request_result = self._begin_operation(task_context, task_input, is_async=True)
 
             if task_request_result is not None:  # invoked a task which may be a coro
                 task_request, task_result = task_request_result
@@ -100,26 +101,33 @@ class FlinkTasks(object):
 
             return task_request, fn(task_context, task_request)
 
-    def _get_pipeline(self, task_id, state):
+    def _get_pipeline(self, context):
+        state = context.get_state()
         pipeline = state.get('pipeline', None)
 
         if pipeline is not None:
             return _Pipeline(pipeline=pipeline)
         else:
-            raise ValueError(f'Missing pipleline for task_id - {task_id}')
+            raise ValueError(f'Missing pipleline for task_id - {context.get_task_id()}')
 
     def _resume_pipeline(self, context, task_result_or_exception: Union[TaskResult, TaskException]):
-        task_id = context.get_task_id()
-        caller_id = context.get_caller_id()
-        state = context.get_state()
-
-        pipeline = self._get_pipeline(task_id, state)
+        pipeline = self._get_pipeline(context)
 
         # either we resume the pipeline or terminate it if we received an exception instead of a result
         if isinstance(task_result_or_exception, TaskResult):
-            pipeline.resume(context, caller_id, state, task_result_or_exception)
+            task_result = task_result_or_exception
+            pipeline.resume(context, task_result)
         else:
-            pipeline.terminate(context, caller_id, task_result_or_exception)
+            task_exception = task_result_or_exception
+
+            # retry if requested
+            if task_exception.retry:
+                
+                # attempt retry - will return false if retry count exceeded
+                if pipeline.attempt_retry(context, task_result_or_exception):
+                    return
+
+            pipeline.terminate(context, task_result_or_exception)
 
     def _finalise_task_result(self, context, task_request, task_result):
 
@@ -147,9 +155,10 @@ class FlinkTasks(object):
 
 
 class _FlinkTask(object):
-    def __init__(self, fun, content_type, **kwargs):
+    def __init__(self, fun, content_type, retry_policy=None, **kwargs):
         self._fun = fun
         self._content_type = content_type
+        self._retry_policy = retry_policy
 
         self._args = inspect.getfullargspec(fun).args
         self._num_args = len(self._args)
@@ -224,14 +233,25 @@ class _FlinkTask(object):
 
         return pipeline, task_result, extra_args
 
-    def _to_task_exception(self, task_request, e):
-        return TaskException(
+    def _to_task_exception(self, task_request, ex):
+        retry = False
+
+        if self._retry_policy is not None:
+            retry = any([isinstance(ex, ex_type) for ex_type in self._retry_policy.retry_for])
+
+        task_exception = TaskException(
                 id=_gen_id(),
                 correlation_id=task_request.id,
                 type=f'{task_request.type}.error',
-                exception_type=type(e).__name__,
-                exception_message=str(e),
-                stacktrace=tb.format_exc())
+                exception_type=type(ex).__name__,
+                exception_message=str(ex),
+                stacktrace=tb.format_exc(),
+                retry=retry)
+
+        if retry:
+            task_exception.original_request.CopyFrom(task_request)
+
+        return task_exception
 
     def _to_task_args_and_kwargs(self, task_request):
         args, kwargs = _to_args_and_kwargs(deserialise(task_request))

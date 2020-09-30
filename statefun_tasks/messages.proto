@@ -25,6 +25,8 @@ message TaskException {
     string exception_type = 4;
     string exception_message = 5;
     string stacktrace = 6;
+    bool retry = 7;
+    statefun_tasks.TaskRequest original_request = 8;
 }
 
 message TaskState {

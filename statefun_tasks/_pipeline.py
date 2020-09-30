@@ -4,6 +4,7 @@ from ._types import _TaskEntry, _GroupEntry, _GroupResult
 from ._context import _TaskContext
 from .messages_pb2 import TaskRequest, TaskResult, TaskException
 
+from datetime import timedelta
 from google.protobuf.any_pb2 import Any
 from typing import Union
 
@@ -78,14 +79,23 @@ class _Pipeline(object):
         # task destination of form 'namespace/worker_name'
         return f'{task.get_parameter("namespace")}/{task.get_parameter("worker_name")}'
 
-    def _mark_complete(self, task_id, pipeline=None):
+    def _get_task_entry(self, task_id, pipeline=None):
         for entry in pipeline if pipeline is not None else self._pipeline:
             if isinstance(entry, _GroupEntry):
                 for pipeline_in_group in entry:
-                    self._mark_complete(task_id, pipeline_in_group)
+                    task_entry = self._get_task_entry(task_id, pipeline_in_group)
+                    if task_entry is not None:
+                        return task_entry
             else:
                 if entry.task_id == task_id:
-                    entry.mark_complete()
+                    return entry
+
+    def _mark_complete(self, task_id):
+        task_entry = self._get_task_entry(task_id)
+
+        # defensive
+        if task_entry is not None:
+            task_entry.mark_complete()
 
     def _get_next_step(self, task_id, pipeline=None):
         # figure out the next step for the pipeline
@@ -117,7 +127,7 @@ class _Pipeline(object):
 
             except StopIteration:
                 return None, None, None
-
+                
     def _save_group_result(self, group: _GroupEntry, caller_id, state: dict, task_result: TaskResult):
         group_results = state.setdefault(group.group_id, {})
         group_results[caller_id] = _GroupResult(task_result.data, task_result.content_type)
@@ -138,7 +148,11 @@ class _Pipeline(object):
 
         return task_result
 
-    def resume(self, context: _TaskContext, caller_id, state: dict, task_result: TaskResult):
+    def resume(self, context: _TaskContext, task_result: TaskResult):
+        task_id = context.get_task_id()
+        caller_id = context.get_caller_id()
+        state = context.get_state()
+
         # mark pipeline step as complete
         self._mark_complete(caller_id)
 
@@ -146,7 +160,7 @@ class _Pipeline(object):
         context.update_state({'pipeline': self._pipeline})
 
         # get the next step of the pipeline to run (if any)
-        current_step, next_step, group = self._get_next_step(caller_id)
+        _, next_step, group = self._get_next_step(caller_id)
 
         # need to aggregate task results into group state
         if group is not None:
@@ -185,9 +199,42 @@ class _Pipeline(object):
             last_step = self._pipeline[-1]
 
             if last_step.is_complete():
-                self.terminate(context, caller_id, task_result)
+                self.terminate(context, task_result)
 
-    def terminate(self, context: _TaskContext, caller_id, task_result_or_exception: Union[TaskResult, TaskException]):
+    def attempt_retry(self, context: _TaskContext, task_exception: TaskException):
+        task_id = context.get_caller_id()
+        task_entry = self._get_task_entry(task_id)
+
+        # defensive
+        if task_entry is None:
+            return False
+
+        retries = context.get_state().get('retries', {})
+        retry_count = retries.get(task_id, 1)
+        retry_policy = task_entry.get_parameter('retry_policy')
+
+        if retry_policy is None:
+            return False
+
+        if retry_count > retry_policy.max_retries:
+            return False
+
+        delay = retry_policy.delay
+
+        if retry_policy.exponential_back_off:
+            delay_ms = int(delay.total_seconds() * 1000.0)
+            delay = timedelta(milliseconds=delay_ms^retry_count)
+
+        request = task_exception.original_request
+        destination = context.get_caller_address()
+        context.pack_and_send_after(delay, destination, task_id, request)
+
+        retries[task_id] = retry_count + 1
+        context.update_state({'retries': retries})
+
+        return True
+
+    def terminate(self, context: _TaskContext, task_result_or_exception: Union[TaskResult, TaskException]):
         task_request = context.unpack('task_request', TaskRequest)
         reply_topic = task_request.reply_topic            
         task_result_or_exception.correlation_id = task_request.id
@@ -199,6 +246,7 @@ class _Pipeline(object):
             context.pack_and_send_egress(topic=reply_topic, value=task_result_or_exception)
         else:
             state = context.get_state()
+            caller_id = context.get_caller_id()
 
             if 'caller_id' in state and state['caller_id'] != caller_id:
                 context.pack_and_send(state['address'], state['caller_id'], task_result_or_exception)

@@ -25,6 +25,9 @@ class _TaskContext(object):
     def get_task_id(self):
         return self._context.address.identity
 
+    def get_caller_address(self):
+        return f'{self._context.caller.namespace}/{self._context.caller.type}'
+
     def get_caller_id(self):
         return None if self._context.caller.identity == "" else self._context.caller.identity
 
@@ -47,6 +50,9 @@ class _TaskContext(object):
 
     def pack_and_send(self, destination, task_id, request):
         self._context.pack_and_send(destination, task_id, request)
+
+    def pack_and_send_after(self, delay, destination, task_id, request):
+        self._context.pack_and_send_after(delay, destination, task_id, request)
 
     def pack_and_send_egress(self, topic, value):
         any = Any()

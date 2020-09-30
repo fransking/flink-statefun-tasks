@@ -1,3 +1,7 @@
+from typing import NamedTuple
+from datetime import timedelta
+
+
 class _TaskEntry(object):
     def __init__(self, task_id, task_type, args, kwargs, parameters=None):
         self.task_id = task_id
@@ -60,3 +64,10 @@ class _GroupResult(object):
     def __init__(self, data, content_type):
         self.data = data
         self.content_type = content_type
+
+
+class TaskRetryPolicy(NamedTuple):
+    retry_for: list = [Exception]
+    max_retries: int = 1
+    delay: timedelta = timedelta()
+    exponential_back_off: bool = False
