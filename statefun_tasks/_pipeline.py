@@ -7,6 +7,7 @@ from .messages_pb2 import TaskRequest, TaskResult, TaskException
 from datetime import timedelta
 from google.protobuf.any_pb2 import Any
 from typing import Union
+import json
 
 
 class _Pipeline(object):
@@ -22,6 +23,12 @@ class _Pipeline(object):
 
     def add_to_group(self, group: _GroupEntry):
         group.add_to_group(self._pipeline)
+
+    def to_json_format(self, verbose=False):
+        return [entry.to_json_format(verbose) for entry in self._pipeline]
+
+    def to_json(self, verbose=False):
+        return [entry.to_json(verbose) for entry in self._pipeline]
 
     def send(self, *args, **kwargs):
         task_type = _task_type_for(self._fun)

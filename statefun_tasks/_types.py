@@ -1,5 +1,7 @@
 from typing import NamedTuple
 from datetime import timedelta
+from copy import deepcopy
+import json
 
 
 class _TaskEntry(object):
@@ -29,6 +31,18 @@ class _TaskEntry(object):
     def is_complete(self):
         return self.complete
 
+    def to_json_format(self, verbose=False):
+        if verbose:
+            return deepcopy(self.__dict__)
+        else:
+            return {
+                'task_id':  self.task_id,
+                'task_type': self.task_type
+            }
+
+    def to_json(self, verbose=False):
+        return json.dumps(self.to_json_format(verbose), default=lambda o: str(o))
+
     def __repr__(self):
         return self.task_id
 
@@ -55,6 +69,15 @@ class _GroupEntry(object):
 
     def is_complete(self):
         return all(entry.is_complete() for entries in self._group for entry in entries)
+
+    def to_json_format(self, verbose=False):
+        return {
+            'group_id': self.group_id,
+            'group': [[entry.to_json_format(verbose) for entry in entries] for entries in self._group]
+        }
+
+    def to_json(self, verbose=False):
+        return json.dumps(self.to_json_format(verbose=verbose), default=lambda o: str(o))
 
     def __repr__(self):
         return self._group.__repr__()
