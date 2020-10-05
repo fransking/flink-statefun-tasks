@@ -1,4 +1,5 @@
-from statefun_tasks import FlinkTasks, TaskRequest, TaskResult, TaskException, in_parallel
+from statefun_tasks import FlinkTasks, TaskRequest, TaskResult, TaskException, in_parallel, TaskRetryPolicy
+from datetime import timedelta
 
 
 tasks = FlinkTasks(default_namespace="example", default_worker_name="worker", egress_type_name="example/kafka-generic-egress")
@@ -28,7 +29,7 @@ def error_workflow():
     return _raise_exception.send().continue_with(_wont_be_called)
 
 
-@tasks.bind()
+@tasks.bind(retry_policy=TaskRetryPolicy(delay=timedelta(seconds=5)))
 def _raise_exception(first_name, last_name):
     raise ValueError('Workflow will terminate here')
 
