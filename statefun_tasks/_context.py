@@ -31,22 +31,14 @@ class _TaskContext(object):
     def get_caller_id(self):
         return None if self._context.caller.identity == "" else self._context.caller.identity
 
-    def unpack(self, key:str, cls:Callable[[], object]):
-        state = self._context[key]
-        if state is None:
-            return None
-        else:
-            value = cls()
-            state.Unpack(value)
-            return value
+    def unpack(self, key:str, object_type):
+        return self._context.state(key).unpack(object_type)
 
     def pack_and_reply(self, message):
         self._context.pack_and_reply(message)
 
     def pack_and_save(self, key:str, value):
-        any = Any()
-        any.Pack(value)
-        self._context[key] = any
+        self._context.state(key).pack(value)
 
     def pack_and_send(self, destination, task_id, request):
         self._context.pack_and_send(destination, task_id, request)

@@ -1,4 +1,4 @@
-from statefun import StatefulFunctions
+from statefun import StatefulFunctions, AsyncRequestReplyHandler
 from aiohttp import web
 import asyncio
 import json
@@ -9,8 +9,6 @@ import traceback
 # import FlinkTasks
 from statefun_tasks import FlinkTasks, TaskRequest, TaskResult, TaskException, in_parallel
 from .api import tasks
-from .async_request_reply import AsyncRequestReplyHandler
-
 
 
 logging.basicConfig(level=logging.INFO)
@@ -30,13 +28,12 @@ async def worker(context, task_data: Union[TaskRequest, TaskResult, TaskExceptio
         traceback.print_exc()
 
 
-handler = AsyncRequestReplyHandler(functions)
-
 #
 # Serve the endpoint
 #
 
 async def handle(request):
+    handler = AsyncRequestReplyHandler(functions)
     request_data = await request.read()
     response_data = await handler.handle_async(request_data)
     return web.Response(body=response_data, content_type='application/octet-stream')

@@ -1,5 +1,6 @@
 from typing import NamedTuple
 from datetime import timedelta
+import json
 
 
 class _TaskEntry(object):
@@ -29,6 +30,18 @@ class _TaskEntry(object):
     def is_complete(self):
         return self.complete
 
+    def to_json_dict(self, verbose=False):
+        return json.loads(self.to_json(verbose))
+
+    def to_json(self, verbose=False):
+        if verbose:
+            return json.dumps(self.__dict__, default=lambda o: str(o))
+        else:
+            return json.dumps({
+                'task_id':  self.task_id,
+                'task_type': self.task_type
+            })
+
     def __repr__(self):
         return self.task_id
 
@@ -55,6 +68,15 @@ class _GroupEntry(object):
 
     def is_complete(self):
         return all(entry.is_complete() for entries in self._group for entry in entries)
+
+    def to_json_dict(self, verbose=False):
+        return {
+            'group_id': self.group_id,
+            'group': [[entry.to_json_dict(verbose) for entry in entries] for entries in self._group]
+        }
+
+    def to_json(self, verbose=False):
+        return json.dumps(self.to_json_dict(verbose=verbose))
 
     def __repr__(self):
         return self._group.__repr__()
