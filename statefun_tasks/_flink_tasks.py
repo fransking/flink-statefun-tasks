@@ -134,6 +134,7 @@ class FlinkTasks(object):
         task_result, task_exception, pipeline, extra_args = task_result  # unpack
 
         if pipeline is not None:
+            context.pack_and_save('task_result', task_result)  # task result will be the pipeline in json format
             pipeline.resolve(context, extra_args)
         else:
 
@@ -211,25 +212,22 @@ class _FlinkTask(object):
     def _to_pipeline_or_task_result(self, task_request, fn_result, extra_args):
         pipeline, task_result = None, None
 
+        if not isinstance(fn_result, Tuple):  # if single result then wrap in tuple as this is the maximal case
+            fn_result = (fn_result,)
+
         # result of the task might be a Flink pipeline or tuple of Flink pipline + extra args to be passed through
-        possible_pipeline_result = fn_result[0] if isinstance(fn_result, Tuple) else fn_result
-
         # in which case return the pipeline and these extra args (if present).
-        if isinstance(possible_pipeline_result, _Pipeline):
-            pipeline = possible_pipeline_result
-            extra_args = fn_result[1:] if isinstance(fn_result, Tuple) and len(fn_result) > 1 else () 
+        if isinstance(fn_result[0], _Pipeline):
+            pipeline = fn_result[0]
+            extra_args = fn_result[1:] if isinstance(fn_result, Tuple) and len(fn_result) > 1 else ()
+            fn_result = (pipeline.to_json_dict(verbose=True), *extra_args)
 
-        # else return the result of the task
-        else:
-            if not isinstance(fn_result, Tuple):  # if single result then wrap in tuple as this is the maximal case
-                fn_result = (fn_result,)
-
-            task_result = TaskResult(
-                id=_gen_id(), 
-                correlation_id=task_request.id,
-                type=f'{task_request.type}.result')
-            
-            serialise(task_result, fn_result, content_type=self._content_type)
+        task_result = TaskResult(
+            id=_gen_id(), 
+            correlation_id=task_request.id,
+            type=f'{task_request.type}.result')
+        
+        serialise(task_result, fn_result, content_type=self._content_type)
 
         return pipeline, task_result, extra_args
 
