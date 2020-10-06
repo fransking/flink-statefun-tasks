@@ -14,7 +14,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/fransking/flink-statefun-tasks",
-    packages=['statefun_tasks'],
+    packages=['statefun_tasks', 'statefun_tasks.client'],
     license='https://www.apache.org/licenses/LICENSE-2.0',
     license_files=["LICENSE"],
     install_requires=install_requires,
