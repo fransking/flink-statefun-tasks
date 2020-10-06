@@ -3,7 +3,7 @@ import setuptools
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-install_requires = ['apache-flink-statefun']
+install_requires = ['apache-flink-statefun>=2.2.0']
 
 setuptools.setup(
     name="statefun-tasks", # Replace with your own username
