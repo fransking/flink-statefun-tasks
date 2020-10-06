@@ -29,7 +29,8 @@ class FlinkTasks(object):
         if fun is None:
             raise ValueError("function instance must be provided")
 
-        self._bindings[_task_type_for(fun)] = _FlinkTask(fun, **params)
+        fun.type_name = _task_type_for(fun)
+        self._bindings[fun.type_name] = _FlinkTask(fun, **params)
 
     def bind(self, content_type:str=None, namespace:str=None, worker_name:str=None, retry_policy:TaskRetryPolicy=None):
         def wrapper(function):
@@ -47,7 +48,7 @@ class FlinkTasks(object):
 
             function.defaults = defaults
             function.send = send
-
+            
             self.register(function, **defaults())
             return function
 
@@ -83,6 +84,7 @@ class FlinkTasks(object):
                     task_result = await task_result
 
                 self._finalise_task_result(task_context, task_request, task_result)
+                
 
     def _begin_operation(self, task_context, task_request_or_result, is_async):
         _log.info(f'Started {task_context}')

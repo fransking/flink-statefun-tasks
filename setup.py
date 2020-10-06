@@ -7,7 +7,7 @@ install_requires = ['apache-flink-statefun']
 
 setuptools.setup(
     name="statefun-tasks", # Replace with your own username
-    version="0.3.0",
+    version="0.3.1",
     author="Frans King",
     author_email="frans.king@sbbsystems.com",
     description="Tasks API for Stateful Functions on Flink",

@@ -1,5 +1,6 @@
 from statefun_tasks import FlinkTasks, TaskRequest, TaskResult, TaskException, in_parallel, TaskRetryPolicy
 from datetime import timedelta
+import asyncio
 
 
 tasks = FlinkTasks(default_namespace="example", default_worker_name="worker", egress_type_name="example/kafka-generic-egress")
@@ -17,8 +18,9 @@ def _say_hello(first_name, last_name):
     return f'Hello {first_name} {last_name}'
 
 
-@tasks.bind()
-def _say_goodbye(greeting, goodbye_message):
+@tasks.bind(worker_name='async_worker')
+async def _say_goodbye(greeting, goodbye_message):
+    await asyncio.sleep(5)
     return f'{greeting}.  So now I will say {goodbye_message}'
 
 
