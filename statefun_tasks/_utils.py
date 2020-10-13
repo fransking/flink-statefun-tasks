@@ -32,3 +32,13 @@ def _to_args_and_kwargs(test_args):
             return (), {}
         else:
             return (test_args), {}
+
+def _is_named_tuple(value):
+    # duck test to see if a value is a NamedTuple and not just a tuple
+    if not isinstance(value, tuple):
+        return False
+
+    return hasattr(type(value), '_fields')
+
+def _is_tuple(value):
+    return isinstance(value, tuple) and not _is_named_tuple(value)

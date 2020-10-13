@@ -1,12 +1,12 @@
 from ._serialisation import deserialise, serialise
-from ._utils import _gen_id, _task_type_for, _to_args_and_kwargs
+from ._utils import _gen_id, _task_type_for, _to_args_and_kwargs, _is_tuple
 from ._types import _GroupEntry, TaskRetryPolicy
 from ._pipeline import _Pipeline
 from ._context import _TaskContext
 from .messages_pb2 import TaskRequest, TaskResult, TaskException
 
 from statefun.request_reply import BatchContext
-from typing import Union, Tuple, Iterable
+from typing import Union, Iterable
 import logging
 import traceback as tb
 import inspect
@@ -214,14 +214,14 @@ class _FlinkTask(object):
     def _to_pipeline_or_task_result(self, task_request, fn_result, extra_args):
         pipeline, task_result = None, None
 
-        if not isinstance(fn_result, Tuple):  # if single result then wrap in tuple as this is the maximal case
+        if not _is_tuple(fn_result):  # if single result then wrap in tuple as this is the maximal case
             fn_result = (fn_result,)
 
         # result of the task might be a Flink pipeline or tuple of Flink pipline + extra args to be passed through
         # in which case return the pipeline and these extra args (if present).
         if isinstance(fn_result[0], _Pipeline):
             pipeline = fn_result[0]
-            extra_args = fn_result[1:] if isinstance(fn_result, Tuple) and len(fn_result) > 1 else ()
+            extra_args = fn_result[1:] if _is_tuple(fn_result) and len(fn_result) > 1 else ()
             fn_result = (pipeline.to_json_dict(verbose=True), *extra_args)
 
         task_result = TaskResult(
