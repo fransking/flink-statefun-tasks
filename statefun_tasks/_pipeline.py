@@ -11,46 +11,10 @@ import json
 
 
 class _Pipeline(object):
-    def __init__(self, fun=None, pipeline=None):
-        self._fun = fun
-        self._pipeline = []
+    def __init__(self, pipeline: list):
+        self._pipeline = pipeline
 
-        if pipeline is not None:
-            self._pipeline.extend(pipeline)
-
-    def append_to(self, other):
-        other._pipeline.extend(self._pipeline)
-
-    def add_to_group(self, group: _GroupEntry):
-        group.add_to_group(self._pipeline)
-
-    def to_json_dict(self, verbose=False):
-        return [entry.to_json_dict(verbose) for entry in self._pipeline]
-
-    def to_json(self, verbose=False):
-        return [entry.to_json(verbose) for entry in self._pipeline]
-
-    def send(self, *args, **kwargs):
-        task_type = _task_type_for(self._fun)
-        self._pipeline.append(_TaskEntry(_gen_id(), task_type, args, kwargs))
-        return self
-
-    def set(self, **kwargs):
-        if any(self._pipeline):
-            entry = self._pipeline[-1]
-            entry.set_parameters(kwargs)
-
-        return self
-
-    def continue_with(self, continuation, *args, **kwargs):
-        if isinstance(continuation, _Pipeline):
-            continuation.append_to(self)
-        else:
-            task_type = _task_type_for(continuation)
-            self._pipeline.append(_TaskEntry(_gen_id(), task_type, args, kwargs, parameters=continuation.defaults()))
-        return self
-
-    def resolve(self, context: _TaskContext, extra_args):
+    def begin(self, context: _TaskContext, extra_args):
         # 1. record all the continuations into a pipeline and save into state with caller id and address
         state = {
             'pipeline': self._pipeline,
@@ -257,3 +221,58 @@ class _Pipeline(object):
 
             if 'caller_id' in state and state['caller_id'] != caller_id:
                 context.pack_and_send(state['address'], state['caller_id'], task_result_or_exception)
+
+
+class PipelineBuilder():
+    def __init__(self, pipeline:list=None):
+        self._pipeline = [] if pipeline is None else pipeline
+
+    def append_to(self, other):
+        other._pipeline.extend(self._pipeline)
+
+    def append_group(self, pipelines):
+        group = _GroupEntry(_gen_id())
+
+        for pipeline in pipelines:
+            pipeline._add_to_group(group)
+        
+        self._pipeline.append(group)
+        return self
+
+    def _add_to_group(self, group: _GroupEntry):
+        group.add_to_group(self._pipeline)
+
+    def to_json_dict(self, verbose=False):
+        return [entry.to_json_dict(verbose) for entry in self._pipeline]
+
+    def to_json(self, verbose=False):
+        return [entry.to_json(verbose) for entry in self._pipeline]
+
+    def send(self, fun, *args, **kwargs):
+        task_type = _task_type_for(fun)
+        self._pipeline.append(_TaskEntry(_gen_id(), task_type, args, kwargs, parameters=fun.defaults()))
+        return self
+
+    def set(self, **kwargs):
+        if any(self._pipeline):
+            entry = self._pipeline[-1]
+            entry.set_parameters(kwargs)
+
+        return self
+
+    def continue_with(self, continuation, *args, **kwargs):
+        if isinstance(continuation, PipelineBuilder):
+            continuation.append_to(self)
+        else:
+            task_type = _task_type_for(continuation)
+            self._pipeline.append(_TaskEntry(_gen_id(), task_type, args, kwargs, parameters=continuation.defaults()))
+        return self
+
+    def to_json_dict(self, verbose=False):
+        return [entry.to_json_dict(verbose) for entry in self._pipeline]
+
+    def to_json(self, verbose=False):
+        return [entry.to_json(verbose) for entry in self._pipeline]
+
+    def build(self):
+        return _Pipeline(self._pipeline)

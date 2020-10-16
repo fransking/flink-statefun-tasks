@@ -1,7 +1,7 @@
 from ._serialisation import deserialise, serialise
 from ._utils import _gen_id, _task_type_for, _to_args_and_kwargs, _is_tuple
 from ._types import _GroupEntry, TaskRetryPolicy
-from ._pipeline import _Pipeline
+from ._pipeline import _Pipeline, PipelineBuilder
 from ._context import _TaskContext
 from .messages_pb2 import TaskRequest, TaskResult, TaskException
 
@@ -44,7 +44,9 @@ class FlinkTasks(object):
                 }
 
             def send(*args, **kwargs):
-                return _Pipeline(fun=function).send(*args, **kwargs).set(**defaults())
+                return PipelineBuilder().send(function, *args, **kwargs)
+                # pipeline = PipelineBuilder().send(function, *args, **kwargs).set(**defaults()).build()
+                # return _Pipeline(fun=function).send(*args, **kwargs).set(**defaults())
 
             function.defaults = defaults
             function.send = send
@@ -137,7 +139,7 @@ class FlinkTasks(object):
 
         if pipeline is not None:
             context.pack_and_save('task_result', task_result)  # task result will be the pipeline in json format
-            pipeline.resolve(context, extra_args)
+            pipeline.begin(context, extra_args)
         else:
 
             if task_exception is not None:
@@ -219,10 +221,11 @@ class _FlinkTask(object):
 
         # result of the task might be a Flink pipeline or tuple of Flink pipline + extra args to be passed through
         # in which case return the pipeline and these extra args (if present).
-        if isinstance(fn_result[0], _Pipeline):
-            pipeline = fn_result[0]
+        if isinstance(fn_result[0], PipelineBuilder):
+            builder = fn_result[0]
+            pipeline = builder.build()
             extra_args = fn_result[1:] if _is_tuple(fn_result) and len(fn_result) > 1 else ()
-            fn_result = (pipeline.to_json_dict(verbose=True), *extra_args)
+            fn_result = (builder.to_json_dict(verbose=True), *extra_args)
 
         task_result = TaskResult(
             id=_gen_id(), 
@@ -288,10 +291,5 @@ class _FlinkTask(object):
             return result
 
 
-def in_parallel(group: list):
-    parallel_pipeline = _GroupEntry(_gen_id())
-
-    for pipeline in group:
-        pipeline.add_to_group(parallel_pipeline)
-
-    return _Pipeline(pipeline=[parallel_pipeline])
+def in_parallel(entries: list):
+    return PipelineBuilder().append_group(entries)
