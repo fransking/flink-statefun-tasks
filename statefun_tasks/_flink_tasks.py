@@ -45,8 +45,6 @@ class FlinkTasks(object):
 
             def send(*args, **kwargs):
                 return PipelineBuilder().send(function, *args, **kwargs)
-                # pipeline = PipelineBuilder().send(function, *args, **kwargs).set(**defaults()).build()
-                # return _Pipeline(fun=function).send(*args, **kwargs).set(**defaults())
 
             function.defaults = defaults
             function.send = send
