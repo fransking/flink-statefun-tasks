@@ -8,6 +8,7 @@ from datetime import timedelta
 from google.protobuf.any_pb2 import Any
 from typing import Union
 import json
+from uuid import uuid4
 
 
 class _Pipeline(object):
@@ -274,5 +275,28 @@ class PipelineBuilder():
     def to_json(self, verbose=False):
         return [entry.to_json(verbose) for entry in self._pipeline]
 
-    def build(self):
+    def is_single_task(self):
+        if len(self._pipeline) == 1:
+            if isinstance(self._pipeline, _TaskEntry):
+                return True
+        
+        return False
+
+    def to_task_request(self):
+        if self.is_single_task():
+            task = self._pipeline[0]
+            task_id, task_type, args, kwargs = task.to_tuple()
+            task_data = (args, kwargs)
+        else:
+            task_id = str(uuid4())
+            task_data = ((self._pipeline,), {})
+            task_type = '__builtins.run_pipeline'
+
+        task_request = TaskRequest(id=task_id, type=task_type)
+        try_serialise_json_then_pickle(task_request, task_data)
+
+        return task_request
+
+
+    def to_pipeline(self):
         return _Pipeline(self._pipeline)

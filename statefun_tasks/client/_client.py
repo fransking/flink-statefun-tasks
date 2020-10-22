@@ -1,5 +1,5 @@
 from ._types import TaskError
-from statefun_tasks import TaskRequest, TaskResult, TaskException, try_serialise_json_then_pickle, deserialise_result
+from statefun_tasks import TaskRequest, TaskResult, TaskException, deserialise_result, PipelineBuilder
 
 from google.protobuf.any_pb2 import Any
 from kafka.errors import NoBrokersAvailable
@@ -37,20 +37,15 @@ class FlinkTasksClient(object):
         self._consumer_thread.daemon = True
         self._consumer_thread.start()
 
-    def send(self, fun, *args, **kwargs):
-        task_id = str(uuid4())
-        task_data = (args, kwargs)
-        task_request = TaskRequest(id=task_id, type=fun.type_name)
+    def submit(self, pipeline: PipelineBuilder):
+        task_request = pipeline.to_task_request()
+        return self._submit_request(task_request)
 
-        try_serialise_json_then_pickle(task_request, task_data)
-
-        return self._send(task_request)
-
-    async def send_async(self, fun, *args, **kwargs):
-        future, _ = self.send(fun, *args, **kwargs)
+    async def submit_async(self, pipeline: PipelineBuilder):
+        future, _ = self.submit(pipeline)
         return await asyncio.wrap_future(future)
 
-    def _send(self, task_request: TaskRequest):
+    def _submit_request(self, task_request: TaskRequest):
         if task_request.id is None or task_request.id == "":
             raise ValueError('Task request is missing an id')
 
@@ -69,7 +64,7 @@ class FlinkTasksClient(object):
         self._producer.flush()
 
         return future, task_request.id
-    
+
     def _consume(self):
         while True:
             try:

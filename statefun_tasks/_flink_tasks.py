@@ -3,6 +3,7 @@ from ._utils import _gen_id, _task_type_for, _to_args_and_kwargs, _is_tuple
 from ._types import _GroupEntry, TaskRetryPolicy
 from ._pipeline import _Pipeline, PipelineBuilder
 from ._context import _TaskContext
+from ._builtins import run_pipeline
 from .messages_pb2 import TaskRequest, TaskResult, TaskException
 
 from statefun.request_reply import BatchContext
@@ -23,7 +24,10 @@ class FlinkTasks(object):
         self._default_worker_name = default_worker_name
         self._egress_type_name = egress_type_name
         self._default_content_type = default_content_type
-        self._bindings = {}
+
+        self._bindings = {
+            '__builtins.run_pipeline': _FlinkTask(run_pipeline, content_type='application/json')
+        }
 
     def register(self, fun, **params):
         if fun is None:
@@ -221,7 +225,7 @@ class _FlinkTask(object):
         # in which case return the pipeline and these extra args (if present).
         if isinstance(fn_result[0], PipelineBuilder):
             builder = fn_result[0]
-            pipeline = builder.build()
+            pipeline = builder.to_pipeline()
             extra_args = fn_result[1:] if _is_tuple(fn_result) and len(fn_result) > 1 else ()
             fn_result = (builder.to_json_dict(verbose=True), *extra_args)
 

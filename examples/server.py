@@ -13,7 +13,8 @@ flink_client = FlinkTasksClient(KAFKA_BROKER, topic='statefun-test.requests', re
 
 async def index(request):
     try:
-        result = await flink_client.send_async(greeting_workflow, 'Jane', last_name='Doe')
+        pipeline = greeting_workflow.send('Jane', last_name='Doe')
+        result = await flink_client.submit_async(pipeline)
 
         response_data = {
             'result': result

@@ -85,5 +85,5 @@ def serialise(task_object: Union[TaskRequest, TaskResult], data, content_type: s
 def try_serialise_json_then_pickle(task_object: Union[TaskRequest, TaskResult], data):
     try:
         serialise(task_object, data, content_type='application/json')
-    except ValueError:
+    except:
         serialise(task_object, data, content_type='application/python-pickle')
