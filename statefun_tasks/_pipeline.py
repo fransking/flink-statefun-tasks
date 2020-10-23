@@ -68,22 +68,20 @@ class _Pipeline(object):
         if task_entry is not None:
             task_entry.mark_complete()
 
-    def _get_next_step(self, task_id, task_result_or_exception: Union[TaskResult, TaskException], pipeline=None):
+    def _get_next_step(self, task_id, previous_task_failed: bool, pipeline=None):
         # figure out the next step for the pipeline
         # a group must be complete before you can move onto its continuation
         # groups are executed in parallel so a pipeline_in_group that is complete should jump
         # to the continuation of the group (if any) but only if the group as a whole is complete
 
-        if pipeline is None:
-            pipeline = self._pipeline
-        if isinstance(task_result_or_exception, TaskException):
-            finally_task = next((task for task in pipeline if isinstance(task, _TaskEntry) and task.is_finally), None)
-            if finally_task is None or finally_task.task_id == task_id:
-                return None, None, None
-            else:
-                return None, finally_task, None
+        if previous_task_failed:
+            # ignore the rest of the pipeline, but execute the "finally" task if it exists
+            finally_task = self._try_get_finally_task()
+            previous_task_was_finally = finally_task is not None and finally_task.task_id == task_id
+            next_task = None if previous_task_was_finally else finally_task
+            return None, next_task, None
 
-        iterator = iter(pipeline)
+        iterator = iter(self._pipeline if pipeline is None else pipeline)
 
         while True:
             try:
@@ -91,7 +89,7 @@ class _Pipeline(object):
 
                 if isinstance(entry, _GroupEntry):
                     for pipeline_in_group in entry:
-                        current_t, next_t, _ = self._get_next_step(task_id, task_result_or_exception, pipeline_in_group)
+                        current_t, next_t, _ = self._get_next_step(task_id, False, pipeline_in_group)
 
                         if current_t is not None:
 
@@ -107,6 +105,9 @@ class _Pipeline(object):
 
             except StopIteration:
                 return None, None, None
+
+    def _try_get_finally_task(self):
+        return next((task for task in self._pipeline if isinstance(task, _TaskEntry) and task.is_finally), None)
 
     def _save_group_result(self, group: _GroupEntry, caller_id, state: dict, task_result: TaskResult):
         group_results = state.setdefault(group.group_id, {})
@@ -138,7 +139,8 @@ class _Pipeline(object):
         context.update_state({'pipeline': self._pipeline})
 
         # get the next step of the pipeline to run (if any)
-        _, next_step, group = self._get_next_step(caller_id, task_result_or_exception)
+        previous_task_failed = isinstance(task_result_or_exception, TaskException)
+        _, next_step, group = self._get_next_step(caller_id, previous_task_failed)
 
         # need to aggregate task results into group state
         if group is not None:
