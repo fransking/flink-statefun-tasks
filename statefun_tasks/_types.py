@@ -4,13 +4,14 @@ import json
 
 
 class _TaskEntry(object):
-    def __init__(self, task_id, task_type, args, kwargs, parameters=None):
+    def __init__(self, task_id, task_type, args, kwargs, parameters=None, is_finally=False):
         self.task_id = task_id
         self.task_type = task_type
         self.args = args
         self.kwargs = kwargs
         self.complete = False
         self.parameters = {} if parameters is None else parameters
+        self.is_finally = is_finally
 
     def set_parameters(self, parameters):
         self.parameters.update(parameters)
@@ -38,7 +39,7 @@ class _TaskEntry(object):
             return json.dumps(self.__dict__, default=lambda o: str(o))
         else:
             return json.dumps({
-                'task_id':  self.task_id,
+                'task_id': self.task_id,
                 'task_type': self.task_type
             })
 

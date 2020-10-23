@@ -14,12 +14,12 @@ import inspect
 import ast
 import asyncio
 
-
 _log = logging.getLogger('FlinkTasks')
 
 
 class FlinkTasks(object):
-    def __init__(self, default_namespace: str, default_worker_name: str, egress_type_name: str, default_content_type='application/json'):
+    def __init__(self, default_namespace: str, default_worker_name: str, egress_type_name: str,
+                 default_content_type='application/json'):
         self._default_namespace = default_namespace
         self._default_worker_name = default_worker_name
         self._egress_type_name = egress_type_name
@@ -36,9 +36,9 @@ class FlinkTasks(object):
         fun.type_name = _task_type_for(fun)
         self._bindings[fun.type_name] = _FlinkTask(fun, **params)
 
-    def bind(self, content_type:str=None, namespace:str=None, worker_name:str=None, retry_policy:TaskRetryPolicy=None):
+    def bind(self, content_type: str = None, namespace: str = None, worker_name: str = None,
+             retry_policy: TaskRetryPolicy = None):
         def wrapper(function):
-
             def defaults():
                 return {
                     'content_type': self._default_content_type if content_type is None else content_type,
@@ -52,7 +52,7 @@ class FlinkTasks(object):
 
             function.defaults = defaults
             function.send = send
-            
+
             self.register(function, **defaults())
             return function
 
@@ -66,7 +66,6 @@ class FlinkTasks(object):
 
     def run(self, context: BatchContext, task_input: Union[TaskRequest, TaskResult, TaskException]):
         with _TaskContext(context, task_input.type, self._egress_type_name) as task_context:
-
             # either we resume a pipeline (received TaskResult or TaskException) or we invoke a task (received TaskRequest)
             task_request_result = self._begin_operation(task_context, task_input, is_async=False)
 
@@ -88,7 +87,15 @@ class FlinkTasks(object):
                     task_result = await task_result
 
                 self._finalise_task_result(task_context, task_request, task_result)
-                
+
+    @staticmethod
+    def send(func, *args, **kwargs) -> PipelineBuilder:
+        try:
+            send_func = func.send
+        except AttributeError:
+            raise AttributeError(
+                'Expected function to have a send attribute. Make sure it is decorated with @tasks.bind()')
+        return send_func(*args, **kwargs)
 
     def _begin_operation(self, task_context, task_request_or_result, is_async):
         _log.info(f'Started {task_context}')
@@ -119,21 +126,17 @@ class FlinkTasks(object):
     def _resume_pipeline(self, context, task_result_or_exception: Union[TaskResult, TaskException]):
         pipeline = self._get_pipeline(context)
 
-        # either we resume the pipeline or terminate it if we received an exception instead of a result
-        if isinstance(task_result_or_exception, TaskResult):
-            task_result = task_result_or_exception
-            pipeline.resume(context, task_result)
-        else:
+        if isinstance(task_result_or_exception, TaskException):
             task_exception = task_result_or_exception
 
             # retry if requested
             if task_exception.retry:
-                
+
                 # attempt retry - will return false if retry count exceeded
                 if pipeline.attempt_retry(context, task_result_or_exception):
                     return
 
-            pipeline.terminate(context, task_result_or_exception)
+        pipeline.resume(context, task_result_or_exception)
 
     def _finalise_task_result(self, context, task_request, task_result):
 
@@ -160,7 +163,6 @@ class FlinkTasks(object):
                 context.pack_and_send_egress(topic=task_request.reply_topic, value=return_value)
 
 
-
 class _FlinkTask(object):
     def __init__(self, fun, content_type, retry_policy=None, **kwargs):
         self._fun = fun
@@ -169,8 +171,8 @@ class _FlinkTask(object):
 
         self._args = inspect.getfullargspec(fun).args
         self._num_args = len(self._args)
-        self._explicit_return = any(isinstance(node, ast.Return) for node in ast.walk(ast.parse(inspect.getsource(fun))))
-        
+        self._explicit_return = any(
+            isinstance(node, ast.Return) for node in ast.walk(ast.parse(inspect.getsource(fun))))
 
     def run(self, context: _TaskContext, task_request: TaskRequest):
         task_result, task_exception, pipeline, extra_args = None, None, None, None
@@ -180,7 +182,7 @@ class _FlinkTask(object):
             task_args, kwargs, pass_through_args = self._to_task_args_and_kwargs(task_request)
 
             result = self._fun(*task_args, **kwargs)
-            
+
             fn_result = self._add_passthrough_args(result, pass_through_args)
 
             pipeline, task_result, extra_args = self._to_pipeline_or_task_result(task_request, fn_result, extra_args)
@@ -203,7 +205,7 @@ class _FlinkTask(object):
             # await coro
             if asyncio.iscoroutine(result):
                 result = await result
-            
+
             fn_result = self._add_passthrough_args(result, pass_through_args)
 
             pipeline, task_result, extra_args = self._to_pipeline_or_task_result(task_request, fn_result, extra_args)
@@ -213,7 +215,6 @@ class _FlinkTask(object):
             task_exception = self._to_task_exception(task_request, e)
 
         return task_result, task_exception, pipeline, extra_args
-
 
     def _to_pipeline_or_task_result(self, task_request, fn_result, extra_args):
         pipeline, task_result = None, None
@@ -230,10 +231,10 @@ class _FlinkTask(object):
             fn_result = (builder.to_json_dict(verbose=True), *extra_args)
 
         task_result = TaskResult(
-            id=_gen_id(), 
+            id=_gen_id(),
             correlation_id=task_request.id,
             type=f'{task_request.type}.result')
-        
+
         serialise(task_result, fn_result, content_type=self._content_type)
 
         return pipeline, task_result, extra_args
@@ -245,13 +246,13 @@ class _FlinkTask(object):
             retry = any([isinstance(ex, ex_type) for ex_type in self._retry_policy.retry_for])
 
         task_exception = TaskException(
-                id=_gen_id(),
-                correlation_id=task_request.id,
-                type=f'{task_request.type}.error',
-                exception_type=type(ex).__name__,
-                exception_message=str(ex),
-                stacktrace=tb.format_exc(),
-                retry=retry)
+            id=_gen_id(),
+            correlation_id=task_request.id,
+            type=f'{task_request.type}.error',
+            exception_type=type(ex).__name__,
+            exception_message=str(ex),
+            stacktrace=tb.format_exc(),
+            retry=retry)
 
         if retry:
             task_exception.original_request.CopyFrom(task_request)
@@ -260,8 +261,8 @@ class _FlinkTask(object):
 
     def _to_task_args_and_kwargs(self, task_request):
         args, kwargs = _to_args_and_kwargs(deserialise(task_request))
-        
-        #listify
+
+        # listify
         args = [arg for arg in args]
 
         # merge in args passed as kwargs e.g. fun1.continue_with(fun2, arg1=a, arg2=b)
@@ -287,7 +288,7 @@ class _FlinkTask(object):
                 return_value = result, *pass_through_args
             else:
                 return_value = *pass_through_args,
-            
+
             return return_value
         else:
             return result
