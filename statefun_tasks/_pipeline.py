@@ -11,15 +11,13 @@ from uuid import uuid4
 
 
 class _Pipeline(object):
-    def __init__(self, pipeline: list, finally_do: Optional[_TaskEntry]):
+    def __init__(self, pipeline: list):
         self._pipeline = pipeline
-        self._finally = finally_do
 
     def begin(self, context: _TaskContext, extra_args):
         # 1. record all the continuations into a pipeline and save into state with caller id and address
         state = {
             'pipeline': self._pipeline,
-            'finally': self._finally,
             'caller_id': context.get_caller_id(),
             'address': context.get_address()
         }
@@ -53,9 +51,7 @@ class _Pipeline(object):
         return f'{task.get_parameter("namespace")}/{task.get_parameter("worker_name")}'
 
     def _get_task_entry(self, task_id, pipeline=None):
-        if pipeline is None:
-            pipeline = self._pipeline
-        for entry in pipeline if self._finally is None else (pipeline + [self._finally]):
+        for entry in self._pipeline if pipeline is None else pipeline:
             if isinstance(entry, _GroupEntry):
                 for pipeline_in_group in entry:
                     task_entry = self._get_task_entry(task_id, pipeline_in_group)
@@ -72,13 +68,22 @@ class _Pipeline(object):
         if task_entry is not None:
             task_entry.mark_complete()
 
-    def _get_next_step(self, task_id, pipeline=None):
+    def _get_next_step(self, task_id, task_result_or_exception: Union[TaskResult, TaskException], pipeline=None):
         # figure out the next step for the pipeline
         # a group must be complete before you can move onto its continuation
         # groups are executed in parallel so a pipeline_in_group that is complete should jump
         # to the continuation of the group (if any) but only if the group as a whole is complete
 
-        iterator = iter(pipeline if pipeline is not None else self._pipeline)
+        if pipeline is None:
+            pipeline = self._pipeline
+        if isinstance(task_result_or_exception, TaskException):
+            finally_task = next((task for task in pipeline if isinstance(task, _TaskEntry) and task.is_finally), None)
+            if finally_task is None or finally_task.task_id == task_id:
+                return None, None, None
+            else:
+                return None, finally_task, None
+
+        iterator = iter(pipeline)
 
         while True:
             try:
@@ -86,7 +91,7 @@ class _Pipeline(object):
 
                 if isinstance(entry, _GroupEntry):
                     for pipeline_in_group in entry:
-                        current_t, next_t, _ = self._get_next_step(task_id, pipeline_in_group)
+                        current_t, next_t, _ = self._get_next_step(task_id, task_result_or_exception, pipeline_in_group)
 
                         if current_t is not None:
 
@@ -122,8 +127,7 @@ class _Pipeline(object):
 
         return task_result
 
-    def resume(self, context: _TaskContext, task_result: TaskResult):
-        task_id = context.get_task_id()
+    def resume(self, context: _TaskContext, task_result_or_exception: Union[TaskResult, TaskException]):
         caller_id = context.get_caller_id()
         state = context.get_state()
 
@@ -134,19 +138,23 @@ class _Pipeline(object):
         context.update_state({'pipeline': self._pipeline})
 
         # get the next step of the pipeline to run (if any)
-        _, next_step, group = self._get_next_step(caller_id)
+        _, next_step, group = self._get_next_step(caller_id, task_result_or_exception)
 
         # need to aggregate task results into group state
         if group is not None:
             # save each result from the pipeline
-            group_results = self._save_group_result(group, caller_id, state, task_result)
+            group_results = self._save_group_result(group, caller_id, state, task_result_or_exception)
 
             # if the group is complete the create the aggregate results as a list
             if group.is_complete():
-                task_result = self._aggregate_group_results(group, group_results)
+                task_result_or_exception = self._aggregate_group_results(group, group_results)
 
         if isinstance(next_step, _TaskEntry):
             remainder = [next_step]
+            if next_step.is_finally:
+                serialised_result = Any()
+                serialised_result.Pack(task_result_or_exception)
+                context.update_state({'result_before_finally': serialised_result})
         elif isinstance(next_step, _GroupEntry):
             remainder = [t[0] for t in next_step]
         else:
@@ -158,13 +166,19 @@ class _Pipeline(object):
             for task in remainder:
                 task_id, task_type, _, kwargs = task.to_tuple()
 
-                args = deserialise(task_result)
+                if isinstance(task_result_or_exception, TaskException):
+                    args = []
+                    content_type = 'application/json'
+                else:
+                    args = deserialise(task_result_or_exception)
+                    content_type = task_result_or_exception.content_type
+
                 task_data = (args, kwargs)
 
                 request = TaskRequest(id=task_id, type=task_type)
 
                 # honour the task_result content_type - pickled data might not be json serialisable
-                serialise(request, task_data, content_type=task_result.content_type)
+                serialise(request, task_data, content_type=content_type)
 
                 destination = self._get_destination(task)
                 context.pack_and_send(destination, task_id, request)
@@ -172,8 +186,8 @@ class _Pipeline(object):
             # if we are at the last step in the pipeline and it is complete then terminate and emit result
             last_step = self._pipeline[-1]
 
-            if last_step.is_complete() or (self._finally and self._finally.is_complete()):
-                self.terminate(context, task_result)
+            if last_step.is_complete() or isinstance(task_result_or_exception, TaskException):
+                self.terminate(context, task_result_or_exception)
 
     def attempt_retry(self, context: _TaskContext, task_exception: TaskException):
         task_id = context.get_caller_id()
@@ -209,18 +223,19 @@ class _Pipeline(object):
         return True
 
     def terminate(self, context: _TaskContext, task_result_or_exception: Union[TaskResult, TaskException]):
-        finally_triggered, finally_exception, result_before_finally = self._try_run_finally(context, task_result_or_exception)
-        if finally_triggered:
-            return  # will re-enter after finally has run
-        if finally_exception is not None:
-            task_result_or_exception = finally_exception
-        elif result_before_finally is not None:
-            task_result_or_exception = result_before_finally
-
         task_request = context.unpack('task_request', TaskRequest)
         reply_topic = task_request.reply_topic
+
+        serialised_result_before_finally = context.get_state().get('result_before_finally')
+        if isinstance(task_result_or_exception, TaskResult) and serialised_result_before_finally is not None:
+            # finally ran successfully, so return the result of the previous task (rather than cleanup result from finally)
+            result_before_finally = TaskException() if TaskException.__name__ in serialised_result_before_finally.type_url else TaskResult()
+            serialised_result_before_finally.Unpack(result_before_finally)
+            task_result_or_exception = result_before_finally
+
         task_result_or_exception.correlation_id = task_request.id
-        task_result_or_exception.type = f'{task_request.type}.' + ('result' if isinstance(task_result_or_exception, TaskResult) else 'error')
+        task_result_or_exception.type = f'{task_request.type}.' + (
+            'result' if isinstance(task_result_or_exception, TaskResult) else 'error')
 
         if reply_topic is not None and reply_topic != "":
             any = Any()
@@ -233,37 +248,10 @@ class _Pipeline(object):
             if 'caller_id' in state and state['caller_id'] != caller_id:
                 context.pack_and_send(state['address'], state['caller_id'], task_result_or_exception)
 
-    def _try_run_finally(self, context: _TaskContext, last_result_or_exception: Union[TaskResult, TaskException]):
-        finally_triggered = False
-        result_before_finally = None
-        finally_exception = None
-        if self._finally is not None:
-            finally_has_run = self._finally.task_id == last_result_or_exception.correlation_id
-            if finally_has_run:
-                serialised_result_before_finally = context.get_state().get('result_before_finally')
-                result_before_finally = TaskException() if TaskException.__name__ in serialised_result_before_finally.type_url else TaskResult()
-                serialised_result_before_finally.Unpack(result_before_finally)
-
-                if isinstance(last_result_or_exception, TaskException):
-                    finally_exception = last_result_or_exception
-            else:
-                serialised_result = Any()
-                serialised_result.Pack(last_result_or_exception)
-                context.update_state({'result_before_finally': serialised_result})
-                task_id, task_type, _, kwargs = self._finally.to_tuple()
-                request = TaskRequest(id=task_id, type=task_type)
-                serialise(request, ([], kwargs), 'application/json')
-                destination = self._get_destination(self._finally)
-                context.pack_and_send(destination, task_id, request)
-                finally_triggered = True
-
-        return finally_triggered, finally_exception, result_before_finally
-
 
 class PipelineBuilder():
     def __init__(self, pipeline: list = None):
         self._pipeline = [] if pipeline is None else pipeline
-        self._finally = None
 
     def append_to(self, other):
         other._pipeline.extend(self._pipeline)
@@ -329,11 +317,20 @@ class PipelineBuilder():
         return task_request
 
     def finally_do(self, finally_action, *args, **kwargs):
-        if self._finally is not None:
-            raise ValueError('Only one finally operation can be added to the pipeline')
         task_type = _task_type_for(finally_action)
-        self._finally = _TaskEntry(_gen_id(), task_type, args, kwargs, parameters=finally_action.defaults())
+        self._pipeline.append(
+            _TaskEntry(_gen_id(), task_type, args, kwargs, parameters=finally_action.defaults(), is_finally=True))
         return self
 
     def to_pipeline(self):
-        return _Pipeline(self._pipeline, self._finally)
+        error = self.validate()
+        if error:
+            raise ValueError(f'Invalid pipeline: {error}')
+        return _Pipeline(self._pipeline)
+
+    def validate(self):
+        finally_tasks = [task for task in self._pipeline if isinstance(task, _TaskEntry) and task.is_finally]
+        if len(finally_tasks) > 1:
+            return 'Cannot have more than one "finally_do" method.'
+        if len(finally_tasks) == 1 and finally_tasks[0] != self._pipeline[-1]:
+            return 'finally_do must be called at the end of a pipeline'
