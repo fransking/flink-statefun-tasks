@@ -6,19 +6,20 @@ from .messages_pb2 import TaskRequest, TaskResult, TaskException
 
 from datetime import timedelta
 from google.protobuf.any_pb2 import Any
-from typing import Union
-import json
+from typing import Union, Optional
 from uuid import uuid4
 
 
 class _Pipeline(object):
-    def __init__(self, pipeline: list):
+    def __init__(self, pipeline: list, finally_do: Optional[_TaskEntry]):
         self._pipeline = pipeline
+        self._finally = finally_do
 
     def begin(self, context: _TaskContext, extra_args):
         # 1. record all the continuations into a pipeline and save into state with caller id and address
         state = {
             'pipeline': self._pipeline,
+            'finally': self._finally,
             'caller_id': context.get_caller_id(),
             'address': context.get_address()
         }
@@ -52,7 +53,9 @@ class _Pipeline(object):
         return f'{task.get_parameter("namespace")}/{task.get_parameter("worker_name")}'
 
     def _get_task_entry(self, task_id, pipeline=None):
-        for entry in pipeline if pipeline is not None else self._pipeline:
+        if pipeline is None:
+            pipeline = self._pipeline
+        for entry in pipeline if self._finally is None else (pipeline + [self._finally]):
             if isinstance(entry, _GroupEntry):
                 for pipeline_in_group in entry:
                     task_entry = self._get_task_entry(task_id, pipeline_in_group)
@@ -74,7 +77,7 @@ class _Pipeline(object):
         # a group must be complete before you can move onto its continuation
         # groups are executed in parallel so a pipeline_in_group that is complete should jump
         # to the continuation of the group (if any) but only if the group as a whole is complete
-        
+
         iterator = iter(pipeline if pipeline is not None else self._pipeline)
 
         while True:
@@ -87,7 +90,7 @@ class _Pipeline(object):
 
                         if current_t is not None:
 
-                            if next_t is None: 
+                            if next_t is None:
                                 # at the end of pipeline_in_group so roll onto the next task but only if the group is complete
                                 next_t = _try_next(iterator) if entry.is_complete() else None
 
@@ -99,12 +102,11 @@ class _Pipeline(object):
 
             except StopIteration:
                 return None, None, None
-                
+
     def _save_group_result(self, group: _GroupEntry, caller_id, state: dict, task_result: TaskResult):
         group_results = state.setdefault(group.group_id, {})
         group_results[caller_id] = _GroupResult(task_result.data, task_result.content_type)
         return group_results
-
 
     def _aggregate_group_results(self, group: _GroupEntry, group_results: dict):
         aggregated_results = []
@@ -170,7 +172,7 @@ class _Pipeline(object):
             # if we are at the last step in the pipeline and it is complete then terminate and emit result
             last_step = self._pipeline[-1]
 
-            if last_step.is_complete():
+            if last_step.is_complete() or (self._finally and self._finally.is_complete()):
                 self.terminate(context, task_result)
 
     def attempt_retry(self, context: _TaskContext, task_exception: TaskException):
@@ -195,7 +197,7 @@ class _Pipeline(object):
 
         if retry_policy.exponential_back_off:
             delay_ms = int(delay.total_seconds() * 1000.0)
-            delay = timedelta(milliseconds=delay_ms^retry_count)
+            delay = timedelta(milliseconds=delay_ms ^ retry_count)
 
         request = task_exception.original_request
         destination = context.get_caller_address()
@@ -207,8 +209,16 @@ class _Pipeline(object):
         return True
 
     def terminate(self, context: _TaskContext, task_result_or_exception: Union[TaskResult, TaskException]):
+        finally_triggered, finally_exception, result_before_finally = self._try_run_finally(context, task_result_or_exception)
+        if finally_triggered:
+            return  # will re-enter after finally has run
+        if finally_exception is not None:
+            task_result_or_exception = finally_exception
+        elif result_before_finally is not None:
+            task_result_or_exception = result_before_finally
+
         task_request = context.unpack('task_request', TaskRequest)
-        reply_topic = task_request.reply_topic            
+        reply_topic = task_request.reply_topic
         task_result_or_exception.correlation_id = task_request.id
         task_result_or_exception.type = f'{task_request.type}.' + ('result' if isinstance(task_result_or_exception, TaskResult) else 'error')
 
@@ -223,10 +233,37 @@ class _Pipeline(object):
             if 'caller_id' in state and state['caller_id'] != caller_id:
                 context.pack_and_send(state['address'], state['caller_id'], task_result_or_exception)
 
+    def _try_run_finally(self, context: _TaskContext, last_result_or_exception: Union[TaskResult, TaskException]):
+        finally_triggered = False
+        result_before_finally = None
+        finally_exception = None
+        if self._finally is not None:
+            finally_has_run = self._finally.task_id == last_result_or_exception.correlation_id
+            if finally_has_run:
+                serialised_result_before_finally = context.get_state().get('result_before_finally')
+                result_before_finally = TaskException() if TaskException.__name__ in serialised_result_before_finally.type_url else TaskResult()
+                serialised_result_before_finally.Unpack(result_before_finally)
+
+                if isinstance(last_result_or_exception, TaskException):
+                    finally_exception = last_result_or_exception
+            else:
+                serialised_result = Any()
+                serialised_result.Pack(last_result_or_exception)
+                context.update_state({'result_before_finally': serialised_result})
+                task_id, task_type, _, kwargs = self._finally.to_tuple()
+                request = TaskRequest(id=task_id, type=task_type)
+                serialise(request, ([], kwargs), 'application/json')
+                destination = self._get_destination(self._finally)
+                context.pack_and_send(destination, task_id, request)
+                finally_triggered = True
+
+        return finally_triggered, finally_exception, result_before_finally
+
 
 class PipelineBuilder():
-    def __init__(self, pipeline:list=None):
+    def __init__(self, pipeline: list = None):
         self._pipeline = [] if pipeline is None else pipeline
+        self._finally = None
 
     def append_to(self, other):
         other._pipeline.extend(self._pipeline)
@@ -236,7 +273,7 @@ class PipelineBuilder():
 
         for pipeline in pipelines:
             pipeline._add_to_group(group)
-        
+
         self._pipeline.append(group)
         return self
 
@@ -269,17 +306,11 @@ class PipelineBuilder():
             self._pipeline.append(_TaskEntry(_gen_id(), task_type, args, kwargs, parameters=continuation.defaults()))
         return self
 
-    def to_json_dict(self, verbose=False):
-        return [entry.to_json_dict(verbose) for entry in self._pipeline]
-
-    def to_json(self, verbose=False):
-        return [entry.to_json(verbose) for entry in self._pipeline]
-
     def is_single_task(self):
         if len(self._pipeline) == 1:
             if isinstance(self._pipeline, _TaskEntry):
                 return True
-        
+
         return False
 
     def to_task_request(self):
@@ -297,6 +328,12 @@ class PipelineBuilder():
 
         return task_request
 
+    def finally_do(self, finally_action, *args, **kwargs):
+        if self._finally is not None:
+            raise ValueError('Only one finally operation can be added to the pipeline')
+        task_type = _task_type_for(finally_action)
+        self._finally = _TaskEntry(_gen_id(), task_type, args, kwargs, parameters=finally_action.defaults())
+        return self
 
     def to_pipeline(self):
-        return _Pipeline(self._pipeline)
+        return _Pipeline(self._pipeline, self._finally)

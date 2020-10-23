@@ -88,7 +88,15 @@ class FlinkTasks(object):
                     task_result = await task_result
 
                 self._finalise_task_result(task_context, task_request, task_result)
-                
+
+    @staticmethod
+    def send(func, *args, **kwargs) -> PipelineBuilder:
+        try:
+            send_func = func.send
+        except AttributeError:
+            raise AttributeError(
+                'Expected function to have a send attribute. Make sure it is decorated with @tasks.bind()')
+        return send_func(*args, **kwargs)
 
     def _begin_operation(self, task_context, task_request_or_result, is_async):
         _log.info(f'Started {task_context}')
@@ -110,9 +118,10 @@ class FlinkTasks(object):
     def _get_pipeline(self, context):
         state = context.get_state()
         pipeline = state.get('pipeline', None)
+        finally_do = state.get('finally', None)
 
         if pipeline is not None:
-            return _Pipeline(pipeline=pipeline)
+            return _Pipeline(pipeline=pipeline, finally_do=finally_do)
         else:
             raise ValueError(f'Missing pipleline for task_id - {context.get_task_id()}')
 
