@@ -2,8 +2,8 @@ from statefun_tasks import FlinkTasks, TaskRequest, TaskResult, TaskException, i
 from datetime import timedelta
 import asyncio
 
-
-tasks = FlinkTasks(default_namespace="example", default_worker_name="worker", egress_type_name="example/kafka-generic-egress")
+tasks = FlinkTasks(default_namespace="example", default_worker_name="worker",
+                   egress_type_name="example/kafka-generic-egress")
 
 
 # 1. simple workflow
@@ -56,7 +56,6 @@ def _count_results(results):
     return len(results)
 
 
-
 # 4. pass through arguments - passing extra parameters through a function: 'f1(a,b) -> c' can be called as 'f1(a,b,1,2...n) -> (c,1,2,...n)
 # in the example below the result will be ('Hello Jane Doe', 3)
 
@@ -73,3 +72,55 @@ def _say_hello_and_return_last_name_length(first_name, last_name):
 @tasks.bind()
 def _say_goodbye_only(greeting):
     return f'{greeting}'
+
+# 5. finally_do for cleaning up resources
+
+
+@tasks.bind()
+def greeting_workflow_with_cleanup(first_name, last_name):
+    return tasks.send(_say_hello, first_name, last_name).continue_with(_say_goodbye, goodbye_message="see you later!") \
+        .continue_with(_print_message).finally_do(_cleanup)
+
+
+@tasks.bind()
+def greeting_workflow_with_cleanup_args(first_name, last_name):
+    return tasks.send(_say_hello, first_name, last_name).continue_with(_say_goodbye, goodbye_message="see you later!") \
+        .continue_with(_print_message).finally_do(_cleanup_with_args, name='Luke')
+
+
+@tasks.bind()
+def greeting_workflow_with_cleanup_error(first_name, last_name):
+    return tasks.send(_say_hello, first_name, last_name).continue_with(_say_goodbye, goodbye_message="see you later!") \
+        .continue_with(_print_message).finally_do(_cleanup_with_exception)
+
+
+@tasks.bind()
+def greeting_workflow_with_cleanup_and_error(first_name, last_name):
+    return tasks.send(_say_hello, first_name, last_name).continue_with(_fail).continue_with(_print_message)\
+        .finally_do(_cleanup)
+
+
+@tasks.bind()
+def _fail(greeting):
+    raise Exception(f'I am supposed to fail: {greeting}')
+
+
+@tasks.bind()
+def _print_message(greeting):
+    print(greeting)
+    return greeting
+
+
+@tasks.bind()
+def _cleanup():
+    print('cleanup complete')
+
+
+@tasks.bind()
+def _cleanup_with_args(name):
+    print(f'cleanup complete for name {name}')
+
+
+@tasks.bind()
+def _cleanup_with_exception():
+    raise Exception('Error cleaning up!')
