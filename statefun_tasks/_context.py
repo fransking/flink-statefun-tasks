@@ -61,6 +61,11 @@ class _TaskContext(object):
     def update_state(self, updates:dict):
         self._state.update(updates)
 
+    def pack_and_update_state(self, key, value):
+        any = Any()
+        any.Pack(value)
+        self._state.update({key: any})
+
     def __enter__(self):
         return self
 

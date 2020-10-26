@@ -1,11 +1,10 @@
-from ._utils import _gen_id, _task_type_for, _try_next
+from ._utils import _gen_id, _task_type_for, _try_next, _is_tuple
 from ._serialisation import deserialise, serialise, try_serialise_json_then_pickle
 from ._types import _TaskEntry, _GroupEntry, _GroupResult
 from ._context import _TaskContext
 from .messages_pb2 import TaskRequest, TaskResult, TaskException
 
 from datetime import timedelta
-from google.protobuf.any_pb2 import Any
 from typing import Union, Optional
 from uuid import uuid4
 
@@ -128,6 +127,18 @@ class _Pipeline(object):
 
         return task_result
 
+    def _extend_args(self, args, task_args):
+        if any(task_args):
+            if _is_tuple(args):
+                args = args + (task_args,)
+            elif isinstance(args, list):
+                args.extend(task_args)
+            else:
+                args = (args) + (task_args,)
+
+        return args
+
+
     def resume(self, context: _TaskContext, task_result_or_exception: Union[TaskResult, TaskException]):
         caller_id = context.get_caller_id()
         state = context.get_state()
@@ -154,9 +165,8 @@ class _Pipeline(object):
         if isinstance(next_step, _TaskEntry):
             remainder = [next_step]
             if next_step.is_finally:
-                serialised_result = Any()
-                serialised_result.Pack(task_result_or_exception)
-                context.update_state({'result_before_finally': serialised_result})
+                # record the result of the task prior to the finally task so we can return it once the finally task completes
+                context.pack_and_update_state('result_before_finally', task_result_or_exception)
         elif isinstance(next_step, _GroupEntry):
             remainder = [t[0] for t in next_step]
         else:
@@ -166,7 +176,7 @@ class _Pipeline(object):
         if any(remainder):
 
             for task in remainder:
-                task_id, task_type, _, kwargs = task.to_tuple()
+                task_id, task_type, task_args, kwargs = task.to_tuple()
 
                 if isinstance(task_result_or_exception, TaskException):
                     args = []
@@ -174,6 +184,9 @@ class _Pipeline(object):
                 else:
                     args = deserialise(task_result_or_exception)
                     content_type = task_result_or_exception.content_type
+
+                # extend with any args passed to the task explicitly
+                args = self._extend_args(args, task_args)
 
                 task_data = (args, kwargs)
 
@@ -240,8 +253,6 @@ class _Pipeline(object):
             'result' if isinstance(task_result_or_exception, TaskResult) else 'error')
 
         if reply_topic is not None and reply_topic != "":
-            any = Any()
-            any.Pack(task_result_or_exception)
             context.pack_and_send_egress(topic=reply_topic, value=task_result_or_exception)
         else:
             state = context.get_state()

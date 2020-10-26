@@ -133,7 +133,7 @@ class FlinkTasks(object):
             if task_exception.retry:
 
                 # attempt retry - will return false if retry count exceeded
-                if pipeline.attempt_retry(context, task_result_or_exception):
+                if pipeline.attempt_retry(context, task_exception):
                     return
 
         pipeline.resume(context, task_result_or_exception)
