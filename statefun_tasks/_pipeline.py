@@ -1,5 +1,5 @@
 from ._utils import _gen_id, _task_type_for, _try_next, _is_tuple
-from ._serialisation import deserialise, serialise, try_serialise_json_then_pickle
+from ._serialisation import deserialise, deserialise_result, serialise, try_serialise_json_then_pickle
 from ._types import _TaskEntry, _GroupEntry, _GroupResult
 from ._context import _TaskContext
 from .messages_pb2 import TaskRequest, TaskResult, TaskException
@@ -117,7 +117,7 @@ class _Pipeline(object):
         aggregated_results = []
         for pipeline in group:
             group_result = group_results[pipeline[-1].task_id]
-            aggregated_results.append(deserialise(group_result))
+            aggregated_results.append(deserialise_result(group_result))  # we want the auto unpacked results to avoid a list of single element tuples
 
         # ensure we send a tuple
         aggregated_results = (aggregated_results,)

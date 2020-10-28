@@ -45,7 +45,7 @@ def deserialise(task_object: Union[TaskRequest, TaskResult, _GroupResult]):
 def deserialise_result(task_result: TaskResult):
     data = deserialise(task_result)
     if isinstance(data, (list, tuple)) and len(data) == 1:
-        # single results are still returned as single element tuple and are thus unpacked
+        # single results are still returned as single element list/tuple and are thus unpacked
         return data[0]
     else:
         return data
