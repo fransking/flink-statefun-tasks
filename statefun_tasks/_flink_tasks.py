@@ -64,10 +64,13 @@ class FlinkTasks(object):
         else:
             raise ValueError(f'{task_type} is not a registered FlinkTask')
 
+    def is_async_required(self, task_input: Union[TaskRequest, TaskResult, TaskException]):
+        return isinstance(task_input, TaskRequest) and self.get_task(task_input.type).is_async
+
     def run(self, context: BatchContext, task_input: Union[TaskRequest, TaskResult, TaskException]):
         with _TaskContext(context, task_input.type, self._egress_type_name) as task_context:
             # either we resume a pipeline (received TaskResult or TaskException) or we invoke a task (received TaskRequest)
-            task_request_result = self._begin_operation(task_context, task_input, is_async=False)
+            task_request_result = self._begin_operation(task_context, task_input)
 
             if task_request_result is not None:  # invoked a task
                 task_request, task_result = task_request_result
@@ -76,9 +79,8 @@ class FlinkTasks(object):
 
     async def run_async(self, context: BatchContext, task_input: Union[TaskRequest, TaskResult, TaskException]):
         with _TaskContext(context, task_input.type, self._egress_type_name) as task_context:
-
             # either we resume a pipeline (received TaskResult or TaskException) or we invoke a task (received TaskRequest)
-            task_request_result = self._begin_operation(task_context, task_input, is_async=True)
+            task_request_result = self._begin_operation(task_context, task_input)
 
             if task_request_result is not None:  # invoked a task which may be a coro
                 task_request, task_result = task_request_result
@@ -97,7 +99,7 @@ class FlinkTasks(object):
                 'Expected function to have a send attribute. Make sure it is decorated with @tasks.bind()')
         return send_func(*args, **kwargs)
 
-    def _begin_operation(self, task_context, task_request_or_result, is_async):
+    def _begin_operation(self, task_context, task_request_or_result):
         _log.info(f'Started {task_context}')
 
         if isinstance(task_request_or_result, (TaskResult, TaskException)):
@@ -110,7 +112,7 @@ class FlinkTasks(object):
             task_context.pack_and_save('task_request', task_request)
 
             flink_task = self.get_task(task_request.type)
-            fn = flink_task.run_async if is_async else flink_task.run
+            fn = flink_task.run_async if flink_task.is_async else flink_task.run
 
             return task_request, fn(task_context, task_request)
 
@@ -173,6 +175,7 @@ class _FlinkTask(object):
         self._num_args = len(self._args)
         self._explicit_return = any(
             isinstance(node, ast.Return) for node in ast.walk(ast.parse(inspect.getsource(fun))))
+        self.is_async = inspect.iscoroutinefunction(fun)
 
     def run(self, context: _TaskContext, task_request: TaskRequest):
         task_result, task_exception, pipeline, extra_args = None, None, None, None
