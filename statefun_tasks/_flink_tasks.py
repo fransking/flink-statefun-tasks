@@ -17,6 +17,17 @@ import asyncio
 _log = logging.getLogger('FlinkTasks')
 
 
+def _to_task_exception(task_request, ex, retry=False):
+    return TaskException(
+        id=_gen_id(),
+        correlation_id=task_request.id,
+        type=f'{task_request.type}.error',
+        exception_type=type(ex).__name__,
+        exception_message=str(ex),
+        stacktrace=tb.format_exc(),
+        retry=retry)
+
+
 class FlinkTasks(object):
     def __init__(self, default_namespace: str, default_worker_name: str, egress_type_name: str,
                  default_content_type='application/json'):
@@ -62,33 +73,44 @@ class FlinkTasks(object):
         if task_type in self._bindings:
             return self._bindings[task_type]
         else:
-            raise ValueError(f'{task_type} is not a registered FlinkTask')
+            raise RuntimeError(f'{task_type} is not a registered FlinkTask')
 
     def is_async_required(self, task_input: Union[TaskRequest, TaskResult, TaskException]):
-        return isinstance(task_input, TaskRequest) and self.get_task(task_input.type).is_async
+        try:
+            return isinstance(task_input, TaskRequest) and self.get_task(task_input.type).is_async
+        except:
+            return False
 
     def run(self, context: BatchContext, task_input: Union[TaskRequest, TaskResult, TaskException]):
         with _TaskContext(context, task_input.type, self._egress_type_name) as task_context:
-            # either we resume a pipeline (received TaskResult or TaskException) or we invoke a task (received TaskRequest)
-            task_request_result = self._begin_operation(task_context, task_input)
+            try:
+                # either we resume a pipeline (received TaskResult or TaskException) or we invoke a task (received TaskRequest)
+                task_request_result = self._begin_operation(task_context, task_input)
 
-            if task_request_result is not None:  # invoked a task
-                task_request, task_result = task_request_result
+                if task_request_result is not None:  # invoked a task
+                    task_request, task_result = task_request_result
 
-                self._finalise_task_result(task_context, task_request, task_result)
+                    self._finalise_task_result(task_context, task_request, task_result)
+            except Exception as ex:
+                self._fail(task_context, task_input, ex)
+                raise
 
     async def run_async(self, context: BatchContext, task_input: Union[TaskRequest, TaskResult, TaskException]):
         with _TaskContext(context, task_input.type, self._egress_type_name) as task_context:
-            # either we resume a pipeline (received TaskResult or TaskException) or we invoke a task (received TaskRequest)
-            task_request_result = self._begin_operation(task_context, task_input)
+            try:
+                # either we resume a pipeline (received TaskResult or TaskException) or we invoke a task (received TaskRequest)
+                task_request_result = self._begin_operation(task_context, task_input)
 
-            if task_request_result is not None:  # invoked a task which may be a coro
-                task_request, task_result = task_request_result
+                if task_request_result is not None:  # invoked a task which may be a coro
+                    task_request, task_result = task_request_result
 
-                if asyncio.iscoroutine(task_result):
-                    task_result = await task_result
+                    if asyncio.iscoroutine(task_result):
+                        task_result = await task_result
 
-                self._finalise_task_result(task_context, task_request, task_result)
+                    self._finalise_task_result(task_context, task_request, task_result)
+            except Exception as ex:
+                self._fail(task_context, task_input, ex)
+                raise
 
     @staticmethod
     def send(func, *args, **kwargs) -> PipelineBuilder:
@@ -140,6 +162,15 @@ class FlinkTasks(object):
 
         pipeline.resume(context, task_result_or_exception)
 
+    def _emit_result(self, context, task_request, task_result):
+            # then either we need to reply to a caller
+            if context.get_caller_id() is not None:
+                context.pack_and_reply(task_result)
+
+            # or we need to send some egress
+            elif task_request.reply_topic is not None and task_request.reply_topic != "":
+                context.pack_and_send_egress(topic=task_request.reply_topic, value=task_result)
+
     def _finalise_task_result(self, context, task_request, task_result):
 
         task_result, task_exception, pipeline, extra_args = task_result  # unpack
@@ -156,13 +187,16 @@ class FlinkTasks(object):
                 context.pack_and_save('task_result', task_result)
                 return_value = task_result
 
-            # then either we need to reply to a caller
-            if context.get_caller_id() is not None:
-                context.pack_and_reply(return_value)
+            # emit the result - either by replying to caller or sending some egress
+            self._emit_result(context, task_request, return_value)
 
-            # or we need to send some egress
-            elif task_request.reply_topic is not None and task_request.reply_topic != "":
-                context.pack_and_send_egress(topic=task_request.reply_topic, value=return_value)
+
+    def _fail(self, context, task_request, ex):
+        task_exception = _to_task_exception(task_request, ex, retry=False)
+        context.pack_and_save('task_exception', task_exception)
+        
+        # emit the error - either by replying to caller or sending some egress
+        self._emit_result(context, task_request, task_exception)
 
 
 class _FlinkTask(object):
@@ -248,14 +282,7 @@ class _FlinkTask(object):
         if self._retry_policy is not None:
             retry = any([isinstance(ex, ex_type) for ex_type in self._retry_policy.retry_for])
 
-        task_exception = TaskException(
-            id=_gen_id(),
-            correlation_id=task_request.id,
-            type=f'{task_request.type}.error',
-            exception_type=type(ex).__name__,
-            exception_message=str(ex),
-            stacktrace=tb.format_exc(),
-            retry=retry)
+        task_exception = _to_task_exception(task_request, ex, retry=retry)
 
         if retry:
             task_exception.original_request.CopyFrom(task_request)

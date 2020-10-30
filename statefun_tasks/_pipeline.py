@@ -309,7 +309,7 @@ class PipelineBuilder():
 
     def is_single_task(self):
         if len(self._pipeline) == 1:
-            if isinstance(self._pipeline, _TaskEntry):
+            if isinstance(self._pipeline[0], _TaskEntry):
                 return True
 
         return False
