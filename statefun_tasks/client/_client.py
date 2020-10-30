@@ -37,15 +37,15 @@ class FlinkTasksClient(object):
         self._consumer_thread.daemon = True
         self._consumer_thread.start()
 
-    def submit(self, pipeline: PipelineBuilder):
+    def submit(self, pipeline: PipelineBuilder, topic=None):
         task_request = pipeline.to_task_request()
         return self._submit_request(task_request)
 
-    async def submit_async(self, pipeline: PipelineBuilder):
+    async def submit_async(self, pipeline: PipelineBuilder, topic=None):
         future, _ = self.submit(pipeline)
         return await asyncio.wrap_future(future)
 
-    def _submit_request(self, task_request: TaskRequest):
+    def _submit_request(self, task_request: TaskRequest, topic=None):
         if task_request.id is None or task_request.id == "":
             raise ValueError('Task request is missing an id')
 
@@ -60,7 +60,8 @@ class FlinkTasksClient(object):
         key = task_request.id.encode('utf-8')
         val = task_request.SerializeToString()
 
-        self._producer.send(topic=self._topic, key=key, value=val)
+        topic = self._topic if topic is None else topic
+        self._producer.send(topic=topic, key=key, value=val)
         self._producer.flush()
 
         return future, task_request.id
