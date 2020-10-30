@@ -39,10 +39,10 @@ class FlinkTasksClient(object):
 
     def submit(self, pipeline: PipelineBuilder, topic=None):
         task_request = pipeline.to_task_request()
-        return self._submit_request(task_request)
+        return self._submit_request(task_request, topic=topic)
 
     async def submit_async(self, pipeline: PipelineBuilder, topic=None):
-        future, _ = self.submit(pipeline)
+        future, _ = self.submit(pipeline, topic=topic)
         return await asyncio.wrap_future(future)
 
     def _submit_request(self, task_request: TaskRequest, topic=None):
