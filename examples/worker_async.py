@@ -35,7 +35,7 @@ async def worker(context, task_data: Union[TaskRequest, TaskResult, TaskExceptio
 async def handle(request):
     handler = AsyncRequestReplyHandler(functions)
     request_data = await request.read()
-    response_data = await handler.handle_async(request_data)
+    response_data = await handler(request_data)
     return web.Response(body=response_data, content_type='application/octet-stream')
 
 async def app():
