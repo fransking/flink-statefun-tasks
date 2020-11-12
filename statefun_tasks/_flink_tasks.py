@@ -163,13 +163,13 @@ class FlinkTasks(object):
         pipeline.resume(context, task_result_or_exception)
 
     def _emit_result(self, context, task_request, task_result):
-            # then either we need to reply to a caller
-            if context.get_caller_id() is not None:
-                context.pack_and_reply(task_result)
+        # then either we need to reply to a caller
+        if context.get_caller_id() is not None:
+            context.pack_and_reply(task_result)
 
-            # or we need to send some egress
-            elif task_request.reply_topic is not None and task_request.reply_topic != "":
-                context.pack_and_send_egress(topic=task_request.reply_topic, value=task_result)
+        # or we need to send some egress
+        elif task_request.reply_topic is not None and task_request.reply_topic != "":
+            context.pack_and_send_egress(topic=task_request.reply_topic, value=task_result)
 
     def _finalise_task_result(self, context, task_request, task_result):
 
@@ -190,11 +190,10 @@ class FlinkTasks(object):
             # emit the result - either by replying to caller or sending some egress
             self._emit_result(context, task_request, return_value)
 
-
     def _fail(self, context, task_request, ex):
         task_exception = _to_task_exception(task_request, ex, retry=False)
         context.pack_and_save('task_exception', task_exception)
-        
+
         # emit the error - either by replying to caller or sending some egress
         self._emit_result(context, task_request, task_exception)
 

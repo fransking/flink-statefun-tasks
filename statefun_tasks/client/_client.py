@@ -12,7 +12,6 @@ from typing import List
 import asyncio
 from concurrent.futures import Future
 
-
 _log = logging.getLogger('FlinkTasks')
 
 
@@ -23,7 +22,7 @@ class FlinkTasksClient(object):
 
         self._topic = topic
         self._reply_topic = reply_topic
-        self._group_id = f'{self._reply_topic}.{str(uuid4())}' # unique for instance
+        self._group_id = f'{self._reply_topic}.{str(uuid4())}'  # unique for instance
 
         self._producer = KafkaProducer(bootstrap_servers=[kafka_broker_url])
 
@@ -69,7 +68,7 @@ class FlinkTasksClient(object):
     def _consume(self):
         while True:
             try:
-                for message in self._consumer: 
+                for message in self._consumer:
                     any = Any()
                     any.ParseFromString(message.value)
 
@@ -77,7 +76,7 @@ class FlinkTasksClient(object):
                         self._raise_exception(any)
                     elif any.Is(TaskResult.DESCRIPTOR):
                         self._return_result(any)
-                          
+
             except Exception as ex:
                 _log.warning(f"Exception in consumer thread - {ex}", exc_info=ex)
 
@@ -87,7 +86,7 @@ class FlinkTasksClient(object):
 
         correlation_id = task_result.correlation_id
 
-        future = self._requests.get(correlation_id, None) 
+        future = self._requests.get(correlation_id, None)
 
         if future is not None:
             del self._requests[correlation_id]
@@ -103,7 +102,7 @@ class FlinkTasksClient(object):
 
         correlation_id = task_exception.correlation_id
 
-        future = self._requests.get(correlation_id, None) 
+        future = self._requests.get(correlation_id, None)
 
         if future is not None:
             del self._requests[correlation_id]

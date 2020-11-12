@@ -1,4 +1,3 @@
-
 from statefun_tasks import TaskException
 
 
@@ -9,6 +8,5 @@ class TaskError(Exception):
         self.message = ex.exception_message
         self.stacktrace = ex.stacktrace
 
-    
     def __str__(self):
         return f'type: {self.type} message: {self.message} stacktrace: {self.stacktrace}'
