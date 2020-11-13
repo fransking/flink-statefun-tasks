@@ -5,7 +5,7 @@ from ._context import _TaskContext
 from .messages_pb2 import TaskRequest, TaskResult, TaskException
 
 from datetime import timedelta
-from typing import Union, Optional
+from typing import Union, Iterable
 from uuid import uuid4
 
 
@@ -266,10 +266,10 @@ class PipelineBuilder():
     def __init__(self, pipeline: list = None):
         self._pipeline = [] if pipeline is None else pipeline
 
-    def append_to(self, other):
+    def append_to(self, other: 'PipelineBuilder'):
         other._pipeline.extend(self._pipeline)
 
-    def append_group(self, pipelines):
+    def append_group(self, pipelines: Iterable['PipelineBuilder']):
         group = _GroupEntry(_gen_id())
 
         for pipeline in pipelines:
@@ -289,7 +289,7 @@ class PipelineBuilder():
 
     def send(self, fun, *args, **kwargs):
         task_type = _task_type_for(fun)
-        self._pipeline.append(_TaskEntry(_gen_id(), task_type, args, kwargs, parameters=fun.defaults()))
+        self._pipeline.append(_TaskEntry(_gen_id(), task_type, args, kwargs, parameters=self._get_defaults(fun)))
         return self
 
     def set(self, **kwargs):
@@ -304,7 +304,7 @@ class PipelineBuilder():
             continuation.append_to(self)
         else:
             task_type = _task_type_for(continuation)
-            self._pipeline.append(_TaskEntry(_gen_id(), task_type, args, kwargs, parameters=continuation.defaults()))
+            self._pipeline.append(_TaskEntry(_gen_id(), task_type, args, kwargs, parameters=self._get_defaults(continuation)))
         return self
 
     def is_single_task(self):
@@ -332,7 +332,8 @@ class PipelineBuilder():
     def finally_do(self, finally_action, *args, **kwargs):
         task_type = _task_type_for(finally_action)
         self._pipeline.append(
-            _TaskEntry(_gen_id(), task_type, args, kwargs, parameters=finally_action.defaults(), is_finally=True))
+            _TaskEntry(_gen_id(), task_type, args, kwargs, parameters=self._get_defaults(finally_action),
+                       is_finally=True))
         return self
 
     def to_pipeline(self):
@@ -347,3 +348,10 @@ class PipelineBuilder():
             return 'Cannot have more than one "finally_do" method.'
         if len(finally_tasks) == 1 and finally_tasks[0] != self._pipeline[-1]:
             return 'finally_do must be called at the end of a pipeline'
+
+    @staticmethod
+    def _get_defaults(fun):
+        try:
+            return fun.defaults()
+        except AttributeError:
+            raise AttributeError(f'Function {fun.__module__}.{fun.__name__} should be decorated with tasks.bind')
