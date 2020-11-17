@@ -82,14 +82,14 @@ Let's revisit our stocks example from a Flink perspective.
 
 ```
 @functions.bind('examples/load_timeseries')
-def load_timeseries(context, stock):
-    prices = _load_prices(stock)
-    context.send('examples/compute_std_dev', prices)
+def load_timeseries(context, stocks):
+    all_prices = [_load_prices(stock) for stock in stocks]
+    context.send('examples/compute_std_dev', all_prices)
 
 
 @functions.bind('examples/compute_std_dev')
-def compute_std_dev(context, prices):
-    context.reply(np.std(prices))
+def compute_std_dev(context, all_prices):
+    context.reply(np.std(prices) for prices in all_prices)
 ```
 
 Some issues with this:
@@ -105,10 +105,10 @@ Some issues with this:
 def load_timeseries(context, input):
 
     if isinstance(input, str):
-        prices = _load_prices(isinstance)
-        context.send('examples/compute_std_dev', prices)
+        all_prices = [_load_prices(stock) for stock in input]
+        context.send('examples/compute_std_dev', all_prices)
     elif isinstance(input, list):
-        context.send('examples/compute_avg', prices)
+        context.send('examples/compute_avg', input)
     elif isinstance(input, double):
         context.pack_and_send_egress('topic', input)
 ```
