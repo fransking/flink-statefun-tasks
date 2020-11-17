@@ -110,3 +110,6 @@ class FinallyDoTests(unittest.TestCase):
             self.assertEqual(e.task_error.message, 'Invalid pipeline: finally_do must be called at the end of a pipeline')
         else:
             self.fail('Expected an exception')
+
+if __name__ == '__main__':
+    unittest.main()
