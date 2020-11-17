@@ -82,14 +82,14 @@ Let's revisit our stocks example from a Flink perspective.
 
 ```
 @functions.bind('examples/load_timeseries')
-def load_timeseries(context, stocks):
-    all_prices = [_load_prices(stock) for stock in stocks]
-    context.send('examples/compute_std_dev', all_prices)
+def load_timeseries(context, stock):
+    prices = _load_prices(stock)
+    context.send('examples/compute_std_dev', prices)
 
 
 @functions.bind('examples/compute_std_dev')
-def compute_std_dev(context, all_prices):
-    context.reply(np.std(prices) for prices in all_prices)
+def compute_std_dev(context, prices):
+    context.reply(np.std(prices))
 ```
 
 Some issues with this:
@@ -101,15 +101,16 @@ Some issues with this:
 3. As the workflow becomes more complex load_timeseries() morphs into an orchestration function:
 
 ```
-@functions.bind('examples/average_std_dev_workflow')
+@functions.bind('examples/load_timeseries')
 def load_timeseries(context, input):
 
     if isinstance(input, str):
-        all_prices = [_load_prices(stock) for stock in input]
-        context.send('examples/compute_std_dev', all_prices)
-    elif isinstance(input, list):
-        context.send('examples/compute_avg', input)
-    elif isinstance(input, double):
+        prices = _load_prices(stock)
+        context.send('examples/compute_std_dev', input)
+    # elif ... next stage
+    # elif ... next stage
+    # elif ... next stage etc
+    elif isinstance(input, double):  # finally reply to original caller
         context.pack_and_send_egress('topic', input)
 ```
 
