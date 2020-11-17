@@ -29,7 +29,7 @@ class PassthroughArgsTests(unittest.TestCase):
     def setUp(self) -> None:
         self.test_harness = TestHarness()
 
-    def test_passing_kwarg_through_task(self):
+    def test_passing_arg_through_task(self):
         pipeline = tasks.send(passthrough_workflow_specifying_kwarg)
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, 'Hello Jane... (last name Doe)')
