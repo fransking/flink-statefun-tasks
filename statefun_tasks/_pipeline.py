@@ -230,7 +230,10 @@ class _Pipeline(object):
 
         request = task_exception.original_request
         destination = context.get_caller_address()
-        context.pack_and_send_after(delay, destination, task_id, request)
+        if delay:
+            context.pack_and_send_after(delay, destination, task_id, request)
+        else:
+            context.pack_and_send(destination, task_id, request)
 
         retries[task_id] = retry_count + 1
         context.update_state({'retries': retries})
