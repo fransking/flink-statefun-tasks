@@ -228,7 +228,7 @@ class _Pipeline(object):
             delay_ms = int(delay.total_seconds() * 1000.0)
             delay = timedelta(milliseconds=delay_ms ^ retry_count)
 
-        request = task_exception.original_request
+        request = task_exception.retry_request
         destination = context.get_caller_address()
         context.pack_and_send_after(delay, destination, task_id, request)
 
@@ -239,7 +239,6 @@ class _Pipeline(object):
 
     def terminate(self, context: _TaskContext, task_result_or_exception: Union[TaskResult, TaskException]):
         task_request = context.unpack('task_request', TaskRequest)
-        reply_topic = task_request.reply_topic
 
         serialised_result_before_finally = context.get_state().get('result_before_finally')
         if isinstance(task_result_or_exception, TaskResult) and serialised_result_before_finally is not None:
@@ -248,17 +247,34 @@ class _Pipeline(object):
             serialised_result_before_finally.Unpack(result_before_finally)
             task_result_or_exception = result_before_finally
 
+        # set basic message properties
         task_result_or_exception.correlation_id = task_request.id
         task_result_or_exception.type = f'{task_request.type}.' + (
             'result' if isinstance(task_result_or_exception, TaskResult) else 'error')
 
-        if reply_topic is not None and reply_topic != "":
-            context.pack_and_send_egress(topic=reply_topic, value=task_result_or_exception)
+        # pass back any request_state that we were given at the start of the pipeline
+        task_result_or_exception.request_state.CopyFrom(task_request.request_state)
+
+        # remove the retry_request if set because this is only used if we are retrying
+        if isinstance(task_result_or_exception, TaskException):
+            task_result_or_exception.ClearField('retry_request')
+
+        # finally reply to caller which as one of:
+        # 1. sending a message to egress if reply_topic was specified
+        if task_request.HasField('reply_topic'):
+            context.pack_and_send_egress(topic=task_request.reply_topic, value=task_result_or_exception)
+
+        # 2. calling back to a particular flink function if reply_address was specified
+        elif task_request.HasField('reply_address'):
+            address, identifer = context.to_address_and_id(task_request.reply_address)
+            context.pack_and_send(address, identifer, task_result_or_exception)
+
+        # 3. else call back to our caller (if there is one)
         else:
             state = context.get_state()
             caller_id = context.get_caller_id()
 
-            if 'caller_id' in state and state['caller_id'] != caller_id:
+            if 'caller_id' in state and state['caller_id'] != caller_id:  # don't call back to self
                 context.pack_and_send(state['address'], state['caller_id'], task_result_or_exception)
 
 

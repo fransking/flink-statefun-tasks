@@ -284,7 +284,7 @@ class _FlinkTask(object):
         task_exception = _to_task_exception(task_request, ex, retry=retry)
 
         if retry:
-            task_exception.original_request.CopyFrom(task_request)
+            task_exception.retry_request.CopyFrom(task_request)
 
         return task_exception
 

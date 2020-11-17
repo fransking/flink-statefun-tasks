@@ -4,6 +4,7 @@ from .messages_pb2 import TaskState, TaskResult
 from google.protobuf.any_pb2 import Any
 from statefun import kafka_egress_record
 from statefun.request_reply import BatchContext
+from statefun.request_reply_pb2 import Address
 from typing import Callable
 
 
@@ -30,6 +31,10 @@ class _TaskContext(object):
 
     def get_caller_id(self):
         return None if self._context.caller.identity == "" else self._context.caller.identity
+
+    @staticmethod
+    def to_address_and_id(address: Address):
+        return f'{address.namespace}/{address.type}', address.id
 
     def unpack(self, key:str, object_type):
         return self._context.state(key).unpack(object_type)
