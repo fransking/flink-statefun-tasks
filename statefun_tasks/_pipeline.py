@@ -138,6 +138,24 @@ class _Pipeline(object):
 
         return args
 
+    @staticmethod
+    def _emit_result(context, task_request, task_result_or_exception):
+        # either send a message to egress if reply_topic was specified
+        if task_request.HasField('reply_topic'):
+            context.pack_and_send_egress(topic=task_request.reply_topic, value=task_result_or_exception)
+
+        # or call back to a particular flink function if reply_address was specified
+        elif task_request.HasField('reply_address'):
+            address, identifer = context.to_address_and_id(task_request.reply_address)
+            context.pack_and_send(address, identifer, task_result_or_exception)
+
+        # or call back to our caller (if there is one)
+        else:
+            state = context.get_state()
+            caller_id = context.get_caller_id()
+
+            if 'caller_id' in state and state['caller_id'] != caller_id:  # don't call back to self
+                context.pack_and_send(state['address'], state['caller_id'], task_result_or_exception)
 
     def resume(self, context: _TaskContext, task_result_or_exception: Union[TaskResult, TaskException]):
         caller_id = context.get_caller_id()
@@ -259,23 +277,8 @@ class _Pipeline(object):
         if isinstance(task_result_or_exception, TaskException):
             task_result_or_exception.ClearField('retry_request')
 
-        # finally reply to caller which as one of:
-        # 1. sending a message to egress if reply_topic was specified
-        if task_request.HasField('reply_topic'):
-            context.pack_and_send_egress(topic=task_request.reply_topic, value=task_result_or_exception)
-
-        # 2. calling back to a particular flink function if reply_address was specified
-        elif task_request.HasField('reply_address'):
-            address, identifer = context.to_address_and_id(task_request.reply_address)
-            context.pack_and_send(address, identifer, task_result_or_exception)
-
-        # 3. else call back to our caller (if there is one)
-        else:
-            state = context.get_state()
-            caller_id = context.get_caller_id()
-
-            if 'caller_id' in state and state['caller_id'] != caller_id:  # don't call back to self
-                context.pack_and_send(state['address'], state['caller_id'], task_result_or_exception)
+        # finally emit the result (to egress, destination address or caller address)
+        self._emit_result(context, task_request, task_result_or_exception)
 
 
 class PipelineBuilder():
