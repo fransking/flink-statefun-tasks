@@ -8,6 +8,9 @@ message TaskRequest {
     string reply_topic = 3;
     string content_type = 4;
     bytes data = 5;
+
+    //Address reply_to = 6;
+    //reply_
 }
 
 message TaskResult {
