@@ -42,7 +42,7 @@ class ResultSerialisationTests(unittest.TestCase):
         try:
             self.test_harness.run_pipeline(pipeline)
         except TaskErrorException as e:
-            self.assertIn('Object of type MyClass is not JSON serializable', str(e))
+            self.assertIn('not JSON serializable', str(e))
         else:
             self.fail('Expected an exception')
 
@@ -56,12 +56,12 @@ class ResultSerialisationTests(unittest.TestCase):
         try:
             self.test_harness.run_pipeline(pipeline)
         except Exception as e:
-            self.assertIn('Object of type MyClass is not JSON serializable', str(e))
+            self.assertIn('not JSON serializable', str(e))
         else:
             self.fail('Expected an exception')
 
     def test_sending_data_as_python_pickle_when_not_json_serialisable(self):
-        pipeline = tasks.send(return_my_class_instance_pipeline, MyClass('inner_inner_val'), 'application/python-pickle')
+        pipeline = tasks.send(return_my_class_instance_pipeline, MyClass('inner_inner_val'), 'application/python-pickle').set(content_type='application/python-pickle')
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result.my_field.my_field, 'inner_inner_val')
 

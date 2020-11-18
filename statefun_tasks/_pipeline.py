@@ -3,6 +3,7 @@ from ._serialisation import deserialise, deserialise_result, serialise, try_seri
 from ._types import _TaskEntry, _GroupEntry, _GroupResult
 from ._context import _TaskContext
 from .messages_pb2 import TaskRequest, TaskResult, TaskException
+from functools import partial
 
 from datetime import timedelta
 from typing import Union, Iterable
@@ -341,14 +342,16 @@ class PipelineBuilder():
             task = self._pipeline[0]
             task_id, task_type, args, kwargs = task.to_tuple()
             task_data = (args, kwargs)
+            serialiser = partial(serialise, data=task_data, content_type=task.get_parameter('content_type'))
         else:
             task_id = str(uuid4())
             task_data = ((self._pipeline,), {})
             task_type = '__builtins.run_pipeline'
+            serialiser = partial(try_serialise_json_then_pickle, data=task_data)
 
         task_request = TaskRequest(id=task_id, type=task_type)
-        try_serialise_json_then_pickle(task_request, task_data)
-
+        serialiser(task_request)
+        
         return task_request
 
     def finally_do(self, finally_action, *args, **kwargs):
