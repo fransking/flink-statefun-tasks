@@ -1,17 +1,16 @@
 from ._serialisation import deserialise, serialise
 from ._utils import _gen_id, _task_type_for, _to_args_and_kwargs, _is_tuple
-from ._types import _GroupEntry, TaskRetryPolicy
+from ._types import TaskRetryPolicy
 from ._pipeline import _Pipeline, PipelineBuilder
 from ._context import _TaskContext
 from ._builtins import run_pipeline
 from .messages_pb2 import TaskRequest, TaskResult, TaskException
 
 from statefun.request_reply import BatchContext
-from typing import Union, Iterable
+from typing import Union
 import logging
 import traceback as tb
 import inspect
-import ast
 import asyncio
 
 _log = logging.getLogger('FlinkTasks')
@@ -212,10 +211,10 @@ class _FlinkTask(object):
         self._content_type = content_type
         self._retry_policy = retry_policy
 
-        self._args = inspect.getfullargspec(fun).args
+        full_arg_spec = inspect.getfullargspec(fun)
+        self._args = full_arg_spec.args
         self._num_args = len(self._args)
-        self._explicit_return = any(
-            isinstance(node, ast.Return) for node in ast.walk(ast.parse(inspect.getsource(fun))))
+        self._accepts_varargs = full_arg_spec.varargs is not None
         self.is_async = inspect.iscoroutinefunction(fun)
 
     def run(self, context: _TaskContext, task_request: TaskRequest):
@@ -310,7 +309,7 @@ class _FlinkTask(object):
             del kwargs[arg]
 
         # pass through any extra args we might have
-        if len(args) > self._num_args:
+        if len(args) > self._num_args and not self._accepts_varargs:
             task_args = args[0: self._num_args]
             pass_through_args = args[len(task_args):]
         else:
@@ -321,13 +320,7 @@ class _FlinkTask(object):
 
     def _add_passthrough_args(self, result, pass_through_args):
         if len(pass_through_args) > 0:
-
-            if self._explicit_return:
-                return_value = result, *pass_through_args
-            else:
-                return_value = *pass_through_args,
-
-            return return_value
+            return (result, *pass_through_args)
         else:
             return result
 

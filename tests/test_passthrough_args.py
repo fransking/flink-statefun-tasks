@@ -21,8 +21,20 @@ def _truncate(greeting, max_length):
 
 
 @tasks.bind()
-def _combine_greeting_and_last_name(truncated_greeting, original_length):
-    return f'{truncated_greeting} (last name {original_length})'
+def _combine_greeting_and_last_name(truncated_greeting, last_name):
+    return f'{truncated_greeting} (last name {last_name})'
+
+
+@tasks.bind()
+def workflow_with_no_return_value_from_passthrough_func():
+    return _say_hello_and_return_last_name.send('Jane', 'Doe') \
+        .continue_with(_save_audit)
+
+
+@tasks.bind()
+def _save_audit(*args):
+    # simulating a function with a side effect which does not need to return a value
+    return args
 
 
 class PassthroughArgsTests(unittest.TestCase):
@@ -34,5 +46,12 @@ class PassthroughArgsTests(unittest.TestCase):
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, 'Hello Jane... (last name Doe)')
 
+    def test_passing_args_through_function_accepting_var_args(self):
+        pipeline = tasks.send(workflow_with_no_return_value_from_passthrough_func)
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, ['Hello Jane Doe', 'Doe'])
+
+
 if __name__ == '__main__':
     unittest.main()
+
