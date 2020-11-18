@@ -2,7 +2,7 @@ import asyncio
 from typing import Union, Optional, List, NamedTuple
 
 from google.protobuf.any_pb2 import Any
-from statefun import StatefulFunctions, RequestReplyHandler, AsyncRequestReplyHandler
+from statefun import StatefulFunctions, AsyncRequestReplyHandler
 from statefun.kafka_egress_pb2 import KafkaProducerRecord
 from statefun.request_reply_pb2 import FromFunction, ToFunction, Address
 
@@ -19,16 +19,13 @@ functions = StatefulFunctions()
 
 
 @functions.bind('test/worker')
-def worker(context, task_data: Union[TaskRequest, TaskResult, TaskException]):
-    tasks.run(context, task_data)
+async def worker(context, task_data: Union[TaskRequest, TaskResult, TaskException]):
+    if tasks.is_async_required(task_data):
+        await tasks.run_async(context, task_data)
+    else:
+        tasks.run(context, task_data)
 
 
-@functions.bind('test/async_worker')
-async def async_worker(context, task_data: Union[TaskRequest, TaskResult, TaskException]):
-    await tasks.run_async(context, task_data)
-
-
-handler = RequestReplyHandler(functions)
 async_handler = AsyncRequestReplyHandler(functions)
 
 
@@ -112,24 +109,18 @@ class TestHarness:
         invocation.argument.Pack(message_arg)
 
         self._copy_state_to_invocation(target.namespace, target.type, target.id, to_function)
-        if target.type == 'worker':
-            result_bytes = handler(to_function.SerializeToString())
-        elif target.type == 'async_worker':
-            result_bytes = asyncio.get_event_loop().run_until_complete(
-                async_handler(to_function.SerializeToString()))
-        else:
-            raise ValueError(f'Unknown worker type: {target.type}')
+        result_bytes = asyncio.get_event_loop().run_until_complete(async_handler(to_function.SerializeToString()))
 
         result = self._process_result(to_function, result_bytes)
         if result.egress_message is not None:
             return result.egress_message
         else:
             outgoing_messages = result.outgoing_messages
-            if len(outgoing_messages) != 1:
-                raise ValueError('Expected exactly one outgoing message if there is no egress')
-            outgoing_message = outgoing_messages[0]
-            message_arg = unpack_any(outgoing_message.argument, [TaskRequest, TaskResult, TaskException])
-            return self._run_flink_loop(message_arg=message_arg, target=outgoing_message.target, caller=target)
+            for outgoing_message in outgoing_messages:
+                message_arg = unpack_any(outgoing_message.argument, [TaskRequest, TaskResult, TaskException])
+                egress_value = self._run_flink_loop(message_arg=message_arg, target=outgoing_message.target, caller=target)
+                if egress_value:
+                    return egress_value
 
     def _process_result(self, to_function: ToFunction, result_bytes) -> _InvocationResult:
         result = self._parse_result_bytes(result_bytes)
