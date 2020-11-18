@@ -40,3 +40,6 @@ class RetryTests(unittest.TestCase):
             self.assertEqual(e.task_error.message, 'Failed after 4 iterations')
         else:
             self.fail('Expected an exception')
+
+if __name__ == '__main__':
+    unittest.main()

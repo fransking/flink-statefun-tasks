@@ -33,3 +33,6 @@ class PassthroughArgsTests(unittest.TestCase):
         pipeline = tasks.send(passthrough_workflow_specifying_kwarg)
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, 'Hello Jane... (last name Doe)')
+
+if __name__ == '__main__':
+    unittest.main()

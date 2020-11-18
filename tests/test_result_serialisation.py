@@ -64,3 +64,6 @@ class ResultSerialisationTests(unittest.TestCase):
         pipeline = tasks.send(return_my_class_instance_pipeline, MyClass('inner_inner_val'), 'application/python-pickle')
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result.my_field.my_field, 'inner_inner_val')
+
+if __name__ == '__main__':
+    unittest.main()
