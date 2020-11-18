@@ -1,11 +1,7 @@
 import asyncio
-import logging
 import unittest
+
 from tests.utils import TestHarness, tasks
-
-logging.basicConfig(level=logging.INFO)
-
-finally_flag = False
 
 
 @tasks.bind()
@@ -23,13 +19,13 @@ def _say_hello(first_name, last_name):
     return f'Hello {first_name} {last_name}'
 
 
-@tasks.bind(worker_name='async_worker')
+@tasks.bind()
 async def _say_goodbye(greeting, goodbye_message):
     await asyncio.sleep(0)
     return f'{greeting}.  So now I will say {goodbye_message}'
 
 
-class PipelineTests(unittest.TestCase):
+class SimplePipelineTests(unittest.TestCase):
     def setUp(self) -> None:
         self.test_harness = TestHarness()
 
