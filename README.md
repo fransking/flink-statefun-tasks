@@ -101,15 +101,16 @@ Some issues with this:
 3. As the workflow becomes more complex load_timeseries() morphs into an orchestration function:
 
 ```
-@functions.bind('examples/average_std_dev_workflow')
+@functions.bind('examples/load_timeseries')
 def load_timeseries(context, input):
 
     if isinstance(input, str):
-        prices = _load_prices(isinstance)
-        context.send('examples/compute_std_dev', prices)
-    elif isinstance(input, list):
-        context.send('examples/compute_avg', prices)
-    elif isinstance(input, double):
+        prices = _load_prices(stock)
+        context.send('examples/compute_std_dev', input)
+    # elif ... next stage
+    # elif ... next stage
+    # elif ... next stage etc
+    elif isinstance(input, double):  # finally reply to original caller
         context.pack_and_send_egress('topic', input)
 ```
 

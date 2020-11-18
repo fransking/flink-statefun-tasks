@@ -16,8 +16,8 @@ import asyncio
 _log = logging.getLogger('FlinkTasks')
 
 
-def _to_task_exception(task_request, ex, retry=False):
-    return TaskException(
+def _create_task_exception(task_request, ex, retry=False):
+    task_exception = TaskException(
         id=_gen_id(),
         correlation_id=task_request.id,
         type=f'{task_request.type}.error',
@@ -25,6 +25,9 @@ def _to_task_exception(task_request, ex, retry=False):
         exception_message=str(ex),
         stacktrace=tb.format_exc(),
         retry=retry)
+    
+    task_exception.request_state.CopyFrom(task_request.request_state)
+    return task_exception
 
 
 class FlinkTasks(object):
@@ -162,13 +165,18 @@ class FlinkTasks(object):
         pipeline.resume(context, task_result_or_exception)
 
     def _emit_result(self, context, task_request, task_result):
-        # then either we need to reply to a caller
+        # either send a message to egress if reply_topic was specified
+        if task_request.HasField('reply_topic'):
+            context.pack_and_send_egress(topic=task_request.reply_topic, value=task_result)
+
+        # or call back to a particular flink function if reply_address was specified
+        elif task_request.HasField('reply_address'):
+            address, identifer = context.to_address_and_id(task_request.reply_address)
+            context.pack_and_send(address, identifer, task_result)
+
+        # or call back to our caller (if there is one)
         if context.get_caller_id() is not None:
             context.pack_and_reply(task_result)
-
-        # or we need to send some egress
-        elif task_request.reply_topic is not None and task_request.reply_topic != "":
-            context.pack_and_send_egress(topic=task_request.reply_topic, value=task_result)
 
     def _finalise_task_result(self, context, task_request, task_result):
 
@@ -190,7 +198,7 @@ class FlinkTasks(object):
             self._emit_result(context, task_request, return_value)
 
     def _fail(self, context, task_request, ex):
-        task_exception = _to_task_exception(task_request, ex, retry=False)
+        task_exception = _create_task_exception(task_request, ex, retry=False)
         context.pack_and_save('task_exception', task_exception)
 
         # emit the error - either by replying to caller or sending some egress
@@ -270,6 +278,7 @@ class _FlinkTask(object):
             correlation_id=task_request.id,
             type=f'{task_request.type}.result')
 
+        task_result.request_state.CopyFrom(task_request.request_state)
         serialise(task_result, fn_result, content_type=self._content_type)
 
         return pipeline, task_result, extra_args
@@ -280,10 +289,10 @@ class _FlinkTask(object):
         if self._retry_policy is not None:
             retry = any([isinstance(ex, ex_type) for ex_type in self._retry_policy.retry_for])
 
-        task_exception = _to_task_exception(task_request, ex, retry=retry)
+        task_exception = _create_task_exception(task_request, ex, retry=retry)
 
         if retry:
-            task_exception.original_request.CopyFrom(task_request)
+            task_exception.retry_request.CopyFrom(task_request)
 
         return task_exception
 

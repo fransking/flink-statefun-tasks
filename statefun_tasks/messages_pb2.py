@@ -12,6 +12,7 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
+from google.protobuf import any_pb2 as google_dot_protobuf_dot_any__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -19,10 +20,56 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='statefun_tasks',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x0emessages.proto\x12\x0estatefun_tasks\"`\n\x0bTaskRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x13\n\x0breply_topic\x18\x03 \x01(\t\x12\x14\n\x0c\x63ontent_type\x18\x04 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x05 \x01(\x0c\"b\n\nTaskResult\x12\n\n\x02id\x18\x01 \x01(\t\x12\x16\n\x0e\x63orrelation_id\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12\x14\n\x0c\x63ontent_type\x18\x04 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x05 \x01(\x0c\"\xce\x01\n\rTaskException\x12\n\n\x02id\x18\x01 \x01(\t\x12\x16\n\x0e\x63orrelation_id\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12\x16\n\x0e\x65xception_type\x18\x04 \x01(\t\x12\x19\n\x11\x65xception_message\x18\x05 \x01(\t\x12\x12\n\nstacktrace\x18\x06 \x01(\t\x12\r\n\x05retry\x18\x07 \x01(\x08\x12\x35\n\x10original_request\x18\x08 \x01(\x0b\x32\x1b.statefun_tasks.TaskRequest\"=\n\tTaskState\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x14\n\x0c\x63ontent_type\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\x0c\x62\x06proto3')
+  serialized_pb=_b('\n\x0emessages.proto\x12\x0estatefun_tasks\x1a\x19google/protobuf/any.proto\"6\n\x07\x41\x64\x64ress\x12\x11\n\tnamespace\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\n\n\x02id\x18\x03 \x01(\t\"\xca\x01\n\x0bTaskRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x15\n\x0breply_topic\x18\x03 \x01(\tH\x00\x12\x30\n\rreply_address\x18\x04 \x01(\x0b\x32\x17.statefun_tasks.AddressH\x00\x12+\n\rrequest_state\x18\x05 \x01(\x0b\x32\x14.google.protobuf.Any\x12\x14\n\x0c\x63ontent_type\x18\x06 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x07 \x01(\x0c\x42\x07\n\x05reply\"\x8f\x01\n\nTaskResult\x12\n\n\x02id\x18\x01 \x01(\t\x12\x16\n\x0e\x63orrelation_id\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12\x14\n\x0c\x63ontent_type\x18\x04 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x05 \x01(\x0c\x12+\n\rrequest_state\x18\x06 \x01(\x0b\x32\x14.google.protobuf.Any\"\xf8\x01\n\rTaskException\x12\n\n\x02id\x18\x01 \x01(\t\x12\x16\n\x0e\x63orrelation_id\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12\x16\n\x0e\x65xception_type\x18\x04 \x01(\t\x12\x19\n\x11\x65xception_message\x18\x05 \x01(\t\x12\x12\n\nstacktrace\x18\x06 \x01(\t\x12\r\n\x05retry\x18\x07 \x01(\x08\x12\x32\n\rretry_request\x18\x08 \x01(\x0b\x32\x1b.statefun_tasks.TaskRequest\x12+\n\rrequest_state\x18\t \x01(\x0b\x32\x14.google.protobuf.Any\"=\n\tTaskState\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x14\n\x0c\x63ontent_type\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\x0c\x62\x06proto3')
+  ,
+  dependencies=[google_dot_protobuf_dot_any__pb2.DESCRIPTOR,])
+
+
+
+
+_ADDRESS = _descriptor.Descriptor(
+  name='Address',
+  full_name='statefun_tasks.Address',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='namespace', full_name='statefun_tasks.Address.namespace', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='type', full_name='statefun_tasks.Address.type', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='id', full_name='statefun_tasks.Address.id', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=61,
+  serialized_end=115,
 )
-
-
 
 
 _TASKREQUEST = _descriptor.Descriptor(
@@ -54,15 +101,29 @@ _TASKREQUEST = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='content_type', full_name='statefun_tasks.TaskRequest.content_type', index=3,
-      number=4, type=9, cpp_type=9, label=1,
+      name='reply_address', full_name='statefun_tasks.TaskRequest.reply_address', index=3,
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='request_state', full_name='statefun_tasks.TaskRequest.request_state', index=4,
+      number=5, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='content_type', full_name='statefun_tasks.TaskRequest.content_type', index=5,
+      number=6, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='data', full_name='statefun_tasks.TaskRequest.data', index=4,
-      number=5, type=12, cpp_type=9, label=1,
+      name='data', full_name='statefun_tasks.TaskRequest.data', index=6,
+      number=7, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -78,9 +139,12 @@ _TASKREQUEST = _descriptor.Descriptor(
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
+    _descriptor.OneofDescriptor(
+      name='reply', full_name='statefun_tasks.TaskRequest.reply',
+      index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=34,
-  serialized_end=130,
+  serialized_start=118,
+  serialized_end=320,
 )
 
 
@@ -126,6 +190,13 @@ _TASKRESULT = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='request_state', full_name='statefun_tasks.TaskResult.request_state', index=5,
+      number=6, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -138,8 +209,8 @@ _TASKRESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=132,
-  serialized_end=230,
+  serialized_start=323,
+  serialized_end=466,
 )
 
 
@@ -200,8 +271,15 @@ _TASKEXCEPTION = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='original_request', full_name='statefun_tasks.TaskException.original_request', index=7,
+      name='retry_request', full_name='statefun_tasks.TaskException.retry_request', index=7,
       number=8, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='request_state', full_name='statefun_tasks.TaskException.request_state', index=8,
+      number=9, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -218,8 +296,8 @@ _TASKEXCEPTION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=233,
-  serialized_end=439,
+  serialized_start=469,
+  serialized_end=717,
 )
 
 
@@ -263,16 +341,34 @@ _TASKSTATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=441,
-  serialized_end=502,
+  serialized_start=719,
+  serialized_end=780,
 )
 
-_TASKEXCEPTION.fields_by_name['original_request'].message_type = _TASKREQUEST
+_TASKREQUEST.fields_by_name['reply_address'].message_type = _ADDRESS
+_TASKREQUEST.fields_by_name['request_state'].message_type = google_dot_protobuf_dot_any__pb2._ANY
+_TASKREQUEST.oneofs_by_name['reply'].fields.append(
+  _TASKREQUEST.fields_by_name['reply_topic'])
+_TASKREQUEST.fields_by_name['reply_topic'].containing_oneof = _TASKREQUEST.oneofs_by_name['reply']
+_TASKREQUEST.oneofs_by_name['reply'].fields.append(
+  _TASKREQUEST.fields_by_name['reply_address'])
+_TASKREQUEST.fields_by_name['reply_address'].containing_oneof = _TASKREQUEST.oneofs_by_name['reply']
+_TASKRESULT.fields_by_name['request_state'].message_type = google_dot_protobuf_dot_any__pb2._ANY
+_TASKEXCEPTION.fields_by_name['retry_request'].message_type = _TASKREQUEST
+_TASKEXCEPTION.fields_by_name['request_state'].message_type = google_dot_protobuf_dot_any__pb2._ANY
+DESCRIPTOR.message_types_by_name['Address'] = _ADDRESS
 DESCRIPTOR.message_types_by_name['TaskRequest'] = _TASKREQUEST
 DESCRIPTOR.message_types_by_name['TaskResult'] = _TASKRESULT
 DESCRIPTOR.message_types_by_name['TaskException'] = _TASKEXCEPTION
 DESCRIPTOR.message_types_by_name['TaskState'] = _TASKSTATE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
+
+Address = _reflection.GeneratedProtocolMessageType('Address', (_message.Message,), dict(
+  DESCRIPTOR = _ADDRESS,
+  __module__ = 'messages_pb2'
+  # @@protoc_insertion_point(class_scope:statefun_tasks.Address)
+  ))
+_sym_db.RegisterMessage(Address)
 
 TaskRequest = _reflection.GeneratedProtocolMessageType('TaskRequest', (_message.Message,), dict(
   DESCRIPTOR = _TASKREQUEST,

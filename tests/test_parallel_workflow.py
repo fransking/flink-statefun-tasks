@@ -54,3 +54,6 @@ class ParallelWorkflowTests(unittest.TestCase):
         self.assertRaises(TaskErrorException, self.test_harness.run_pipeline, pipeline)
 
         self.assertEqual(join_results_called, False)
+
+if __name__ == '__main__':
+    unittest.main()
