@@ -311,7 +311,7 @@ class _FlinkTask(object):
 
     def _add_passthrough_args(self, result, pass_through_args):
         if len(pass_through_args) > 0:
-            return result, *pass_through_args
+            return (result, *pass_through_args)
         else:
             return result
 
