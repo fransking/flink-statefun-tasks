@@ -175,7 +175,7 @@ class FlinkTasks(object):
             context.pack_and_send(address, identifer, task_result)
 
         # or call back to our caller (if there is one)
-        if context.get_caller_id() is not None:
+        elif context.get_caller_id() is not None:
             context.pack_and_reply(task_result)
 
     def _finalise_task_result(self, context, task_request, task_result):
