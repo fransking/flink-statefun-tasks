@@ -25,15 +25,11 @@ class _Pipeline(object):
         context.set_state(state)
 
         # 2. get initial tasks(s) to call - might be single start of chain task or a group of tasks to call in parallel
-        if isinstance(self._pipeline[0], _TaskEntry):
-            tasks = [self._pipeline[0]]
-        elif isinstance(self._pipeline[0], _GroupEntry):
-            tasks = [t[0] for t in self._pipeline[0]]
-        else:
-            raise ValueError(f'Expected either a task or a group as the start of the pipeline')
+        tasks = self._get_initial_tasks(self._pipeline[0])
 
         # 3. call each task
         for task in tasks:
+
             task_id, task_type, args, kwargs = task.to_tuple()
             # merge args and extra_args
             args = args + extra_args
@@ -45,6 +41,18 @@ class _Pipeline(object):
 
             destination = self._get_destination(task)
             context.pack_and_send(destination, task_id, request)
+
+    def _get_initial_tasks(self, entry):
+        tasks = []
+        if isinstance(entry, _GroupEntry):
+            for t in entry:
+                tasks.extend(self._get_initial_tasks(t[0]))
+        elif isinstance(entry, _TaskEntry):
+            tasks.append(entry)
+        else:
+            raise ValueError(f'Expected either a task or a group at the start of each pipeline')
+
+        return tasks
 
     def _get_destination(self, task: _TaskEntry):
         # task destination of form 'namespace/worker_name'
@@ -115,10 +123,21 @@ class _Pipeline(object):
         return group_results
 
     def _aggregate_group_results(self, group: _GroupEntry, group_results: dict):
-        aggregated_results = []
-        for pipeline in group:
-            group_result = group_results[pipeline[-1].task_id]
-            aggregated_results.append(deserialise_result(group_result))  # we want the auto unpacked results to avoid a list of single element tuples
+
+        def aggregate_results(grp):
+            aggregated_results = []
+            for pipeline in grp:
+                last_task = pipeline[-1]
+                if isinstance(last_task, _GroupEntry):
+                    results = aggregate_results(last_task)
+                    aggregated_results.append(results)
+                else:
+                    group_result = group_results[pipeline[-1].task_id]
+                    aggregated_results.append(deserialise_result(group_result))
+            
+            return aggregated_results
+
+        aggregated_results = aggregate_results(group)
 
         # ensure we send a tuple
         aggregated_results = (aggregated_results,)
@@ -187,7 +206,7 @@ class _Pipeline(object):
                 # record the result of the task prior to the finally task so we can return it once the finally task completes
                 context.pack_and_update_state('result_before_finally', task_result_or_exception)
         elif isinstance(next_step, _GroupEntry):
-            remainder = [t[0] for t in next_step]
+            remainder = self._get_initial_tasks(next_step)
         else:
             remainder = []
 
@@ -211,7 +230,7 @@ class _Pipeline(object):
 
                 request = TaskRequest(id=task_id, type=task_type)
 
-                # honour the task_result content_type - pickled data might not be json serialisable
+                # honour the task_result content_type - pickled or protobuf data might not be json serialisable
                 serialise(request, task_data, content_type=content_type)
 
                 destination = self._get_destination(task)
