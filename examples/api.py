@@ -1,4 +1,4 @@
-from statefun_tasks import FlinkTasks, TaskRequest, TaskResult, TaskException, in_parallel, TaskRetryPolicy
+from statefun_tasks import FlinkTasks, TaskRequest, TaskResult, TaskException, in_parallel, RetryPolicy
 from datetime import timedelta
 import asyncio
 
@@ -31,7 +31,7 @@ def error_workflow():
     return _raise_exception.send().continue_with(_wont_be_called)
 
 
-@tasks.bind(retry_policy=TaskRetryPolicy(delay=timedelta(seconds=5)))
+@tasks.bind(retry_policy=RetryPolicy(delay=timedelta(seconds=5)))
 def _raise_exception(first_name, last_name):
     raise ValueError('Workflow will terminate here')
 

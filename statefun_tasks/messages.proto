@@ -4,10 +4,54 @@ import "google/protobuf/any.proto";
 
 package statefun_tasks;
 
+message NoneValue {
+}
+
 message Address {
     string namespace = 1;
     string type = 2;
     string id = 3;
+}
+
+message JsonLikeObject {
+    map <string, google.protobuf.Any> value = 1;
+}
+
+message JsonLikeArray {
+    repeated google.protobuf.Any value = 1;
+}
+
+message TaskEntry {
+    string task_id = 1;
+    string task_type = 2;
+    JsonLikeArray args = 3;
+    JsonLikeObject kwargs = 4;
+    bool complete = 5;
+    JsonLikeObject parameters = 6;
+    bool is_finally = 7;
+}
+
+message GroupEntry {
+    string group_id = 1;
+    repeated Pipeline group = 2;
+}
+
+message PipelineEntry {
+    oneof entry {
+        TaskEntry task_entry = 1;
+        GroupEntry group_entry = 2;
+    }
+}
+
+message Pipeline {
+    repeated PipelineEntry entries = 1;
+}
+
+message TaskRetryPolicy {
+    repeated string retry_for = 1;
+    int32 max_retries = 2;
+    float delay_ms = 3;
+    bool exponential_back_off = 4;
 }
 
 message TaskRequest {
@@ -18,17 +62,16 @@ message TaskRequest {
         Address reply_address = 4;
     }
     google.protobuf.Any request_state = 5;
-    string content_type = 6;
-    bytes data = 7;
+    JsonLikeArray args = 6;
+    JsonLikeObject kwargs = 7;
 }
 
 message TaskResult {
     string id = 1;
     string correlation_id = 2;
     string type = 3;
-    string content_type = 4;
-    bytes data = 5;
-    google.protobuf.Any request_state = 6;
+    JsonLikeArray result = 4;
+    google.protobuf.Any request_state = 5;
 }
 
 message TaskException {
@@ -44,7 +87,9 @@ message TaskException {
 }
 
 message TaskState {
-    string type = 1;
-    string content_type = 2;
-    bytes data = 3;
+    JsonLikeObject data = 1;
+}
+
+message GroupResults {
+    map<string, TaskResult> results = 1;
 }

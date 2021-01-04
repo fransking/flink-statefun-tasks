@@ -37,6 +37,13 @@ def _save_audit(*args):
     return args
 
 
+@tasks.bind()
+def _no_explicit_return(*args):
+    # simulating a function with a side effect which doed not have an explicit return (implicit None)
+    pass
+
+
+
 class PassthroughArgsTests(unittest.TestCase):
     def setUp(self) -> None:
         self.test_harness = TestHarness()
