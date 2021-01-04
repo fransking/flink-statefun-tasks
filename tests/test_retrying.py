@@ -1,6 +1,6 @@
 import unittest
 
-from statefun_tasks import TaskRetryPolicy
+from statefun_tasks import RetryPolicy
 from tests.utils import TestHarness, tasks, TaskErrorException
 
 
@@ -12,7 +12,7 @@ def fail_workflow(fail_times):
     return tasks.send(_fail, fail_times)
 
 
-@tasks.bind(retry_policy=TaskRetryPolicy(retry_for=[Exception], max_retries=3))
+@tasks.bind(retry_policy=RetryPolicy(retry_for=[Exception], max_retries=3))
 def _fail(count):
     global _fail_run_count
     if _fail_run_count < count:

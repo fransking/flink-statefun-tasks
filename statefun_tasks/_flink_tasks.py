@@ -1,6 +1,6 @@
-from ._serialisation import deserialise, serialise
-from ._utils import _gen_id, _task_type_for, _to_args_and_kwargs, _is_tuple
-from ._types import TaskRetryPolicy
+from ._serialisation import DefaultSerialiser
+from ._utils import _gen_id, _task_type_for, _is_tuple, _type_name, _protobuf_args
+from ._types import RetryPolicy
 from ._pipeline import _Pipeline, PipelineBuilder
 from ._context import _TaskContext
 from ._builtins import run_pipeline
@@ -8,6 +8,7 @@ from .messages_pb2 import TaskRequest, TaskResult, TaskException
 
 from statefun.request_reply import BatchContext
 from typing import Union
+from functools import partial
 import logging
 import traceback as tb
 import inspect
@@ -21,7 +22,7 @@ def _create_task_exception(task_request, ex, retry=False):
         id=_gen_id(),
         correlation_id=task_request.id,
         type=f'{task_request.type}.error',
-        exception_type=type(ex).__name__,
+        exception_type=_type_name(ex),
         exception_message=str(ex),
         stacktrace=tb.format_exc(),
         retry=retry)
@@ -31,33 +32,33 @@ def _create_task_exception(task_request, ex, retry=False):
 
 
 class FlinkTasks(object):
-    def __init__(self, default_namespace: str, default_worker_name: str, egress_type_name: str,
-                 default_content_type='application/json'):
+    def __init__(self, default_namespace: str, default_worker_name: str, egress_type_name: str, serialiser=None):
         self._default_namespace = default_namespace
         self._default_worker_name = default_worker_name
         self._egress_type_name = egress_type_name
-        self._default_content_type = default_content_type
+        self._serialiser = serialiser if serialiser is not None else DefaultSerialiser()
 
-        self._bindings = {
-            '__builtins.run_pipeline': _FlinkTask(run_pipeline, content_type='application/json')
-        }
+        self._bindings = {}
+
+        self.register_builtin('run_pipeline', partial(run_pipeline, serialiser=self._serialiser))
+
+    def register_builtin(self, type_name, fun, **params):
+        self._bindings[f'__builtins.{type_name}'] = _FlinkTask(fun, self._serialiser, **params)
 
     def register(self, fun, **params):
         if fun is None:
             raise ValueError("function instance must be provided")
 
         fun.type_name = _task_type_for(fun)
-        self._bindings[fun.type_name] = _FlinkTask(fun, **params)
+        self._bindings[fun.type_name] = _FlinkTask(fun, self._serialiser, **params)
 
-    def bind(self, content_type: str = None, namespace: str = None, worker_name: str = None,
-             retry_policy: TaskRetryPolicy = None):
+    def bind(self, namespace: str = None, worker_name: str = None, retry_policy: RetryPolicy = None):
         def wrapper(function):
             def defaults():
                 return {
-                    'content_type': self._default_content_type if content_type is None else content_type,
                     'namespace': self._default_namespace if namespace is None else namespace,
                     'worker_name': self._default_worker_name if worker_name is None else worker_name,
-                    'retry_policy': retry_policy
+                    'retry_policy': None if retry_policy is None else retry_policy.to_proto()
                 }
 
             def send(*args, **kwargs):
@@ -84,7 +85,7 @@ class FlinkTasks(object):
             return False
 
     def run(self, context: BatchContext, task_input: Union[TaskRequest, TaskResult, TaskException]):
-        with _TaskContext(context, task_input.type, self._egress_type_name) as task_context:
+        with _TaskContext(context, task_input.type, self._egress_type_name, self._serialiser) as task_context:
             try:
                 # either we resume a pipeline (received TaskResult or TaskException) or we invoke a task (received TaskRequest)
                 task_request_result = self._begin_operation(task_context, task_input)
@@ -98,7 +99,7 @@ class FlinkTasks(object):
                 raise
 
     async def run_async(self, context: BatchContext, task_input: Union[TaskRequest, TaskResult, TaskException]):
-        with _TaskContext(context, task_input.type, self._egress_type_name) as task_context:
+        with _TaskContext(context, task_input.type, self._egress_type_name, self._serialiser) as task_context:
             try:
                 # either we resume a pipeline (received TaskResult or TaskException) or we invoke a task (received TaskRequest)
                 task_request_result = self._begin_operation(task_context, task_input)
@@ -138,14 +139,14 @@ class FlinkTasks(object):
             flink_task = self.get_task(task_request.type)
             fn = flink_task.run_async if flink_task.is_async else flink_task.run
 
-            return task_request, fn(task_context, task_request)
+            return task_request, fn(task_request)
 
     def _get_pipeline(self, context):
         state = context.get_state()
-        pipeline = state.get('pipeline', None)
+        pipeline_protos = state.get('pipeline', None)
 
-        if pipeline is not None:
-            return _Pipeline(pipeline=pipeline)
+        if pipeline_protos is not None:
+            return _Pipeline.from_proto(pipeline_protos, self._serialiser)
         else:
             raise ValueError(f'Missing pipleline for task_id - {context.get_task_id()}')
 
@@ -206,9 +207,9 @@ class FlinkTasks(object):
 
 
 class _FlinkTask(object):
-    def __init__(self, fun, content_type, retry_policy=None, **kwargs):
+    def __init__(self, fun, serialiser, retry_policy=None, **kwargs):
         self._fun = fun
-        self._content_type = content_type
+        self._serialiser = serialiser
         self._retry_policy = retry_policy
 
         full_arg_spec = inspect.getfullargspec(fun)
@@ -217,7 +218,12 @@ class _FlinkTask(object):
         self._accepts_varargs = full_arg_spec.varargs is not None
         self.is_async = inspect.iscoroutinefunction(fun)
 
-    def run(self, context: _TaskContext, task_request: TaskRequest):
+        # register any annotated proto types
+        annotated_proto_types = _protobuf_args(full_arg_spec.annotations)
+        self._serialiser.register_proto_types(annotated_proto_types)
+
+
+    def run(self, task_request: TaskRequest):
         task_result, task_exception, pipeline, extra_args = None, None, None, None
 
         try:
@@ -236,7 +242,7 @@ class _FlinkTask(object):
 
         return task_result, task_exception, pipeline, extra_args
 
-    async def run_async(self, context: _TaskContext, task_request: TaskRequest):
+    async def run_async(self, task_request: TaskRequest):
         task_result, task_exception, pipeline, extra_args = None, None, None, None
 
         try:
@@ -271,7 +277,8 @@ class _FlinkTask(object):
             builder = fn_result[0]
             pipeline = builder.to_pipeline()
             extra_args = fn_result[1:] if _is_tuple(fn_result) and len(fn_result) > 1 else ()
-            fn_result = (builder.to_json_dict(verbose=True), *extra_args)
+            fn_result = (builder.to_proto(self._serialiser), *extra_args)
+
 
         task_result = TaskResult(
             id=_gen_id(),
@@ -279,7 +286,7 @@ class _FlinkTask(object):
             type=f'{task_request.type}.result')
 
         task_result.request_state.CopyFrom(task_request.request_state)
-        serialise(task_result, fn_result, content_type=self._content_type)
+        self._serialiser.serialise_result(task_result, fn_result)
 
         return pipeline, task_result, extra_args
 
@@ -287,7 +294,8 @@ class _FlinkTask(object):
         retry = False
 
         if self._retry_policy is not None:
-            retry = any([isinstance(ex, ex_type) for ex_type in self._retry_policy.retry_for])
+            ex_class_hierarchy = [_type_name(ex) for ex in inspect.getmro(ex.__class__)]
+            retry = any([ex_type for ex_type in self._retry_policy.retry_for if ex_type in ex_class_hierarchy])
 
         task_exception = _create_task_exception(task_request, ex, retry=retry)
 
@@ -297,7 +305,7 @@ class _FlinkTask(object):
         return task_exception
 
     def _to_task_args_and_kwargs(self, task_request):
-        args, kwargs = _to_args_and_kwargs(deserialise(task_request))
+        args, kwargs = self._serialiser.deserialise_request(task_request)
 
         # listify
         args = [arg for arg in args]
