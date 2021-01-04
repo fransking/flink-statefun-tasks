@@ -1,5 +1,5 @@
 from ._serialisation import DefaultSerialiser
-from ._utils import _gen_id, _task_type_for, _is_tuple, _type_name, _protobuf_args
+from ._utils import _gen_id, _task_type_for, _is_tuple, _type_name, _annotated_protos_for
 from ._types import RetryPolicy
 from ._pipeline import _Pipeline, PipelineBuilder
 from ._context import _TaskContext
@@ -218,9 +218,10 @@ class _FlinkTask(object):
         self._accepts_varargs = full_arg_spec.varargs is not None
         self.is_async = inspect.iscoroutinefunction(fun)
 
-        # register any annotated proto types
-        annotated_proto_types = _protobuf_args(full_arg_spec.annotations)
-        self._serialiser.register_proto_types(annotated_proto_types)
+        # register any annotated proto types for fn
+        proto_types = _annotated_protos_for(fun)
+        self._serialiser.register_proto_types(proto_types)
+
 
 
     def run(self, task_request: TaskRequest):

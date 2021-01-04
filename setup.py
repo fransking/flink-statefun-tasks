@@ -6,8 +6,8 @@ with open("README.md", "r") as fh:
 install_requires = ['apache-flink-statefun>=2.2.0']
 
 setuptools.setup(
-    name="statefun-tasks", # Replace with your own username
-    version="0.5.1",
+    name="statefun-tasks",
+    version="0.6.0",
     author="Frans King",
     author_email="frans.king@sbbsystems.com",
     description="Tasks API for Stateful Functions on Flink",

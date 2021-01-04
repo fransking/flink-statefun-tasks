@@ -1,5 +1,6 @@
 import inspect
 from uuid import uuid4
+from typing import get_type_hints
 from google.protobuf.message import Message
 
 
@@ -37,16 +38,19 @@ def _is_tuple(value):
     return isinstance(value, tuple) and not _is_named_tuple(value)
 
 
-def _protobuf_args(annotations):
+def _annotated_protos_for(fn):
     args = []
 
-    for arg_name, annotation in annotations.items():
-        if inspect.isclass(annotation):
-            args.append(annotation)
-        else:
-            try:
-                args.extend(annotation._args_)
-            except:
-                pass
+    try:
+        for _, hint in get_type_hints(fn).items():
+            if inspect.isclass(hint):
+                args.append(hint)
+            else:
+                try:
+                    args.extend(hint._args_)
+                except:
+                    pass
+    except:
+        args = []
 
     return [arg for arg in args if inspect.isclass(arg) and issubclass(arg, Message)]

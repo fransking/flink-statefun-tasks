@@ -1,6 +1,7 @@
 import unittest
 
-from statefun_tasks.messages_pb2 import Address
+from google.protobuf.any_pb2 import Any
+from tests.test_messages_pb2 import TestProto, TestResultProto, UnknownProto
 from tests.utils import TestHarness, tasks, TaskErrorException
 
 
@@ -14,8 +15,13 @@ def return_my_class_my_field(my_class):
 
 
 @tasks.bind()
-def receive_protobuf(address: Address):
-    return str(type(address))
+def receive_and_reply_protobuf_fully_annotated(test_proto: TestProto) -> TestResultProto:
+    return TestResultProto(value_str=str(type(test_proto)))
+
+
+@tasks.bind()
+def receive_and_reply_protobuf_not_annotated(test_proto):
+    return UnknownProto(value_str=str(type(test_proto)))
 
 
 class RequestSerialisationTests(unittest.TestCase):
@@ -32,10 +38,21 @@ class RequestSerialisationTests(unittest.TestCase):
             self.fail('Expected an exception')
 
 
-    def test_sending_annotated_protobuf_type(self):
-        pipeline = tasks.send(receive_protobuf, Address(namespace='namespace'))
+    def test_sending_protobuf_to_function_with_annotations_uses_exact_protos(self):
+        pipeline = tasks.send(receive_and_reply_protobuf_fully_annotated, TestProto())
         result = self.test_harness.run_pipeline(pipeline)
-        self.assertEqual("<class 'messages_pb2.Address'>", result)
+        self.assertIsInstance(result, TestResultProto)
+        self.assertEqual("<class 'test_messages_pb2.TestProto'>", result.value_str)
+
+    def test_sending_protobuf_to_function_without_annotations_packs_as_any(self):
+        pipeline = tasks.send(receive_and_reply_protobuf_not_annotated, UnknownProto())
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertIsInstance(result, Any)
+
+        unknown = UnknownProto()
+        result.Unpack(unknown)
+        self.assertEqual("<class 'google.protobuf.any_pb2.Any'>", unknown.value_str)
+
 
 if __name__ == '__main__':
     unittest.main()
