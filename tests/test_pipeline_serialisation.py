@@ -21,7 +21,7 @@ class PipelineSerialisationTests(unittest.TestCase):
 
         self.assertEqual(reconsituted_entry.task_id, entry.task_id)
         self.assertEqual(reconsituted_entry.task_type, entry.task_type)
-        self.assertEqual(reconsituted_entry.args, list(entry.args))
+        self.assertEqual(reconsituted_entry.args, tuple(entry.args,))
         self.assertEqual(reconsituted_entry.kwargs, kwargs)
         self.assertEqual(reconsituted_entry.parameters, parameters)
         self.assertEqual(reconsituted_entry.is_finally, True)

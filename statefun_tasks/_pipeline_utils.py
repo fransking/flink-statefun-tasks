@@ -78,14 +78,7 @@ def _get_next_step_in_pipeline(task_id, previous_task_failed: bool, pipeline):
 
 
 def _extend_args(args, task_args):
-    if any(task_args):
-        if _is_tuple(args):
-            args = args + (task_args,)
-        elif isinstance(args, list):
-            args.extend(task_args)
-        else:
-            args = (args) + (task_args,)
-    return args
+    return args + task_args if any(task_args) else args
 
 
 def _save_group_result(group: _GroupEntry, caller_id, state: dict, task_result: TaskResult):

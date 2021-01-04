@@ -39,7 +39,7 @@ def _save_audit(*args):
 
 @tasks.bind()
 def _no_explicit_return(*args):
-    # simulating a function with a side effect which doed not have an explicit return (implicit None)
+    # simulating a function with a side effect which does not have an explicit return (implicit None)
     pass
 
 
@@ -56,7 +56,7 @@ class PassthroughArgsTests(unittest.TestCase):
     def test_passing_args_through_function_accepting_var_args(self):
         pipeline = tasks.send(workflow_with_no_return_value_from_passthrough_func)
         result = self.test_harness.run_pipeline(pipeline)
-        self.assertEqual(result, ['Hello Jane Doe', 'Doe'])
+        self.assertEqual(result, ('Hello Jane Doe', 'Doe'))
 
 
 if __name__ == '__main__':

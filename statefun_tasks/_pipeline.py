@@ -119,7 +119,7 @@ class _Pipeline(object):
                 task_id, task_type, task_args, kwargs = task.to_tuple()
 
                 if isinstance(task_result_or_exception, TaskException):
-                    args = []
+                    args = ()
                 else:
                     args = self._serialiser.deserialise_result(task_result_or_exception)
 

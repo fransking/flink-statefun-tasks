@@ -21,10 +21,14 @@ message ArrayOfAny {
     repeated google.protobuf.Any items = 1;
 }
 
+message TupleOfAny {
+    repeated google.protobuf.Any items = 1;
+}
+
 message TaskEntry {
     string task_id = 1;
     string task_type = 2;
-    ArrayOfAny args = 3;
+    TupleOfAny args = 3;
     MapOfStringToAny kwargs = 4;
     bool complete = 5;
     MapOfStringToAny parameters = 6;
@@ -62,7 +66,7 @@ message TaskRequest {
         Address reply_address = 4;
     }
     google.protobuf.Any request_state = 5;
-    ArrayOfAny args = 6;
+    TupleOfAny args = 6;
     MapOfStringToAny kwargs = 7;
 }
 
@@ -70,7 +74,7 @@ message TaskResult {
     string id = 1;
     string correlation_id = 2;
     string type = 3;
-    ArrayOfAny result = 4;
+    TupleOfAny result = 4;
     google.protobuf.Any request_state = 5;
 }
 

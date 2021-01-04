@@ -278,7 +278,7 @@ class _FlinkTask(object):
             builder = fn_result[0]
             pipeline = builder.to_pipeline()
             extra_args = fn_result[1:] if _is_tuple(fn_result) and len(fn_result) > 1 else ()
-            fn_result = (builder.to_proto(self._serialiser), *extra_args)
+            fn_result = ((builder.to_proto(self._serialiser)), *extra_args)
 
 
         task_result = TaskResult(
