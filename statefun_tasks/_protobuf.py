@@ -1,7 +1,7 @@
 from google.protobuf.wrappers_pb2 import DoubleValue, Int64Value, BoolValue, StringValue, BytesValue
 from google.protobuf.any_pb2 import Any
 from google.protobuf.message import Message
-from .messages_pb2 import JsonLikeObject, JsonLikeArray, TaskEntry, GroupEntry, TaskRetryPolicy, NoneValue, TaskRequest, \
+from .messages_pb2 import MapOfStringToAny, ArrayOfAny, TaskEntry, GroupEntry, TaskRetryPolicy, NoneValue, TaskRequest, \
     TaskResult, TaskException, TaskState, GroupResults, Pipeline, PipelineEntry, Address
 from ._utils import _is_tuple
 from typing import Union
@@ -25,8 +25,8 @@ _KNOWN_PROTO_TYPES = [
     NoneValue,
     
     # flink task types
-    JsonLikeObject,
-    JsonLikeArray,
+    MapOfStringToAny,
+    ArrayOfAny,
     TaskEntry,
     GroupEntry,
     TaskRetryPolicy,
@@ -94,23 +94,23 @@ def _unwrap_any(value, known_proto_types):
     return value
 
 
-def _convert_to_proto(data) -> Union[JsonLikeObject, JsonLikeArray, Message]:
+def _convert_to_proto(data) -> Union[MapOfStringToAny, ArrayOfAny, Message]:
 
     def convert(obj):
         if isinstance(obj, dict):
-            proto = JsonLikeObject()
+            proto = MapOfStringToAny()
 
             for k,v in obj.items():
                 v = _wrap_any(convert(v))
-                proto.value[k].CopyFrom(v)
+                proto.items[k].CopyFrom(v)
 
             return proto
         elif isinstance(obj, list) or _is_tuple(obj):
-            proto = JsonLikeArray()
+            proto = ArrayOfAny()
 
             for v in obj:
                 v = _wrap_any(convert(v))
-                proto.value.append(v)
+                proto.items.append(v)
 
             return proto
         else:
@@ -119,26 +119,26 @@ def _convert_to_proto(data) -> Union[JsonLikeObject, JsonLikeArray, Message]:
     return convert(data)
 
 
-def _convert_from_proto(proto: Union[JsonLikeObject, JsonLikeArray, Message], known_proto_types = []):
+def _convert_from_proto(proto: Union[MapOfStringToAny, ArrayOfAny, Message], known_proto_types = []):
 
     # map of known proto types
     all_known_proto_types = {t.DESCRIPTOR.full_name: t for t in _KNOWN_PROTO_TYPES}
     all_known_proto_types.update({t.DESCRIPTOR.full_name: t for t in known_proto_types})
 
     def convert(obj):
-        if isinstance(obj, JsonLikeObject):
+        if isinstance(obj, MapOfStringToAny):
             output = {}
 
-            for k,v in obj.value.items():
+            for k,v in obj.items.items():
                 v = convert(_unwrap_any(v, all_known_proto_types))
                 output[k] = v
             
             return output
 
-        elif isinstance(obj, JsonLikeArray):
+        elif isinstance(obj, ArrayOfAny):
             output = []
 
-            for v in obj.value:
+            for v in obj.items:
                 v = convert(_unwrap_any(v, all_known_proto_types))
                 output.append(v)
 

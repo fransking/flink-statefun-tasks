@@ -13,21 +13,21 @@ message Address {
     string id = 3;
 }
 
-message JsonLikeObject {
-    map <string, google.protobuf.Any> value = 1;
+message MapOfStringToAny {
+    map <string, google.protobuf.Any> items = 1;
 }
 
-message JsonLikeArray {
-    repeated google.protobuf.Any value = 1;
+message ArrayOfAny {
+    repeated google.protobuf.Any items = 1;
 }
 
 message TaskEntry {
     string task_id = 1;
     string task_type = 2;
-    JsonLikeArray args = 3;
-    JsonLikeObject kwargs = 4;
+    ArrayOfAny args = 3;
+    MapOfStringToAny kwargs = 4;
     bool complete = 5;
-    JsonLikeObject parameters = 6;
+    MapOfStringToAny parameters = 6;
     bool is_finally = 7;
 }
 
@@ -62,15 +62,15 @@ message TaskRequest {
         Address reply_address = 4;
     }
     google.protobuf.Any request_state = 5;
-    JsonLikeArray args = 6;
-    JsonLikeObject kwargs = 7;
+    ArrayOfAny args = 6;
+    MapOfStringToAny kwargs = 7;
 }
 
 message TaskResult {
     string id = 1;
     string correlation_id = 2;
     string type = 3;
-    JsonLikeArray result = 4;
+    ArrayOfAny result = 4;
     google.protobuf.Any request_state = 5;
 }
 
@@ -87,7 +87,7 @@ message TaskException {
 }
 
 message TaskState {
-    JsonLikeObject data = 1;
+    MapOfStringToAny data = 1;
 }
 
 message GroupResults {

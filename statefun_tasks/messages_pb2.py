@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x0emessages.proto\x12\x0estatefun_tasks\x1a\x19google/protobuf/any.proto\"\x0b\n\tNoneValue\"6\n\x07\x41\x64\x64ress\x12\x11\n\tnamespace\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\n\n\x02id\x18\x03 \x01(\t\"\x8e\x01\n\x0eJsonLikeObject\x12\x38\n\x05value\x18\x01 \x03(\x0b\x32).statefun_tasks.JsonLikeObject.ValueEntry\x1a\x42\n\nValueEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12#\n\x05value\x18\x02 \x01(\x0b\x32\x14.google.protobuf.Any:\x02\x38\x01\"4\n\rJsonLikeArray\x12#\n\x05value\x18\x01 \x03(\x0b\x32\x14.google.protobuf.Any\"\xe6\x01\n\tTaskEntry\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x11\n\ttask_type\x18\x02 \x01(\t\x12+\n\x04\x61rgs\x18\x03 \x01(\x0b\x32\x1d.statefun_tasks.JsonLikeArray\x12.\n\x06kwargs\x18\x04 \x01(\x0b\x32\x1e.statefun_tasks.JsonLikeObject\x12\x10\n\x08\x63omplete\x18\x05 \x01(\x08\x12\x32\n\nparameters\x18\x06 \x01(\x0b\x32\x1e.statefun_tasks.JsonLikeObject\x12\x12\n\nis_finally\x18\x07 \x01(\x08\"G\n\nGroupEntry\x12\x10\n\x08group_id\x18\x01 \x01(\t\x12\'\n\x05group\x18\x02 \x03(\x0b\x32\x18.statefun_tasks.Pipeline\"|\n\rPipelineEntry\x12/\n\ntask_entry\x18\x01 \x01(\x0b\x32\x19.statefun_tasks.TaskEntryH\x00\x12\x31\n\x0bgroup_entry\x18\x02 \x01(\x0b\x32\x1a.statefun_tasks.GroupEntryH\x00\x42\x07\n\x05\x65ntry\":\n\x08Pipeline\x12.\n\x07\x65ntries\x18\x01 \x03(\x0b\x32\x1d.statefun_tasks.PipelineEntry\"i\n\x0fTaskRetryPolicy\x12\x11\n\tretry_for\x18\x01 \x03(\t\x12\x13\n\x0bmax_retries\x18\x02 \x01(\x05\x12\x10\n\x08\x64\x65lay_ms\x18\x03 \x01(\x02\x12\x1c\n\x14\x65xponential_back_off\x18\x04 \x01(\x08\"\x83\x02\n\x0bTaskRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x15\n\x0breply_topic\x18\x03 \x01(\tH\x00\x12\x30\n\rreply_address\x18\x04 \x01(\x0b\x32\x17.statefun_tasks.AddressH\x00\x12+\n\rrequest_state\x18\x05 \x01(\x0b\x32\x14.google.protobuf.Any\x12+\n\x04\x61rgs\x18\x06 \x01(\x0b\x32\x1d.statefun_tasks.JsonLikeArray\x12.\n\x06kwargs\x18\x07 \x01(\x0b\x32\x1e.statefun_tasks.JsonLikeObjectB\x07\n\x05reply\"\x9a\x01\n\nTaskResult\x12\n\n\x02id\x18\x01 \x01(\t\x12\x16\n\x0e\x63orrelation_id\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12-\n\x06result\x18\x04 \x01(\x0b\x32\x1d.statefun_tasks.JsonLikeArray\x12+\n\rrequest_state\x18\x05 \x01(\x0b\x32\x14.google.protobuf.Any\"\xf8\x01\n\rTaskException\x12\n\n\x02id\x18\x01 \x01(\t\x12\x16\n\x0e\x63orrelation_id\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12\x16\n\x0e\x65xception_type\x18\x04 \x01(\t\x12\x19\n\x11\x65xception_message\x18\x05 \x01(\t\x12\x12\n\nstacktrace\x18\x06 \x01(\t\x12\r\n\x05retry\x18\x07 \x01(\x08\x12\x32\n\rretry_request\x18\x08 \x01(\x0b\x32\x1b.statefun_tasks.TaskRequest\x12+\n\rrequest_state\x18\t \x01(\x0b\x32\x14.google.protobuf.Any\"9\n\tTaskState\x12,\n\x04\x64\x61ta\x18\x01 \x01(\x0b\x32\x1e.statefun_tasks.JsonLikeObject\"\x96\x01\n\x0cGroupResults\x12:\n\x07results\x18\x01 \x03(\x0b\x32).statefun_tasks.GroupResults.ResultsEntry\x1aJ\n\x0cResultsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12)\n\x05value\x18\x02 \x01(\x0b\x32\x1a.statefun_tasks.TaskResult:\x02\x38\x01\x62\x06proto3'
+  serialized_pb=b'\n\x0emessages.proto\x12\x0estatefun_tasks\x1a\x19google/protobuf/any.proto\"\x0b\n\tNoneValue\"6\n\x07\x41\x64\x64ress\x12\x11\n\tnamespace\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\n\n\x02id\x18\x03 \x01(\t\"\x92\x01\n\x10MapOfStringToAny\x12:\n\x05items\x18\x01 \x03(\x0b\x32+.statefun_tasks.MapOfStringToAny.ItemsEntry\x1a\x42\n\nItemsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12#\n\x05value\x18\x02 \x01(\x0b\x32\x14.google.protobuf.Any:\x02\x38\x01\"1\n\nArrayOfAny\x12#\n\x05items\x18\x01 \x03(\x0b\x32\x14.google.protobuf.Any\"\xe7\x01\n\tTaskEntry\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x11\n\ttask_type\x18\x02 \x01(\t\x12(\n\x04\x61rgs\x18\x03 \x01(\x0b\x32\x1a.statefun_tasks.ArrayOfAny\x12\x30\n\x06kwargs\x18\x04 \x01(\x0b\x32 .statefun_tasks.MapOfStringToAny\x12\x10\n\x08\x63omplete\x18\x05 \x01(\x08\x12\x34\n\nparameters\x18\x06 \x01(\x0b\x32 .statefun_tasks.MapOfStringToAny\x12\x12\n\nis_finally\x18\x07 \x01(\x08\"G\n\nGroupEntry\x12\x10\n\x08group_id\x18\x01 \x01(\t\x12\'\n\x05group\x18\x02 \x03(\x0b\x32\x18.statefun_tasks.Pipeline\"|\n\rPipelineEntry\x12/\n\ntask_entry\x18\x01 \x01(\x0b\x32\x19.statefun_tasks.TaskEntryH\x00\x12\x31\n\x0bgroup_entry\x18\x02 \x01(\x0b\x32\x1a.statefun_tasks.GroupEntryH\x00\x42\x07\n\x05\x65ntry\":\n\x08Pipeline\x12.\n\x07\x65ntries\x18\x01 \x03(\x0b\x32\x1d.statefun_tasks.PipelineEntry\"i\n\x0fTaskRetryPolicy\x12\x11\n\tretry_for\x18\x01 \x03(\t\x12\x13\n\x0bmax_retries\x18\x02 \x01(\x05\x12\x10\n\x08\x64\x65lay_ms\x18\x03 \x01(\x02\x12\x1c\n\x14\x65xponential_back_off\x18\x04 \x01(\x08\"\x82\x02\n\x0bTaskRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x15\n\x0breply_topic\x18\x03 \x01(\tH\x00\x12\x30\n\rreply_address\x18\x04 \x01(\x0b\x32\x17.statefun_tasks.AddressH\x00\x12+\n\rrequest_state\x18\x05 \x01(\x0b\x32\x14.google.protobuf.Any\x12(\n\x04\x61rgs\x18\x06 \x01(\x0b\x32\x1a.statefun_tasks.ArrayOfAny\x12\x30\n\x06kwargs\x18\x07 \x01(\x0b\x32 .statefun_tasks.MapOfStringToAnyB\x07\n\x05reply\"\x97\x01\n\nTaskResult\x12\n\n\x02id\x18\x01 \x01(\t\x12\x16\n\x0e\x63orrelation_id\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12*\n\x06result\x18\x04 \x01(\x0b\x32\x1a.statefun_tasks.ArrayOfAny\x12+\n\rrequest_state\x18\x05 \x01(\x0b\x32\x14.google.protobuf.Any\"\xf8\x01\n\rTaskException\x12\n\n\x02id\x18\x01 \x01(\t\x12\x16\n\x0e\x63orrelation_id\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12\x16\n\x0e\x65xception_type\x18\x04 \x01(\t\x12\x19\n\x11\x65xception_message\x18\x05 \x01(\t\x12\x12\n\nstacktrace\x18\x06 \x01(\t\x12\r\n\x05retry\x18\x07 \x01(\x08\x12\x32\n\rretry_request\x18\x08 \x01(\x0b\x32\x1b.statefun_tasks.TaskRequest\x12+\n\rrequest_state\x18\t \x01(\x0b\x32\x14.google.protobuf.Any\";\n\tTaskState\x12.\n\x04\x64\x61ta\x18\x01 \x01(\x0b\x32 .statefun_tasks.MapOfStringToAny\"\x96\x01\n\x0cGroupResults\x12:\n\x07results\x18\x01 \x03(\x0b\x32).statefun_tasks.GroupResults.ResultsEntry\x1aJ\n\x0cResultsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12)\n\x05value\x18\x02 \x01(\x0b\x32\x1a.statefun_tasks.TaskResult:\x02\x38\x01\x62\x06proto3'
   ,
   dependencies=[google_dot_protobuf_dot_any__pb2.DESCRIPTOR,])
 
@@ -98,23 +98,23 @@ _ADDRESS = _descriptor.Descriptor(
 )
 
 
-_JSONLIKEOBJECT_VALUEENTRY = _descriptor.Descriptor(
-  name='ValueEntry',
-  full_name='statefun_tasks.JsonLikeObject.ValueEntry',
+_MAPOFSTRINGTOANY_ITEMSENTRY = _descriptor.Descriptor(
+  name='ItemsEntry',
+  full_name='statefun_tasks.MapOfStringToAny.ItemsEntry',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='key', full_name='statefun_tasks.JsonLikeObject.ValueEntry.key', index=0,
+      name='key', full_name='statefun_tasks.MapOfStringToAny.ItemsEntry.key', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='value', full_name='statefun_tasks.JsonLikeObject.ValueEntry.value', index=1,
+      name='value', full_name='statefun_tasks.MapOfStringToAny.ItemsEntry.value', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -132,20 +132,20 @@ _JSONLIKEOBJECT_VALUEENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=207,
-  serialized_end=273,
+  serialized_start=211,
+  serialized_end=277,
 )
 
-_JSONLIKEOBJECT = _descriptor.Descriptor(
-  name='JsonLikeObject',
-  full_name='statefun_tasks.JsonLikeObject',
+_MAPOFSTRINGTOANY = _descriptor.Descriptor(
+  name='MapOfStringToAny',
+  full_name='statefun_tasks.MapOfStringToAny',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='value', full_name='statefun_tasks.JsonLikeObject.value', index=0,
+      name='items', full_name='statefun_tasks.MapOfStringToAny.items', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -154,7 +154,7 @@ _JSONLIKEOBJECT = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_JSONLIKEOBJECT_VALUEENTRY, ],
+  nested_types=[_MAPOFSTRINGTOANY_ITEMSENTRY, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -164,20 +164,20 @@ _JSONLIKEOBJECT = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=131,
-  serialized_end=273,
+  serialized_end=277,
 )
 
 
-_JSONLIKEARRAY = _descriptor.Descriptor(
-  name='JsonLikeArray',
-  full_name='statefun_tasks.JsonLikeArray',
+_ARRAYOFANY = _descriptor.Descriptor(
+  name='ArrayOfAny',
+  full_name='statefun_tasks.ArrayOfAny',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='value', full_name='statefun_tasks.JsonLikeArray.value', index=0,
+      name='items', full_name='statefun_tasks.ArrayOfAny.items', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -195,8 +195,8 @@ _JSONLIKEARRAY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=275,
-  serialized_end=327,
+  serialized_start=279,
+  serialized_end=328,
 )
 
 
@@ -269,8 +269,8 @@ _TASKENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=330,
-  serialized_end=560,
+  serialized_start=331,
+  serialized_end=562,
 )
 
 
@@ -308,8 +308,8 @@ _GROUPENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=562,
-  serialized_end=633,
+  serialized_start=564,
+  serialized_end=635,
 )
 
 
@@ -352,8 +352,8 @@ _PIPELINEENTRY = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=635,
-  serialized_end=759,
+  serialized_start=637,
+  serialized_end=761,
 )
 
 
@@ -384,8 +384,8 @@ _PIPELINE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=761,
-  serialized_end=819,
+  serialized_start=763,
+  serialized_end=821,
 )
 
 
@@ -437,8 +437,8 @@ _TASKRETRYPOLICY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=821,
-  serialized_end=926,
+  serialized_start=823,
+  serialized_end=928,
 )
 
 
@@ -516,8 +516,8 @@ _TASKREQUEST = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=929,
-  serialized_end=1188,
+  serialized_start=931,
+  serialized_end=1189,
 )
 
 
@@ -576,8 +576,8 @@ _TASKRESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1191,
-  serialized_end=1345,
+  serialized_start=1192,
+  serialized_end=1343,
 )
 
 
@@ -664,8 +664,8 @@ _TASKEXCEPTION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1348,
-  serialized_end=1596,
+  serialized_start=1346,
+  serialized_end=1594,
 )
 
 
@@ -696,7 +696,7 @@ _TASKSTATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1598,
+  serialized_start=1596,
   serialized_end=1655,
 )
 
@@ -770,13 +770,13 @@ _GROUPRESULTS = _descriptor.Descriptor(
   serialized_end=1808,
 )
 
-_JSONLIKEOBJECT_VALUEENTRY.fields_by_name['value'].message_type = google_dot_protobuf_dot_any__pb2._ANY
-_JSONLIKEOBJECT_VALUEENTRY.containing_type = _JSONLIKEOBJECT
-_JSONLIKEOBJECT.fields_by_name['value'].message_type = _JSONLIKEOBJECT_VALUEENTRY
-_JSONLIKEARRAY.fields_by_name['value'].message_type = google_dot_protobuf_dot_any__pb2._ANY
-_TASKENTRY.fields_by_name['args'].message_type = _JSONLIKEARRAY
-_TASKENTRY.fields_by_name['kwargs'].message_type = _JSONLIKEOBJECT
-_TASKENTRY.fields_by_name['parameters'].message_type = _JSONLIKEOBJECT
+_MAPOFSTRINGTOANY_ITEMSENTRY.fields_by_name['value'].message_type = google_dot_protobuf_dot_any__pb2._ANY
+_MAPOFSTRINGTOANY_ITEMSENTRY.containing_type = _MAPOFSTRINGTOANY
+_MAPOFSTRINGTOANY.fields_by_name['items'].message_type = _MAPOFSTRINGTOANY_ITEMSENTRY
+_ARRAYOFANY.fields_by_name['items'].message_type = google_dot_protobuf_dot_any__pb2._ANY
+_TASKENTRY.fields_by_name['args'].message_type = _ARRAYOFANY
+_TASKENTRY.fields_by_name['kwargs'].message_type = _MAPOFSTRINGTOANY
+_TASKENTRY.fields_by_name['parameters'].message_type = _MAPOFSTRINGTOANY
 _GROUPENTRY.fields_by_name['group'].message_type = _PIPELINE
 _PIPELINEENTRY.fields_by_name['task_entry'].message_type = _TASKENTRY
 _PIPELINEENTRY.fields_by_name['group_entry'].message_type = _GROUPENTRY
@@ -789,26 +789,26 @@ _PIPELINEENTRY.fields_by_name['group_entry'].containing_oneof = _PIPELINEENTRY.o
 _PIPELINE.fields_by_name['entries'].message_type = _PIPELINEENTRY
 _TASKREQUEST.fields_by_name['reply_address'].message_type = _ADDRESS
 _TASKREQUEST.fields_by_name['request_state'].message_type = google_dot_protobuf_dot_any__pb2._ANY
-_TASKREQUEST.fields_by_name['args'].message_type = _JSONLIKEARRAY
-_TASKREQUEST.fields_by_name['kwargs'].message_type = _JSONLIKEOBJECT
+_TASKREQUEST.fields_by_name['args'].message_type = _ARRAYOFANY
+_TASKREQUEST.fields_by_name['kwargs'].message_type = _MAPOFSTRINGTOANY
 _TASKREQUEST.oneofs_by_name['reply'].fields.append(
   _TASKREQUEST.fields_by_name['reply_topic'])
 _TASKREQUEST.fields_by_name['reply_topic'].containing_oneof = _TASKREQUEST.oneofs_by_name['reply']
 _TASKREQUEST.oneofs_by_name['reply'].fields.append(
   _TASKREQUEST.fields_by_name['reply_address'])
 _TASKREQUEST.fields_by_name['reply_address'].containing_oneof = _TASKREQUEST.oneofs_by_name['reply']
-_TASKRESULT.fields_by_name['result'].message_type = _JSONLIKEARRAY
+_TASKRESULT.fields_by_name['result'].message_type = _ARRAYOFANY
 _TASKRESULT.fields_by_name['request_state'].message_type = google_dot_protobuf_dot_any__pb2._ANY
 _TASKEXCEPTION.fields_by_name['retry_request'].message_type = _TASKREQUEST
 _TASKEXCEPTION.fields_by_name['request_state'].message_type = google_dot_protobuf_dot_any__pb2._ANY
-_TASKSTATE.fields_by_name['data'].message_type = _JSONLIKEOBJECT
+_TASKSTATE.fields_by_name['data'].message_type = _MAPOFSTRINGTOANY
 _GROUPRESULTS_RESULTSENTRY.fields_by_name['value'].message_type = _TASKRESULT
 _GROUPRESULTS_RESULTSENTRY.containing_type = _GROUPRESULTS
 _GROUPRESULTS.fields_by_name['results'].message_type = _GROUPRESULTS_RESULTSENTRY
 DESCRIPTOR.message_types_by_name['NoneValue'] = _NONEVALUE
 DESCRIPTOR.message_types_by_name['Address'] = _ADDRESS
-DESCRIPTOR.message_types_by_name['JsonLikeObject'] = _JSONLIKEOBJECT
-DESCRIPTOR.message_types_by_name['JsonLikeArray'] = _JSONLIKEARRAY
+DESCRIPTOR.message_types_by_name['MapOfStringToAny'] = _MAPOFSTRINGTOANY
+DESCRIPTOR.message_types_by_name['ArrayOfAny'] = _ARRAYOFANY
 DESCRIPTOR.message_types_by_name['TaskEntry'] = _TASKENTRY
 DESCRIPTOR.message_types_by_name['GroupEntry'] = _GROUPENTRY
 DESCRIPTOR.message_types_by_name['PipelineEntry'] = _PIPELINEENTRY
@@ -835,27 +835,27 @@ Address = _reflection.GeneratedProtocolMessageType('Address', (_message.Message,
   })
 _sym_db.RegisterMessage(Address)
 
-JsonLikeObject = _reflection.GeneratedProtocolMessageType('JsonLikeObject', (_message.Message,), {
+MapOfStringToAny = _reflection.GeneratedProtocolMessageType('MapOfStringToAny', (_message.Message,), {
 
-  'ValueEntry' : _reflection.GeneratedProtocolMessageType('ValueEntry', (_message.Message,), {
-    'DESCRIPTOR' : _JSONLIKEOBJECT_VALUEENTRY,
+  'ItemsEntry' : _reflection.GeneratedProtocolMessageType('ItemsEntry', (_message.Message,), {
+    'DESCRIPTOR' : _MAPOFSTRINGTOANY_ITEMSENTRY,
     '__module__' : 'messages_pb2'
-    # @@protoc_insertion_point(class_scope:statefun_tasks.JsonLikeObject.ValueEntry)
+    # @@protoc_insertion_point(class_scope:statefun_tasks.MapOfStringToAny.ItemsEntry)
     })
   ,
-  'DESCRIPTOR' : _JSONLIKEOBJECT,
+  'DESCRIPTOR' : _MAPOFSTRINGTOANY,
   '__module__' : 'messages_pb2'
-  # @@protoc_insertion_point(class_scope:statefun_tasks.JsonLikeObject)
+  # @@protoc_insertion_point(class_scope:statefun_tasks.MapOfStringToAny)
   })
-_sym_db.RegisterMessage(JsonLikeObject)
-_sym_db.RegisterMessage(JsonLikeObject.ValueEntry)
+_sym_db.RegisterMessage(MapOfStringToAny)
+_sym_db.RegisterMessage(MapOfStringToAny.ItemsEntry)
 
-JsonLikeArray = _reflection.GeneratedProtocolMessageType('JsonLikeArray', (_message.Message,), {
-  'DESCRIPTOR' : _JSONLIKEARRAY,
+ArrayOfAny = _reflection.GeneratedProtocolMessageType('ArrayOfAny', (_message.Message,), {
+  'DESCRIPTOR' : _ARRAYOFANY,
   '__module__' : 'messages_pb2'
-  # @@protoc_insertion_point(class_scope:statefun_tasks.JsonLikeArray)
+  # @@protoc_insertion_point(class_scope:statefun_tasks.ArrayOfAny)
   })
-_sym_db.RegisterMessage(JsonLikeArray)
+_sym_db.RegisterMessage(ArrayOfAny)
 
 TaskEntry = _reflection.GeneratedProtocolMessageType('TaskEntry', (_message.Message,), {
   'DESCRIPTOR' : _TASKENTRY,
@@ -936,6 +936,6 @@ _sym_db.RegisterMessage(GroupResults)
 _sym_db.RegisterMessage(GroupResults.ResultsEntry)
 
 
-_JSONLIKEOBJECT_VALUEENTRY._options = None
+_MAPOFSTRINGTOANY_ITEMSENTRY._options = None
 _GROUPRESULTS_RESULTSENTRY._options = None
 # @@protoc_insertion_point(module_scope)
