@@ -2,6 +2,7 @@ import inspect
 from uuid import uuid4
 from typing import get_type_hints
 from google.protobuf.message import Message
+from google.protobuf.any_pb2 import Any
 
 
 def _gen_id():
@@ -53,4 +54,4 @@ def _annotated_protos_for(fn):
     except:
         args = []
 
-    return [arg for arg in args if inspect.isclass(arg) and issubclass(arg, Message)]
+    return [arg for arg in args if inspect.isclass(arg) and issubclass(arg, Message) and arg != Any]

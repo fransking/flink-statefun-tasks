@@ -20,7 +20,7 @@ def receive_and_reply_protobuf_fully_annotated(test_proto: TestProto) -> TestRes
 
 
 @tasks.bind()
-def receive_and_reply_protobuf_not_annotated(test_proto):
+def receive_and_reply_protobuf_not_annotated(test_proto) -> Any:
     return UnknownProto(value_str=str(type(test_proto)))
 
 
