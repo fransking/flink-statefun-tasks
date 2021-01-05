@@ -61,7 +61,7 @@ def _count_results(results):
 
 @tasks.bind()
 def passthrough_workflow():
-    return _say_hello.send('Jane', 'Doe').continue_with(_say_goodbye)
+    return _say_hello_and_return_last_name_length.send('Jane', 'Doe').continue_with(_say_goodbye_only)
 
 
 @tasks.bind()
