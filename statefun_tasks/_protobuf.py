@@ -59,6 +59,7 @@ def _wrap_value(v):
 
     return mapped
 
+
 def _unwrap_value(v):
     # if NoneValue wrapper return None
     if isinstance(v, NoneValue):
@@ -70,21 +71,25 @@ def _unwrap_value(v):
         return v.value
     return v
 
+
 def _wrap_any(value) -> Any:
     any = Any()
     any.Pack(value)
     return any
+
 
 def _parse_any_from_bytes(bytes) -> Any:
     any = Any()
     any.ParseFromString(bytes)
     return any
 
+
 def _is_wrapped_known_proto_type(value, known_proto_types):
     if isinstance(value, Any):
         return value.TypeName() in known_proto_types
 
     return False
+
 
 def _unwrap_any(value, known_proto_types):
     if _is_wrapped_known_proto_type(value, known_proto_types):

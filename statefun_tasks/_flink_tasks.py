@@ -222,8 +222,6 @@ class _FlinkTask(object):
         proto_types = _annotated_protos_for(fun)
         self._serialiser.register_proto_types(proto_types)
 
-
-
     def run(self, task_request: TaskRequest):
         task_result, task_exception, pipeline, extra_args = None, None, None, None
 
