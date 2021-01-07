@@ -91,23 +91,29 @@ def _aggregate_group_results(group: _GroupEntry, group_results: GroupResults, se
 
     def aggregate_results(grp):
         aggregated_results = []
+        aggregated_states = []
+
         for pipeline in grp:
             last_task = pipeline[-1]
             if isinstance(last_task, _GroupEntry):
-                results = aggregate_results(last_task)
+                results, states = aggregate_results(last_task)
                 aggregated_results.append(results)
+                aggregated_states.append(states)
             else:
                 group_result = group_results.results[pipeline[-1].task_id]
-                aggregated_results.append(serialiser.deserialise_result(group_result, unwrap_tuple=True))
+                result, state = serialiser.deserialise_result(group_result, unwrap_tuple=True)
+
+                aggregated_results.append(result)
+                aggregated_states.append(state)
         
-        return aggregated_results
+        return aggregated_results, aggregated_states
 
-    aggregated_results = aggregate_results(group)
+    aggregated_results, aggregated_states = aggregate_results(group)
 
-    # ensure we send a tuple
+    # ensure we send a tuple for the args
     aggregated_results = (aggregated_results,)
 
     task_result = TaskResult(id=_gen_id())
-    serialiser.serialise_result(task_result, aggregated_results)
+    serialiser.serialise_result(task_result, aggregated_results, aggregated_states)
 
     return task_result

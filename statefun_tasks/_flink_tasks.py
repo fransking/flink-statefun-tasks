@@ -27,7 +27,7 @@ def _create_task_exception(task_request, ex, retry=False):
         stacktrace=tb.format_exc(),
         retry=retry)
     
-    task_exception.request_state.CopyFrom(task_request.request_state)
+    task_exception.state.CopyFrom(task_request.state)
     return task_exception
 
 
@@ -52,13 +52,15 @@ class FlinkTasks(object):
         fun.type_name = _task_type_for(fun)
         self._bindings[fun.type_name] = _FlinkTask(fun, self._serialiser, **params)
 
-    def bind(self, namespace: str = None, worker_name: str = None, retry_policy: RetryPolicy = None):
+    def bind(self, namespace: str = None, worker_name: str = None, retry_policy: RetryPolicy = None,  with_state: bool = False, is_fruitful: bool = True):
         def wrapper(function):
             def defaults():
                 return {
                     'namespace': self._default_namespace if namespace is None else namespace,
                     'worker_name': self._default_worker_name if worker_name is None else worker_name,
-                    'retry_policy': None if retry_policy is None else retry_policy.to_proto()
+                    'retry_policy': None if retry_policy is None else retry_policy.to_proto(),
+                    'with_state': with_state,
+                    'is_fruitful': is_fruitful
                 }
 
             def send(*args, **kwargs):
@@ -181,11 +183,11 @@ class FlinkTasks(object):
 
     def _finalise_task_result(self, context, task_request, task_result):
 
-        task_result, task_exception, pipeline, extra_args = task_result  # unpack
+        task_result, task_exception, pipeline = task_result  # unpack
 
         if pipeline is not None:
-            context.pack_and_save('task_result', task_result)  # task result will be the pipeline in json format
-            pipeline.begin(context, extra_args)
+            context.pack_and_save('task_result', task_result)
+            pipeline.begin(context)
         else:
 
             if task_exception is not None:
@@ -207,10 +209,12 @@ class FlinkTasks(object):
 
 
 class _FlinkTask(object):
-    def __init__(self, fun, serialiser, retry_policy=None, **kwargs):
+    def __init__(self, fun, serialiser, retry_policy=None, with_state=False, is_fruitful=True, **kwargs):
         self._fun = fun
         self._serialiser = serialiser
         self._retry_policy = retry_policy
+        self._with_state = with_state
+        self._is_fruitful = is_fruitful
 
         full_arg_spec = inspect.getfullargspec(fun)
         self._args = full_arg_spec.args
@@ -223,60 +227,65 @@ class _FlinkTask(object):
         self._serialiser.register_proto_types(proto_types)
 
     def run(self, task_request: TaskRequest):
-        task_result, task_exception, pipeline, extra_args = None, None, None, None
+        task_result, task_exception, pipeline = None, None, None
 
         try:
             # run the flink task
-            task_args, kwargs, pass_through_args = self._to_task_args_and_kwargs(task_request)
+            task_args, kwargs, original_state = self._to_task_args_and_kwargs(task_request)
 
-            result = self._fun(*task_args, **kwargs)
+            fn_result = self._fun(*task_args, **kwargs)
 
-            fn_result = self._add_passthrough_args(result, pass_through_args)
-
-            pipeline, task_result, extra_args = self._to_pipeline_or_task_result(task_request, fn_result, extra_args)
-
+            pipeline, task_result = self._to_pipeline_or_task_result(task_request, fn_result, original_state)
+            
         # we errored so return a task_exception instead
         except Exception as e:
             task_exception = self._to_task_exception(task_request, e)
 
-        return task_result, task_exception, pipeline, extra_args
+        return task_result, task_exception, pipeline
 
     async def run_async(self, task_request: TaskRequest):
-        task_result, task_exception, pipeline, extra_args = None, None, None, None
+        task_result, task_exception, pipeline = None, None, None
 
         try:
             # run the flink task
-            task_args, kwargs, pass_through_args = self._to_task_args_and_kwargs(task_request)
+            task_args, kwargs, original_state = self._to_task_args_and_kwargs(task_request)
 
-            result = self._fun(*task_args, **kwargs)
+            fn_result = self._fun(*task_args, **kwargs)
 
             # await coro
-            if asyncio.iscoroutine(result):
-                result = await result
+            if asyncio.iscoroutine(fn_result):
+                fn_result = await fn_result
 
-            fn_result = self._add_passthrough_args(result, pass_through_args)
-
-            pipeline, task_result, extra_args = self._to_pipeline_or_task_result(task_request, fn_result, extra_args)
+            pipeline, task_result = self._to_pipeline_or_task_result(task_request, fn_result, original_state)
 
         # we errored so return a task_exception instead
         except Exception as e:
             task_exception = self._to_task_exception(task_request, e)
 
-        return task_result, task_exception, pipeline, extra_args
+        return task_result, task_exception, pipeline
 
-    def _to_pipeline_or_task_result(self, task_request, fn_result, extra_args):
-        pipeline, task_result = None, None
+    def _to_pipeline_or_task_result(self, task_request, fn_result, original_state):
+        pipeline, task_result, fn_state = None, None, original_state
 
-        if not _is_tuple(fn_result):  # if single result then wrap in tuple as this is the maximal case
-            fn_result = (fn_result,)
+        if not self._is_fruitful:
+            fn_result = ()
 
-        # result of the task might be a Flink pipeline or tuple of Flink pipline + extra args to be passed through
-        # in which case return the pipeline and these extra args (if present).
-        if isinstance(fn_result[0], PipelineBuilder):
-            builder = fn_result[0]
-            pipeline = builder.to_pipeline()
-            extra_args = fn_result[1:] if _is_tuple(fn_result) and len(fn_result) > 1 else ()
-            fn_result = ((builder.to_proto(self._serialiser)), *extra_args)
+        else:
+            # if single result then wrap in tuple as this is the maximal case
+            if not _is_tuple(fn_result):  
+                fn_result = (fn_result,)
+
+            # if this task accesses state then we expect the first element in the result tuple
+            # to be the mutated state and the task results to be remainder
+            if self._with_state:
+                fn_state = fn_result[0]
+                fn_result = fn_result[1:] if len(fn_result) > 1 else ()
+
+            # result of the task might be a Flink pipeline
+            if len(fn_result) > 0 and isinstance(fn_result[0], PipelineBuilder):
+                builder = fn_result[0]
+                pipeline = builder.to_pipeline()
+                fn_result = ((builder.to_proto(self._serialiser)),)
 
 
         task_result = TaskResult(
@@ -284,10 +293,10 @@ class _FlinkTask(object):
             correlation_id=task_request.id,
             type=f'{task_request.type}.result')
 
-        task_result.request_state.CopyFrom(task_request.request_state)
-        self._serialiser.serialise_result(task_result, fn_result)
+        # task_result.state.CopyFrom(task_request.state)
+        self._serialiser.serialise_result(task_result, fn_result, fn_state)
 
-        return pipeline, task_result, extra_args
+        return pipeline, task_result
 
     def _to_task_exception(self, task_request, ex):
         retry = False
@@ -304,7 +313,7 @@ class _FlinkTask(object):
         return task_exception
 
     def _to_task_args_and_kwargs(self, task_request):
-        args, kwargs = self._serialiser.deserialise_request(task_request)
+        args, kwargs, state = self._serialiser.deserialise_request(task_request)
 
         # listify
         args = [arg for arg in args]
@@ -315,21 +324,17 @@ class _FlinkTask(object):
             args.insert(idx, val)
             del kwargs[arg]
 
-        # pass through any extra args we might have
-        if len(args) > self._num_args and not self._accepts_varargs:
-            task_args = args[0: self._num_args]
-            pass_through_args = args[len(task_args):]
-        else:
-            task_args = args
-            pass_through_args = ()
+        # add state as first argument if required by this task
+        if self._with_state:
+            args = [state] + args
 
-        return task_args, kwargs, pass_through_args
+        return args, kwargs, state
 
-    def _add_passthrough_args(self, result, pass_through_args):
-        if len(pass_through_args) > 0:
-            return (result, *pass_through_args)
-        else:
-            return result
+    # def _add_passthrough_args(self, result, pass_through_args):
+    #     if len(pass_through_args) > 0:
+    #         return (result, *pass_through_args)
+    #     else:
+    #         return result
 
 
 def in_parallel(entries: list):

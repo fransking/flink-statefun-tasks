@@ -33,7 +33,7 @@ class _Pipeline(object):
         return _Pipeline(pipeline, serialiser)
         
 
-    def begin(self, context: _TaskContext, extra_args):
+    def begin(self, context: _TaskContext):
         # 1. record all the continuations into a pipeline and save into state with caller id and address
 
         state = {
@@ -51,9 +51,6 @@ class _Pipeline(object):
         for task in tasks:
 
             task_id, task_type, args, kwargs = task.to_tuple()
-            
-            # merge args and extra_args
-            args = _extend_args(args, extra_args)
 
             request = TaskRequest(id=task_id, type=task_type)
             self._serialiser.serialise_request(request, args, kwargs)
@@ -118,17 +115,17 @@ class _Pipeline(object):
             for task in remainder:
                 task_id, task_type, task_args, kwargs = task.to_tuple()
 
-                if isinstance(task_result_or_exception, TaskException):
-                    args = ()
+                if task.is_finally:
+                    args, state = (), self._serialiser.from_proto(task_result_or_exception.state)
                 else:
-                    args = self._serialiser.deserialise_result(task_result_or_exception)
+                    args, state = self._serialiser.deserialise_result(task_result_or_exception)
 
                 # extend with any args passed to the task explicitly
                 args = _extend_args(args, task_args)
 
                 request = TaskRequest(id=task_id, type=task_type)
-                self._serialiser.serialise_request(request, args, kwargs)
-
+                self._serialiser.serialise_request(request, args, kwargs, state)
+                
                 context.pack_and_send(task.get_destination(), task_id, request)
         else:
             # if we are at the last step in the pipeline and it is complete then terminate and emit result
@@ -185,8 +182,8 @@ class _Pipeline(object):
         task_result_or_exception.type = f'{task_request.type}.' + (
             'result' if isinstance(task_result_or_exception, TaskResult) else 'error')
 
-        # pass back any request_state that we were given at the start of the pipeline
-        task_result_or_exception.request_state.CopyFrom(task_request.request_state)
+        # pass back any state that we were given at the start of the pipeline
+        task_result_or_exception.state.CopyFrom(task_request.state)
 
         # remove the retry_request if set because this is only used if we are retrying
         if isinstance(task_result_or_exception, TaskException):
@@ -259,9 +256,9 @@ class PipelineBuilder():
 
     def finally_do(self, finally_action, *args, **kwargs):
         task_type = _task_type_for(finally_action)
-        self._pipeline.append(
-            _TaskEntry(_gen_id(), task_type, args, kwargs, parameters=self._get_defaults(finally_action),
-                       is_finally=True))
+        task_entry = _TaskEntry(_gen_id(), task_type, args, kwargs, parameters=self._get_defaults(finally_action), is_finally=True)
+        task_entry.set_parameters({'is_fruitful': False})
+        self._pipeline.append(task_entry)
         return self
 
     def to_pipeline(self):

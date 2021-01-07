@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x0emessages.proto\x12\x0estatefun_tasks\x1a\x19google/protobuf/any.proto\"\x0b\n\tNoneValue\"6\n\x07\x41\x64\x64ress\x12\x11\n\tnamespace\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\n\n\x02id\x18\x03 \x01(\t\"\x92\x01\n\x10MapOfStringToAny\x12:\n\x05items\x18\x01 \x03(\x0b\x32+.statefun_tasks.MapOfStringToAny.ItemsEntry\x1a\x42\n\nItemsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12#\n\x05value\x18\x02 \x01(\x0b\x32\x14.google.protobuf.Any:\x02\x38\x01\"1\n\nArrayOfAny\x12#\n\x05items\x18\x01 \x03(\x0b\x32\x14.google.protobuf.Any\"1\n\nTupleOfAny\x12#\n\x05items\x18\x01 \x03(\x0b\x32\x14.google.protobuf.Any\"\xe7\x01\n\tTaskEntry\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x11\n\ttask_type\x18\x02 \x01(\t\x12(\n\x04\x61rgs\x18\x03 \x01(\x0b\x32\x1a.statefun_tasks.TupleOfAny\x12\x30\n\x06kwargs\x18\x04 \x01(\x0b\x32 .statefun_tasks.MapOfStringToAny\x12\x10\n\x08\x63omplete\x18\x05 \x01(\x08\x12\x34\n\nparameters\x18\x06 \x01(\x0b\x32 .statefun_tasks.MapOfStringToAny\x12\x12\n\nis_finally\x18\x07 \x01(\x08\"G\n\nGroupEntry\x12\x10\n\x08group_id\x18\x01 \x01(\t\x12\'\n\x05group\x18\x02 \x03(\x0b\x32\x18.statefun_tasks.Pipeline\"|\n\rPipelineEntry\x12/\n\ntask_entry\x18\x01 \x01(\x0b\x32\x19.statefun_tasks.TaskEntryH\x00\x12\x31\n\x0bgroup_entry\x18\x02 \x01(\x0b\x32\x1a.statefun_tasks.GroupEntryH\x00\x42\x07\n\x05\x65ntry\":\n\x08Pipeline\x12.\n\x07\x65ntries\x18\x01 \x03(\x0b\x32\x1d.statefun_tasks.PipelineEntry\"i\n\x0fTaskRetryPolicy\x12\x11\n\tretry_for\x18\x01 \x03(\t\x12\x13\n\x0bmax_retries\x18\x02 \x01(\x05\x12\x10\n\x08\x64\x65lay_ms\x18\x03 \x01(\x02\x12\x1c\n\x14\x65xponential_back_off\x18\x04 \x01(\x08\"\x82\x02\n\x0bTaskRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x15\n\x0breply_topic\x18\x03 \x01(\tH\x00\x12\x30\n\rreply_address\x18\x04 \x01(\x0b\x32\x17.statefun_tasks.AddressH\x00\x12+\n\rrequest_state\x18\x05 \x01(\x0b\x32\x14.google.protobuf.Any\x12(\n\x04\x61rgs\x18\x06 \x01(\x0b\x32\x1a.statefun_tasks.TupleOfAny\x12\x30\n\x06kwargs\x18\x07 \x01(\x0b\x32 .statefun_tasks.MapOfStringToAnyB\x07\n\x05reply\"\x97\x01\n\nTaskResult\x12\n\n\x02id\x18\x01 \x01(\t\x12\x16\n\x0e\x63orrelation_id\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12*\n\x06result\x18\x04 \x01(\x0b\x32\x1a.statefun_tasks.TupleOfAny\x12+\n\rrequest_state\x18\x05 \x01(\x0b\x32\x14.google.protobuf.Any\"\xf8\x01\n\rTaskException\x12\n\n\x02id\x18\x01 \x01(\t\x12\x16\n\x0e\x63orrelation_id\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12\x16\n\x0e\x65xception_type\x18\x04 \x01(\t\x12\x19\n\x11\x65xception_message\x18\x05 \x01(\t\x12\x12\n\nstacktrace\x18\x06 \x01(\t\x12\r\n\x05retry\x18\x07 \x01(\x08\x12\x32\n\rretry_request\x18\x08 \x01(\x0b\x32\x1b.statefun_tasks.TaskRequest\x12+\n\rrequest_state\x18\t \x01(\x0b\x32\x14.google.protobuf.Any\";\n\tTaskState\x12.\n\x04\x64\x61ta\x18\x01 \x01(\x0b\x32 .statefun_tasks.MapOfStringToAny\"\x96\x01\n\x0cGroupResults\x12:\n\x07results\x18\x01 \x03(\x0b\x32).statefun_tasks.GroupResults.ResultsEntry\x1aJ\n\x0cResultsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12)\n\x05value\x18\x02 \x01(\x0b\x32\x1a.statefun_tasks.TaskResult:\x02\x38\x01\x62\x06proto3'
+  serialized_pb=b'\n\x0emessages.proto\x12\x0estatefun_tasks\x1a\x19google/protobuf/any.proto\"\x0b\n\tNoneValue\"6\n\x07\x41\x64\x64ress\x12\x11\n\tnamespace\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\n\n\x02id\x18\x03 \x01(\t\"\x92\x01\n\x10MapOfStringToAny\x12:\n\x05items\x18\x01 \x03(\x0b\x32+.statefun_tasks.MapOfStringToAny.ItemsEntry\x1a\x42\n\nItemsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12#\n\x05value\x18\x02 \x01(\x0b\x32\x14.google.protobuf.Any:\x02\x38\x01\"1\n\nArrayOfAny\x12#\n\x05items\x18\x01 \x03(\x0b\x32\x14.google.protobuf.Any\"1\n\nTupleOfAny\x12#\n\x05items\x18\x01 \x03(\x0b\x32\x14.google.protobuf.Any\"\xe7\x01\n\tTaskEntry\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x11\n\ttask_type\x18\x02 \x01(\t\x12(\n\x04\x61rgs\x18\x03 \x01(\x0b\x32\x1a.statefun_tasks.TupleOfAny\x12\x30\n\x06kwargs\x18\x04 \x01(\x0b\x32 .statefun_tasks.MapOfStringToAny\x12\x10\n\x08\x63omplete\x18\x05 \x01(\x08\x12\x34\n\nparameters\x18\x06 \x01(\x0b\x32 .statefun_tasks.MapOfStringToAny\x12\x12\n\nis_finally\x18\x07 \x01(\x08\"G\n\nGroupEntry\x12\x10\n\x08group_id\x18\x01 \x01(\t\x12\'\n\x05group\x18\x02 \x03(\x0b\x32\x18.statefun_tasks.Pipeline\"|\n\rPipelineEntry\x12/\n\ntask_entry\x18\x01 \x01(\x0b\x32\x19.statefun_tasks.TaskEntryH\x00\x12\x31\n\x0bgroup_entry\x18\x02 \x01(\x0b\x32\x1a.statefun_tasks.GroupEntryH\x00\x42\x07\n\x05\x65ntry\":\n\x08Pipeline\x12.\n\x07\x65ntries\x18\x01 \x03(\x0b\x32\x1d.statefun_tasks.PipelineEntry\"i\n\x0fTaskRetryPolicy\x12\x11\n\tretry_for\x18\x01 \x03(\t\x12\x13\n\x0bmax_retries\x18\x02 \x01(\x05\x12\x10\n\x08\x64\x65lay_ms\x18\x03 \x01(\x02\x12\x1c\n\x14\x65xponential_back_off\x18\x04 \x01(\x08\"\xfa\x01\n\x0bTaskRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x15\n\x0breply_topic\x18\x03 \x01(\tH\x00\x12\x30\n\rreply_address\x18\x04 \x01(\x0b\x32\x17.statefun_tasks.AddressH\x00\x12#\n\x05state\x18\x05 \x01(\x0b\x32\x14.google.protobuf.Any\x12(\n\x04\x61rgs\x18\x06 \x01(\x0b\x32\x1a.statefun_tasks.TupleOfAny\x12\x30\n\x06kwargs\x18\x07 \x01(\x0b\x32 .statefun_tasks.MapOfStringToAnyB\x07\n\x05reply\"\x8f\x01\n\nTaskResult\x12\n\n\x02id\x18\x01 \x01(\t\x12\x16\n\x0e\x63orrelation_id\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12*\n\x06result\x18\x04 \x01(\x0b\x32\x1a.statefun_tasks.TupleOfAny\x12#\n\x05state\x18\x05 \x01(\x0b\x32\x14.google.protobuf.Any\"\xf0\x01\n\rTaskException\x12\n\n\x02id\x18\x01 \x01(\t\x12\x16\n\x0e\x63orrelation_id\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12\x16\n\x0e\x65xception_type\x18\x04 \x01(\t\x12\x19\n\x11\x65xception_message\x18\x05 \x01(\t\x12\x12\n\nstacktrace\x18\x06 \x01(\t\x12\r\n\x05retry\x18\x07 \x01(\x08\x12\x32\n\rretry_request\x18\x08 \x01(\x0b\x32\x1b.statefun_tasks.TaskRequest\x12#\n\x05state\x18\t \x01(\x0b\x32\x14.google.protobuf.Any\";\n\tTaskState\x12.\n\x04\x64\x61ta\x18\x01 \x01(\x0b\x32 .statefun_tasks.MapOfStringToAny\"\x96\x01\n\x0cGroupResults\x12:\n\x07results\x18\x01 \x03(\x0b\x32).statefun_tasks.GroupResults.ResultsEntry\x1aJ\n\x0cResultsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12)\n\x05value\x18\x02 \x01(\x0b\x32\x1a.statefun_tasks.TaskResult:\x02\x38\x01\x62\x06proto3'
   ,
   dependencies=[google_dot_protobuf_dot_any__pb2.DESCRIPTOR,])
 
@@ -511,7 +511,7 @@ _TASKREQUEST = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='request_state', full_name='statefun_tasks.TaskRequest.request_state', index=4,
+      name='state', full_name='statefun_tasks.TaskRequest.state', index=4,
       number=5, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -549,7 +549,7 @@ _TASKREQUEST = _descriptor.Descriptor(
     fields=[]),
   ],
   serialized_start=982,
-  serialized_end=1240,
+  serialized_end=1232,
 )
 
 
@@ -590,7 +590,7 @@ _TASKRESULT = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='request_state', full_name='statefun_tasks.TaskResult.request_state', index=4,
+      name='state', full_name='statefun_tasks.TaskResult.state', index=4,
       number=5, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -608,8 +608,8 @@ _TASKRESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1243,
-  serialized_end=1394,
+  serialized_start=1235,
+  serialized_end=1378,
 )
 
 
@@ -678,7 +678,7 @@ _TASKEXCEPTION = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='request_state', full_name='statefun_tasks.TaskException.request_state', index=8,
+      name='state', full_name='statefun_tasks.TaskException.state', index=8,
       number=9, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -696,8 +696,8 @@ _TASKEXCEPTION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1397,
-  serialized_end=1645,
+  serialized_start=1381,
+  serialized_end=1621,
 )
 
 
@@ -728,8 +728,8 @@ _TASKSTATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1647,
-  serialized_end=1706,
+  serialized_start=1623,
+  serialized_end=1682,
 )
 
 
@@ -767,8 +767,8 @@ _GROUPRESULTS_RESULTSENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1785,
-  serialized_end=1859,
+  serialized_start=1761,
+  serialized_end=1835,
 )
 
 _GROUPRESULTS = _descriptor.Descriptor(
@@ -798,8 +798,8 @@ _GROUPRESULTS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1709,
-  serialized_end=1859,
+  serialized_start=1685,
+  serialized_end=1835,
 )
 
 _MAPOFSTRINGTOANY_ITEMSENTRY.fields_by_name['value'].message_type = google_dot_protobuf_dot_any__pb2._ANY
@@ -821,7 +821,7 @@ _PIPELINEENTRY.oneofs_by_name['entry'].fields.append(
 _PIPELINEENTRY.fields_by_name['group_entry'].containing_oneof = _PIPELINEENTRY.oneofs_by_name['entry']
 _PIPELINE.fields_by_name['entries'].message_type = _PIPELINEENTRY
 _TASKREQUEST.fields_by_name['reply_address'].message_type = _ADDRESS
-_TASKREQUEST.fields_by_name['request_state'].message_type = google_dot_protobuf_dot_any__pb2._ANY
+_TASKREQUEST.fields_by_name['state'].message_type = google_dot_protobuf_dot_any__pb2._ANY
 _TASKREQUEST.fields_by_name['args'].message_type = _TUPLEOFANY
 _TASKREQUEST.fields_by_name['kwargs'].message_type = _MAPOFSTRINGTOANY
 _TASKREQUEST.oneofs_by_name['reply'].fields.append(
@@ -831,9 +831,9 @@ _TASKREQUEST.oneofs_by_name['reply'].fields.append(
   _TASKREQUEST.fields_by_name['reply_address'])
 _TASKREQUEST.fields_by_name['reply_address'].containing_oneof = _TASKREQUEST.oneofs_by_name['reply']
 _TASKRESULT.fields_by_name['result'].message_type = _TUPLEOFANY
-_TASKRESULT.fields_by_name['request_state'].message_type = google_dot_protobuf_dot_any__pb2._ANY
+_TASKRESULT.fields_by_name['state'].message_type = google_dot_protobuf_dot_any__pb2._ANY
 _TASKEXCEPTION.fields_by_name['retry_request'].message_type = _TASKREQUEST
-_TASKEXCEPTION.fields_by_name['request_state'].message_type = google_dot_protobuf_dot_any__pb2._ANY
+_TASKEXCEPTION.fields_by_name['state'].message_type = google_dot_protobuf_dot_any__pb2._ANY
 _TASKSTATE.fields_by_name['data'].message_type = _MAPOFSTRINGTOANY
 _GROUPRESULTS_RESULTSENTRY.fields_by_name['value'].message_type = _TASKRESULT
 _GROUPRESULTS_RESULTSENTRY.containing_type = _GROUPRESULTS

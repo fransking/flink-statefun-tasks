@@ -65,7 +65,7 @@ message TaskRequest {
         string reply_topic = 3;
         Address reply_address = 4;
     }
-    google.protobuf.Any request_state = 5;
+    google.protobuf.Any state = 5;
     TupleOfAny args = 6;
     MapOfStringToAny kwargs = 7;
 }
@@ -75,7 +75,7 @@ message TaskResult {
     string correlation_id = 2;
     string type = 3;
     TupleOfAny result = 4;
-    google.protobuf.Any request_state = 5;
+    google.protobuf.Any state = 5;
 }
 
 message TaskException {
@@ -87,7 +87,7 @@ message TaskException {
     string stacktrace = 6;
     bool retry = 7;
     statefun_tasks.TaskRequest retry_request = 8;
-    google.protobuf.Any request_state = 9;
+    google.protobuf.Any state = 9;
 }
 
 message TaskState {

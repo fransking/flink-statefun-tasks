@@ -47,18 +47,18 @@ async def _say_goodbye(greeting, goodbye_message):
 
 
 @tasks.bind()
-def _throw_error():
+def _throw_error(*args):
     raise Exception('I am supposed to fail')
 
 
 @tasks.bind()
-def _cleanup():
+def _cleanup(*args):
     global finally_flag
     finally_flag = True
 
 
 @tasks.bind()
-def _cleanup_with_args(arg1, arg2):
+def _cleanup_with_args(arg1, arg2, *args):
     global finally_args
     finally_args = [arg1, arg2]
 
