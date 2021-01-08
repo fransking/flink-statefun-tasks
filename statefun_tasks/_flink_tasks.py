@@ -281,11 +281,14 @@ class _FlinkTask(object):
                 fn_state = fn_result[0]
                 fn_result = fn_result[1:] if len(fn_result) > 1 else ()
 
+            # if a single element tuple then unpack back to single value
+            # so (8,) becomes 8 but (8,9) remains a tuple
+            fn_result = fn_result[0] if len(fn_result) == 1 else fn_result
+
             # result of the task might be a Flink pipeline
-            if len(fn_result) > 0 and isinstance(fn_result[0], PipelineBuilder):
-                builder = fn_result[0]
-                pipeline = builder.to_pipeline()
-                fn_result = ((builder.to_proto(self._serialiser)),)
+            if isinstance(fn_result, PipelineBuilder):
+                pipeline = fn_result.to_pipeline()
+                fn_result = fn_result.to_proto(self._serialiser)
 
 
         task_result = TaskResult(
@@ -293,7 +296,6 @@ class _FlinkTask(object):
             correlation_id=task_request.id,
             type=f'{task_request.type}.result')
 
-        # task_result.state.CopyFrom(task_request.state)
         self._serialiser.serialise_result(task_result, fn_result, fn_state)
 
         return pipeline, task_result
@@ -316,7 +318,10 @@ class _FlinkTask(object):
         args, kwargs, state = self._serialiser.deserialise_request(task_request)
 
         # listify
-        args = [arg for arg in args]
+        if _is_tuple(args):
+            args = [arg for arg in args]
+        else:
+            args = [args]
 
         # merge in args passed as kwargs e.g. fun1.continue_with(fun2, arg1=a, arg2=b)
         args_in_kwargs = [(idx, arg, kwargs[arg]) for idx, arg in enumerate(self._args) if arg in kwargs]
@@ -329,12 +334,6 @@ class _FlinkTask(object):
             args = [state] + args
 
         return args, kwargs, state
-
-    # def _add_passthrough_args(self, result, pass_through_args):
-    #     if len(pass_through_args) > 0:
-    #         return (result, *pass_through_args)
-    #     else:
-    #         return result
 
 
 def in_parallel(entries: list):

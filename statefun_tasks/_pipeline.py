@@ -1,4 +1,4 @@
-from ._utils import _gen_id, _task_type_for
+from ._utils import _gen_id, _task_type_for, _is_tuple
 from ._serialisation import DefaultSerialiser
 from ._types import _TaskEntry, _GroupEntry
 from ._context import _TaskContext
@@ -246,8 +246,12 @@ class PipelineBuilder():
         else:
             task_id = str(uuid4())
             task_type = '__builtins.run_pipeline'
-            args = (self.to_pipeline().to_proto(),)
+            args = self.to_pipeline().to_proto()
             kwargs = {}
+
+        # send a single argument by itself instead of wrapped inside a tuple
+        if _is_tuple(args) and len(args) == 1:
+            args = args[0]
 
         task_request = TaskRequest(id=task_id, type=task_type)
         serialiser.serialise_request(task_request, args, kwargs)

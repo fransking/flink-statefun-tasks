@@ -78,7 +78,13 @@ def _get_next_step_in_pipeline(task_id, previous_task_failed: bool, pipeline):
 
 
 def _extend_args(args, task_args):
-    return args + task_args if any(task_args) else args
+    if not any(task_args):
+        return args
+
+    if not _is_tuple(args):
+        args = (args,)
+
+    return args + task_args
 
 
 def _save_group_result(group: _GroupEntry, caller_id, state: dict, task_result: TaskResult):
@@ -101,7 +107,7 @@ def _aggregate_group_results(group: _GroupEntry, group_results: GroupResults, se
                 aggregated_states.append(states)
             else:
                 group_result = group_results.results[pipeline[-1].task_id]
-                result, state = serialiser.deserialise_result(group_result, unwrap_tuple=True)
+                result, state = serialiser.deserialise_result(group_result)
 
                 aggregated_results.append(result)
                 aggregated_states.append(state)
@@ -109,9 +115,6 @@ def _aggregate_group_results(group: _GroupEntry, group_results: GroupResults, se
         return aggregated_results, aggregated_states
 
     aggregated_results, aggregated_states = aggregate_results(group)
-
-    # ensure we send a tuple for the args
-    aggregated_results = (aggregated_results,)
 
     task_result = TaskResult(id=_gen_id())
     serialiser.serialise_result(task_result, aggregated_results, aggregated_states)

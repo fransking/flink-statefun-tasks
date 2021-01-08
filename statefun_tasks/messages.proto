@@ -58,6 +58,11 @@ message TaskRetryPolicy {
     bool exponential_back_off = 4;
 }
 
+message ArgsAndKwargs {
+    TupleOfAny args = 1;
+    MapOfStringToAny kwargs = 2;
+}
+
 message TaskRequest {
     string id = 1;
     string type = 2;
@@ -65,16 +70,15 @@ message TaskRequest {
         string reply_topic = 3;
         Address reply_address = 4;
     }
-    google.protobuf.Any state = 5;
-    TupleOfAny args = 6;
-    MapOfStringToAny kwargs = 7;
+    google.protobuf.Any request = 5;
+    google.protobuf.Any state = 6;
 }
 
 message TaskResult {
     string id = 1;
     string correlation_id = 2;
     string type = 3;
-    TupleOfAny result = 4;
+    google.protobuf.Any result = 4;
     google.protobuf.Any state = 5;
 }
 

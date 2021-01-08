@@ -97,7 +97,7 @@ class TestHarness:
         result_any = Any.FromString(kafka_producer_record.value_bytes)
         task_result_or_exception = unpack_any(result_any, [TaskResult, TaskException])
         if isinstance(task_result_or_exception, TaskResult):
-            result, _ = serialiser.deserialise_result(task_result_or_exception, unwrap_tuple=True)
+            result, _ = serialiser.deserialise_result(task_result_or_exception)
             return result
         else:
             raise TaskErrorException(TaskError(task_result_or_exception))

@@ -93,7 +93,7 @@ class FlinkTasksClient(object):
             del self._requests[correlation_id]
 
             try:
-                result, _ = self._serialiser.deserialise_result(task_result, unwrap_tuple=True)
+                result, _ = self._serialiser.deserialise_result(task_result)
                 future.set_result(result)
             except Exception as ex:
                 future.set_exception(ex)
