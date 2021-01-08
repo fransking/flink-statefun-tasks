@@ -73,15 +73,15 @@ def _unwrap_value(v):
 
 
 def _pack_any(value) -> Any:
-    any = Any()
-    any.Pack(value)
-    return any
+    proto = Any()
+    proto.Pack(value)
+    return proto
 
 
 def _parse_any_from_bytes(bytes) -> Any:
-    any = Any()
-    any.ParseFromString(bytes)
-    return any
+    proto = Any()
+    proto.ParseFromString(bytes)
+    return proto
 
 
 def _is_wrapped_known_proto_type(value, known_proto_types):
@@ -142,31 +142,13 @@ def _convert_from_proto(proto: Union[MapOfStringToAny, ArrayOfAny, TupleOfAny, M
 
     def convert(obj):
         if isinstance(obj, MapOfStringToAny):
-            output = {}
-
-            for k,v in obj.items.items():
-                v = convert(_unpack_any(v, all_known_proto_types))
-                output[k] = v
-            
-            return output
+            return {k: convert(_unpack_any(v, all_known_proto_types)) for k, v in obj.items.items()}
 
         elif isinstance(obj, ArrayOfAny):
-            output = []
-
-            for v in obj.items:
-                v = convert(_unpack_any(v, all_known_proto_types))
-                output.append(v)
-
-            return output
+            return [convert(_unpack_any(v, all_known_proto_types)) for v in obj.items]
 
         elif isinstance(obj, TupleOfAny):
-            output = []
-
-            for v in obj.items:
-                v = convert(_unpack_any(v, all_known_proto_types))
-                output.append(v)
-
-            return (*output,)
+            return  tuple(convert(_unpack_any(v, all_known_proto_types)) for v in obj.items)
 
         elif isinstance(obj, Any):
             if _is_wrapped_known_proto_type(obj, all_known_proto_types):
