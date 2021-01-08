@@ -6,14 +6,15 @@ from statefun import StatefulFunctions, AsyncRequestReplyHandler
 from statefun.kafka_egress_pb2 import KafkaProducerRecord
 from statefun.request_reply_pb2 import FromFunction, ToFunction, Address
 
-from statefun_tasks import TaskResult, TaskException, PipelineBuilder, TaskRequest, FlinkTasks, deserialise_result
+from statefun_tasks import TaskResult, TaskException, PipelineBuilder, TaskRequest, FlinkTasks, DefaultSerialiser
 from statefun_tasks.client import TaskError
 from ._test_utils import update_address, update_state, unpack_any
 
 default_namespace = 'test'
 default_worker_name = 'worker'
+serialiser = DefaultSerialiser()
 tasks = FlinkTasks(default_namespace=default_namespace, default_worker_name=default_worker_name,
-                   egress_type_name=f'{default_namespace}/kafka-generic-egress')
+                   egress_type_name=f'{default_namespace}/kafka-generic-egress', serialiser=serialiser)
 
 functions = StatefulFunctions()
 
@@ -52,7 +53,7 @@ class TestHarness:
         self.__reply_topic = 'my_reply_topic'
 
     def run_pipeline(self, pipeline: PipelineBuilder, initial_target_type='worker'):
-        task_request = pipeline.to_task_request()
+        task_request = pipeline.to_task_request(serialiser)
         task_request.reply_topic = self.__reply_topic
 
         target = Address()
@@ -96,10 +97,11 @@ class TestHarness:
         result_any = Any.FromString(kafka_producer_record.value_bytes)
         task_result_or_exception = unpack_any(result_any, [TaskResult, TaskException])
         if isinstance(task_result_or_exception, TaskResult):
-            return deserialise_result(task_result_or_exception)
+            result, _ = serialiser.deserialise_result(task_result_or_exception)
+            return result
         else:
             raise TaskErrorException(TaskError(task_result_or_exception))
-
+        
     def _run_flink_loop(self, message_arg: Union[TaskRequest, TaskResult, TaskException], target: Address, caller=None):
         to_function = ToFunction()
         update_address(to_function.invocation.target, target.namespace, target.type, target.id)

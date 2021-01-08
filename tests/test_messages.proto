@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package tests;
+
+message TestProto {
+}
+
+message TestResultProto {
+    string value_str = 1;
+}
+
+message UnknownProto {
+    string value_str = 1;
+}
+
+message TestPerson {
+    string first_name = 1;
+    string last_name = 2;
+}
+
+message TestGreetingRequest {
+    TestPerson person = 1;
+    string message = 2;
+}
+
+message TestGreetingResponse {
+    string greeting = 3;
+}

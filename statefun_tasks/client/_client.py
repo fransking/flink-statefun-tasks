@@ -1,5 +1,5 @@
 from ._types import TaskError
-from statefun_tasks import TaskRequest, TaskResult, TaskException, deserialise_result, PipelineBuilder
+from statefun_tasks import TaskRequest, TaskResult, TaskException, DefaultSerialiser, PipelineBuilder
 
 from google.protobuf.any_pb2 import Any
 from kafka.errors import NoBrokersAvailable
@@ -16,13 +16,14 @@ _log = logging.getLogger('FlinkTasks')
 
 
 class FlinkTasksClient(object):
-    def __init__(self, kafka_broker_url, topic, reply_topic):
+    def __init__(self, kafka_broker_url, topic, reply_topic, serialiser=None):
         self._kafka_broker_url = kafka_broker_url
         self._requests = {}
 
         self._topic = topic
         self._reply_topic = reply_topic
         self._group_id = f'{self._reply_topic}.{str(uuid4())}'  # unique for instance
+        self._serialiser = serialiser if serialiser is not None else DefaultSerialiser()
 
         self._producer = KafkaProducer(bootstrap_servers=[kafka_broker_url])
 
@@ -37,7 +38,7 @@ class FlinkTasksClient(object):
         self._consumer_thread.start()
 
     def submit(self, pipeline: PipelineBuilder, topic=None):
-        task_request = pipeline.to_task_request()
+        task_request = pipeline.to_task_request(self._serialiser)
         return self._submit_request(task_request, topic=topic)
 
     async def submit_async(self, pipeline: PipelineBuilder, topic=None):
@@ -92,7 +93,8 @@ class FlinkTasksClient(object):
             del self._requests[correlation_id]
 
             try:
-                future.set_result(deserialise_result(task_result))
+                result, _ = self._serialiser.deserialise_result(task_result)
+                future.set_result(result)
             except Exception as ex:
                 future.set_exception(ex)
 
