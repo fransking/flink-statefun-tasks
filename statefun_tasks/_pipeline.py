@@ -213,8 +213,8 @@ class PipelineBuilder():
         group.add_to_group(self._pipeline)
 
     def send(self, fun, *args, **kwargs):
-        task_type = _task_type_for(fun)
-        self._pipeline.append(_TaskEntry(_gen_id(), task_type, args, kwargs, parameters=self._get_defaults(fun)))
+        task_type, parameters = self._task_type_and_parameters_for(fun)
+        self._pipeline.append(_TaskEntry(_gen_id(), task_type, args, kwargs, parameters=parameters))
         return self
 
     def set(self, **kwargs):
@@ -228,8 +228,8 @@ class PipelineBuilder():
         if isinstance(continuation, PipelineBuilder):
             continuation.append_to(self)
         else:
-            task_type = _task_type_for(continuation)
-            self._pipeline.append(_TaskEntry(_gen_id(), task_type, args, kwargs, parameters=self._get_defaults(continuation)))
+            task_type, parameters = self._task_type_and_parameters_for(continuation)
+            self._pipeline.append(_TaskEntry(_gen_id(), task_type, args, kwargs, parameters=parameters))
         return self
 
     def is_single_task(self):
@@ -259,8 +259,8 @@ class PipelineBuilder():
         return task_request
 
     def finally_do(self, finally_action, *args, **kwargs):
-        task_type = _task_type_for(finally_action)
-        task_entry = _TaskEntry(_gen_id(), task_type, args, kwargs, parameters=self._get_defaults(finally_action), is_finally=True)
+        task_type, parameters = self._task_type_and_parameters_for(finally_action)
+        task_entry = _TaskEntry(_gen_id(), task_type, args, kwargs, parameters=parameters, is_finally=True)
         task_entry.set_parameters({'is_fruitful': False})
         self._pipeline.append(task_entry)
         return self
@@ -295,8 +295,12 @@ class PipelineBuilder():
         return PipelineBuilder(pipeline)
 
     @staticmethod
-    def _get_defaults(fun):
+    def _task_type_and_parameters_for(fun):
         try:
-            return fun.defaults()
+            parameters = fun.defaults()
+            module_name = parameters.get('module_name', None)
+            task_type = _task_type_for(fun, module_name)
+
+            return task_type, parameters
         except AttributeError:
             raise AttributeError(f'Function {fun.__module__}.{fun.__name__} should be decorated with tasks.bind')

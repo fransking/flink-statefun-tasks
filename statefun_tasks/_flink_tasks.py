@@ -45,14 +45,25 @@ class FlinkTasks(object):
     def register_builtin(self, type_name, fun, **params):
         self._bindings[f'__builtins.{type_name}'] = _FlinkTask(fun, self._serialiser, **params)
 
-    def register(self, fun, **params):
+    def register(self, fun, module_name=None, **params):
         if fun is None:
             raise ValueError("function instance must be provided")
 
-        fun.type_name = _task_type_for(fun)
+        fun.type_name = _task_type_for(fun, module_name)
         self._bindings[fun.type_name] = _FlinkTask(fun, self._serialiser, **params)
 
-    def bind(self, namespace: str = None, worker_name: str = None, retry_policy: RetryPolicy = None,  with_state: bool = False, is_fruitful: bool = True):
+    def bind(self, namespace: str = None, worker_name: str = None, retry_policy: RetryPolicy = None,  with_state: bool = False, is_fruitful: bool = True, module_name: str = None):
+        """Binds a python function as a Flink Statefun Task
+
+        Parameters:
+        namespace (optional) (str): Statefun namespace to use in place of the default
+        worker_name (optional) (str): Statefun worker to use in place of the default
+        retry_policy (optional) (RetryPolicy): RetryPolicy to use should the task throw an exception
+        with_state (optional defaults to false) (bool): Whether to pass a state object as the first parameter (an expect back a tuple of (state, result,)
+        is_fruitful (optional defaults to true): Whether the function produces a fruitful result or simply returns None
+        module_name (optional) (str): If specified then the task type will be module_name.function_name otherwise the Python module containing the function will be used 
+
+        """
         def wrapper(function):
             def defaults():
                 return {
@@ -60,7 +71,8 @@ class FlinkTasks(object):
                     'worker_name': self._default_worker_name if worker_name is None else worker_name,
                     'retry_policy': None if retry_policy is None else retry_policy.to_proto(),
                     'with_state': with_state,
-                    'is_fruitful': is_fruitful
+                    'is_fruitful': is_fruitful,
+                    'module_name': module_name
                 }
 
             def send(*args, **kwargs):
