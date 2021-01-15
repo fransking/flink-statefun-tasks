@@ -16,8 +16,9 @@ def _type_name(thing):
         return ".".join([thing.__class__.__module__, thing.__class__.__name__])
 
 
-def _task_type_for(fun):
-    return ".".join([fun.__module__, fun.__name__])
+def _task_type_for(fun, module_name=None):
+    module = fun.__module__ if module_name is None else module_name
+    return ".".join([module, fun.__name__])
 
 
 def _try_next(iterator):
