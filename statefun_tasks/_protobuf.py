@@ -75,6 +75,9 @@ def _unwrap_value(v):
 
 
 def _pack_any(value) -> Any:
+    if isinstance(value, Any):
+        return value
+        
     proto = Any()
     proto.Pack(value)
     return proto
