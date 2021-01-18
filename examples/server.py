@@ -1,15 +1,14 @@
 from statefun_tasks import TaskRequest, TaskResult, TaskException, deserialise_result
-from statefun_tasks.client import FlinkTasksClient, TaskError
+from statefun_tasks.client import FlinkTasksClientFactory, TaskError
 
 from aiohttp import web
-import socket
 import json
 
 from .api import greeting_workflow
 
 KAFKA_BROKER = "kafka broker URI"
 
-flink_client = FlinkTasksClient(KAFKA_BROKER, topic='statefun-test.requests', reply_topic=f'statefun-test.reply.{socket.gethostname()}')
+flink_client = FlinkTasksClientFactory.get_client(KAFKA_BROKER, request_topic='statefun-test.requests', reply_topic_prefix=f'statefun-test.reply')
 
 async def index(request):
     try:
