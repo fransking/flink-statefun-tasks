@@ -32,7 +32,7 @@ def _create_task_exception(task_request, ex, retry=False):
 
 
 class FlinkTasks(object):
-    def __init__(self, default_namespace: str, default_worker_name: str, egress_type_name: str, serialiser=None):
+    def __init__(self, default_namespace: str = None, default_worker_name: str = None, egress_type_name: str = None, serialiser = None):
         self._default_namespace = default_namespace
         self._default_worker_name = default_worker_name
         self._egress_type_name = egress_type_name
