@@ -1,15 +1,13 @@
-from ._types import TaskError
 from statefun_tasks import TaskRequest, TaskResult, TaskException, DefaultSerialiser, PipelineBuilder
+from statefun_tasks.client import TaskError
 
 from google.protobuf.any_pb2 import Any
-from kafka.errors import NoBrokersAvailable
 from kafka import KafkaProducer, KafkaConsumer, TopicPartition
 
 import logging
 import socket
 from uuid import uuid4
 from threading import Thread
-from typing import List
 import asyncio
 from concurrent.futures import Future
 
@@ -32,13 +30,12 @@ class FlinkTasksClient(object):
         self._consumer = KafkaConsumer(
             self._reply_topic,
             bootstrap_servers=[self._kafka_broker_url],
-            auto_offset_reset='latest',
+            auto_offset_reset='earliest',
             group_id=self._group_id)
 
         self._consumer_thread = Thread(target=self._consume, args=())
         self._consumer_thread.daemon = True
         self._consumer_thread.start()
-
 
     def submit(self, pipeline: PipelineBuilder, topic=None):
         task_request = pipeline.to_task_request(self._serialiser)
