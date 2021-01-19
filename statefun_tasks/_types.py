@@ -37,6 +37,13 @@ class _TaskEntry(object):
     def is_complete(self):
         return self.complete
 
+    def validate(self, errors):
+        if self.get_parameter('namespace') is None:
+            errors.append(f'task {self.task_type} [{self.task_id}] is missing "namespace"')
+
+        if self.get_parameter('worker_name') is None:
+            errors.append(f'task {self.task_type} [{self.task_id}] is missing "worker_name"')
+
     def to_proto(self, serialiser) -> PipelineEntry:
         proto = TaskEntry(
             task_id=self.task_id, 
@@ -95,6 +102,11 @@ class _GroupEntry(object):
 
     def is_complete(self):
         return all(entry.is_complete() for entries in self._group for entry in entries)
+
+    def validate(self, errors):
+        for entries in self._group:
+            for entry in entries:
+                entry.validate(errors)
 
     def to_proto(self, serialiser) -> PipelineEntry:
         proto = GroupEntry(group_id=self.group_id)
