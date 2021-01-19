@@ -246,7 +246,7 @@ class PipelineBuilder():
         else:
             task_id = str(uuid4())
             task_type = '__builtins.run_pipeline'
-            args = self.to_pipeline().to_proto()
+            args = self.validate().to_pipeline().to_proto()
             kwargs = {}
 
         # send a single argument by itself instead of wrapped inside a tuple
@@ -266,17 +266,27 @@ class PipelineBuilder():
         return self
 
     def to_pipeline(self):
-        error = self.validate()
-        if error:
-            raise ValueError(f'Invalid pipeline: {error}')
+        self.validate()
         return _Pipeline(self._pipeline)
 
     def validate(self):
+
+        errors = []
+
+        for entry in self._pipeline:
+            entry.validate(errors)
+
         finally_tasks = [task for task in self._pipeline if isinstance(task, _TaskEntry) and task.is_finally]
         if len(finally_tasks) > 1:
-            return 'Cannot have more than one "finally_do" method.'
+            errors.append('Cannot have more than one "finally_do" method')
         if len(finally_tasks) == 1 and finally_tasks[0] != self._pipeline[-1]:
-            return 'finally_do must be called at the end of a pipeline'
+            errors.append('"finally_do" must be called at the end of a pipeline')
+        
+        if any(errors):
+            error = ', '.join(errors)
+            raise ValueError(f'Invalid pipeline: {error}')
+
+        return self
 
     def to_proto(self, serialiser) -> Pipeline:
         pipeline = Pipeline(entries=[p.to_proto(serialiser) for p in self._pipeline])
