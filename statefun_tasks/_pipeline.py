@@ -246,7 +246,7 @@ class PipelineBuilder():
         else:
             task_id = str(uuid4())
             task_type = '__builtins.run_pipeline'
-            args = self.validate().to_pipeline().to_proto()
+            args = self.validate().to_pipeline(serialiser=serialiser).to_proto()
             kwargs = {}
 
         # send a single argument by itself instead of wrapped inside a tuple
@@ -265,9 +265,9 @@ class PipelineBuilder():
         self._pipeline.append(task_entry)
         return self
 
-    def to_pipeline(self):
+    def to_pipeline(self, serialiser=None):
         self.validate()
-        return _Pipeline(self._pipeline)
+        return _Pipeline(self._pipeline, serialiser=serialiser)
 
     def validate(self):
 
