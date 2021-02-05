@@ -16,11 +16,11 @@ _log = logging.getLogger('FlinkTasks')
 
 class FlinkTasksClient(object):
     
-    def __init__(self, kafka_broker_url, request_topic, reply_topic, group_id=None, serialiser=None):
+    def __init__(self, kafka_broker_url, request_topics, reply_topic, group_id=None, serialiser=None):
         self._kafka_broker_url = kafka_broker_url
         self._requests = {}
 
-        self._request_topic = request_topic
+        self._request_topics = request_topics
         self._reply_topic = reply_topic
         self._group_id = group_id
         self._serialiser = serialiser if serialiser is not None else DefaultSerialiser()
@@ -37,15 +37,29 @@ class FlinkTasksClient(object):
         self._consumer_thread.daemon = True
         self._consumer_thread.start()
 
+    def _get_request_topic(self, pipeline: PipelineBuilder, topic=None):
+        if topic is not None:
+            return topic
+
+        destination = pipeline.get_inital_destination()
+        if destination in self._request_topics:
+            return self._request_topics[destination]
+
+        if None in self._request_topics:
+            return self._request_topics[None]
+
+        raise ValueError(f'Could not find a topic to send this request to')
+
     def submit(self, pipeline: PipelineBuilder, topic=None):
-        task_request = pipeline.to_task_request(self._serialiser)
-        return self._submit_request(task_request, topic=topic)
+        return self._submit_request(pipeline, topic=topic)
 
     async def submit_async(self, pipeline: PipelineBuilder, topic=None):
         future, _ = self.submit(pipeline, topic=topic)
         return await asyncio.wrap_future(future)
 
-    def _submit_request(self, task_request: TaskRequest, topic=None):
+    def _submit_request(self, pipeline: PipelineBuilder, topic=None):
+        task_request = pipeline.to_task_request(self._serialiser)
+
         if task_request.id is None or task_request.id == "":
             raise ValueError('Task request is missing an id')
 
@@ -60,7 +74,7 @@ class FlinkTasksClient(object):
         key = task_request.id.encode('utf-8')
         val = task_request.SerializeToString()
 
-        topic = self._request_topic if topic is None else topic
+        topic = self._get_request_topic(pipeline, topic)
         self._producer.send(topic=topic, key=key, value=val)
         self._producer.flush()
 
@@ -122,13 +136,23 @@ class FlinkTasksClientFactory():
     __clients = {}
 
     @staticmethod
-    def get_client(kafka_broker_url, request_topic, reply_topic_prefix, serialiser=None) -> FlinkTasksClient:
-        key = f'{kafka_broker_url}.{request_topic}.{reply_topic_prefix}'
+    def get_client(kafka_broker_url, request_topics: dict, reply_topic_prefix, serialiser=None) -> FlinkTasksClient:
+        """
+        Creates a FlinkTasksClient for submitting tasks to flink
+
+        :param kafka_broker_url: url of the kafka broker used for ingress and egress
+        :param request_topic: either a single ingress topic or dictionary of worker to ingress topic mappings  (use None for default)
+                              e.g. {'example/worker': 'example.requests', None: 'example.default.requests'}
+        :param reply_topic: topic to listen on for responses
+        :param serialiser: serialiser to use (optional will use DefaultSerialiser if not set)
+        """
+
+        key = f'{kafka_broker_url}.{request_topics}.{reply_topic_prefix}'
 
         if key not in FlinkTasksClientFactory.__clients:
 
             reply_topic = f'{reply_topic_prefix}.{socket.gethostname()}.{str(uuid4())}'
-            client = FlinkTasksClient(kafka_broker_url, request_topic, reply_topic, serialiser=serialiser)
+            client = FlinkTasksClient(kafka_broker_url, request_topics, reply_topic, serialiser=serialiser)
             FlinkTasksClientFactory.__clients[key] = client
 
         return FlinkTasksClientFactory.__clients[key]

@@ -91,6 +91,9 @@ class _GroupEntry(object):
     def get_parameter(self, parameter_name):
         return None
 
+    def get_destination(self):
+        return None  # _GroupEntries don't have a single destination
+
     def add_to_group(self, tasks):
         self._group.append(tasks)
 
