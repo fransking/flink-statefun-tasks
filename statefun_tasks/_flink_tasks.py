@@ -101,6 +101,8 @@ class FlinkTasks(object):
     def run(self, context: BatchContext, task_input: Union[TaskRequest, TaskResult, TaskException]):
         with _TaskContext(context, task_input.type, self._egress_type_name, self._serialiser) as task_context:
             try:
+                _log.info(f'Started {task_context}')
+
                 # either we resume a pipeline (received TaskResult or TaskException) or we invoke a task (received TaskRequest)
                 task_request_result = self._begin_operation(task_context, task_input)
 
@@ -111,10 +113,14 @@ class FlinkTasks(object):
             except Exception as ex:
                 self._fail(task_context, task_input, ex)
                 raise
+            finally:
+                _log.info(f'Finished {task_context}')
 
     async def run_async(self, context: BatchContext, task_input: Union[TaskRequest, TaskResult, TaskException]):
         with _TaskContext(context, task_input.type, self._egress_type_name, self._serialiser) as task_context:
             try:
+                _log.info(f'Started {task_context}')
+
                 # either we resume a pipeline (received TaskResult or TaskException) or we invoke a task (received TaskRequest)
                 task_request_result = self._begin_operation(task_context, task_input)
 
@@ -128,6 +134,8 @@ class FlinkTasks(object):
             except Exception as ex:
                 self._fail(task_context, task_input, ex)
                 raise
+            finally:
+                _log.info(f'Finished {task_context}')
 
     @staticmethod
     def send(func, *args, **kwargs) -> PipelineBuilder:
@@ -139,8 +147,6 @@ class FlinkTasks(object):
         return send_func(*args, **kwargs)
 
     def _begin_operation(self, task_context, task_request_or_result):
-        _log.info(f'Started {task_context}')
-
         if isinstance(task_request_or_result, (TaskResult, TaskException)):
             # we resume the pipeline passing this result into the next task
             task_result_or_exception = task_request_or_result

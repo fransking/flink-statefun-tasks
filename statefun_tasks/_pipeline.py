@@ -38,8 +38,9 @@ class _Pipeline(object):
 
         state = {
             'pipeline': self.to_proto(),
+            'address': context.get_address(),
             'caller_id': context.get_caller_id(),
-            'address': context.get_address()
+            'caller_address': context.get_caller_address()
         }
 
         context.set_state(state)
@@ -74,7 +75,7 @@ class _Pipeline(object):
             caller_id = context.get_caller_id()
 
             if 'caller_id' in state and state['caller_id'] != caller_id:  # don't call back to self
-                context.pack_and_send(state['address'], state['caller_id'], task_result_or_exception)
+                context.pack_and_send(state['caller_address'], state['caller_id'], task_result_or_exception)
 
     def resume(self, context: _TaskContext, task_result_or_exception: Union[TaskResult, TaskException]):
         caller_id = context.get_caller_id()
@@ -239,6 +240,9 @@ class PipelineBuilder():
 
         return False
 
+    def get_inital_destination(self):
+        return None if not any(self._pipeline) else self._pipeline[0].get_destination()
+
     def to_task_request(self, serialiser):
         if self.is_single_task():
             task = self._pipeline[0]
@@ -246,7 +250,7 @@ class PipelineBuilder():
         else:
             task_id = str(uuid4())
             task_type = '__builtins.run_pipeline'
-            args = self.validate().to_pipeline().to_proto()
+            args = self.validate().to_pipeline(serialiser=serialiser).to_proto()
             kwargs = {}
 
         # send a single argument by itself instead of wrapped inside a tuple
@@ -265,9 +269,9 @@ class PipelineBuilder():
         self._pipeline.append(task_entry)
         return self
 
-    def to_pipeline(self):
+    def to_pipeline(self, serialiser=None):
         self.validate()
-        return _Pipeline(self._pipeline)
+        return _Pipeline(self._pipeline, serialiser=serialiser)
 
     def validate(self):
 
