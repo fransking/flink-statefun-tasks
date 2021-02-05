@@ -244,19 +244,14 @@ class PipelineBuilder():
         return None if not any(self._pipeline) else self._pipeline[0].get_destination()
 
     def to_task_request(self, serialiser):
-        # if self.is_single_task():
-        #     task = self._pipeline[0]
-        #     task_id, task_type, args, kwargs = task.to_tuple()
-        # else:
-        #     task_id = str(uuid4())
-        #     task_type = '__builtins.run_pipeline'
-        #     args = self.validate().to_pipeline(serialiser=serialiser).to_proto()
-        #     kwargs = {}
-
-        task_id = str(uuid4())
-        task_type = '__builtins.run_pipeline'
-        args = self.validate().to_pipeline(serialiser=serialiser).to_proto()
-        kwargs = {}
+        if self.is_single_task():
+            task = self._pipeline[0]
+            task_id, task_type, args, kwargs = task.to_tuple()
+        else:
+            task_id = str(uuid4())
+            task_type = '__builtins.run_pipeline'
+            args = self.validate().to_pipeline(serialiser=serialiser).to_proto()
+            kwargs = {}
 
         # send a single argument by itself instead of wrapped inside a tuple
         if _is_tuple(args) and len(args) == 1:
