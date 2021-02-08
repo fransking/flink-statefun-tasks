@@ -213,7 +213,16 @@ class PipelineBuilder():
     def _add_to_group(self, group: _GroupEntry):
         group.add_to_group(self._pipeline)
 
+    @staticmethod
+    def _unpack_single_tuple_args(args):
+        # send a single argument by itself instead of wrapped inside a tuple
+        if _is_tuple(args) and len(args) == 1:
+            args = args[0]
+
+        return args
+
     def send(self, fun, *args, **kwargs):
+        args = self._unpack_single_tuple_args(args)
         task_type, parameters = self._task_type_and_parameters_for(fun)
         self._pipeline.append(_TaskEntry(_gen_id(), task_type, args, kwargs, parameters=parameters))
         return self
@@ -229,6 +238,7 @@ class PipelineBuilder():
         if isinstance(continuation, PipelineBuilder):
             continuation.append_to(self)
         else:
+            args = self._unpack_single_tuple_args(args)
             task_type, parameters = self._task_type_and_parameters_for(continuation)
             self._pipeline.append(_TaskEntry(_gen_id(), task_type, args, kwargs, parameters=parameters))
         return self
@@ -263,6 +273,7 @@ class PipelineBuilder():
         return task_request
 
     def finally_do(self, finally_action, *args, **kwargs):
+        args = self._unpack_single_tuple_args(args)
         task_type, parameters = self._task_type_and_parameters_for(finally_action)
         task_entry = _TaskEntry(_gen_id(), task_type, args, kwargs, parameters=parameters, is_finally=True)
         task_entry.set_parameters({'is_fruitful': False})
