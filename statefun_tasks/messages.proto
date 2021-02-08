@@ -28,11 +28,10 @@ message TupleOfAny {
 message TaskEntry {
     string task_id = 1;
     string task_type = 2;
-    TupleOfAny args = 3;
-    MapOfStringToAny kwargs = 4;
-    bool complete = 5;
-    MapOfStringToAny parameters = 6;
-    bool is_finally = 7;
+    google.protobuf.Any request = 3;
+    bool complete = 4;
+    MapOfStringToAny parameters = 5;
+    bool is_finally = 6;
 }
 
 message GroupEntry {
