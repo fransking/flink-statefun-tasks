@@ -1,6 +1,8 @@
 import asyncio
 import unittest
 
+from statefun_tasks import DefaultSerialiser
+
 from tests.test_messages_pb2 import TestPerson, TestGreetingRequest, TestGreetingResponse
 from tests.utils import TestHarness, tasks
 
@@ -52,6 +54,9 @@ class SimplePipelineTests(unittest.TestCase):
 
     def test_pipeline_using_kwargs(self):
         pipeline = tasks.send(hello_workflow, first_name='Jane', last_name='Doe')
+        proto = pipeline.to_proto(serialiser=DefaultSerialiser())
+        self.assertEqual(proto.entries[0].task_entry.request.type_url, 'type.googleapis.com/statefun_tasks.ArgsAndKwargs')
+
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, 'Hello Jane Doe')
 
@@ -62,6 +67,10 @@ class SimplePipelineTests(unittest.TestCase):
 
     def test_simple_protobuf_pipeline(self):
         pipeline = tasks.send(simple_protobuf_workflow, TestPerson(first_name='Jane', last_name='Doe'))
+        proto = pipeline.to_proto(serialiser=DefaultSerialiser())
+
+        self.assertEqual(proto.entries[0].task_entry.request.type_url, 'type.googleapis.com/tests.TestPerson')
+
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result.greeting, 'Hello Jane Doe')
 
