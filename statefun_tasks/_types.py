@@ -1,5 +1,6 @@
 from typing import NamedTuple
 from datetime import timedelta
+from google.protobuf.message import Message
 from .messages_pb2 import TaskEntry, GroupEntry, PipelineEntry, TaskRetryPolicy, Pipeline
 from ._utils import _type_name
 import json
@@ -51,11 +52,8 @@ class _TaskEntry(object):
             complete=self.complete, 
             is_finally=self.is_finally)
         
-        if self.args is not None:
-            proto.args.CopyFrom(serialiser.to_proto(self.args))
-
-        if self.kwargs is not None: 
-            proto.kwargs.CopyFrom(serialiser.to_proto(self.kwargs))
+        request = serialiser.serialise_args_and_kwargs(self.args, self.kwargs)
+        proto.request.CopyFrom(request)
 
         if self.parameters is not None:
             proto.parameters.CopyFrom(serialiser.to_proto(self.parameters))
@@ -64,11 +62,13 @@ class _TaskEntry(object):
 
     @staticmethod 
     def from_proto(proto: PipelineEntry, serialiser):
+        args, kwargs = serialiser.deserialise_args_and_kwargs(proto.task_entry.request)
+
         entry = _TaskEntry(
             task_id=proto.task_entry.task_id, 
             task_type=proto.task_entry.task_type, 
-            args=serialiser.from_proto(proto.task_entry.args), 
-            kwargs=serialiser.from_proto(proto.task_entry.kwargs), 
+            args=args, 
+            kwargs=kwargs, 
             parameters=serialiser.from_proto(proto.task_entry.parameters), 
             is_finally=proto.task_entry.is_finally)
 

@@ -18,8 +18,7 @@ class DefaultSerialiser(object):
     def from_proto(self, proto):
         return _convert_from_proto(proto, self._known_proto_types)
 
-    def serialise_request(self, task_request: TaskRequest, args, kwargs, state=None):
-
+    def serialise_args_and_kwargs(self, args, kwargs) -> Any:
         # if kwargs are empty and this is a single protobuf arguments then 
         # send in simple format i.e. fn(protobuf) -> protobuf as opposed to fn(*args, **kwargs) -> (*results,)
         # so as to aid calling flink functions written in other frameworks that might not understand
@@ -32,19 +31,28 @@ class DefaultSerialiser(object):
             request.args.CopyFrom(_convert_to_proto(args))
             request.kwargs.CopyFrom(_convert_to_proto(kwargs))
 
-        task_request.request.CopyFrom(_pack_any(request))
-        task_request.state.CopyFrom(_pack_any(_convert_to_proto(state)))
+        return _pack_any(request)
 
-    def deserialise_request(self, task_request: TaskRequest):
-        request = _convert_from_proto(task_request.request, self._known_proto_types)
+    def deserialise_args_and_kwargs(self, request: Any):
+        # do the reverse of serialise_args_and_kwargs
+        request = _convert_from_proto(request, self._known_proto_types)
 
-        # do the reverse from serialise_request
         if isinstance(request, ArgsAndKwargs):
             args = _convert_from_proto(request.args, self._known_proto_types)
             kwargs = _convert_from_proto(request.kwargs, self._known_proto_types)
         else:
             args = request
             kwargs = {}
+
+        return args, kwargs
+
+    def serialise_request(self, task_request: TaskRequest, args, kwargs, state=None):
+        request = self.serialise_args_and_kwargs(args, kwargs)
+        task_request.request.CopyFrom(request)
+        task_request.state.CopyFrom(_pack_any(_convert_to_proto(state)))
+
+    def deserialise_request(self, task_request: TaskRequest):
+        args, kwargs = self.deserialise_args_and_kwargs(task_request.request)
 
         state = _convert_from_proto(task_request.state, self._known_proto_types)
         return args, kwargs, state
