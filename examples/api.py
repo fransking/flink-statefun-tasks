@@ -76,7 +76,7 @@ def _join_names(first_name, last_name):
 
 @tasks.bind(with_state=True)
 def _do_greeting_with_state(state, full_name):
-    return f'Hello {full_name}.  Your last name length is {state}'
+    return state, f'Hello {full_name}.  Your last name length is {state}'
 
 # 5. finally_do for cleaning up resources
 
