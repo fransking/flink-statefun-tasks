@@ -1,5 +1,5 @@
 from ._serialisation import DefaultSerialiser
-from .messages_pb2 import TaskState, TaskResult
+from .messages_pb2 import TaskState
 
 from google.protobuf.any_pb2 import Any
 from statefun import kafka_egress_record
@@ -18,7 +18,7 @@ class _TaskContext(object):
         try:
             task_state = self.unpack('task_state', TaskState)
             self._state = self._serialiser.from_proto(task_state.data)
-        except Exception as e:
+        except:
             self._state = {}
 
     def get_address(self):

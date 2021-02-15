@@ -3,7 +3,7 @@ from google.protobuf.any_pb2 import Any
 from google.protobuf.message import Message
 from .messages_pb2 import MapOfStringToAny, ArrayOfAny, TupleOfAny, TaskEntry, GroupEntry, NoneValue, \
     TaskRetryPolicy, TaskRequest, TaskResult, TaskException, TaskState, GroupResults, Pipeline, PipelineEntry, Address, \
-        ArgsAndKwargs
+        ArgsAndKwargs, TaskActionRequest, TaskActionResult, TaskActionException
 from ._utils import _is_tuple
 from typing import Union
  
