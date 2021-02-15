@@ -1,12 +1,11 @@
 from ._utils import _gen_id, _task_type_for, _is_tuple
 from ._serialisation import DefaultSerialiser
-from ._types import _TaskEntry, _GroupEntry
+from ._types import _TaskEntry, _GroupEntry, RetryPolicy
 from ._context import _TaskContext
 from ._pipeline_utils import _get_initial_tasks, _mark_task_complete, _get_task_entry, _get_next_step_in_pipeline, \
     _extend_args, _save_group_result, _aggregate_group_results
 from .messages_pb2 import TaskRequest, TaskResult, TaskException, GroupResults, GroupEntry, TaskEntry, Pipeline
 
-from datetime import timedelta
 from typing import Union, Iterable
 from uuid import uuid4
 
@@ -51,15 +50,18 @@ class _Pipeline(object):
         # 3. call each task
         for task in tasks:
 
-            task_id, task_type, args, kwargs = task.to_tuple()
-
-            request = TaskRequest(id=task_id, type=task_type)
+            task_id, task_type, args, kwargs, parameters = task.to_tuple()
+            request = TaskRequest(id=task_id, type=task_type, parameters=self._serialiser.to_proto(parameters))
             self._serialiser.serialise_request(request, args, kwargs)
 
             context.pack_and_send(task.get_destination(), task_id, request)
 
     @staticmethod
     def _emit_result(context, task_request, task_result_or_exception):
+        # the result of this task is the result of the pipeline
+        key = 'task_result' if isinstance(task_result_or_exception, TaskResult) else 'task_exception'
+        context.pack_and_save(key, task_result_or_exception)
+
         # either send a message to egress if reply_topic was specified
         if task_request.HasField('reply_topic'):
             context.pack_and_send_egress(topic=task_request.reply_topic, value=task_result_or_exception)
@@ -114,7 +116,7 @@ class _Pipeline(object):
         if any(remainder):
 
             for task in remainder:
-                task_id, task_type, task_args, kwargs = task.to_tuple()
+                task_id, task_type, task_args, kwargs, parameters = task.to_tuple()
 
                 if task.is_finally:
                     args, state = (), self._serialiser.from_proto(task_result_or_exception.state)
@@ -124,7 +126,7 @@ class _Pipeline(object):
                 # extend with any args passed to the task explicitly
                 args = _extend_args(args, task_args)
 
-                request = TaskRequest(id=task_id, type=task_type)
+                request = TaskRequest(id=task_id, type=task_type, parameters=self._serialiser.to_proto(parameters))
                 self._serialiser.serialise_request(request, args, kwargs, state)
                 
                 context.pack_and_send(task.get_destination(), task_id, request)
@@ -135,41 +137,6 @@ class _Pipeline(object):
             if last_step.is_complete() or isinstance(task_result_or_exception, TaskException):
                 self.terminate(context, task_result_or_exception)
 
-    def attempt_retry(self, context: _TaskContext, task_exception: TaskException):
-        task_id = context.get_caller_id()
-        task_entry = _get_task_entry(task_id, self._pipeline)
-
-        # defensive
-        if task_entry is None:
-            return False
-
-        retries = context.get_state().get('retries', {})
-        retry_count = retries.get(task_id, 1)
-        retry_policy = task_entry.get_parameter('retry_policy')
-
-        if retry_policy is None:
-            return False
-
-        if retry_count > retry_policy.max_retries:
-            return False
-
-        delay = timedelta(milliseconds=retry_policy.delay_ms)
-
-        if retry_policy.exponential_back_off:
-            delay = timedelta(milliseconds=retry_policy.delay_ms ^ retry_count)
-
-        request = task_exception.retry_request
-        destination = context.get_caller_address()
-        if delay:
-            context.pack_and_send_after(delay, destination, task_id, request)
-        else:
-            context.pack_and_send(destination, task_id, request)
-
-        retries[task_id] = retry_count + 1
-        context.update_state({'retries': retries})
-
-        return True
-
     def terminate(self, context: _TaskContext, task_result_or_exception: Union[TaskResult, TaskException]):
         task_request = context.unpack('task_request', TaskRequest)
 
@@ -179,24 +146,28 @@ class _Pipeline(object):
             task_result_or_exception = result_before_finally
 
         # set basic message properties
-        task_result_or_exception.correlation_id = task_request.id
+        task_result_or_exception.id = task_request.id
         task_result_or_exception.type = f'{task_request.type}.' + (
             'result' if isinstance(task_result_or_exception, TaskResult) else 'error')
 
         # pass back any state that we were given at the start of the pipeline
         task_result_or_exception.state.CopyFrom(task_request.state)
 
-        # remove the retry_request if set because this is only used if we are retrying
-        if isinstance(task_result_or_exception, TaskException):
-            task_result_or_exception.ClearField('retry_request')
-
         # finally emit the result (to egress, destination address or caller address)
         self._emit_result(context, task_request, task_result_or_exception)
 
 
-class PipelineBuilder():
+class PipelineBuilder(object):
     def __init__(self, pipeline: list = None):
         self._pipeline = [] if pipeline is None else pipeline
+        self._builder_id = _gen_id()
+
+    @property
+    def id(self):
+        if self.is_single_task():
+            return self._pipeline[0].task_id
+        else:
+            return self._builder_id
 
     def append_to(self, other: 'PipelineBuilder'):
         other._pipeline.extend(self._pipeline)
@@ -227,7 +198,11 @@ class PipelineBuilder():
         self._pipeline.append(_TaskEntry(_gen_id(), task_type, args, kwargs, parameters=parameters))
         return self
 
-    def set(self, **kwargs):
+    def set(self, retry_policy:RetryPolicy = None, **kwargs):
+
+        if retry_policy is not None:
+            kwargs['retry_policy'] = retry_policy.to_proto()
+
         if any(self._pipeline):
             entry = self._pipeline[-1]
             entry.set_parameters(kwargs)
@@ -254,20 +229,22 @@ class PipelineBuilder():
         return None if not any(self._pipeline) else self._pipeline[0].get_destination()
 
     def to_task_request(self, serialiser):
+        # if a pipeline consists of a single task then we will call that task directly instead of via the __builtins.pipeline task
         if self.is_single_task():
             task = self._pipeline[0]
-            task_id, task_type, args, kwargs = task.to_tuple()
+            task_id, task_type, args, kwargs, parameters = task.to_tuple()
         else:
-            task_id = str(uuid4())
+            task_id = self._builder_id
             task_type = '__builtins.run_pipeline'
-            args = self.validate().to_pipeline(serialiser=serialiser).to_proto()
+            args = self.validate().to_proto(serialiser=serialiser)
             kwargs = {}
+            parameters = {}
 
         # send a single argument by itself instead of wrapped inside a tuple
         if _is_tuple(args) and len(args) == 1:
             args = args[0]
 
-        task_request = TaskRequest(id=task_id, type=task_type)
+        task_request = TaskRequest(id=task_id, type=task_type, parameters=serialiser.to_proto(parameters))
         serialiser.serialise_request(task_request, args, kwargs)
         
         return task_request
@@ -303,9 +280,8 @@ class PipelineBuilder():
 
         return self
 
-    def to_proto(self, serialiser) -> Pipeline:
-        pipeline = Pipeline(entries=[p.to_proto(serialiser) for p in self._pipeline])
-        return pipeline
+    def to_proto(self, serialiser=None) -> Pipeline:
+        return _Pipeline(self._pipeline, serialiser=serialiser).to_proto()
 
     @staticmethod
     def from_proto(pipeline_proto: Pipeline, serialiser):

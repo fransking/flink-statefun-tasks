@@ -70,8 +70,11 @@ class TestHarness:
             if state_mutation.mutation_type == state_mutation.MODIFY:
                 next(filter(lambda x: x.state_name == state_mutation.state_name,
                             state)).state_value = state_mutation.state_value
+            elif state_mutation.mutation_type == state_mutation.DELETE:
+                next(filter(lambda x: x.state_name == state_mutation.state_name,
+                            state)).state_value = bytes()
             else:
-                raise ValueError('Only state modifications are currently supported')
+                raise ValueError('Only state modifications and deletions are currently supported')
         self.__states[item_id] = state
 
     def _copy_state_to_invocation(self, namespace, target_type, target_id, to_function):

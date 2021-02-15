@@ -1,4 +1,5 @@
-from statefun_tasks import TaskRequest, TaskResult, TaskException, DefaultSerialiser, PipelineBuilder
+from statefun_tasks import TaskRequest, TaskResult, TaskException, TaskAction, TaskActionRequest, TaskActionResult, \
+    TaskActionException, DefaultSerialiser, PipelineBuilder
 from statefun_tasks.client import TaskError
 
 from google.protobuf.any_pb2 import Any
@@ -37,6 +38,15 @@ class FlinkTasksClient(object):
         self._consumer_thread.daemon = True
         self._consumer_thread.start()
 
+    @staticmethod
+    def _get_request_key(item):
+        if isinstance(item, (TaskRequest, TaskResult, TaskException)):
+            return f'task_req.{item.id}'
+        elif isinstance(item, (TaskActionRequest, TaskActionResult, TaskActionException)):
+            return f'task_req.{item.id}'
+        else:
+            raise ValueError(f'Unsupported request type {type(item)}')
+
     def _get_request_topic(self, pipeline: PipelineBuilder, topic=None):
         if topic is not None:
             return topic
@@ -49,36 +59,45 @@ class FlinkTasksClient(object):
             return self._request_topics[None]
 
         raise ValueError(f'Could not find a topic to send this request to')
-
+        
     def submit(self, pipeline: PipelineBuilder, topic=None):
-        return self._submit_request(pipeline, topic=topic)
+        task_request = pipeline.to_task_request(self._serialiser)
+        topic = self._get_request_topic(pipeline, topic)
+        return self._submit_request(task_request, topic)
 
     async def submit_async(self, pipeline: PipelineBuilder, topic=None):
         future, _ = self.submit(pipeline, topic=topic)
         return await asyncio.wrap_future(future)
 
-    def _submit_request(self, pipeline: PipelineBuilder, topic=None):
-        task_request = pipeline.to_task_request(self._serialiser)
+    def _submit_request(self, request, topic):
+        request_id = self._get_request_key(request)
 
-        if task_request.id is None or task_request.id == "":
-            raise ValueError('Task request is missing an id')
-
-        if task_request.type is None or task_request.type == "":
-            raise ValueError('Task request is missing a type')
-
+        # if we have already subscribed then don't subscribe again
+        future = self._requests.get(request_id, None)
+        if future is not None:
+            return future, request.id
+    
+        # else create new future for this request
         future = Future()
-        self._requests[task_request.id] = future
+        self._requests[request_id] = future
 
-        task_request.reply_topic = self._reply_topic
+        request.reply_topic = self._reply_topic
 
-        key = task_request.id.encode('utf-8')
-        val = task_request.SerializeToString()
+        key = request.id.encode('utf-8')
+        val = request.SerializeToString()
 
-        topic = self._get_request_topic(pipeline, topic)
         self._producer.send(topic=topic, key=key, value=val)
         self._producer.flush()
 
-        return future, task_request.id
+        return future, request.id
+
+    def get_status(self, pipeline: PipelineBuilder, topic=None):
+        task_action = TaskActionRequest(id=pipeline.id, action=TaskAction.NONE, reply_topic=self._reply_topic)
+        return self._submit_request(task_action, topic)
+
+    async def get_status_async(self, pipeline: PipelineBuilder, topic=None):
+        future, _ = self.get_status(pipeline, topic)
+        return await asyncio.wrap_future(future)
 
     def _consume(self):
         while True:
@@ -91,41 +110,53 @@ class FlinkTasksClient(object):
                     any.ParseFromString(message.value)
 
                     if any.Is(TaskException.DESCRIPTOR):
-                        self._raise_exception(any)
+                        self._raise_exception(any, TaskException)
                     elif any.Is(TaskResult.DESCRIPTOR):
-                        self._return_result(any)
+                        self._return_result(any, TaskResult)
+                    elif any.Is(TaskActionException.DESCRIPTOR):
+                        self._raise_exception(any, TaskActionException)
+                    elif any.Is(TaskActionResult.DESCRIPTOR):
+                        self._return(any, TaskActionResult)
 
             except Exception as ex:
                 _log.warning(f'Exception in consumer thread - {ex}', exc_info=ex)
 
-    def _return_result(self, any: Any):
-        task_result = TaskResult()
-        any.Unpack(task_result)
+    def _unpack_with_future(self, any: Any, proto_type):
+        proto = proto_type()
+        any.Unpack(proto)
 
-        correlation_id = task_result.correlation_id
-
-        future = self._requests.get(correlation_id, None)
+        request_id = self._get_request_key(proto)
+        future = self._requests.get(request_id, None)
 
         if future is not None:
-            del self._requests[correlation_id]
+            del self._requests[request_id]
+            return proto, future
+        
+        return None, None
 
+    def _return(self, any: Any, proto_type):
+        proto, future = self._unpack_with_future(any, proto_type)
+
+        if future is not None:
+            try:
+                future.set_result(proto)
+            except Exception as ex:
+                future.set_exception(ex)
+
+    def _return_result(self, any: Any, proto_type):
+        task_result, future = self._unpack_with_future(any, proto_type)
+
+        if future is not None:
             try:
                 result, _ = self._serialiser.deserialise_result(task_result)
                 future.set_result(result)
             except Exception as ex:
                 future.set_exception(ex)
 
-    def _raise_exception(self, any: Any):
-        task_exception = TaskException()
-        any.Unpack(task_exception)
-
-        correlation_id = task_exception.correlation_id
-
-        future = self._requests.get(correlation_id, None)
+    def _raise_exception(self, any: Any, proto_type):
+        task_exception, future = self._unpack_with_future(any, proto_type)
 
         if future is not None:
-            del self._requests[correlation_id]
-
             try:
                 future.set_exception(TaskError(task_exception))
             except Exception as ex:
