@@ -4,6 +4,7 @@ from ._types import RetryPolicy, TaskAlreadyExistsException
 from ._pipeline import _Pipeline, PipelineBuilder
 from ._context import _TaskContext
 from ._builtins import run_pipeline
+from ._protobuf import _pack_any
 from .messages_pb2 import TaskRequest, TaskResult, TaskException, TaskActionRequest, TaskActionResult, TaskActionException, \
     TaskAction, TaskStatus
 
@@ -21,7 +22,7 @@ _log = logging.getLogger('FlinkTasks')
 
 def _task_name(task_input):
     if isinstance(task_input, TaskActionRequest):
-        return f'Action.{TaskAction.Name(task_input.action)}'
+        return f'Action [{TaskAction.Name(task_input.action)}]'
     else:
         return task_input.type
 
@@ -48,15 +49,25 @@ def _create_task_exception(task_input, ex):
         return task_exception
 
 
-def _create_task_result(task_input):
-    task_result = TaskResult(
-        id=task_input.id,
-        type=f'{_task_name(task_input)}.result')
+def _create_task_result(task_input, result=None):
+    if isinstance(task_input, TaskActionRequest):
+        task_result = TaskActionResult(
+            id=task_input.id,
+            action = task_input.action
+        )
+    else:
+        task_result = TaskResult(
+            id=task_input.id,
+            type=f'{_task_name(task_input)}.result')
 
-    if task_input.HasField('state'):
-        task_result.state.CopyFrom(task_input.state)
+        if task_input.HasField('state'):
+            task_result.state.CopyFrom(task_input.state)
+
+    if result is not None:
+        task_result.result.CopyFrom(_pack_any(result))
 
     return task_result
+
 
 
 class FlinkTasks(object):
@@ -216,11 +227,11 @@ class FlinkTasks(object):
     def _invoke_action(self, context, task_action):
         state = context.get_state()
 
-        # if task_action.action == TaskAction.GET_STATUS:
-        #     task_request = context.unpack('task_request', TaskRequest)
-        #     pass
-
-        raise ValueError(f'Unsupported task action {TaskAction.Name(task_action.action)}')
+        if task_action.action == TaskAction.GET_STATUS:
+            task_action_result = _create_task_result(task_action, TaskStatus(status=TaskStatus.Status.RUNNING))
+            self._emit_result(context, task_action, task_action_result)
+        else:    
+            raise ValueError(f'Unsupported task action {TaskAction.Name(task_action.action)}')
 
     def _invoke_task(self, context, task_request):
         if context.unpack('task_request', TaskRequest) is not None:
