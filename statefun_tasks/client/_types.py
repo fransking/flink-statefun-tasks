@@ -17,8 +17,4 @@ class TaskStatus(Enum):
     RUNNING = TaskStatusProto.Status.RUNNING
     COMPLETED = TaskStatusProto.Status.COMPLETED
     FAILED = TaskStatusProto.Status.FAILED
-
-    # @staticmethod
-    # def from_proto(proto: TaskStatusProto):
-    #     print(f'proto is {proto}')
-    #     return TaskStatus(proto.status)
+    WAITING = TaskStatusProto.Status.WAITING

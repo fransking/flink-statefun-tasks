@@ -58,15 +58,11 @@ class FlinkTasksClient(object):
             return self._request_topics[None]
 
         raise ValueError(f'Could not find a topic to send this request to')
-        
-    def submit(self, pipeline: PipelineBuilder, topic=None):
-        task_request = pipeline.to_task_request(self._serialiser)
-        topic = self._get_request_topic(pipeline, topic)
-        return self._submit_request(task_request, topic)
 
-    async def submit_async(self, pipeline: PipelineBuilder, topic=None):
-        future, _ = self.submit(pipeline, topic=topic)
-        return await asyncio.wrap_future(future)
+    @staticmethod
+    def _wrap_future(res):
+        future, _ = res
+        return asyncio.wrap_future(future)
 
     def _submit_request(self, request, topic):
         request_id = self._get_request_key(request)
@@ -90,13 +86,29 @@ class FlinkTasksClient(object):
 
         return future, request.id
 
-    def get_status(self, pipeline: PipelineBuilder, topic=None):
-        task_action = TaskActionRequest(id=pipeline.id, action=TaskAction.GET_STATUS, reply_topic=self._reply_topic)
+    def _submit_action(self, task_id, action, topic):
+        task_action = TaskActionRequest(id=task_id, action=action, reply_topic=self._reply_topic)
         return self._submit_request(task_action, topic)
 
+    def submit(self, pipeline: PipelineBuilder, topic=None):
+        task_request = pipeline.to_task_request(self._serialiser)
+        topic = self._get_request_topic(pipeline, topic)
+        return self._submit_request(task_request, topic)
+
+    async def submit_async(self, pipeline: PipelineBuilder, topic=None):
+        return await self._wrap_future(self.submit(pipeline, topic=topic))
+
+    def get_status(self, pipeline: PipelineBuilder, topic=None):
+        return self._submit_action(pipeline.id, TaskAction.GET_STATUS, topic)
+
     async def get_status_async(self, pipeline: PipelineBuilder, topic=None):
-        future, _ = self.get_status(pipeline, topic)
-        return await asyncio.wrap_future(future)
+        return await self._wrap_future(self.get_status(pipeline, topic))
+    
+    def get_request(self, pipeline: PipelineBuilder, topic=None):
+        return self._submit_action(pipeline.id, TaskAction.GET_REQUEST, topic)
+
+    async def get_request_async(self, pipeline: PipelineBuilder, topic=None):
+        return await self._wrap_future(self.get_request(pipeline, topic))
 
     def _consume(self):
         while True:
@@ -144,8 +156,13 @@ class FlinkTasksClient(object):
 
         if future is not None:
             try:
+
                 if proto.action == TaskAction.GET_STATUS:
                     future.set_result(TaskStatus(self._unpack(proto.result, TaskStatusProto).status))
+                
+                elif proto.action == TaskAction.GET_REQUEST:
+                    future.set_result(self._unpack(proto.result, TaskRequest))
+
                 else:
                     raise ValueError(f'Unsupported action {TaskAction.Name(proto.action)}')
             except Exception as ex:
