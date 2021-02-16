@@ -1,12 +1,11 @@
-from statefun_tasks import TaskRequest, TaskResult, TaskException, TaskAction, TaskActionRequest, TaskActionResult, \
-    TaskActionException, DefaultSerialiser, PipelineBuilder
-from statefun_tasks.client import TaskError
+from statefun_tasks import DefaultSerialiser, PipelineBuilder, TaskRequest, TaskResult, TaskException, TaskAction, \
+    TaskActionRequest, TaskActionResult, TaskActionException, TaskStatus as TaskStatusProto
+from statefun_tasks.client import TaskError, TaskStatus
 
 from google.protobuf.any_pb2 import Any
 from kafka import KafkaProducer, KafkaConsumer, TopicPartition
 
 import logging
-import socket
 from uuid import uuid4
 from threading import Thread
 import asyncio
@@ -92,7 +91,7 @@ class FlinkTasksClient(object):
         return future, request.id
 
     def get_status(self, pipeline: PipelineBuilder, topic=None):
-        task_action = TaskActionRequest(id=pipeline.id, action=TaskAction.NONE, reply_topic=self._reply_topic)
+        task_action = TaskActionRequest(id=pipeline.id, action=TaskAction.GET_STATUS, reply_topic=self._reply_topic)
         return self._submit_request(task_action, topic)
 
     async def get_status_async(self, pipeline: PipelineBuilder, topic=None):
@@ -116,14 +115,20 @@ class FlinkTasksClient(object):
                     elif any.Is(TaskActionException.DESCRIPTOR):
                         self._raise_exception(any, TaskActionException)
                     elif any.Is(TaskActionResult.DESCRIPTOR):
-                        self._return(any, TaskActionResult)
+                        self._return_action_result(any, TaskActionResult)
 
             except Exception as ex:
                 _log.warning(f'Exception in consumer thread - {ex}', exc_info=ex)
 
-    def _unpack_with_future(self, any: Any, proto_type):
+
+    @staticmethod
+    def _unpack(any_proto: Any, proto_type):
         proto = proto_type()
-        any.Unpack(proto)
+        any_proto.Unpack(proto)
+        return proto
+
+    def _unpack_with_future(self, any_proto: Any, proto_type):
+        proto = self._unpack(any_proto, proto_type)
 
         request_id = self._get_request_key(proto)
         future = self._requests.get(request_id, None)
@@ -134,12 +139,15 @@ class FlinkTasksClient(object):
         
         return None, None
 
-    def _return(self, any: Any, proto_type):
-        proto, future = self._unpack_with_future(any, proto_type)
+    def _return_action_result(self, any_proto: Any, proto_type):
+        proto, future = self._unpack_with_future(any_proto, proto_type)
 
         if future is not None:
             try:
-                future.set_result(proto)
+                if proto.action == TaskAction.GET_STATUS:
+                    future.set_result(TaskStatus(self._unpack(proto.result, TaskStatusProto).status))
+                else:
+                    raise ValueError(f'Unsupported action {TaskAction.Name(proto.action)}')
             except Exception as ex:
                 future.set_exception(ex)
 
@@ -167,23 +175,21 @@ class FlinkTasksClientFactory():
     __clients = {}
 
     @staticmethod
-    def get_client(kafka_broker_url, request_topics: dict, reply_topic_prefix, serialiser=None) -> FlinkTasksClient:
+    def get_client(kafka_broker_url, request_topics: dict, reply_topic, serialiser=None) -> FlinkTasksClient:
         """
         Creates a FlinkTasksClient for submitting tasks to flink
 
         :param kafka_broker_url: url of the kafka broker used for ingress and egress
         :param request_topic: either a single ingress topic or dictionary of worker to ingress topic mappings  (use None for default)
                               e.g. {'example/worker': 'example.requests', None: 'example.default.requests'}
-        :param reply_topic: topic to listen on for responses
+        :param reply_topic: topic to listen on for responses (a unique consumer group id will be created)
         :param serialiser: serialiser to use (optional will use DefaultSerialiser if not set)
         """
 
-        key = f'{kafka_broker_url}.{request_topics}.{reply_topic_prefix}'
+        key = f'{kafka_broker_url}.{reply_topic}'
 
         if key not in FlinkTasksClientFactory.__clients:
-
-            reply_topic = f'{reply_topic_prefix}.{socket.gethostname()}.{str(uuid4())}'
-            client = FlinkTasksClient(kafka_broker_url, request_topics, reply_topic, serialiser=serialiser)
+            client = FlinkTasksClient(kafka_broker_url, request_topics, reply_topic, serialiser=serialiser, group_id=str(uuid4()))
             FlinkTasksClientFactory.__clients[key] = client
 
         return FlinkTasksClientFactory.__clients[key]
