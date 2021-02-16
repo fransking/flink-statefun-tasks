@@ -101,13 +101,12 @@ message GroupResults {
 }
 
 enum TaskAction {
-    NONE = 0;
-    GET_STATUS = 1;
-    GET_REQUEST = 2;
-    GET_RESULT = 3;
-    PAUSE_PIPELINE = 4;
-    RESUME_PIPELINE = 5;
-    STOP_PIPELINE = 6;
+    GET_STATUS = 0;
+    GET_REQUEST = 1;
+    GET_RESULT = 2;
+    PAUSE_PIPELINE = 3;
+    RESUME_PIPELINE = 4;
+    STOP_PIPELINE = 5;
 }
 
 message TaskActionRequest {
@@ -139,6 +138,7 @@ message TaskStatus {
         RUNNING = 1;
         COMPLETED = 2;
         FAILED = 3;
+        WAITING = 4;
     }
     Status status = 1;
 }

@@ -5,6 +5,7 @@ from ._pipeline import _Pipeline, PipelineBuilder
 from ._context import _TaskContext
 from ._builtins import run_pipeline
 from ._protobuf import _pack_any
+from ._task_actions import _invoke_task_action
 from .messages_pb2 import TaskRequest, TaskResult, TaskException, TaskActionRequest, TaskActionResult, TaskActionException, \
     TaskAction, TaskStatus
 
@@ -227,12 +228,15 @@ class FlinkTasks(object):
     def _invoke_action(self, context, task_action):
         state = context.get_state()
 
-        if task_action.action == TaskAction.GET_STATUS:
-            task_action_result = _create_task_result(task_action, TaskStatus(status=TaskStatus.Status.RUNNING))
-            self._emit_result(context, task_action, task_action_result)
-        else:    
-            raise ValueError(f'Unsupported task action {TaskAction.Name(task_action.action)}')
+        try:
+            result = _invoke_task_action(context, task_action)
+            if result is not None:
+                self._emit_result(context, task_action, _create_task_result(task_action, result))
+                
+        except Exception as ex:
+            self._emit_result(context, task_action, _create_task_exception(task_action, ex))
 
+        
     def _invoke_task(self, context, task_request):
         if context.unpack('task_request', TaskRequest) is not None:
             # don't allow tasks to be overwritten
