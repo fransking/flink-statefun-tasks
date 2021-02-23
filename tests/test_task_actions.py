@@ -54,7 +54,7 @@ class TaskActionsTests(unittest.TestCase):
     def test_get_task_request_for_a_non_existing_task(self):
         pipeline = tasks.send(_say_hello, 'Jane', 'Doe')
         try:
-            self.test_harness.run_action(pipeline, ßTaskAction.GET_REQUEST)
+            self.test_harness.run_action(pipeline, TaskAction.GET_REQUEST)
         except TaskErrorException as ex:
             self.assertEqual(ex.task_error.message, 'Task request not found')
         else:
