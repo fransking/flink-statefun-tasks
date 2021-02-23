@@ -43,6 +43,19 @@ module:
                 typeUrl: com.googleapis/statefun_tasks.TaskRequest
                 targets:
                   - example/worker
+              - topic: statefun-test.actions
+                typeUrl: com.googleapis/statefun_tasks.TaskActionRequest
+                targets:
+                  - example/worker
+              - topic: statefun-test.async-requests
+                typeUrl: com.googleapis/statefun_tasks.TaskRequest
+                targets:
+                  - example/async_worker
+              - topic: statefun-test.async-actions
+                typeUrl: com.googleapis/statefun_tasks.TaskActionRequest
+                targets:
+                  - example/async_worker
+
     egresses:
       - egress:
           meta:
