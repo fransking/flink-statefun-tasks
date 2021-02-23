@@ -23,18 +23,18 @@ class TaskActionsTests(unittest.TestCase):
         any_proto.Unpack(proto)
         return proto
 
-    def test_get_status_for_pending_task(self):
+    def test_get_status_for_pending_pipeline(self):
         pipeline = tasks.send(_say_hello, 'Jane', 'Doe')
         action_result = self.test_harness.run_action(pipeline, TaskAction.GET_STATUS)
         self.assertEqual(self._unpack(action_result.result, TaskStatus).status, TaskStatus.PENDING)
 
-    def test_get_status_for_completed_task(self):
+    def test_get_status_for_completed_pipeline(self):
         pipeline = tasks.send(_say_hello, 'Jane', 'Doe')
         self.test_harness.run_pipeline(pipeline)
         action_result = self.test_harness.run_action(pipeline, TaskAction.GET_STATUS)
         self.assertEqual(self._unpack(action_result.result, TaskStatus).status, TaskStatus.COMPLETED)
 
-    def test_get_status_for_failed_task(self):
+    def test_get_status_for_failed_pipeline(self):
         pipeline = tasks.send(_say_hello, 'Jane')
         try:
             self.test_harness.run_pipeline(pipeline)
@@ -44,14 +44,14 @@ class TaskActionsTests(unittest.TestCase):
         action_result = self.test_harness.run_action(pipeline, TaskAction.GET_STATUS)
         self.assertEqual(self._unpack(action_result.result, TaskStatus).status, TaskStatus.FAILED)
 
-    def test_get_task_request_for_an_existing_task(self):
+    def test_get_task_request_for_an_existing_pipeline(self):
         pipeline = tasks.send(_say_hello, 'Jane', 'Doe')
         self.test_harness.run_pipeline(pipeline)
         action_result = self.test_harness.run_action(pipeline, TaskAction.GET_REQUEST)
         task_request = self._unpack(action_result.result, TaskRequest)
         self.assertEqual(task_request.id, pipeline.id)
 
-    def test_get_task_request_for_a_non_existing_task(self):
+    def test_get_task_request_for_a_non_existing_pipeline(self):
         pipeline = tasks.send(_say_hello, 'Jane', 'Doe')
         try:
             self.test_harness.run_action(pipeline, TaskAction.GET_REQUEST)
@@ -60,7 +60,7 @@ class TaskActionsTests(unittest.TestCase):
         else:
             self.fail('Expected an exception')
 
-    def test_get_task_result_for_a_completed_task(self):
+    def test_get_task_result_for_a_completed_pipeline(self):
         pipeline = tasks.send(_say_hello, 'Jane', 'Doe')
         self.test_harness.run_pipeline(pipeline)
         action_result = self.test_harness.run_action(pipeline, TaskAction.GET_RESULT)
