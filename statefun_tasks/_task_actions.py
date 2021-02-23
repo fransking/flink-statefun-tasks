@@ -12,11 +12,16 @@ def _get_task_status(context):
 
 def _get_task_request(context):
     task_request = context.unpack('task_request', TaskRequest)
-
     if task_request is not None:
         return task_request
-
     raise ValueError(f'Task request not found')
+
+
+def _get_task_result(context):
+    task_result = context.unpack('task_result', TaskResult)
+    if task_result is not None:
+        return task_result
+    raise ValueError(f'Task result not found')
     
 
 def _invoke_task_action(context, task_action):
@@ -25,6 +30,9 @@ def _invoke_task_action(context, task_action):
 
     elif task_action.action == TaskAction.GET_REQUEST:
         return _get_task_request(context)
+
+    elif task_action.action == TaskAction.GET_RESULT:
+        return _get_task_result(context)
 
     else:    
         raise ValueError(f'Unsupported task action {TaskAction.Name(task_action.action)}')

@@ -236,7 +236,6 @@ class FlinkTasks(object):
         except Exception as ex:
             self._emit_result(context, task_action, _create_task_exception(task_action, ex))
 
-        
     def _invoke_task(self, context, task_request):
         if context.unpack('task_request', TaskRequest) is not None:
             # don't allow tasks to be overwritten
