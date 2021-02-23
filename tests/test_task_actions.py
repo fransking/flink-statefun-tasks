@@ -54,28 +54,18 @@ class TaskActionsTests(unittest.TestCase):
     def test_get_task_request_for_a_non_existing_task(self):
         pipeline = tasks.send(_say_hello, 'Jane', 'Doe')
         try:
-            self.test_harness.run_action(pipeline, TaskAction.GET_REQUEST)
+            self.test_harness.run_action(pipeline, ßTaskAction.GET_REQUEST)
         except TaskErrorException as ex:
             self.assertEqual(ex.task_error.message, 'Task request not found')
         else:
             self.fail('Expected an exception')
 
-    def test_get_task_result_for_an_completed_task(self):
+    def test_get_task_result_for_a_completed_task(self):
         pipeline = tasks.send(_say_hello, 'Jane', 'Doe')
         self.test_harness.run_pipeline(pipeline)
         action_result = self.test_harness.run_action(pipeline, TaskAction.GET_RESULT)
         task_result = self._unpack(action_result.result, TaskResult)
         self.assertEqual(task_result.id, pipeline.id)
-
-    # def test_get_task_result_for_a_non_existing_task(self):
-    #     pipeline = tasks.send(_say_hello, 'Jane', 'Doe')
-    #     try:
-    #         self.test_harness.run_action(pipeline, TaskAction.GET_REQUEST)
-    #     except TaskErrorException as ex:
-    #         self.assertEqual(ex.task_error.message, 'Task request not found')
-    #     else:
-    #         self.fail('Expected an exception')
-
 
 if __name__ == '__main__':
     unittest.main()
