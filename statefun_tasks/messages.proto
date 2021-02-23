@@ -104,9 +104,6 @@ enum TaskAction {
     GET_STATUS = 0;
     GET_REQUEST = 1;
     GET_RESULT = 2;
-    PAUSE_PIPELINE = 3;
-    RESUME_PIPELINE = 4;
-    STOP_PIPELINE = 5;
 }
 
 message TaskActionRequest {

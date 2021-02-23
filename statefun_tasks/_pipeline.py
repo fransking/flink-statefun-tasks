@@ -164,10 +164,7 @@ class PipelineBuilder(object):
 
     @property
     def id(self):
-        if self.is_single_task():
-            return self._pipeline[0].task_id
-        else:
-            return self._builder_id
+        return self._builder_id
 
     def append_to(self, other: 'PipelineBuilder'):
         other._pipeline.extend(self._pipeline)
@@ -218,27 +215,15 @@ class PipelineBuilder(object):
             self._pipeline.append(_TaskEntry(_gen_id(), task_type, args, kwargs, parameters=parameters))
         return self
 
-    def is_single_task(self):
-        if len(self._pipeline) == 1:
-            if isinstance(self._pipeline[0], _TaskEntry):
-                return True
-
-        return False
-
     def get_inital_destination(self):
         return None if not any(self._pipeline) else self._pipeline[0].get_destination()
 
     def to_task_request(self, serialiser):
-        # if a pipeline consists of a single task then we will call that task directly instead of via the __builtins.pipeline task
-        if self.is_single_task():
-            task = self._pipeline[0]
-            task_id, task_type, args, kwargs, parameters = task.to_tuple()
-        else:
-            task_id = self._builder_id
-            task_type = '__builtins.run_pipeline'
-            args = self.validate().to_proto(serialiser=serialiser)
-            kwargs = {}
-            parameters = {}
+        task_id = self._builder_id
+        task_type = '__builtins.run_pipeline'
+        args = self.validate().to_proto(serialiser=serialiser)
+        kwargs = {}
+        parameters = {}    
 
         # send a single argument by itself instead of wrapped inside a tuple
         if _is_tuple(args) and len(args) == 1:

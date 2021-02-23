@@ -16,11 +16,12 @@ _log = logging.getLogger('FlinkTasks')
 
 class FlinkTasksClient(object):
     
-    def __init__(self, kafka_broker_url, request_topics, reply_topic, group_id=None, serialiser=None):
+    def __init__(self, kafka_broker_url, request_topics, action_topics, reply_topic, group_id=None, serialiser=None):
         self._kafka_broker_url = kafka_broker_url
         self._requests = {}
 
         self._request_topics = request_topics
+        self._action_topics = action_topics
         self._reply_topic = reply_topic
         self._group_id = group_id
         self._serialiser = serialiser if serialiser is not None else DefaultSerialiser()
@@ -40,29 +41,39 @@ class FlinkTasksClient(object):
     @staticmethod
     def _get_request_key(item):
         if isinstance(item, (TaskRequest, TaskResult, TaskException)):
-            return f'task_req.{item.id}'
+            return f'request.{item.id}'
         elif isinstance(item, (TaskActionRequest, TaskActionResult, TaskActionException)):
-            return f'task_req.{item.id}'
+            return f'action.{item.action}.{item.id}'
         else:
             raise ValueError(f'Unsupported request type {type(item)}')
 
-    def _get_request_topic(self, pipeline: PipelineBuilder, topic=None):
+    @staticmethod
+    def _try_get_topic_for(pipeline: PipelineBuilder, topics, topic=None):
         if topic is not None:
             return topic
 
         destination = pipeline.get_inital_destination()
-        if destination in self._request_topics:
-            return self._request_topics[destination]
+        if destination in topics:
+            return topics[destination]
 
-        if None in self._request_topics:
-            return self._request_topics[None]
+        if None in topics:
+            return topics[None]
+        
+        return None
 
-        raise ValueError(f'Could not find a topic to send this request to')
+    def _get_request_topic(self, pipeline: PipelineBuilder, topic=None):
+        topic = self._try_get_topic_for(pipeline, self._request_topics, topic)
+        if topic is None:
+            raise ValueError(f'Could not find a topic to send this request to')
+        else:
+            return topic
 
-    @staticmethod
-    def _wrap_future(res):
-        future, _ = res
-        return asyncio.wrap_future(future)
+    def _get_action_topic(self, pipeline: PipelineBuilder, topic=None):
+        topic = self._try_get_topic_for(pipeline, self._action_topics, topic)
+        if topic is None:
+            raise ValueError(f'Could not find a topic to send this action to')
+        else:
+            return topic
 
     def _submit_request(self, request, topic):
         request_id = self._get_request_key(request)
@@ -70,7 +81,7 @@ class FlinkTasksClient(object):
         # if we have already subscribed then don't subscribe again
         future = self._requests.get(request_id, None)
         if future is not None:
-            return future, request.id
+            return future
     
         # else create new future for this request
         future = Future()
@@ -84,7 +95,7 @@ class FlinkTasksClient(object):
         self._producer.send(topic=topic, key=key, value=val)
         self._producer.flush()
 
-        return future, request.id
+        return future
 
     def _submit_action(self, task_id, action, topic):
         task_action = TaskActionRequest(id=task_id, action=action, reply_topic=self._reply_topic)
@@ -96,19 +107,21 @@ class FlinkTasksClient(object):
         return self._submit_request(task_request, topic)
 
     async def submit_async(self, pipeline: PipelineBuilder, topic=None):
-        return await self._wrap_future(self.submit(pipeline, topic=topic))
+        return await asyncio.wrap_future(self.submit(pipeline, topic=topic))
 
     def get_status(self, pipeline: PipelineBuilder, topic=None):
+        topic = self._get_action_topic(pipeline, topic)
         return self._submit_action(pipeline.id, TaskAction.GET_STATUS, topic)
 
     async def get_status_async(self, pipeline: PipelineBuilder, topic=None):
-        return await self._wrap_future(self.get_status(pipeline, topic))
+        return await asyncio.wrap_future(self.get_status(pipeline, topic))
     
     def get_request(self, pipeline: PipelineBuilder, topic=None):
+        topic = self._get_action_topic(pipeline, topic)
         return self._submit_action(pipeline.id, TaskAction.GET_REQUEST, topic)
 
     async def get_request_async(self, pipeline: PipelineBuilder, topic=None):
-        return await self._wrap_future(self.get_request(pipeline, topic))
+        return await asyncio.wrap_future(self.get_request(pipeline, topic))
 
     def _consume(self):
         while True:
@@ -192,13 +205,14 @@ class FlinkTasksClientFactory():
     __clients = {}
 
     @staticmethod
-    def get_client(kafka_broker_url, request_topics: dict, reply_topic, serialiser=None) -> FlinkTasksClient:
+    def get_client(kafka_broker_url, request_topics: dict, action_topics: dict, reply_topic, serialiser=None) -> FlinkTasksClient:
         """
         Creates a FlinkTasksClient for submitting tasks to flink
 
         :param kafka_broker_url: url of the kafka broker used for ingress and egress
-        :param request_topic: either a single ingress topic or dictionary of worker to ingress topic mappings  (use None for default)
+        :param request_topics: dictionary of worker to ingress topic mappings  (use None for default)
                               e.g. {'example/worker': 'example.requests', None: 'example.default.requests'}
+        :param action_toptics: as per request_topics but used for action requests
         :param reply_topic: topic to listen on for responses (a unique consumer group id will be created)
         :param serialiser: serialiser to use (optional will use DefaultSerialiser if not set)
         """
@@ -206,7 +220,7 @@ class FlinkTasksClientFactory():
         key = f'{kafka_broker_url}.{reply_topic}'
 
         if key not in FlinkTasksClientFactory.__clients:
-            client = FlinkTasksClient(kafka_broker_url, request_topics, reply_topic, serialiser=serialiser, group_id=str(uuid4()))
+            client = FlinkTasksClient(kafka_broker_url, request_topics, action_topics, reply_topic, serialiser=serialiser, group_id=str(uuid4()))
             FlinkTasksClientFactory.__clients[key] = client
 
         return FlinkTasksClientFactory.__clients[key]
