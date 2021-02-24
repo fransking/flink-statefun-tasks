@@ -96,6 +96,10 @@ message TaskState {
     MapOfStringToAny data = 1;
 }
 
+message TaskResults {
+    map<string, google.protobuf.Any> by_id = 1;
+}
+
 message GroupResults {
     map<string, TaskResult> results = 1;
 }

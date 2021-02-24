@@ -21,6 +21,12 @@ def _get_task_result(context):
     task_result = context.unpack('task_result', TaskResult)
     if task_result is not None:
         return task_result
+
+    task_exception = context.unpack('task_exception', TaskException)
+    if task_exception is not None:
+        return task_exception
+
+
     raise ValueError(f'Task result not found')
     
 

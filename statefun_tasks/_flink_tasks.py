@@ -303,7 +303,7 @@ class FlinkTasks(object):
                 context.update_state({'original_caller_address': context.get_caller_address(), 'original_caller_id': context.get_caller_id()})
 
             # remove previous task_request from state, increment retry count
-            del context._context['task_request']
+            context.delete('task_request')
             state['retry_count'] = retry_count + 1
             
             # send retry

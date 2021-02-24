@@ -123,6 +123,13 @@ class FlinkTasksClient(object):
     async def get_request_async(self, pipeline: PipelineBuilder, topic=None):
         return await asyncio.wrap_future(self.get_request(pipeline, topic))
 
+    def get_result(self, pipeline: PipelineBuilder, topic=None):
+        topic = self._get_action_topic(pipeline, topic)
+        return self._submit_action(pipeline.id, TaskAction.GET_RESULT, topic)
+
+    async def get_result_async(self, pipeline: PipelineBuilder, topic=None):
+        return await asyncio.wrap_future(self.get_result(pipeline, topic))
+
     def _consume(self):
         while True:
             try:
@@ -175,6 +182,9 @@ class FlinkTasksClient(object):
                 
                 elif proto.action == TaskAction.GET_REQUEST:
                     future.set_result(self._unpack(proto.result, TaskRequest))
+
+                elif proto.action == TaskAction.GET_RESULT:
+                    future.set_result(self._unpack(proto.result, TaskResult))
 
                 else:
                     raise ValueError(f'Unsupported action {TaskAction.Name(proto.action)}')

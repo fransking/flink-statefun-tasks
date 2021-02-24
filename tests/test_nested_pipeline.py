@@ -34,7 +34,5 @@ class NestedPipelineTests(unittest.TestCase):
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, 'Hello Jane Doe.  So now I will say see you later!')
 
-        # a = self.test_harness.get
-
 if __name__ == '__main__':
     unittest.main()
