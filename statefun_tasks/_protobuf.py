@@ -2,7 +2,7 @@ from google.protobuf.wrappers_pb2 import DoubleValue, Int64Value, BoolValue, Str
 from google.protobuf.any_pb2 import Any
 from google.protobuf.message import Message
 from .messages_pb2 import MapOfStringToAny, ArrayOfAny, TupleOfAny, TaskEntry, GroupEntry, NoneValue, \
-    TaskRetryPolicy, TaskRequest, TaskResult, TaskException, TaskState, GroupResults, Pipeline, PipelineEntry, Address, \
+    TaskRetryPolicy, TaskRequest, TaskResult, TaskException, TaskState, TaskResults, GroupResults, Pipeline, PipelineEntry, Address, \
         ArgsAndKwargs, TaskActionRequest, TaskActionResult, TaskActionException
 from ._utils import _is_tuple
 from typing import Union
@@ -36,6 +36,7 @@ _KNOWN_PROTO_TYPES = [
     TaskResult,
     TaskException,
     TaskState,
+    TaskResults,
     GroupResults,
     Pipeline, 
     PipelineEntry,

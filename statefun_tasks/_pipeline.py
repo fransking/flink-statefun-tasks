@@ -3,7 +3,7 @@ from ._serialisation import DefaultSerialiser
 from ._types import _TaskEntry, _GroupEntry, RetryPolicy
 from ._context import _TaskContext
 from ._pipeline_utils import _get_initial_tasks, _mark_task_complete, _get_task_entry, _get_next_step_in_pipeline, \
-    _extend_args, _save_group_result, _aggregate_group_results
+    _extend_args, _save_task_result_or_exception, _aggregate_group_results, _try_get_finally_task
 from .messages_pb2 import TaskRequest, TaskResult, TaskException, GroupResults, GroupEntry, TaskEntry, Pipeline
 
 from typing import Union, Iterable
@@ -86,22 +86,24 @@ class _Pipeline(object):
         # mark pipeline step as complete
         _mark_task_complete(caller_id, self._pipeline)
 
+        # record the task result / exception - returns current map of task_id to task_result
+        task_results =_save_task_result_or_exception(caller_id, state, task_result_or_exception)
+
         # save updated pipeline state
         context.update_state({'pipeline': self.to_proto()})
 
         # get the next step of the pipeline to run (if any)
-        previous_task_failed = isinstance(task_result_or_exception, TaskException)
-        _, next_step, group = _get_next_step_in_pipeline(caller_id, previous_task_failed, self._pipeline)
+        _, next_step, group = _get_next_step_in_pipeline(caller_id, self._pipeline)
 
-        # need to aggregate task results into group state
-        if group is not None:
-            # save each result from the pipeline
-            group_results = _save_group_result(group, caller_id, state, task_result_or_exception)
+        # if the group is complete the create the aggregate results as a list
+        if group is not None and group.is_complete():
+            task_result_or_exception = _aggregate_group_results(group, task_results, self._serialiser)
 
-            # if the group is complete the create the aggregate results as a list
-            if group.is_complete():
-                task_result_or_exception = _aggregate_group_results(group, group_results, self._serialiser)
+        # if we got an exception then the next step is the finally_task if there is one (or none otherwise)
+        if isinstance(task_result_or_exception, TaskException):
+            next_step = _try_get_finally_task(caller_id, self._pipeline)
 
+        # turn next step into remainder of tasks to call
         if isinstance(next_step, _TaskEntry):
             remainder = [next_step]
             if next_step.is_finally:
@@ -131,11 +133,17 @@ class _Pipeline(object):
                 
                 context.pack_and_send(task.get_destination(), task_id, request)
         else:
-            # if we are at the last step in the pipeline and it is complete then terminate and emit result
             last_step = self._pipeline[-1]
 
-            if last_step.is_complete() or isinstance(task_result_or_exception, TaskException):
+            if last_step.is_complete():
+                # if we are at the last step in the pipeline and it is complete then terminate and emit result
                 self.terminate(context, task_result_or_exception)
+
+            elif isinstance(task_result_or_exception, TaskException):
+                if group is None or group.is_complete():
+                    # else if have an exception then terminate but waiting for any parallel tasks in the group to complete first
+                    self.terminate(context, task_result_or_exception)
+
 
     def terminate(self, context: _TaskContext, task_result_or_exception: Union[TaskResult, TaskException]):
         task_request = context.unpack('task_request', TaskRequest)

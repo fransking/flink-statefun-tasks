@@ -58,6 +58,9 @@ class _TaskContext(object):
         egress_message = kafka_egress_record(topic=topic, value=any)
         self._context.pack_and_send_egress(self._egress_type_name, egress_message)
 
+    def delete(self, key):
+        del self._context[key]
+
     def set_state(self, data:dict):
         self._state = data
 

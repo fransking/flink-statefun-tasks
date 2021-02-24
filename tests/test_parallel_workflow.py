@@ -5,7 +5,7 @@ from tests.utils import TestHarness, tasks, TaskErrorException
 
 
 join_results_called = False
-
+say_goodbye_called = False
 
 @tasks.bind()
 def _say_hello(first_name, last_name):
@@ -14,6 +14,8 @@ def _say_hello(first_name, last_name):
 
 @tasks.bind()
 def _say_goodbye(greeting, goodbye_message):
+    global say_goodbye_called
+    say_goodbye_called = True
     return f'{greeting}. So now I will say {goodbye_message}'
 
 
@@ -100,11 +102,13 @@ class ParallelWorkflowTests(unittest.TestCase):
         pipeline = in_parallel([
             _say_hello.send("John", "Smith"),
             _fail.send(),
+            _say_goodbye.send("John", "Bye")
         ]).continue_with(_join_results)
 
         self.assertRaises(TaskErrorException, self.test_harness.run_pipeline, pipeline)
 
         self.assertEqual(join_results_called, False)
+        self.assertEqual(say_goodbye_called, True)
 
 if __name__ == '__main__':
     unittest.main()

@@ -25,6 +25,7 @@ def workflow_with_cleanup_kwargs(first_name, last_name):
 def workflow_with_error_and_cleanup(first_name, last_name):
     return tasks.send(_say_hello, first_name, last_name) \
         .continue_with(_throw_error) \
+        .continue_with(_say_goodbye, 'Bye') \
         .finally_do(_cleanup)
 
 
