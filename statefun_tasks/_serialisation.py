@@ -15,8 +15,9 @@ class DefaultSerialiser(object):
     def to_proto(self, obj):
         return _convert_to_proto(obj)
 
-    def from_proto(self, proto):
-        return _convert_from_proto(proto, self._known_proto_types)
+    def from_proto(self, proto, default=None):
+        result = _convert_from_proto(proto, self._known_proto_types)
+        return result if result is not None else default
 
     def serialise_args_and_kwargs(self, args, kwargs) -> Any:
         # if kwargs are empty and this is a single protobuf arguments then 

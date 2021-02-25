@@ -30,7 +30,7 @@ class _TaskEntry(object):
         return f'{self.get_parameter("namespace")}/{self.get_parameter("worker_name")}'
 
     def to_tuple(self):
-        return self.task_id, self.task_type, self.args, self.kwargs
+        return self.task_id, self.task_type, self.args, self.kwargs, self.parameters
 
     def mark_complete(self):
         self.complete = True
@@ -160,3 +160,8 @@ class RetryPolicy(NamedTuple):
             max_retries=self.max_retries, 
             delay_ms=self.delay.total_seconds() * 1000, 
             exponential_back_off=self.exponential_back_off)
+
+
+class TaskAlreadyExistsException(Exception):
+    def __init__(self, message):
+        super().__init__(message)

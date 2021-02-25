@@ -2,7 +2,7 @@ import unittest
 
 from statefun.request_reply_pb2 import Address
 
-from statefun_tasks import TaskRequest, TaskEntry
+from statefun_tasks import TaskRequest
 from statefun_tasks._protobuf import _convert_from_proto, _convert_to_proto
 
 
