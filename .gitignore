@@ -1,3 +1,8 @@
 __pycache__/
 build
 statefun_tasks.egg-info
+docsrc/_build
+.vscode
+TODO
+my_examples
+dist
