@@ -1,0 +1,413 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>DefaultSerialiser &mdash; Flink Tasks  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Client API" href="../flink_tasks_client.html" />
+    <link rel="prev" title="PipelineBuilder" href="statefun_tasks.PipelineBuilder.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Flink Tasks
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tasks_vs_functions.html">Tasks vs Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tasks.html">Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pipelines.html">Pipelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../actions.html">Actions</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Developer Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../flink_tasks.html">Tasks API</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="statefun_tasks.FlinkTasks.html">FlinkTasks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="statefun_tasks.PipelineBuilder.html">PipelineBuilder</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">DefaultSerialiser</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../flink_tasks_client.html">Client API</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Flink Tasks</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../api.html">API Reference</a> &raquo;</li>
+        
+          <li><a href="../flink_tasks.html">Tasks API</a> &raquo;</li>
+        
+      <li>DefaultSerialiser</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="defaultserialiser">
+<h1>DefaultSerialiser<a class="headerlink" href="#defaultserialiser" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="statefun_tasks.DefaultSerialiser">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">statefun_tasks.</span></code><code class="sig-name descname"><span class="pre">DefaultSerialiser</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">known_proto_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.DefaultSerialiser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default protobuf serialiser for Flink Tasks</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>known_proto_types</strong> – an array of known protobuf types that will not be packed inside Any</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="statefun_tasks.DefaultSerialiser.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">known_proto_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.DefaultSerialiser.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.DefaultSerialiser.__init__" title="statefun_tasks.DefaultSerialiser.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([known_proto_types])</p></td>
+<td><p>Initialize self.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.DefaultSerialiser.deserialise_args_and_kwargs" title="statefun_tasks.DefaultSerialiser.deserialise_args_and_kwargs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">deserialise_args_and_kwargs</span></code></a>(request)</p></td>
+<td><p>Deserialises Any into args and kwargs</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.DefaultSerialiser.deserialise_request" title="statefun_tasks.DefaultSerialiser.deserialise_request"><code class="xref py py-obj docutils literal notranslate"><span class="pre">deserialise_request</span></code></a>(task_request)</p></td>
+<td><p>Dserialises a TaskRequest back into args, kwargs and state</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.DefaultSerialiser.deserialise_result" title="statefun_tasks.DefaultSerialiser.deserialise_result"><code class="xref py py-obj docutils literal notranslate"><span class="pre">deserialise_result</span></code></a>(task_result)</p></td>
+<td><p>Dserialises a TaskResult back into result and state</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.DefaultSerialiser.from_proto" title="statefun_tasks.DefaultSerialiser.from_proto"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_proto</span></code></a>(proto[, default])</p></td>
+<td><p>Converts from protobuf to Python</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_proto_types</span></code>(proto_types)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.DefaultSerialiser.serialise_args_and_kwargs" title="statefun_tasks.DefaultSerialiser.serialise_args_and_kwargs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serialise_args_and_kwargs</span></code></a>(args, kwargs)</p></td>
+<td><p>Serialises Python args and kwargs into protobuf</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.DefaultSerialiser.serialise_request" title="statefun_tasks.DefaultSerialiser.serialise_request"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serialise_request</span></code></a>(task_request, args, kwargs)</p></td>
+<td><p>Serialises args, kwargs and optional state into a TaskRequest</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.DefaultSerialiser.serialise_result" title="statefun_tasks.DefaultSerialiser.serialise_result"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serialise_result</span></code></a>(task_result, result, state)</p></td>
+<td><p>Serialises the result of a task invocation into a TaskResult</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.DefaultSerialiser.to_proto" title="statefun_tasks.DefaultSerialiser.to_proto"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_proto</span></code></a>(item)</p></td>
+<td><p>Converts from Python to protobuf</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt id="statefun_tasks.DefaultSerialiser.deserialise_args_and_kwargs">
+<code class="sig-name descname"><span class="pre">deserialise_args_and_kwargs</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.DefaultSerialiser.deserialise_args_and_kwargs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deserialises Any into args and kwargs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>request</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>) – the protobuf message</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>tuple of args and kwargs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.DefaultSerialiser.deserialise_request">
+<code class="sig-name descname"><span class="pre">deserialise_request</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_request</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.DefaultSerialiser.deserialise_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dserialises a TaskRequest back into args, kwargs and state</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>task_request</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TaskRequest</span></code>) – the TaskRequest</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>tuple of task args, kwargs and state</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.DefaultSerialiser.deserialise_result">
+<code class="sig-name descname"><span class="pre">deserialise_result</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_result</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.DefaultSerialiser.deserialise_result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dserialises a TaskResult back into result and state</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>task_result</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TaskResult</span></code>) – the TaskResult</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>tuple of result and state</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.DefaultSerialiser.from_proto">
+<code class="sig-name descname"><span class="pre">from_proto</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.DefaultSerialiser.from_proto" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts from protobuf to Python</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>proto</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Message</span></code>) – the protobuf message</p></li>
+<li><p><strong>default</strong> (<em>option</em>) – an optional default value to return</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the Python type or default value if deserialisation return None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.DefaultSerialiser.serialise_args_and_kwargs">
+<code class="sig-name descname"><span class="pre">serialise_args_and_kwargs</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.DefaultSerialiser.serialise_args_and_kwargs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serialises Python args and kwargs into protobuf</p>
+<p>If there is a single arg and no kwargs and the arg is already a protobuf it returns
+that instance packed inside an Any.  Otherwise it returns an ArgsAndKwargs packed in an Any.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> – the Python args</p></li>
+<li><p><strong>kwargs</strong> – the Python kwargs</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>protobuf Any</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.DefaultSerialiser.serialise_request">
+<code class="sig-name descname"><span class="pre">serialise_request</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.DefaultSerialiser.serialise_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serialises args, kwargs and optional state into a TaskRequest</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>task_request</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TaskRequest</span></code>) – the TaskRequest</p></li>
+<li><p><strong>args</strong> – task args</p></li>
+<li><p><strong>kwargs</strong> – task kwargs</p></li>
+<li><p><strong>state</strong> (<em>optional</em>) – task state</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.DefaultSerialiser.serialise_result">
+<code class="sig-name descname"><span class="pre">serialise_result</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.DefaultSerialiser.serialise_result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serialises the result of a task invocation into a TaskResult</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>task_result</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TaskResult</span></code>) – the TaskResult</p></li>
+<li><p><strong>result</strong> – task result</p></li>
+<li><p><strong>state</strong> – task state</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.DefaultSerialiser.to_proto">
+<code class="sig-name descname"><span class="pre">to_proto</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.DefaultSerialiser.to_proto" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts from Python to protobuf</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>item</strong> – the item to convert</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Message</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the protobuf message possibly packed in an Any</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="../flink_tasks_client.html" class="btn btn-neutral float-right" title="Client API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="statefun_tasks.PipelineBuilder.html" class="btn btn-neutral float-left" title="PipelineBuilder" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020-2021, Frans King.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

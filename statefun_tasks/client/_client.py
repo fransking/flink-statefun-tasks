@@ -11,11 +11,26 @@ from threading import Thread
 import asyncio
 from concurrent.futures import Future
 
+
 _log = logging.getLogger('FlinkTasks')
 
 
 class FlinkTasksClient(object):
+    """
+    Client for submitting TaskRequests / TaskActionRequests
     
+    Replies are handled on a dedicated thread created per instance so FlinkTasksClientFactory.get_client() is preferred to 
+    instantiating this class directly.
+
+    :param kafka_broker_url: url of the kafka broker used for ingress and egress
+    :param request_topics: dictionary of worker to ingress topic mappings  (use None for default)
+                            e.g. {'example/worker': 'example.requests', None: 'example.default.requests'}
+    :param action_toptics: as per request_topics but used for action requests
+    :param reply_topic: topic to listen on for responses (a unique consumer group id will be created)
+    :param optional group_id: kafka group id to use when subscribing to reply_topic
+    :param optional serialiser: serialiser to use (will use DefaultSerialiser if not set)
+    """
+
     def __init__(self, kafka_broker_url, request_topics, action_topics, reply_topic, group_id=None, serialiser=None):
         self._kafka_broker_url = kafka_broker_url
         self._requests = {}
@@ -101,33 +116,89 @@ class FlinkTasksClient(object):
         task_action = TaskActionRequest(id=task_id, action=action, reply_topic=self._reply_topic)
         return self._submit_request(task_action, topic)
 
-    def submit(self, pipeline: PipelineBuilder, topic=None):
+    def submit(self, pipeline: PipelineBuilder, topic=None) -> Future:
+        """
+        Submit a pipeline to Flink
+
+        :param pipeline: the pipeline
+        :param optional topic: override the default ingress topic
+        :return: a Future encapsulating the result of the pipeline
+        """
         task_request = pipeline.to_task_request(self._serialiser)
         topic = self._get_request_topic(pipeline, topic)
         return self._submit_request(task_request, topic)
 
     async def submit_async(self, pipeline: PipelineBuilder, topic=None):
+        """
+        Submit a pipeline to Flink
+
+        :param pipeline: the pipeline
+        :param optional topic: override the default ingress topic
+        :return: the result of the pipeline
+        """
         return await asyncio.wrap_future(self.submit(pipeline, topic=topic))
 
-    def get_status(self, pipeline: PipelineBuilder, topic=None):
+    def get_status(self, pipeline: PipelineBuilder, topic=None) -> Future:
+        """
+        Get the status of a previously submitted pipeline
+
+        :param pipeline: the pipeline
+        :param optional topic: override the default ingress topic
+        :return: a Future encapsulating the status of the pipeline
+        """
         topic = self._get_action_topic(pipeline, topic)
         return self._submit_action(pipeline.id, TaskAction.GET_STATUS, topic)
 
     async def get_status_async(self, pipeline: PipelineBuilder, topic=None):
+        """
+        Get the status of a previously submitted pipeline
+
+        :param pipeline: the pipeline
+        :param optional topic: override the default ingress topic
+        :return: the status of the pipeline
+        """
         return await asyncio.wrap_future(self.get_status(pipeline, topic))
     
-    def get_request(self, pipeline: PipelineBuilder, topic=None):
+    def get_request(self, pipeline: PipelineBuilder, topic=None) -> Future:
+        """
+        Get the original TaskRequest for a previously submitted pipeline
+
+        :param pipeline: the pipeline
+        :param optional topic: override the default ingress topic
+        :return: a Future encapsulating the original TaskRequest
+        """
         topic = self._get_action_topic(pipeline, topic)
         return self._submit_action(pipeline.id, TaskAction.GET_REQUEST, topic)
 
     async def get_request_async(self, pipeline: PipelineBuilder, topic=None):
+        """
+        Get the original TaskRequest for a previously submitted pipeline
+
+        :param pipeline: the pipeline
+        :param optional topic: override the default ingress topic
+        :return: the original TaskRequest
+        """
         return await asyncio.wrap_future(self.get_request(pipeline, topic))
 
-    def get_result(self, pipeline: PipelineBuilder, topic=None):
+    def get_result(self, pipeline: PipelineBuilder, topic=None) -> Future:
+        """
+        Get the TaskResult for a previously submitted pipeline
+
+        :param pipeline: the pipeline
+        :param optional topic: override the default ingress topic
+        :return: a Future encapsulating the original TaskResult
+        """
         topic = self._get_action_topic(pipeline, topic)
         return self._submit_action(pipeline.id, TaskAction.GET_RESULT, topic)
 
     async def get_result_async(self, pipeline: PipelineBuilder, topic=None):
+        """
+        Get the TaskResult for a previously submitted pipeline
+
+        :param pipeline: the pipeline
+        :param optional topic: override the default ingress topic
+        :return: the original TaskResult
+        """
         return await asyncio.wrap_future(self.get_result(pipeline, topic))
 
     def _consume(self):
@@ -212,19 +283,22 @@ class FlinkTasksClient(object):
 
 
 class FlinkTasksClientFactory():
+    """
+    Factory for creating memoized FlinkTasksClients
+    """
     __clients = {}
 
     @staticmethod
     def get_client(kafka_broker_url, request_topics: dict, action_topics: dict, reply_topic, serialiser=None) -> FlinkTasksClient:
         """
-        Creates a FlinkTasksClient for submitting tasks to flink
+        Creates a FlinkTasksClient for submitting tasks to flink.  Clients are memoized by broker url and reply topic.
 
         :param kafka_broker_url: url of the kafka broker used for ingress and egress
         :param request_topics: dictionary of worker to ingress topic mappings  (use None for default)
                               e.g. {'example/worker': 'example.requests', None: 'example.default.requests'}
         :param action_toptics: as per request_topics but used for action requests
         :param reply_topic: topic to listen on for responses (a unique consumer group id will be created)
-        :param serialiser: serialiser to use (optional will use DefaultSerialiser if not set)
+        :param optional serialiser: serialiser to use (will use DefaultSerialiser if not set)
         """
 
         key = f'{kafka_broker_url}.{reply_topic}'

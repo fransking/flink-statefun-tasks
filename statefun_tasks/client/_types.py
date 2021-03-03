@@ -17,4 +17,3 @@ class TaskStatus(Enum):
     RUNNING = TaskStatusProto.Status.RUNNING
     COMPLETED = TaskStatusProto.Status.COMPLETED
     FAILED = TaskStatusProto.Status.FAILED
-    WAITING = TaskStatusProto.Status.WAITING

@@ -18,6 +18,7 @@ import traceback as tb
 import inspect
 import asyncio
 
+
 _log = logging.getLogger('FlinkTasks')
 
 
@@ -72,6 +73,17 @@ def _create_task_result(task_input, result=None):
 
 
 class FlinkTasks(object):
+    """
+    Flink Tasks implementation
+    
+    An instance should be instantiated at the top of your api file and used to decorate functions
+    to be exposed as tasks.
+
+    :param default_namespace: namespace to expose functions under. Maps to Flink Statefun function namespace in module.yaml
+    :param default_worker_name: worker name to expose.  Maps to Flink Statefun function type in module.yaml
+    :param egress_type_name: egress type name.  Maps to Flink Statefun egress in module.yaml
+    :param optional serialiser: serialiser to use (will use DefaultSerialiser if not set)
+    """
     def __init__(self, default_namespace: str = None, default_worker_name: str = None, egress_type_name: str = None, serialiser = None):
         self._default_namespace = default_namespace
         self._default_worker_name = default_worker_name
@@ -83,9 +95,26 @@ class FlinkTasks(object):
         self.register_builtin('run_pipeline', partial(run_pipeline, serialiser=self._serialiser))
 
     def register_builtin(self, type_name, fun, **params):
+        """
+        Registers a built in Flink Task e.g. __builtins.run_pipeline
+        This should only be used if you want to provide your own built in (pre-defined) tasks
+
+        :param type_name: task type to expose the built in as
+        :param fun: a function, partial or lambda representing the built in
+        :param params: any additional parameters to the built in
+        """
         self._bindings[f'__builtins.{type_name}'] = _FlinkTask(fun, self._serialiser, **params)
 
     def register(self, fun, module_name=None, **params):
+        """
+        Registers a Python function as a Flink Task.  
+        Normally you would attribute the function with @tasks.bind() instead
+
+        :param fun: the python function
+        :param optional module_name: the module name to register the task under which by default is the Python module name containing the function
+        :param params: any additional parameters to the Flink Task (such as a retry policy)
+        """
+
         if fun is None:
             raise ValueError("function instance must be provided")
 
@@ -93,15 +122,16 @@ class FlinkTasks(object):
         self._bindings[fun.type_name] = _FlinkTask(fun, self._serialiser, **params)
 
     def bind(self, namespace: str = None, worker_name: str = None, retry_policy: RetryPolicy = None,  with_state: bool = False, is_fruitful: bool = True, module_name: str = None):
-        """Binds a python function as a Flink Statefun Task
+        """
+        Binds a function as a Flink Task
 
-        Parameters:
-        namespace (optional) (str): Statefun namespace to use in place of the default
-        worker_name (optional) (str): Statefun worker to use in place of the default
-        retry_policy (optional) (RetryPolicy): RetryPolicy to use should the task throw an exception
-        with_state (optional defaults to false) (bool): Whether to pass a state object as the first parameter (an expect back a tuple of (state, result,)
-        is_fruitful (optional defaults to true): Whether the function produces a fruitful result or simply returns None
-        module_name (optional) (str): If specified then the task type will be module_name.function_name otherwise the Python module containing the function will be used 
+        :param namespace: namespace to use in place of the default
+        :param worker_name: worker name to use in place of the default
+        :param retry_policy: retry policy to use should the task throw an exception
+        :param with_state: whether to pass a state object as the first parameter - return value should be a tuple of state, result (default False)
+        :param is_fruitful: whether the function produces a fruitful result or simply returns None (default True)
+        :param module_name: if specified then the task type used in addressingwill be module_name.function_name 
+                            otherwise the Python module containing the function will be used 
 
         """
         def wrapper(function):
@@ -127,18 +157,38 @@ class FlinkTasks(object):
         return wrapper
 
     def get_task(self, task_type):
+        """
+        Returns the Flink Task instance for a given task type name
+
+        :param task_type: task type name e.g. examples.multiply
+        :return: the Flink Task
+        """
         if task_type in self._bindings:
             return self._bindings[task_type]
         else:
             raise RuntimeError(f'{task_type} is not a registered FlinkTask')
 
     def is_async_required(self, task_input: Union[TaskRequest, TaskResult, TaskException, TaskActionRequest]):
+        """
+        Checks if a task is declared as async or not
+
+        :param task_input: the task input protobuf message
+        :return: true if the task being called is declared as async otherwise false
+        """
+
         try:
             return isinstance(task_input, TaskRequest) and self.get_task(task_input.type).is_async
         except:
             return False
 
     def run(self, context: BatchContext, task_input: Union[TaskRequest, TaskResult, TaskException, TaskActionRequest]):
+        """
+        Runs a non-async Flink Task
+
+        :param context: context object provided by Flink
+        :param task_input: the task input protobuf message
+        """
+
         with _TaskContext(context, _task_name(task_input), self._egress_type_name, self._serialiser) as task_context:
             try:
                 _log.info(f'Started {task_context}')
@@ -160,6 +210,12 @@ class FlinkTasks(object):
                 raise
 
     async def run_async(self, context: BatchContext, task_input: Union[TaskRequest, TaskResult, TaskException, TaskActionRequest]):
+        """
+        Runs an async Flink Task
+
+        :param context: context object provided by Flink
+        :param task_input: the task input protobuf message
+        """
         with _TaskContext(context, _task_name(task_input), self._egress_type_name, self._serialiser) as task_context:
             try:
                 _log.info(f'Started {task_context}')
@@ -185,6 +241,14 @@ class FlinkTasks(object):
                 
     @staticmethod
     def send(func, *args, **kwargs) -> PipelineBuilder:
+        """
+        Returns a PipelineBuilder with this task as the first item in the pipeline
+
+        :param func: a function decorated with @tasks.bind()
+        :param args: task args
+        :param kwargs: task kwargs
+        :return: a pipeline builder
+        """
         try:
             send_func = func.send
         except AttributeError:
@@ -226,8 +290,6 @@ class FlinkTasks(object):
         pipeline.resume(context, task_result_or_exception)
 
     def _invoke_action(self, context, task_action):
-        state = context.get_state()
-
         try:
             result = _invoke_task_action(context, task_action)
             if result is not None:

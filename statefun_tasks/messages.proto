@@ -135,7 +135,6 @@ message TaskStatus {
         RUNNING = 1;
         COMPLETED = 2;
         FAILED = 3;
-        WAITING = 4;
     }
     Status status = 1;
 }
