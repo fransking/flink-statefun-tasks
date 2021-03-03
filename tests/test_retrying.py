@@ -27,12 +27,36 @@ class RetryTests(unittest.TestCase):
         _fail_run_count = 0
         self.test_harness = TestHarness()
 
-    def test_failing_3_times_with_3_retries(self):
+    def test_failing_task_1_times_with_3_retries(self):
+        pipeline = tasks.send(_fail, 1)
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, 'Succeeded after 1 failures')
+
+    def test_failing_task_3_times_with_3_retries(self):
+        pipeline = tasks.send(_fail, 3)
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, 'Succeeded after 3 failures')
+
+    def test_failing_task_4_times_with_3_retries(self):
+        pipeline = tasks.send(_fail, 4)
+        try:
+            self.test_harness.run_pipeline(pipeline)
+        except TaskErrorException as e:
+            self.assertEqual(e.task_error.message, 'Failed after 4 iterations')
+        else:
+            self.fail('Expected an exception')
+
+    def test_failing_pipeline_1_time_with_3_retries(self):
+        pipeline = tasks.send(fail_workflow, 1)
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, 'Succeeded after 1 failures')
+
+    def test_failing_pipeline_3_times_with_3_retries(self):
         pipeline = tasks.send(fail_workflow, 3)
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, 'Succeeded after 3 failures')
 
-    def test_failing_4_times_with_3_retries(self):
+    def test_failing_pipeline_4_times_with_3_retries(self):
         pipeline = tasks.send(fail_workflow, 4)
         try:
             self.test_harness.run_pipeline(pipeline)

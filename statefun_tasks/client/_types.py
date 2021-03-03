@@ -1,5 +1,5 @@
-from statefun_tasks import TaskException
-
+from statefun_tasks import TaskException, TaskActionResult, TaskStatus as TaskStatusProto
+from enum import Enum
 
 class TaskError(Exception):
     def __init__(self, ex: TaskException, *args, **kwargs):
@@ -10,3 +10,10 @@ class TaskError(Exception):
 
     def __str__(self):
         return f'type: {self.type} message: {self.message} stacktrace: {self.stacktrace}'
+
+
+class TaskStatus(Enum):
+    PENDING = TaskStatusProto.Status.PENDING
+    RUNNING = TaskStatusProto.Status.RUNNING
+    COMPLETED = TaskStatusProto.Status.COMPLETED
+    FAILED = TaskStatusProto.Status.FAILED
