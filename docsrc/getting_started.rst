@@ -8,4 +8,4 @@ Flink Tasks for Python can be installed from PyPi using pip
     pip install statefun-tasks
 
 
-See the `Github repo <https://github.com/fransking/flink-statefun-tasks/tree/master/examples>`_ for some examples.
+See the `GitHub repo <https://github.com/fransking/flink-statefun-tasks/tree/master/examples>`_ for some examples.
