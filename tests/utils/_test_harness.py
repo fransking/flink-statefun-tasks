@@ -15,6 +15,8 @@ default_worker_name = 'worker'
 serialiser = DefaultSerialiser()
 tasks = FlinkTasks(default_namespace=default_namespace, default_worker_name=default_worker_name,
                    egress_type_name=f'{default_namespace}/kafka-generic-egress', serialiser=serialiser)
+other_tasks_instance = FlinkTasks(default_namespace=default_namespace, default_worker_name=default_worker_name,
+                                  egress_type_name=f'{default_namespace}/kafka-generic-egress', serialiser=serialiser)
 
 functions = StatefulFunctions()
 
@@ -100,7 +102,7 @@ class TestHarness:
             return serialiser.deserialise_result(task_result_or_exception, unwrap_tuple=True)
         else:
             raise TaskErrorException(TaskError(task_result_or_exception))
-        
+
     def _run_flink_loop(self, message_arg: Union[TaskRequest, TaskResult, TaskException], target: Address, caller=None):
         to_function = ToFunction()
         update_address(to_function.invocation.target, target.namespace, target.type, target.id)
@@ -119,7 +121,8 @@ class TestHarness:
             outgoing_messages = result.outgoing_messages
             for outgoing_message in outgoing_messages:
                 message_arg = unpack_any(outgoing_message.argument, [TaskRequest, TaskResult, TaskException])
-                egress_value = self._run_flink_loop(message_arg=message_arg, target=outgoing_message.target, caller=target)
+                egress_value = self._run_flink_loop(message_arg=message_arg, target=outgoing_message.target,
+                                                    caller=target)
                 if egress_value:
                     return egress_value
 

@@ -96,7 +96,6 @@ class FlinkTasks(object):
                     self._finalise_task_result(task_context, task_request, task_result)
             except Exception as ex:
                 self._fail(task_context, task_input, ex)
-                raise
 
     async def run_async(self, context: BatchContext, task_input: Union[TaskRequest, TaskResult, TaskException]):
         with _TaskContext(context, task_input.type, self._egress_type_name, self._serialiser) as task_context:
@@ -113,7 +112,6 @@ class FlinkTasks(object):
                     self._finalise_task_result(task_context, task_request, task_result)
             except Exception as ex:
                 self._fail(task_context, task_input, ex)
-                raise
 
     @staticmethod
     def send(func, *args, **kwargs) -> PipelineBuilder:

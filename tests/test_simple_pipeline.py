@@ -1,7 +1,7 @@
 import asyncio
 import unittest
 
-from tests.utils import TestHarness, tasks
+from tests.utils import TestHarness, tasks, other_tasks_instance, TaskErrorException
 
 
 @tasks.bind()
@@ -43,6 +43,19 @@ class SimplePipelineTests(unittest.TestCase):
         pipeline = tasks.send(hello_and_goodbye_workflow, 'Jane', last_name='Doe')
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, 'Hello Jane Doe.  So now I will say see you later!')
+
+    def test_unregistered_function(self):
+        @other_tasks_instance.bind()
+        def new_function():
+            return 'Hello'
+
+        pipeline = tasks.send(new_function, 'Jane', 'Doe')
+        try:
+            self.test_harness.run_pipeline(pipeline)
+        except TaskErrorException as e:
+            self.assertEqual(str(e.task_error.message), f'{__name__}.new_function is not a registered FlinkTask')
+        else:
+            self.fail('Expected a TaskErrorException')
 
 
 if __name__ == '__main__':
