@@ -44,7 +44,7 @@ def _create_task_exception(task_input, ex):
             exception_type=_type_name(ex),
             exception_message=str(ex),
             stacktrace=tb.format_exc())
-        
+
         if isinstance(task_input, TaskRequest) and task_input.HasField('state'):
             task_exception.state.CopyFrom(task_input.state)
 
@@ -75,7 +75,7 @@ def _create_task_result(task_input, result=None):
 class FlinkTasks(object):
     """
     Flink Tasks implementation
-    
+
     An instance should be instantiated at the top of your api file and used to decorate functions
     to be exposed as tasks.
 
@@ -107,7 +107,7 @@ class FlinkTasks(object):
 
     def register(self, fun, module_name=None, **params):
         """
-        Registers a Python function as a Flink Task.  
+        Registers a Python function as a Flink Task.
         Normally you would attribute the function with @tasks.bind() instead
 
         :param fun: the python function
@@ -130,8 +130,8 @@ class FlinkTasks(object):
         :param retry_policy: retry policy to use should the task throw an exception
         :param with_state: whether to pass a state object as the first parameter - return value should be a tuple of state, result (default False)
         :param is_fruitful: whether the function produces a fruitful result or simply returns None (default True)
-        :param module_name: if specified then the task type used in addressingwill be module_name.function_name 
-                            otherwise the Python module containing the function will be used 
+        :param module_name: if specified then the task type used in addressingwill be module_name.function_name
+                            otherwise the Python module containing the function will be used
 
         """
         def wrapper(function):
@@ -201,13 +201,12 @@ class FlinkTasks(object):
                     task_request, task_result = task_request_result
 
                     self._finalise_task_result(task_context, task_request, task_result)
-                    
+
                 _log.info(f'Finished {task_context}')
 
             except Exception as ex:
                 _log.error(f'Error invoking {task_context} - {ex}')
                 self._fail(task_context, task_input, ex)
-                raise
 
     async def run_async(self, context: BatchContext, task_input: Union[TaskRequest, TaskResult, TaskException, TaskActionRequest]):
         """
@@ -237,8 +236,7 @@ class FlinkTasks(object):
             except Exception as ex:
                 _log.error(f'Error invoking {task_context} - {ex}')
                 self._fail(task_context, task_input, ex)
-                raise
-                
+
     @staticmethod
     def send(func, *args, **kwargs) -> PipelineBuilder:
         """
@@ -261,7 +259,7 @@ class FlinkTasks(object):
             # we resume the pipeline passing this result into the next task
             task_result_or_exception = task_input
             self._resume_pipeline(context, task_result_or_exception)
-            
+
         elif isinstance(task_input, TaskActionRequest):
             # we are invoking some kind of action like pausing a pipeline or returning a task state
             task_action = task_input  # type: TaskAction
@@ -294,7 +292,7 @@ class FlinkTasks(object):
             result = _invoke_task_action(context, task_action)
             if result is not None:
                 self._emit_result(context, task_action, _create_task_result(task_action, result))
-                
+
         except Exception as ex:
             self._emit_result(context, task_action, _create_task_exception(task_action, ex))
 
@@ -302,7 +300,7 @@ class FlinkTasks(object):
         if context.unpack('task_request', TaskRequest) is not None:
             # don't allow tasks to be overwritten
             raise TaskAlreadyExistsException(f'Task already exists: {task_request.id}')
-        
+
         context.pack_and_save('task_request', task_request)
 
         flink_task = self.get_task(task_request.type)
@@ -367,7 +365,7 @@ class FlinkTasks(object):
             # remove previous task_request from state, increment retry count
             context.delete('task_request')
             state['retry_count'] = retry_count + 1
-            
+
             # send retry
             delay = timedelta(milliseconds=task_exception.retry_policy.delay_ms)
 
@@ -418,7 +416,7 @@ class _FlinkTask(object):
             fn_result = self._fun(*task_args, **kwargs)
 
             pipeline, task_result = self._to_pipeline_or_task_result(task_request, fn_result, original_state)
-            
+
         # we errored so return a task_exception instead
         except Exception as e:
             task_exception = self._to_task_exception(task_request, e)
@@ -454,7 +452,7 @@ class _FlinkTask(object):
 
         else:
             # if single result then wrap in tuple as this is the maximal case
-            if not _is_tuple(fn_result):  
+            if not _is_tuple(fn_result):
                 fn_result = (fn_result,)
 
             # if this task accesses state then we expect the first element in the result tuple
@@ -480,7 +478,7 @@ class _FlinkTask(object):
     def _to_task_exception(self, task_request, ex):
         # use retry policy on task request first then fallback to task definition
         task_parameters = self._serialiser.from_proto(task_request.parameters, {})
-        task_retry_policy = task_parameters.get('retry_policy', self._retry_policy)  
+        task_retry_policy = task_parameters.get('retry_policy', self._retry_policy)
         maybe_retry = False
 
         if task_retry_policy is not None:
@@ -488,7 +486,7 @@ class _FlinkTask(object):
             maybe_retry = any([ex_type for ex_type in task_retry_policy.retry_for if ex_type in ex_class_hierarchy])
 
         task_exception = _create_task_exception(task_request, ex)
-        
+
         if maybe_retry:
             task_exception.maybe_retry = True
             task_exception.retry_policy.CopyFrom(task_retry_policy)

@@ -4,7 +4,7 @@ import unittest
 from statefun_tasks import DefaultSerialiser
 
 from tests.test_messages_pb2 import TestPerson, TestGreetingRequest, TestGreetingResponse
-from tests.utils import TestHarness, tasks
+from tests.utils import TestHarness, tasks, other_tasks_instance, TaskErrorException
 
 
 @tasks.bind()
@@ -73,6 +73,19 @@ class SimplePipelineTests(unittest.TestCase):
 
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result.greeting, 'Hello Jane Doe')
+
+    def test_unregistered_function(self):
+        @other_tasks_instance.bind()
+        def new_function():
+            return 'Hello'
+
+        pipeline = tasks.send(new_function, 'Jane', 'Doe')
+        try:
+            self.test_harness.run_pipeline(pipeline)
+        except TaskErrorException as e:
+            self.assertEqual(str(e.task_error.message), f'{__name__}.new_function is not a registered FlinkTask')
+        else:
+            self.fail('Expected a TaskErrorException')
 
 
 if __name__ == '__main__':
