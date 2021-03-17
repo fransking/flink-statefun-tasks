@@ -1,6 +1,9 @@
 import asyncio
 import unittest
 
+from statefun_tasks import DefaultSerialiser
+
+from tests.test_messages_pb2 import TestPerson, TestGreetingRequest, TestGreetingResponse
 from tests.utils import TestHarness, tasks, other_tasks_instance, TaskErrorException
 
 
@@ -12,6 +15,21 @@ def hello_workflow(first_name, last_name):
 @tasks.bind()
 def hello_and_goodbye_workflow(first_name, last_name):
     return tasks.send(_say_hello, first_name, last_name).continue_with(_say_goodbye, goodbye_message="see you later!")
+
+
+@tasks.bind()
+def simple_protobuf_workflow(person: TestPerson):
+    return tasks.send(_create_greeting, person).continue_with(_greet_person)
+
+
+@tasks.bind()
+def _create_greeting(person: TestPerson) -> TestGreetingRequest:
+    return TestGreetingRequest(person=person, message='Hello')
+
+
+@tasks.bind()
+def _greet_person(greeting: TestGreetingRequest) -> TestGreetingResponse:
+    return TestGreetingResponse(greeting=f'{greeting.message} {greeting.person.first_name} {greeting.person.last_name}')
 
 
 @tasks.bind()
@@ -36,6 +54,9 @@ class SimplePipelineTests(unittest.TestCase):
 
     def test_pipeline_using_kwargs(self):
         pipeline = tasks.send(hello_workflow, first_name='Jane', last_name='Doe')
+        proto = pipeline.to_proto(serialiser=DefaultSerialiser())
+        self.assertEqual(proto.entries[0].task_entry.request.type_url, 'type.googleapis.com/statefun_tasks.ArgsAndKwargs')
+
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, 'Hello Jane Doe')
 
@@ -43,6 +64,15 @@ class SimplePipelineTests(unittest.TestCase):
         pipeline = tasks.send(hello_and_goodbye_workflow, 'Jane', last_name='Doe')
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, 'Hello Jane Doe.  So now I will say see you later!')
+
+    def test_simple_protobuf_pipeline(self):
+        pipeline = tasks.send(simple_protobuf_workflow, TestPerson(first_name='Jane', last_name='Doe'))
+        proto = pipeline.to_proto(serialiser=DefaultSerialiser())
+
+        self.assertEqual(proto.entries[0].task_entry.request.type_url, 'type.googleapis.com/tests.TestPerson')
+
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result.greeting, 'Hello Jane Doe')
 
     def test_unregistered_function(self):
         @other_tasks_instance.bind()

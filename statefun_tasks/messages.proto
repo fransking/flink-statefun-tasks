@@ -28,11 +28,10 @@ message TupleOfAny {
 message TaskEntry {
     string task_id = 1;
     string task_type = 2;
-    TupleOfAny args = 3;
-    MapOfStringToAny kwargs = 4;
-    bool complete = 5;
-    MapOfStringToAny parameters = 6;
-    bool is_finally = 7;
+    google.protobuf.Any request = 3;
+    bool complete = 4;
+    MapOfStringToAny parameters = 5;
+    bool is_finally = 6;
 }
 
 message GroupEntry {
@@ -58,6 +57,11 @@ message TaskRetryPolicy {
     bool exponential_back_off = 4;
 }
 
+message ArgsAndKwargs {
+    TupleOfAny args = 1;
+    MapOfStringToAny kwargs = 2;
+}
+
 message TaskRequest {
     string id = 1;
     string type = 2;
@@ -65,35 +69,72 @@ message TaskRequest {
         string reply_topic = 3;
         Address reply_address = 4;
     }
-    google.protobuf.Any request_state = 5;
-    TupleOfAny args = 6;
-    MapOfStringToAny kwargs = 7;
+    google.protobuf.Any request = 5;
+    google.protobuf.Any state = 6;
+    MapOfStringToAny parameters = 7;
 }
 
 message TaskResult {
     string id = 1;
-    string correlation_id = 2;
-    string type = 3;
-    TupleOfAny result = 4;
-    google.protobuf.Any request_state = 5;
+    string type = 2;
+    google.protobuf.Any result = 3;
+    google.protobuf.Any state = 4;
 }
 
 message TaskException {
     string id = 1;
-    string correlation_id = 2;
-    string type = 3;
-    string exception_type = 4;
-    string exception_message = 5;
-    string stacktrace = 6;
-    bool retry = 7;
-    statefun_tasks.TaskRequest retry_request = 8;
-    google.protobuf.Any request_state = 9;
+    string type = 2;
+    string exception_type = 3;
+    string exception_message = 4;
+    string stacktrace = 5;
+    google.protobuf.Any state = 6;
+    bool maybe_retry = 7;
+    TaskRetryPolicy retry_policy = 8;
 }
 
 message TaskState {
     MapOfStringToAny data = 1;
 }
 
-message GroupResults {
-    map<string, TaskResult> results = 1;
+message TaskResults {
+    map<string, google.protobuf.Any> by_id = 1;
+}
+
+enum TaskAction {
+    GET_STATUS = 0;
+    GET_REQUEST = 1;
+    GET_RESULT = 2;
+}
+
+message TaskActionRequest {
+    string id = 1;
+    oneof reply {
+        string reply_topic = 2;
+        Address reply_address = 3;
+    }
+    TaskAction action = 4;
+}
+
+message TaskActionResult {
+    string id = 1;
+    TaskAction action = 2;
+    google.protobuf.Any result = 3;
+}
+
+message TaskActionException {
+    string id = 1;
+    TaskAction action = 2;
+    string exception_type = 3;
+    string exception_message = 4;
+    string stacktrace = 5;
+}
+
+message TaskStatus {
+    enum Status {
+        PENDING = 0;
+        RUNNING = 1;
+        COMPLETED = 2;
+        FAILED = 3;
+    }
+    Status status = 1;
 }

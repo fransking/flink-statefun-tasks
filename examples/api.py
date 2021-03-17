@@ -56,22 +56,27 @@ def _count_results(results):
     return len(results)
 
 
-# 4. pass through arguments - passing extra parameters through a function: 'f1(a,b) -> c' can be called as 'f1(a,b,1,2...n) -> (c,1,2,...n)
-# in the example below the result will be ('Hello Jane Doe', 3)
+# 4. state passing which allows a mutable state variable to be passed between tasks in the workflow
 
 @tasks.bind()
-def passthrough_workflow():
-    return _say_hello.send('Jane', 'Doe').continue_with(_say_goodbye)
+def state_passing_workflow():
+    return _store_last_name_length.send('Jane', 'Doe').continue_with(_join_names).continue_with(_do_greeting_with_state)
+
+
+@tasks.bind(with_state=True)
+def _store_last_name_length(initial_state, first_name, last_name):
+    initial_state = len(last_name)
+    return initial_state, f'{first_name} {last_name}'
 
 
 @tasks.bind()
-def _say_hello_and_return_last_name_length(first_name, last_name):
-    return f'Hello {first_name} {last_name}', len(last_name)
+def _join_names(first_name, last_name):
+    return f'{first_name} {last_name}'
 
 
-@tasks.bind()
-def _say_goodbye_only(greeting):
-    return f'{greeting}'
+@tasks.bind(with_state=True)
+def _do_greeting_with_state(state, full_name):
+    return state, f'Hello {full_name}.  Your last name length is {state}'
 
 # 5. finally_do for cleaning up resources
 
@@ -80,12 +85,6 @@ def _say_goodbye_only(greeting):
 def greeting_workflow_with_cleanup(first_name, last_name):
     return tasks.send(_say_hello, first_name, last_name).continue_with(_say_goodbye, goodbye_message="see you later!") \
         .continue_with(_print_message).finally_do(_cleanup)
-
-
-@tasks.bind()
-def greeting_workflow_with_cleanup_args(first_name, last_name):
-    return tasks.send(_say_hello, first_name, last_name).continue_with(_say_goodbye, goodbye_message="see you later!") \
-        .continue_with(_print_message).finally_do(_cleanup_with_args, name='Luke')
 
 
 @tasks.bind()
@@ -117,10 +116,5 @@ def _cleanup():
 
 
 @tasks.bind()
-def _cleanup_with_args(name):
-    print(f'cleanup complete for name {name}')
-
-
-@tasks.bind()
-def _cleanup_with_exception():
+def _cleanup_with_exception(*args):
     raise Exception('Error cleaning up!')

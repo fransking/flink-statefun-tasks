@@ -5,6 +5,8 @@ Tasks API for Stateful Functions on Flink
 
 A lightweight API that borrows concepts from Celery to allow Python developers to run task based workflows on Apache Flink Stateful Functions.  Workflows are composed of Tasks which accept parameters and can be chained together as continuations into a Pipeline.  The Pipeline becomes the Flink state.
 
+Additional documentation can be found [here](https://fransking.github.io/flink-statefun-tasks).
+
 ```
 @tasks.bind()
 def greeting_workflow(first_name, last_name):

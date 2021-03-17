@@ -5,7 +5,7 @@ from typing import Union
 import traceback
 
 # import FlinkTasks
-from statefun_tasks import FlinkTasks, TaskRequest, TaskResult, TaskException, in_parallel
+from statefun_tasks import FlinkTasks, TaskRequest, TaskResult, TaskException, TaskActionRequest, in_parallel
 from .api import tasks
 
 
@@ -20,9 +20,9 @@ functions = StatefulFunctions()
 
 
 @functions.bind("example/worker")
-def worker(context, task_data: Union[TaskRequest, TaskResult, TaskException]):
+def worker(context, task_input: Union[TaskRequest, TaskResult, TaskException, TaskActionRequest]):
     try:
-        tasks.run(context, task_data)
+        tasks.run(context, task_input)
     except Exception as e:
         print(f'Error - {e}')
         traceback.print_exc()

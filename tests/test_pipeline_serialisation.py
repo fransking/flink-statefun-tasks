@@ -19,6 +19,7 @@ class PipelineSerialisationTests(unittest.TestCase):
         entry_proto = entry.to_proto(serialiser)
         reconsituted_entry = _TaskEntry.from_proto(entry_proto, serialiser)
 
+        self.assertEqual(entry_proto.task_entry.request.type_url, 'type.googleapis.com/statefun_tasks.ArgsAndKwargs')
         self.assertEqual(reconsituted_entry.task_id, entry.task_id)
         self.assertEqual(reconsituted_entry.task_type, entry.task_type)
         self.assertEqual(reconsituted_entry.args, tuple(entry.args,))
@@ -26,6 +27,21 @@ class PipelineSerialisationTests(unittest.TestCase):
         self.assertEqual(reconsituted_entry.parameters, parameters)
         self.assertEqual(reconsituted_entry.is_finally, True)
         self.assertEqual(reconsituted_entry.is_complete(), True)
+
+    def test_task_entry_serialisation_with_single_protobuf_arg(self):
+        serialiser = DefaultSerialiser(known_proto_types=[Address])
+
+        args = Address(namespace='test')
+        entry = _TaskEntry('task_id', 'task_type', args, {}, {}, True)
+
+        entry_proto = entry.to_proto(serialiser)
+        reconsituted_entry = _TaskEntry.from_proto(entry_proto, serialiser)
+
+        self.assertEqual(entry_proto.task_entry.request.type_url, 'type.googleapis.com/org.apache.flink.statefun.flink.core.polyglot.Address')
+
+        self.assertEqual(reconsituted_entry.args, entry.args)
+        self.assertEqual(reconsituted_entry.kwargs, {})
+
 
     def test_group_entry_serialisation(self):
         serialiser = DefaultSerialiser(known_proto_types=[Address])

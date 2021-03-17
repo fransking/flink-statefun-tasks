@@ -6,7 +6,8 @@ from statefun import StatefulFunctions, AsyncRequestReplyHandler
 from statefun.kafka_egress_pb2 import KafkaProducerRecord
 from statefun.request_reply_pb2 import FromFunction, ToFunction, Address
 
-from statefun_tasks import TaskResult, TaskException, PipelineBuilder, TaskRequest, FlinkTasks, DefaultSerialiser
+from statefun_tasks import TaskRequest, TaskResult, TaskException, TaskActionRequest, TaskActionResult, TaskActionException, TaskAction, \
+    PipelineBuilder, FlinkTasks, DefaultSerialiser
 from statefun_tasks.client import TaskError
 from ._test_utils import update_address, update_state, unpack_any
 
@@ -22,7 +23,7 @@ functions = StatefulFunctions()
 
 
 @functions.bind('test/worker')
-async def worker(context, task_data: Union[TaskRequest, TaskResult, TaskException]):
+async def worker(context, task_data: Union[TaskRequest, TaskResult, TaskException, TaskActionRequest]):
     if tasks.is_async_required(task_data):
         await tasks.run_async(context, task_data)
     else:
@@ -33,14 +34,13 @@ async_handler = AsyncRequestReplyHandler(functions)
 
 
 class _InvocationResult(NamedTuple):
-    egress_message: Optional[Union[TaskResult, TaskException]]
+    egress_message: Optional[Union[TaskResult, TaskException, TaskActionResult, TaskActionException]]
     outgoing_messages: List[Any]
 
 
 class TestHarness:
     """
-    Provides a simplified implementation of Flink stateful functions, suitable for testing pipeline execution.
-
+    Provides a simplified implementation of Flink stateful functions, suitable for testing pipeline execution and task actions
     Tasks are executed within the same process.
     """
 
@@ -65,6 +65,17 @@ class TestHarness:
 
         return self._run_flink_loop(task_request, target)
 
+
+    def run_action(self, pipeline: PipelineBuilder, action: TaskAction, initial_target_type='worker'):
+        task_action = TaskActionRequest(id=pipeline.id, action=action, reply_topic=self.__reply_topic)
+
+        target = Address()
+        target.namespace = default_namespace
+        target.type = initial_target_type
+        target.id = pipeline.id
+
+        return self._run_flink_loop(task_action, target)
+
     def _update_state(self, namespace, target_type, target_id, state_mutations):
         item_id = (namespace, target_type, target_id)
         state = self.__states[item_id]
@@ -72,8 +83,11 @@ class TestHarness:
             if state_mutation.mutation_type == state_mutation.MODIFY:
                 next(filter(lambda x: x.state_name == state_mutation.state_name,
                             state)).state_value = state_mutation.state_value
+            elif state_mutation.mutation_type == state_mutation.DELETE:
+                next(filter(lambda x: x.state_name == state_mutation.state_name,
+                            state)).state_value = bytes()
             else:
-                raise ValueError('Only state modifications are currently supported')
+                raise ValueError('Only state modifications and deletions are currently supported')
         self.__states[item_id] = state
 
     def _copy_state_to_invocation(self, namespace, target_type, target_id, to_function):
@@ -97,13 +111,16 @@ class TestHarness:
         if kafka_producer_record.topic != self.__reply_topic:
             raise ValueError(f'Unexpected topic for egress: {kafka_producer_record.topic}')
         result_any = Any.FromString(kafka_producer_record.value_bytes)
-        task_result_or_exception = unpack_any(result_any, [TaskResult, TaskException])
-        if isinstance(task_result_or_exception, TaskResult):
-            return serialiser.deserialise_result(task_result_or_exception, unwrap_tuple=True)
+        result_proto = unpack_any(result_any, [TaskResult, TaskException, TaskActionResult, TaskActionException])
+        if isinstance(result_proto, TaskResult):
+            result, _ = serialiser.deserialise_result(result_proto)
+            return result
+        elif isinstance(result_proto, TaskActionResult):
+            return result_proto
         else:
-            raise TaskErrorException(TaskError(task_result_or_exception))
+            raise TaskErrorException(TaskError(result_proto))
 
-    def _run_flink_loop(self, message_arg: Union[TaskRequest, TaskResult, TaskException], target: Address, caller=None):
+    def _run_flink_loop(self, message_arg: Union[TaskRequest, TaskResult, TaskException, TaskActionRequest], target: Address, caller=None):
         to_function = ToFunction()
         update_address(to_function.invocation.target, target.namespace, target.type, target.id)
         invocation = to_function.invocation.invocations.add()
@@ -129,10 +146,11 @@ class TestHarness:
     def _process_result(self, to_function: ToFunction, result_bytes) -> _InvocationResult:
         result = self._parse_result_bytes(result_bytes)
         invocation_result = result.invocation_result
-        egress_message = self._try_extract_egress(invocation_result)
-        outgoing_messages = invocation_result.outgoing_messages
         target = to_function.invocation.target
         self._update_state(target.namespace, target.type, target.id, invocation_result.state_mutations)
+
+        egress_message = self._try_extract_egress(invocation_result)
+        outgoing_messages = invocation_result.outgoing_messages
         return _InvocationResult(egress_message, outgoing_messages)
 
     @staticmethod

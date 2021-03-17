@@ -5,6 +5,7 @@ from tests.utils import TestHarness, tasks, TaskErrorException
 
 finally_flag = False
 finally_args = []
+finally_state = 0
 
 
 @tasks.bind()
@@ -20,11 +21,16 @@ def workflow_with_cleanup_kwargs(first_name, last_name):
         .continue_with(_say_goodbye, goodbye_message="see you later!") \
         .finally_do(_cleanup_with_args, arg1='arg1', arg2='arg2')
 
+@tasks.bind()
+def workflow_with_cleanup_state(initial_state):
+    return tasks.send(_set_state, initial_state).finally_do(_cleanup_with_state) 
+
 
 @tasks.bind()
 def workflow_with_error_and_cleanup(first_name, last_name):
     return tasks.send(_say_hello, first_name, last_name) \
         .continue_with(_throw_error) \
+        .continue_with(_say_goodbye, 'Bye') \
         .finally_do(_cleanup)
 
 
@@ -33,6 +39,12 @@ def workflow_with_cleanup_in_middle(first_name, last_name):
     return tasks.send(_say_hello, first_name, last_name) \
         .finally_do(_cleanup) \
         .continue_with(_throw_error)
+
+
+@tasks.bind(with_state=True)
+def _set_state(initial_state, value):
+    initial_state = value
+    return initial_state, value
 
 
 @tasks.bind()
@@ -47,20 +59,26 @@ async def _say_goodbye(greeting, goodbye_message):
 
 
 @tasks.bind()
-def _throw_error():
+def _throw_error(*args):
     raise Exception('I am supposed to fail')
 
 
 @tasks.bind()
-def _cleanup():
+def _cleanup(*args):
     global finally_flag
     finally_flag = True
 
 
 @tasks.bind()
-def _cleanup_with_args(arg1, arg2):
+def _cleanup_with_args(arg1, arg2, *args):
     global finally_args
     finally_args = [arg1, arg2]
+
+
+@tasks.bind(with_state=True)
+def _cleanup_with_state(state, *args):
+    global finally_state
+    finally_state = state + 10
 
 
 class FinallyDoTests(unittest.TestCase):
@@ -86,6 +104,14 @@ class FinallyDoTests(unittest.TestCase):
 
         self.assertEqual(finally_args, ['arg1', 'arg2'])
 
+    def test_pipeline_with_finally_state(self):
+        global finally_state
+        finally_state = 0
+        pipeline = tasks.send(workflow_with_cleanup_state, initial_state=10)
+
+        self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(finally_state, 20)  # finally adds 10
+
     def test_pipeline_with_finally_and_error(self):
         global finally_flag
         finally_flag = False
@@ -105,7 +131,7 @@ class FinallyDoTests(unittest.TestCase):
         try:
             self.test_harness.run_pipeline(pipeline)
         except TaskErrorException as e:
-            self.assertEqual(e.task_error.message, 'Invalid pipeline: finally_do must be called at the end of a pipeline')
+            self.assertEqual(e.task_error.message, 'Invalid pipeline: "finally_do" must be called at the end of a pipeline')
         else:
             self.fail('Expected an exception')
 
