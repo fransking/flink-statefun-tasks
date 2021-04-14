@@ -1,6 +1,6 @@
 from statefun_tasks import DefaultSerialiser, PipelineBuilder, TaskRequest, TaskResult, TaskException, TaskAction, \
     TaskActionRequest, TaskActionResult, TaskActionException, TaskStatus as TaskStatusProto
-from statefun_tasks.client import TaskError, TaskStatus
+from statefun_tasks.client.types import TaskError, TaskStatus
 
 from google.protobuf.any_pb2 import Any
 from kafka import KafkaProducer, KafkaConsumer, TopicPartition
@@ -208,17 +208,17 @@ class FlinkTasksClient(object):
 
                     _log.info(f'Message received - {message}')
 
-                    any = Any()
-                    any.ParseFromString(message.value)
+                    proto = Any()
+                    proto.ParseFromString(message.value)
 
-                    if any.Is(TaskException.DESCRIPTOR):
-                        self._raise_exception(any, TaskException)
-                    elif any.Is(TaskResult.DESCRIPTOR):
-                        self._return_result(any, TaskResult)
-                    elif any.Is(TaskActionException.DESCRIPTOR):
-                        self._raise_exception(any, TaskActionException)
-                    elif any.Is(TaskActionResult.DESCRIPTOR):
-                        self._return_action_result(any, TaskActionResult)
+                    if proto.Is(TaskException.DESCRIPTOR):
+                        self._raise_exception(proto, TaskException)
+                    elif proto.Is(TaskResult.DESCRIPTOR):
+                        self._return_result(proto, TaskResult)
+                    elif proto.Is(TaskActionException.DESCRIPTOR):
+                        self._raise_exception(proto, TaskActionException)
+                    elif proto.Is(TaskActionResult.DESCRIPTOR):
+                        self._return_action_result(proto, TaskActionResult)
 
             except Exception as ex:
                 _log.warning(f'Exception in consumer thread - {ex}', exc_info=ex)

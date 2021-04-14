@@ -174,19 +174,19 @@
 <p>A lightweight API that borrows concepts from Celery to allow Python developers to run task based workflows on Apache Flink Stateful Functions.
 Workflows are composed of Tasks which accept parameters and can be chained together as continuations into a Pipeline.
 The Pipeline becomes the Flink state.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks.bind</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">greeting_workflow</span><span class="p">(</span><span class="n">first_name</span><span class="p">,</span> <span class="n">last_name</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">say_hello</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">first_name</span><span class="p">,</span> <span class="n">last_name</span><span class="p">)</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">say_goodbye</span><span class="p">)</span>
 
 
-<span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
+<span class="nd">@tasks.bind</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">say_hello</span><span class="p">(</span><span class="n">first_name</span><span class="p">,</span> <span class="n">last_name</span><span class="p">):</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Hello </span><span class="si">{</span><span class="n">first_name</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">last_name</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="k">return</span> <span class="n">f</span><span class="s1">&#39;Hello {first_name} {last_name}&#39;</span>
 
 
-<span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
+<span class="nd">@tasks.bind</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">say_goodbye</span><span class="p">(</span><span class="n">greeting</span><span class="p">):</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">greeting</span><span class="si">}</span><span class="s1">.  So now I will say goodbye&#39;</span>
+    <span class="k">return</span> <span class="n">f</span><span class="s1">&#39;{greeting}.  So now I will say goodbye&#39;</span>
 </pre></div>
 </div>
 </div>
@@ -200,18 +200,18 @@ The Pipeline becomes the Flink state.</p>
 <li><p>Return the average of of the standard deviations</p></li>
 </ul>
 <p>This is fairly trivial to achieve in Celery using plain old functions decorated as Celery tasks</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app</span><span class="o">.</span><span class="n">task</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app.task</span>
 <span class="k">def</span> <span class="nf">load_timeseries</span><span class="p">(</span><span class="n">stock</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
     <span class="c1"># load timeseries from market data system and return array of prices</span>
     <span class="k">return</span> <span class="n">prices</span>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">task</span>
+<span class="nd">@app.task</span>
 <span class="k">def</span> <span class="nf">compute_std_dev</span><span class="p">(</span><span class="n">prices</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">prices</span><span class="p">)</span>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">task</span>
+<span class="nd">@app.task</span>
 <span class="k">def</span> <span class="nf">compute_average</span><span class="p">(</span><span class="n">std_devs</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">std_devs</span><span class="p">)</span>
 </pre></div>
@@ -238,13 +238,13 @@ The Pipeline becomes the Flink state.</p>
 <div class="section" id="flink-stateful-functions">
 <h2>Flink Stateful Functions<a class="headerlink" href="#flink-stateful-functions" title="Permalink to this headline">¶</a></h2>
 <p>Let’s revisit our stocks example and implement it as Flink Stateful Functions.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@functions</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s1">&#39;examples/load_timeseries&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@functions.bind</span><span class="p">(</span><span class="s1">&#39;examples/load_timeseries&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">load_timeseries</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">stock</span><span class="p">):</span>
     <span class="n">prices</span> <span class="o">=</span> <span class="n">_load_prices</span><span class="p">(</span><span class="n">stock</span><span class="p">)</span>
     <span class="n">context</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;examples/compute_std_dev&#39;</span><span class="p">,</span> <span class="n">prices</span><span class="p">)</span>
 
 
-<span class="nd">@functions</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s1">&#39;examples/compute_std_dev&#39;</span><span class="p">)</span>
+<span class="nd">@functions.bind</span><span class="p">(</span><span class="s1">&#39;examples/compute_std_dev&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">compute_std_dev</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">prices</span><span class="p">):</span>
     <span class="n">context</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">prices</span><span class="p">))</span>
 </pre></div>
@@ -255,7 +255,7 @@ The Pipeline becomes the Flink state.</p>
 <li><p>compute_std_dev() replies to load_timeseries().  That means load_timeseries() needs to accept both a stock as an input or a list of stock prices.</p></li>
 <li><p>As the workflow becomes more complex load_timeseries() morphs into an orchestration function:</p></li>
 </ol>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@functions</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s1">&#39;examples/load_timeseries&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@functions.bind</span><span class="p">(</span><span class="s1">&#39;examples/load_timeseries&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">load_timeseries</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -283,7 +283,7 @@ invocation, execution is still distributed and can be scaled up as required.</p>
     <span class="n">egress_type_name</span><span class="o">=</span><span class="s2">&quot;example/kafka-generic-egress&quot;</span><span class="p">)</span>
 
 
-<span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
+<span class="nd">@tasks.bind</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">timeseries_workflow</span><span class="p">():</span>
     <span class="n">stocks</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;BT.L&#39;</span><span class="p">,</span> <span class="s1">&#39;DAIGn.DE&#39;</span><span class="p">,</span> <span class="s1">&#39;BP.L&#39;</span><span class="p">]</span>
 
@@ -292,27 +292,27 @@ invocation, execution is still distributed and can be scaled up as required.</p>
     <span class="p">)</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">compute_average</span><span class="p">)</span>
 
 
-<span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
+<span class="nd">@tasks.bind</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">load_timeseries</span><span class="p">(</span><span class="n">stock</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">_load_prices</span><span class="p">(</span><span class="n">stock</span><span class="p">)</span>
 
 
-<span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
+<span class="nd">@tasks.bind</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">compute_std_dev</span><span class="p">(</span><span class="n">prices</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">prices</span><span class="p">)</span>
 
 
-<span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
+<span class="nd">@tasks.bind</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">compute_average</span><span class="p">(</span><span class="n">std_devs</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">std_devs</span><span class="p">)</span>
 
 
-<span class="nd">@functions</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;example/worker&quot;</span><span class="p">)</span>
+<span class="nd">@functions.bind</span><span class="p">(</span><span class="s2">&quot;example/worker&quot;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">worker</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">task_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TaskRequest</span><span class="p">,</span> <span class="n">TaskResult</span><span class="p">,</span> <span class="n">TaskException</span><span class="p">]):</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">tasks</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">task_data</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Error - </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Error - {e}&#39;</span><span class="p">)</span>
         <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
 </pre></div>
 </div>

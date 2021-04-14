@@ -2,7 +2,7 @@ import unittest
 
 from statefun.request_reply_pb2 import Address
 
-from statefun_tasks._types import _TaskEntry, _GroupEntry
+from statefun_tasks.types import _TaskEntry, _GroupEntry
 from statefun_tasks import DefaultSerialiser, RetryPolicy
 
 class PipelineSerialisationTests(unittest.TestCase):
@@ -37,7 +37,7 @@ class PipelineSerialisationTests(unittest.TestCase):
         entry_proto = entry.to_proto(serialiser)
         reconsituted_entry = _TaskEntry.from_proto(entry_proto, serialiser)
 
-        self.assertEqual(entry_proto.task_entry.request.type_url, 'type.googleapis.com/org.apache.flink.statefun.flink.core.polyglot.Address')
+        self.assertEqual(entry_proto.task_entry.request.type_url, 'type.googleapis.com/io.statefun.sdk.reqreply.Address')
 
         self.assertEqual(reconsituted_entry.args, entry.args)
         self.assertEqual(reconsituted_entry.kwargs, {})

@@ -1,6 +1,6 @@
-from .messages_pb2 import TaskRequest, TaskResult, TaskException, ArgsAndKwargs
-from ._protobuf import _convert_from_proto, _convert_to_proto, _pack_any, _unpack_any, _parse_any_from_bytes
-from ._utils import _is_tuple
+from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, ArgsAndKwargs
+from statefun_tasks.protobuf import pack_any, unpack_any, _convert_from_proto, _convert_to_proto, _parse_any_from_bytes
+from statefun_tasks.utils import _is_tuple
 from google.protobuf.any_pb2 import Any
 from google.protobuf.message import Message
 
@@ -61,7 +61,7 @@ class DefaultSerialiser(object):
             request.args.CopyFrom(_convert_to_proto(args))
             request.kwargs.CopyFrom(_convert_to_proto(kwargs))
 
-        return _pack_any(request)
+        return pack_any(request)
 
     def deserialise_args_and_kwargs(self, request: Any):
         """
@@ -92,7 +92,7 @@ class DefaultSerialiser(object):
         """
         request = self.serialise_args_and_kwargs(args, kwargs)
         task_request.request.CopyFrom(request)
-        task_request.state.CopyFrom(_pack_any(_convert_to_proto(state)))
+        task_request.state.CopyFrom(pack_any(_convert_to_proto(state)))
 
     def deserialise_request(self, task_request: TaskRequest):
         """
@@ -114,8 +114,8 @@ class DefaultSerialiser(object):
         :param result: task result
         :param state: task state
         """
-        task_result.result.CopyFrom(_pack_any(_convert_to_proto(result)))
-        task_result.state.CopyFrom(_pack_any(_convert_to_proto(state)))
+        task_result.result.CopyFrom(pack_any(_convert_to_proto(result)))
+        task_result.state.CopyFrom(pack_any(_convert_to_proto(state)))
 
     def deserialise_result(self, task_result: TaskResult):
         """
