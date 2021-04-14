@@ -19,10 +19,10 @@ _log.info("Worker starting")
 functions = StatefulFunctions()
 
 
-@functions.bind("example/worker")
-def worker(context, task_input: Union[TaskRequest, TaskResult, TaskException, TaskActionRequest]):
+@functions.bind("example/worker", specs=tasks.value_specs())
+async def worker(context, message):
     try:
-        tasks.run(context, task_input)
+        await tasks.run_async(context, message)
     except Exception as e:
         print(f'Error - {e}')
         traceback.print_exc()

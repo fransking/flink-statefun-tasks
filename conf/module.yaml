@@ -1,55 +1,39 @@
-version: "1.0"
+version: "3.0"
 module:
   meta:
     type: remote
   spec:
-    functions:
-      - function:
-          meta:
-            kind: http
-            type: example/worker
-          spec:
-            endpoint: SYNC_WORKER_ADDRESS
-            states:
-              - task_request
-              - task_state
-              - task_result
-              - task_exception
-            maxNumBatchRequests: 500
-            timeout: 10min
-      - function:
-          meta:
-            kind: http
-            type: example/async_worker
-          spec:
-            endpoint: ASYNC_WORKER_ADDRESS
-            states:
-              - task_request
-              - task_state
-              - task_result
-              - task_exception
-            maxNumBatchRequests: 500
-            timeout: 10min
+    endpoints:
+    - endpoint:
+        meta:
+          kind: http
+        spec:
+          functions: example/worker
+          urlPathTemplate: http://WORKER:8085/statefun
     ingresses:
       - ingress:
           meta:
-            type: statefun.kafka.io/routable-protobuf-ingress
-            id: example/requests
+            type: io.statefun.kafka/ingress
+            id: example/worker
           spec:
-            address: KAFKA_BROKER_ADDRESS
+            address: KAFKA_SERVER:9092
             consumerGroupId: flink-cluster-id
             topics:
               - topic: statefun-test.requests
-                typeUrl: com.googleapis/statefun_tasks.TaskRequest
+                valueType: io.statefun_tasks.types/statefun_tasks.TaskRequest
+                targets:
+                  - example/worker
+              - topic:  statefun-test.actions
+                valueType: io.statefun_tasks.types/statefun_tasks.TaskActionRequest
                 targets:
                   - example/worker
     egresses:
       - egress:
           meta:
-            type: statefun.kafka.io/generic-egress
+            type: io.statefun.kafka/egress
             id: example/kafka-generic-egress
           spec:
-            address: KAFKA_BROKER_ADDRESS
+            address: KAFKA_SERVER:9092
             deliverySemantic:
-              type: exactly-once
+              type: at-least-once
               transactionTimeoutMillis: 100000
