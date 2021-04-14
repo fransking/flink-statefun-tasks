@@ -171,14 +171,14 @@
 <div class="section" id="stateful-functions">
 <h2>Stateful Functions<a class="headerlink" href="#stateful-functions" title="Permalink to this headline">¶</a></h2>
 <p>In Flink Stateful Functions a stateful function has inputs, outputs, state and has a logical address name of up a namespace, type and id:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@functions</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;example/functions&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@functions.bind</span><span class="p">(</span><span class="s2">&quot;example/functions&quot;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">stateful_function</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">input</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ProtobufTypeA</span><span class="p">,</span> <span class="n">ProtobufTypeB</span><span class="p">,</span> <span class="o">...</span><span class="p">]):</span>
     <span class="o">...</span>
 </pre></div>
 </div>
 <p>Inputs may be of different types and the outputs include directives to mutate state, call other stateful functions and submit outgoing messages to some egress topic.
 Outputs are not returned from the function but instead written into the context.  The same is true for state:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@functions</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;example/functions&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@functions.bind</span><span class="p">(</span><span class="s2">&quot;example/functions&quot;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">stateful_function</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">input</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ProtobufTypeA</span><span class="p">,</span> <span class="n">ProtobufTypeB</span><span class="p">,</span> <span class="o">...</span><span class="p">]):</span>
     <span class="n">state</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">]</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">state</span><span class="p">:</span>
@@ -190,7 +190,7 @@ Outputs are not returned from the function but instead written into the context.
 </pre></div>
 </div>
 <p>Functions may also reply to their caller:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@functions</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;example/functions&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@functions.bind</span><span class="p">(</span><span class="s2">&quot;example/functions&quot;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">stateful_function</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">input</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">RequestsType</span><span class="p">,</span> <span class="n">ResultType</span><span class="p">,</span> <span class="o">...</span><span class="p">]):</span>
     <span class="n">context</span><span class="o">.</span><span class="n">pack_and_reply</span><span class="p">(</span><span class="s1">&#39;a response&#39;</span><span class="p">)</span>
 </pre></div>
@@ -205,7 +205,7 @@ Outputs are not returned from the function but instead written into the context.
 </pre></div>
 </div>
 <p>The corresponding Stateful Function might be:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@functions</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;example/functions&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@functions.bind</span><span class="p">(</span><span class="s2">&quot;example/functions&quot;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">stateful_multiply</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">input</span><span class="p">:</span> <span class="n">TwoNumbersType</span><span class="p">):</span>
     <span class="n">result</span> <span class="o">=</span> <span class="nb">input</span><span class="o">.</span><span class="n">x</span> <span class="o">*</span> <span class="nb">input</span><span class="o">.</span><span class="n">y</span>
 
@@ -226,7 +226,7 @@ called and by who.  It also has an impact on unit testing:</p>
 <div class="section" id="flink-tasks">
 <h2>Flink Tasks<a class="headerlink" href="#flink-tasks" title="Permalink to this headline">¶</a></h2>
 <p><strong>Flink Tasks trades the ability to have multiple effects (reply, send, egress) in favour of the simplicty of attributing plain old functions:</strong></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks.bind</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">multiply</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y</span>
 </pre></div>

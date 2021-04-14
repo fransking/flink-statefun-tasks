@@ -179,7 +179,7 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">divide</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">client</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>                                     <span class="c1"># non-blocking returns Future</span>
 
-<span class="n">status</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get_status_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>            <span class="c1"># type: TaskStatus</span>
+<span class="n">status</span> <span class="o">=</span> <span class="n">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get_status_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>            <span class="c1"># type: TaskStatus</span>
 </pre></div>
 </div>
 </div>
@@ -188,7 +188,7 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">divide</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">client</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>                                     <span class="c1"># non-blocking returns Future</span>
 
-<span class="n">request</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get_request_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>          <span class="c1"># type: TaskRequest</span>
+<span class="n">request</span> <span class="o">=</span> <span class="n">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get_request_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>          <span class="c1"># type: TaskRequest</span>
 </pre></div>
 </div>
 </div>
@@ -197,7 +197,7 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">divide</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">client</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>                                     <span class="c1"># non-blocking returns Future</span>
 
-<span class="n">request</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get_result_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>           <span class="c1"># type: TaskResult</span>
+<span class="n">request</span> <span class="o">=</span> <span class="n">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get_result_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>           <span class="c1"># type: TaskResult</span>
 </pre></div>
 </div>
 </div>
