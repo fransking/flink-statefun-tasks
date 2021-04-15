@@ -43,7 +43,7 @@ app = Flask(__name__)
 
 @app.route('/statefun', methods=['POST'])
 def handle():
-    response_data = handler(request.data)
+    response_data = handler.handle_sync(request.data)
     response = make_response(response_data)
     response.headers.set('Content-Type', 'application/octet-stream')
     return response
