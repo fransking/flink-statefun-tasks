@@ -15,7 +15,7 @@ from statefun_tasks.pipeline import _Pipeline
 from statefun_tasks.tasks import _FlinkTask
 from statefun_tasks.actions import _FlinkAction
 
-from statefun import ValueSpec, Context, Message, make_protobuf_type
+from statefun import ValueSpec, Context, Message
 from datetime import timedelta
 from typing import Union
 from functools import partial
@@ -98,7 +98,7 @@ class FlinkTasks(object):
         :param retry_policy: retry policy to use should the task throw an exception
         :param with_state: whether to pass a state object as the first parameter - return value should be a tuple of state, result (default False)
         :param is_fruitful: whether the function produces a fruitful result or simply returns None (default True)
-        :param module_name: if specified then the task type used in addressingwill be module_name.function_name
+        :param module_name: if specified then the task type used in addressing will be module_name.function_name
                             otherwise the Python module containing the function will be used
 
         """

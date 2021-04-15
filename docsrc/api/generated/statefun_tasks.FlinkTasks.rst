@@ -15,12 +15,11 @@ FlinkTasks
       ~FlinkTasks.__init__
       ~FlinkTasks.bind
       ~FlinkTasks.get_task
-      ~FlinkTasks.is_async_required
       ~FlinkTasks.register
       ~FlinkTasks.register_builtin
-      ~FlinkTasks.run
       ~FlinkTasks.run_async
       ~FlinkTasks.send
+      ~FlinkTasks.value_specs
    
     
    

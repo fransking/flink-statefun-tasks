@@ -7,7 +7,6 @@ from statefun_tasks.utils import _extend_args
 from statefun_tasks.pipeline_helper import _PipelineHelper
 
 from typing import Union, Iterable
-from uuid import uuid4
 
 
 class _Pipeline(object):

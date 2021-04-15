@@ -5,7 +5,7 @@ from statefun_tasks.messages_pb2 import TaskState, TaskRequest, TaskResult, Task
 from statefun import make_protobuf_type
 from google.protobuf.message import Message
 
-from typing import NamedTuple
+from dataclasses import dataclass, field
 from datetime import timedelta
 import json
 
@@ -29,7 +29,6 @@ _VALUE_TYPE_MAP = {
     TaskActionResult: TASK_ACTION_RESULT_TYPE,
     TaskActionException: TASK_ACTION_EXCEPTION_TYPE
 }
-
 
 
 class _TaskEntry(object):
@@ -174,8 +173,9 @@ class _GroupEntry(object):
         return self._group.__repr__()
 
 
-class RetryPolicy(NamedTuple):
-    retry_for: list = [Exception]
+@dataclass
+class RetryPolicy:
+    retry_for: list = field(default_factory=lambda: [Exception])
     max_retries: int = 1
     delay: timedelta = timedelta()
     exponential_back_off: bool = False
