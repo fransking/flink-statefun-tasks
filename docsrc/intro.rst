@@ -8,27 +8,11 @@ A lightweight API that borrows concepts from Celery to allow Python developers t
 Workflows are composed of Tasks which accept parameters and can be chained together as continuations into a Pipeline.  
 The Pipeline becomes the Flink state.
 
-.. code-block:: python
-
-    @tasks.bind()
-    def greeting_workflow(first_name, last_name):
-        return say_hello.send(first_name, last_name).continue_with(say_goodbye)
-
-
-    @tasks.bind()
-    def say_hello(first_name, last_name):
-        return f'Hello {first_name} {last_name}'
-
-
-    @tasks.bind()
-    def say_goodbye(greeting):
-        return f'{greeting}.  So now I will say goodbye'
-
 
 Motivation
 ^^^^^^^^^^
 
-I use Celery in my professional life to orchestrate distributed Python workflows.  These workflows are typically 1-N-1 cardinality such as:
+I use Celery in my professional life to orchestrate distributed Python workflows.  These workflows are typically 1-N-1 such as:
 
 * Load a portfolio of stocks
 * For each stock load a timeseries of historical prices
@@ -74,58 +58,97 @@ Since the workflow is implemented as simple functions it is also testable and de
 
 .. code-block:: python
 
-    test_result = compute_average([compute_std_dev(load_timeseries('BT.L'))])
+    test_result = compute_average([compute_std_dev(load_timeseries('BT.L')), compute_std_dev(load_timeseries('VOD.L'))])
 
 
 Flink Stateful Functions
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-Let's revisit our stocks example and implement it as Flink Stateful Functions.  
+Let's revisit our stocks example and try to implement it as Flink Stateful Functions.  
 
 .. code-block:: python
 
     @functions.bind('examples/load_timeseries')
-    def load_timeseries(context, stock):
-        prices = _load_prices(stock)
-        context.send('examples/compute_std_dev', prices)
+    def load_timeseries(context, message):
+        prices = _load_prices(message.as_type(STOCK))
+        context.send('prices -> examples/compute_std_dev')
 
 
     @functions.bind('examples/compute_std_dev')
-    def compute_std_dev(context, prices):
-        context.reply(np.std(prices))
+    def compute_std_dev(context, message):
+        std_dev = np.std(message.as_type(PRICES))
+        context.send('std_dev -> examples/compute_average')
+
+
+    @functions.bind('examples/compute_average')
+    def compute_average(context, message):
+        context.storage.std_devs.append(message.as_type(STD_DEV))
+
+        if len(context.storage.std_devs) > NUMBER_OF_STOCKS:
+            avg = np.mean(context.storage.std_devs)
+            context.send_egress('avg -> egress topic')
 
 
 Some issues with this:
 
-1. load_timeseries() always calls compute_std_dev().  It's no longer a resusable function so I cannot use it in other workflows.
+1. load_timeseries() always calls compute_std_dev().  It's no longer a resusable function so I cannot use it in other workflows. The is true for compute_std_dev().
 
-2. compute_std_dev() replies to load_timeseries().  That means load_timeseries() needs to accept both a stock as an input or a list of stock prices.  
+2. compute_average() has to wait for all standand deviations to be received before it calculates the average, storing intermdiate values in state
 
-3. As the workflow becomes more complex load_timeseries() morphs into an orchestration function:
+3. None of the functions are fruitful so they cannot be tested by chaining them together outside of Flink
+
+
+A better approach might be to have a central orchestration function that load_timeseries(), compute_std_dev(), compute_average() call back to.  This makes them resusable
+and keeps the state management in one place
+
 
 .. code-block:: python
 
     @functions.bind('examples/load_timeseries')
-    def load_timeseries(context, input):
+    def load_timeseries(context, message):
+        context.send('prices -> context.caller')
 
-        if isinstance(input, str):
-            prices = _load_prices(stock)
-            context.send('examples/compute_std_dev', input)
-        # elif ... next stage
-        # elif ... next stage
-        # elif ... next stage etc
-        elif isinstance(input, double):  # finally reply to original caller
-            context.pack_and_send_egress('topic', input)
 
-4. The functions are no longer testable by chaining them together outside of Flink
+    @functions.bind('examples/compute_std_dev')
+    def compute_std_dev(context, message):
+        context.send('std_dev -> context.caller')
+
+
+    @functions.bind('examples/compute_average')
+    def compute_average(context, message):
+        context.send('avg -> context.caller')
+
+
+    @functions.bind('examples/load_timeseries')
+    def compute_average_std_devs_of_timeseries(context, message):
+
+        if message.is_type(STOCK_LIST):
+            context.storage.stocks = message.as_type(STOCK_LIST)
+            context.storage.std_devs = []
+            context.storage.initial_caller = context.caller
+
+            for stock in context.storage.stocks:
+                context.send('stock -> examples/load_timeseries')
+        
+        elif message.is_type(PRICES):
+            context.send('prices -> examples/compute_std_dev')
+
+        elif message.is_type(STD_DEV):
+            context.storage.std_devs.append(message.as_type(STD_DEV))
+
+            if len(context.storage.std_devs) == len(context.storage.stocks)
+                context.send('context.storage.std_devs -> examples/compute_average')
+
+        elif message.is_type(AVG):
+            context.send('average -> context.storage.initial_caller')
+
 
 
 Flink Tasks
 ^^^^^^^^^^^
 
-Flink Tasks wraps up the orchestration function into a Pipeline so that developers can focus on writing simple functions that are 
-combined into workflows using an intuitive API.  As each individual task in a workflow is run as a seperate Flink stateful function 
-invocation, execution is still distributed and can be scaled up as required.
+Flink Tasks wraps up this orchestration function into a pipeline so that developers can focus on writing simple functions that are 
+combined into workflows using an intuitive API based around ordinary Python functions.
 
 .. code-block:: python
 
@@ -136,9 +159,7 @@ invocation, execution is still distributed and can be scaled up as required.
 
 
     @tasks.bind()
-    def timeseries_workflow():
-        stocks = ['BT.L', 'DAIGn.DE', 'BP.L']
-
+    def compute_average_std_devs_of_timeseries(stocks):
         return in_parallel(
             [load_timeseries.send(stock).continue_with(compute_std_dev) for stock in stocks]
         ).continue_with(compute_average)
@@ -160,9 +181,9 @@ invocation, execution is still distributed and can be scaled up as required.
 
 
     @functions.bind("example/worker")
-    def worker(context, task_data: Union[TaskRequest, TaskResult, TaskException]):
+    async def worker(context, message):
         try:
-            tasks.run(context, task_data)
+            await tasks.run_async(context, message)
         except Exception as e:
             print(f'Error - {e}')
             traceback.print_exc()

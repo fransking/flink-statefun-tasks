@@ -19,9 +19,9 @@ Stateful Function:
         return x - y
 
 
-    @functions.bind("example/maths")
-    def worker(context, task_input: Union[TaskRequest, TaskResult, TaskException]):
-        tasks.run(context, task_input)
+    @functions.bind("example/worker", specs=tasks.value_specs())
+    async def worker(context, message):
+        await tasks.run_async(context, message)
 
 
 
