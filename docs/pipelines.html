@@ -181,7 +181,7 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># task results are passed as arguments to continuations</span>
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">divide</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
-<span class="n">result</span> <span class="o">=</span> <span class="n">await</span> <span class="n">client</span><span class="o">.</span><span class="n">submit_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">submit_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -193,11 +193,11 @@
     <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
 <span class="p">])</span>
 
-<span class="n">result</span> <span class="o">=</span> <span class="n">await</span> <span class="n">client</span><span class="o">.</span><span class="n">submit_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">submit_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Parallel tasks results can be aggregated into a continuation:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks.bind</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">average</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
     <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
 
@@ -223,18 +223,18 @@
 <h2>Passing State<a class="headerlink" href="#passing-state" title="Permalink to this headline">¶</a></h2>
 <p>State can be shared and passed across tasks in a pipeline.  Tasks that access state should
 declare so in <em>&#64;tasks.bind()</em>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks.bind</span><span class="p">(</span><span class="n">with_state</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>       <span class="c1"># sets initial state</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">with_state</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>       <span class="c1"># sets initial state</span>
 <span class="k">def</span> <span class="nf">multiply</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
     <span class="n">state</span> <span class="o">=</span> <span class="mi">10</span>
     <span class="k">return</span> <span class="n">state</span><span class="p">,</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y</span>
 
 
-<span class="nd">@tasks.bind</span><span class="p">()</span>                      <span class="c1"># state is passed across</span>
+<span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>                      <span class="c1"># state is passed across</span>
 <span class="k">def</span> <span class="nf">subtract</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">x</span> <span class="o">-</span> <span class="n">y</span>
 
 
-<span class="nd">@tasks.bind</span><span class="p">(</span><span class="n">with_state</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>       <span class="c1"># accesses state</span>
+<span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">with_state</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>       <span class="c1"># accesses state</span>
 <span class="k">def</span> <span class="nf">add_state</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">state</span><span class="p">,</span> <span class="n">state</span> <span class="o">+</span> <span class="n">x</span>
 
@@ -252,7 +252,7 @@ Unhandled exceptions are returned to the client as they are with single tasks.</
 <p>Pipelines may also include a <em>finally_do</em> contiunation as their final step which will be called regardless of
 success or failure.  This is a good place to put any clean up logic.</p>
 <p>The <em>finally_do</em> task is non-fruitful so the result of the pipeline is the result of the previous task (or exception):</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks.bind</span><span class="p">(</span><span class="n">with_state</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">with_state</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
     <span class="c1"># do cleanup</span>
 
@@ -267,7 +267,7 @@ success or failure.  This is a good place to put any clean up logic.</p>
 patterns:</p>
 <div class="section" id="composition">
 <h3>Composition<a class="headerlink" href="#composition" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks.bind</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">multiply_and_subtract</span><span class="p">(</span><span class="n">mult_a</span><span class="p">,</span> <span class="n">mult_b</span><span class="p">,</span> <span class="n">sub_c</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">mult_a</span><span class="p">,</span> <span class="n">mult_b</span><span class="p">)</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">subtract</span><span class="p">,</span> <span class="n">sub_c</span><span class="p">)</span>
 
@@ -278,12 +278,12 @@ patterns:</p>
 </div>
 <div class="section" id="conditional-execution">
 <h3>Conditional Execution<a class="headerlink" href="#conditional-execution" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks.bind</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">add_positive</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">add</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">make_positive</span><span class="p">)</span>
 
 
-<span class="nd">@tasks.bind</span><span class="p">()</span>
+<span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">make_positive</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">x</span>                        <span class="c1"># either return value</span>
@@ -297,12 +297,12 @@ patterns:</p>
 </div>
 <div class="section" id="recursion">
 <h3>Recursion<a class="headerlink" href="#recursion" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks.bind</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">count_to_100</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">add</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">check_result</span><span class="p">)</span>
 
 
-<span class="nd">@tasks.bind</span><span class="p">()</span>
+<span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">check_result</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">100</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">x</span>

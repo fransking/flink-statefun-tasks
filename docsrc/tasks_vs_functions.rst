@@ -9,7 +9,7 @@ In Flink Stateful Functions a stateful function has inputs, outputs, state and h
 .. code-block:: python
 
     @functions.bind("example/functions")
-    def stateful_function(context, input: Union[ProtobufTypeA, ProtobufTypeB, ...]):
+    def stateful_function(context, message):
         ...
 
 Inputs may be of different types and the outputs include directives to mutate state, call other stateful functions and submit outgoing messages to some egress topic.  
@@ -17,31 +17,27 @@ Outputs are not returned from the function but instead written into the context.
 
 .. code-block:: python
 
-    @functions.bind("example/functions")
-    def stateful_function(context, input: Union[ProtobufTypeA, ProtobufTypeB, ...]):
-        state = context['state']
-        if not state:
-            state = 0
+    @functions.bind("example/function")
+    def stateful_function(context, message):
+        state = context.storage.state or 0
 
-        context['state'] = state + 1
-        context.pack_and_send('example/functions/other_function', 'an id', 'an input')
-        context.pack_and_send_egress('topic', 'an output')
+        context.storage.state = state + 1
+        context.send('message to another function')
+        context.send_egress('message to a topic')
 
 Functions may also reply to their caller:
 
 .. code-block:: python
 
-    @functions.bind("example/functions")
-    def stateful_function(context, input: Union[RequestsType, ResultType, ...]):
-        context.pack_and_reply('a response')
-
-which is why a typical Stateful Function signature accepts a Union of types as its input to cater for requests and results.
+    @functions.bind("example/function")
+    def stateful_function(context, message):
+        context.send('message to context.caller')
 
 
 Comparison with Python Functions
 --------------------------------
 
-In Python a plain old function that multiplies two numbers might look like:
+In Python an ordinary function that multiplies two numbers might look like:
 
 .. code-block:: python
 
@@ -52,8 +48,9 @@ The corresponding Stateful Function might be:
 
 .. code-block:: python
 
-    @functions.bind("example/functions")
-    def stateful_multiply(context, input: TwoNumbersType):
+    @functions.bind("example/multiply")
+    def stateful_multiply(context, message):
+        input = message.as_type(TWO_NUMBERS_TYPE)
         result = input.x * input.y
 
         # What to do now?  If I have a caller I should probably reply with the result.  
@@ -67,19 +64,17 @@ called and by who.  It also has an impact on unit testing:
     result = multiply(3, 2)
     self.assertEqual(6, result)
 
-    stateful_multiply(dummy_context, input)
-    self.assertEqual(6, dummy_context...)  # pick through the context directives to find the result.
+    stateful_multiply(dummy_context, message)
+    self.assertEqual(6, dummy_context...)  # pick through the context to find the result.
 
 
 Flink Tasks
 -----------
 
-**Flink Tasks trades the ability to have multiple effects (reply, send, egress) in favour of the simplicty of attributing plain old functions:**
+**Flink Tasks trades the ability to have multiple effects (reply, send, egress) in favour of the simplicty of attributing ordinary Python functions:**
 
 .. code-block:: python
 
     @tasks.bind()
     def multiply(x, y):
         return x * y
-
-It also allows for arbitrary parameters and return types so long as they can be packed into protobuf by the DefaultSerialiser.

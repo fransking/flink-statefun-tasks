@@ -243,7 +243,7 @@ to be exposed as tasks.</p>
 <li><p><strong>retry_policy</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">RetryPolicy</span></code>]) – retry policy to use should the task throw an exception</p></li>
 <li><p><strong>with_state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to pass a state object as the first parameter - return value should be a tuple of state, result (default False)</p></li>
 <li><p><strong>is_fruitful</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether the function produces a fruitful result or simply returns None (default True)</p></li>
-<li><p><strong>module_name</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – if specified then the task type used in addressingwill be module_name.function_name
+<li><p><strong>module_name</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – if specified then the task type used in addressing will be module_name.function_name
 otherwise the Python module containing the function will be used</p></li>
 </ul>
 </dd>

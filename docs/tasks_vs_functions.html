@@ -171,42 +171,40 @@
 <div class="section" id="stateful-functions">
 <h2>Stateful Functions<a class="headerlink" href="#stateful-functions" title="Permalink to this headline">¶</a></h2>
 <p>In Flink Stateful Functions a stateful function has inputs, outputs, state and has a logical address name of up a namespace, type and id:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@functions.bind</span><span class="p">(</span><span class="s2">&quot;example/functions&quot;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">stateful_function</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">input</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ProtobufTypeA</span><span class="p">,</span> <span class="n">ProtobufTypeB</span><span class="p">,</span> <span class="o">...</span><span class="p">]):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@functions</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;example/functions&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">stateful_function</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
     <span class="o">...</span>
 </pre></div>
 </div>
 <p>Inputs may be of different types and the outputs include directives to mutate state, call other stateful functions and submit outgoing messages to some egress topic.
 Outputs are not returned from the function but instead written into the context.  The same is true for state:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@functions.bind</span><span class="p">(</span><span class="s2">&quot;example/functions&quot;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">stateful_function</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">input</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ProtobufTypeA</span><span class="p">,</span> <span class="n">ProtobufTypeB</span><span class="p">,</span> <span class="o">...</span><span class="p">]):</span>
-    <span class="n">state</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">]</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">state</span><span class="p">:</span>
-        <span class="n">state</span> <span class="o">=</span> <span class="mi">0</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@functions</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;example/function&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">stateful_function</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">state</span> <span class="ow">or</span> <span class="mi">0</span>
 
-    <span class="n">context</span><span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">state</span> <span class="o">+</span> <span class="mi">1</span>
-    <span class="n">context</span><span class="o">.</span><span class="n">pack_and_send</span><span class="p">(</span><span class="s1">&#39;example/functions/other_function&#39;</span><span class="p">,</span> <span class="s1">&#39;an id&#39;</span><span class="p">,</span> <span class="s1">&#39;an input&#39;</span><span class="p">)</span>
-    <span class="n">context</span><span class="o">.</span><span class="n">pack_and_send_egress</span><span class="p">(</span><span class="s1">&#39;topic&#39;</span><span class="p">,</span> <span class="s1">&#39;an output&#39;</span><span class="p">)</span>
+    <span class="n">context</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">state</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">context</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;message to another function&#39;</span><span class="p">)</span>
+    <span class="n">context</span><span class="o">.</span><span class="n">send_egress</span><span class="p">(</span><span class="s1">&#39;message to a topic&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Functions may also reply to their caller:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@functions.bind</span><span class="p">(</span><span class="s2">&quot;example/functions&quot;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">stateful_function</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">input</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">RequestsType</span><span class="p">,</span> <span class="n">ResultType</span><span class="p">,</span> <span class="o">...</span><span class="p">]):</span>
-    <span class="n">context</span><span class="o">.</span><span class="n">pack_and_reply</span><span class="p">(</span><span class="s1">&#39;a response&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@functions</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;example/function&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">stateful_function</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+    <span class="n">context</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;message to context.caller&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>which is why a typical Stateful Function signature accepts a Union of types as its input to cater for requests and results.</p>
 </div>
 <div class="section" id="comparison-with-python-functions">
 <h2>Comparison with Python Functions<a class="headerlink" href="#comparison-with-python-functions" title="Permalink to this headline">¶</a></h2>
-<p>In Python a plain old function that multiplies two numbers might look like:</p>
+<p>In Python an ordinary function that multiplies two numbers might look like:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">multiply</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y</span>
 </pre></div>
 </div>
 <p>The corresponding Stateful Function might be:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@functions.bind</span><span class="p">(</span><span class="s2">&quot;example/functions&quot;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">stateful_multiply</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">input</span><span class="p">:</span> <span class="n">TwoNumbersType</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@functions</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;example/multiply&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">stateful_multiply</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+    <span class="nb">input</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">as_type</span><span class="p">(</span><span class="n">TWO_NUMBERS_TYPE</span><span class="p">)</span>
     <span class="n">result</span> <span class="o">=</span> <span class="nb">input</span><span class="o">.</span><span class="n">x</span> <span class="o">*</span> <span class="nb">input</span><span class="o">.</span><span class="n">y</span>
 
     <span class="c1"># What to do now?  If I have a caller I should probably reply with the result.</span>
@@ -218,20 +216,19 @@ called and by who.  It also has an impact on unit testing:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">multiply</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
 
-<span class="n">stateful_multiply</span><span class="p">(</span><span class="n">dummy_context</span><span class="p">,</span> <span class="nb">input</span><span class="p">)</span>
-<span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">dummy_context</span><span class="o">...</span><span class="p">)</span>  <span class="c1"># pick through the context directives to find the result.</span>
+<span class="n">stateful_multiply</span><span class="p">(</span><span class="n">dummy_context</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">dummy_context</span><span class="o">...</span><span class="p">)</span>  <span class="c1"># pick through the context to find the result.</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="flink-tasks">
 <h2>Flink Tasks<a class="headerlink" href="#flink-tasks" title="Permalink to this headline">¶</a></h2>
-<p><strong>Flink Tasks trades the ability to have multiple effects (reply, send, egress) in favour of the simplicty of attributing plain old functions:</strong></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks.bind</span><span class="p">()</span>
+<p><strong>Flink Tasks trades the ability to have multiple effects (reply, send, egress) in favour of the simplicty of attributing ordinary Python functions:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">multiply</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y</span>
 </pre></div>
 </div>
-<p>It also allows for arbitrary parameters and return types so long as they can be packed into protobuf by the DefaultSerialiser.</p>
 </div>
 </div>
 
