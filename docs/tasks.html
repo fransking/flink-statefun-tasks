@@ -172,17 +172,17 @@
 <h2>Registering a Task<a class="headerlink" href="#registering-a-task" title="Permalink to this headline">¶</a></h2>
 <p>Any Python function can be attributed with <em>tasks.bind()</em> to register it as a Flink Task.  Multiple tasks may be invoked by a single
 Stateful Function:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks.bind</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">multiply</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y</span>
 
 
-<span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
+<span class="nd">@tasks.bind</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">subtract</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">x</span> <span class="o">-</span> <span class="n">y</span>
 
 
-<span class="nd">@functions</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s2">&quot;example/maths&quot;</span><span class="p">)</span>
+<span class="nd">@functions.bind</span><span class="p">(</span><span class="s2">&quot;example/maths&quot;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">worker</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">task_input</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TaskRequest</span><span class="p">,</span> <span class="n">TaskResult</span><span class="p">,</span> <span class="n">TaskException</span><span class="p">]):</span>
     <span class="n">tasks</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">task_input</span><span class="p">)</span>
 </pre></div>
@@ -192,7 +192,7 @@ Stateful Function:</p>
 <h2>Error Handling<a class="headerlink" href="#error-handling" title="Permalink to this headline">¶</a></h2>
 <p>Exceptions thrown by a task can either be passed back to the caller or they can trigger a retry.  Retry parameters are set using
 a RetryPolicy:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">retry_policy</span><span class="o">=</span><span class="n">RetryPolicy</span><span class="p">(</span><span class="n">retry_for</span><span class="o">=</span><span class="p">[</span><span class="ne">ValueError</span><span class="p">],</span> <span class="n">max_retries</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">delay</span><span class="o">=</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span> <span class="n">exponential_backoff</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks.bind</span><span class="p">(</span><span class="n">retry_policy</span><span class="o">=</span><span class="n">RetryPolicy</span><span class="p">(</span><span class="n">retry_for</span><span class="o">=</span><span class="p">[</span><span class="ne">ValueError</span><span class="p">],</span> <span class="n">max_retries</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">delay</span><span class="o">=</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span> <span class="n">exponential_backoff</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
 <span class="k">def</span> <span class="nf">unreliable_task</span><span class="p">():</span>
     <span class="o">...</span>
 </pre></div>
@@ -204,7 +204,7 @@ a RetryPolicy:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">multiply</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>             <span class="c1"># direct function call for testing</span>
 
 <span class="n">task</span> <span class="o">=</span> <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-<span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">submit_async</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>  <span class="c1"># indirect invocation as a Flink Task</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">await</span> <span class="n">client</span><span class="o">.</span><span class="n">submit_async</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>  <span class="c1"># indirect invocation as a Flink Task</span>
 </pre></div>
 </div>
 </div>

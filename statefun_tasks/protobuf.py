@@ -1,10 +1,12 @@
+from statefun_tasks.utils import _is_tuple
+from statefun_tasks.messages_pb2 import MapOfStringToAny, ArrayOfAny, TupleOfAny, TaskEntry, GroupEntry, NoneValue, \
+    TaskRetryPolicy, TaskRequest, TaskResult, TaskException, TaskState, TaskResults, Pipeline, PipelineEntry, Address, \
+        ArgsAndKwargs, TaskActionRequest, TaskActionResult, TaskActionException
+
 from google.protobuf.wrappers_pb2 import DoubleValue, Int64Value, BoolValue, StringValue, BytesValue
 from google.protobuf.any_pb2 import Any
 from google.protobuf.message import Message
-from .messages_pb2 import MapOfStringToAny, ArrayOfAny, TupleOfAny, TaskEntry, GroupEntry, NoneValue, \
-    TaskRetryPolicy, TaskRequest, TaskResult, TaskException, TaskState, TaskResults, Pipeline, PipelineEntry, Address, \
-        ArgsAndKwargs, TaskActionRequest, TaskActionResult, TaskActionException
-from ._utils import _is_tuple
+
 from typing import Union
  
 
@@ -43,6 +45,7 @@ _KNOWN_PROTO_TYPES = [
     ArgsAndKwargs
 ]
 
+
 def _wrap_value(v):
     # if none return NoneValue wrapper
     if v is None:
@@ -74,13 +77,25 @@ def _unwrap_value(v):
     return v
 
 
-def _pack_any(value) -> Any:
+def pack_any(value) -> Any:
     if isinstance(value, Any):
         return value
         
     proto = Any()
     proto.Pack(value)
     return proto
+
+
+def unpack_any(value, known_proto_types):
+    if isinstance(value, Any):
+        for proto_type in known_proto_types:
+            if value.Is(proto_type.DESCRIPTOR):
+                unwrapped = proto_type()
+                value.Unpack(unwrapped)
+                return unwrapped
+        return value
+
+    return value
 
 
 def _parse_any_from_bytes(bytes) -> Any:
@@ -90,19 +105,7 @@ def _parse_any_from_bytes(bytes) -> Any:
 
 
 def _is_wrapped_known_proto_type(value, known_proto_types):
-    if isinstance(value, Any):
-        return value.TypeName() in known_proto_types
-
-    return False
-
-
-def _unpack_any(value, known_proto_types):
-    if _is_wrapped_known_proto_type(value, known_proto_types):
-        unwrapped = known_proto_types[value.TypeName()]()
-        value.Unpack(unwrapped)
-        return unwrapped
-
-    return value
+    return isinstance(value, Any) and any([value.Is(proto_type.DESCRIPTOR) for proto_type in known_proto_types])
 
 
 def _convert_to_proto(data) -> Union[MapOfStringToAny, ArrayOfAny, TupleOfAny, Message]:
@@ -112,7 +115,7 @@ def _convert_to_proto(data) -> Union[MapOfStringToAny, ArrayOfAny, TupleOfAny, M
             proto = MapOfStringToAny()
 
             for k,v in obj.items():
-                v = _pack_any(convert(v))
+                v = pack_any(convert(v))
                 proto.items[k].CopyFrom(v)
 
             return proto
@@ -121,7 +124,7 @@ def _convert_to_proto(data) -> Union[MapOfStringToAny, ArrayOfAny, TupleOfAny, M
             proto = TupleOfAny()
 
             for v in obj:
-                v = _pack_any(convert(v))
+                v = pack_any(convert(v))
                 proto.items.append(v)
 
             return proto
@@ -129,7 +132,7 @@ def _convert_to_proto(data) -> Union[MapOfStringToAny, ArrayOfAny, TupleOfAny, M
             proto = ArrayOfAny()
 
             for v in obj:
-                v = _pack_any(convert(v))
+                v = pack_any(convert(v))
                 proto.items.append(v)
 
             return proto
@@ -141,23 +144,24 @@ def _convert_to_proto(data) -> Union[MapOfStringToAny, ArrayOfAny, TupleOfAny, M
 
 def _convert_from_proto(proto: Union[MapOfStringToAny, ArrayOfAny, TupleOfAny, Message], known_proto_types = []):
 
-    # map of known proto types
-    all_known_proto_types = {t.DESCRIPTOR.full_name: t for t in _KNOWN_PROTO_TYPES}
-    all_known_proto_types.update({t.DESCRIPTOR.full_name: t for t in known_proto_types})
+    all_known_proto_types = _KNOWN_PROTO_TYPES + list(known_proto_types)
+    # # map of known proto types
+    # all_known_proto_types = {t.DESCRIPTOR.full_name: t for t in _KNOWN_PROTO_TYPES}
+    # all_known_proto_types.update({t.DESCRIPTOR.full_name: t for t in known_proto_types})
 
     def convert(obj):
         if isinstance(obj, MapOfStringToAny):
-            return {k: convert(_unpack_any(v, all_known_proto_types)) for k, v in obj.items.items()}
+            return {k: convert(unpack_any(v, all_known_proto_types)) for k, v in obj.items.items()}
 
         elif isinstance(obj, ArrayOfAny):
-            return [convert(_unpack_any(v, all_known_proto_types)) for v in obj.items]
+            return [convert(unpack_any(v, all_known_proto_types)) for v in obj.items]
 
         elif isinstance(obj, TupleOfAny):
-            return  tuple(convert(_unpack_any(v, all_known_proto_types)) for v in obj.items)
+            return  tuple(convert(unpack_any(v, all_known_proto_types)) for v in obj.items)
 
         elif isinstance(obj, Any):
             if _is_wrapped_known_proto_type(obj, all_known_proto_types):
-                return convert(_unpack_any(obj, all_known_proto_types))
+                return convert(unpack_any(obj, all_known_proto_types))
             else:
                 return obj # leave it as an any and go no futher with it
         else:    

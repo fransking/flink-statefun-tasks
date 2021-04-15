@@ -1,4 +1,4 @@
-from statefun_tasks import TaskRequest, TaskResult, TaskException, deserialise_result
+from statefun_tasks import TaskRequest, TaskResult, TaskException
 from statefun_tasks.client import FlinkTasksClientFactory, TaskError
 
 from aiohttp import web
@@ -29,6 +29,7 @@ async def index(request):
 
 
 async def app():
+
     web_app = web.Application()
     web_app.router.add_get('/', index)
     return web_app

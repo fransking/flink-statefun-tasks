@@ -1,9 +1,34 @@
-from typing import NamedTuple
-from datetime import timedelta
+from statefun_tasks.utils import _type_name
+from statefun_tasks.messages_pb2 import TaskState, TaskRequest, TaskResult, TaskException, \
+    TaskActionRequest, TaskActionResult, TaskActionException, TaskEntry, GroupEntry, PipelineEntry, TaskRetryPolicy, Pipeline
+
+from statefun import make_protobuf_type
 from google.protobuf.message import Message
-from .messages_pb2 import TaskEntry, GroupEntry, PipelineEntry, TaskRetryPolicy, Pipeline
-from ._utils import _type_name
+
+from dataclasses import dataclass, field
+from datetime import timedelta
 import json
+
+
+# Protobuf type registrations required by Flink Statefun API
+TASK_STATE_TYPE = make_protobuf_type(TaskState, namespace='io.statefun_tasks.types')
+TASK_REQUEST_TYPE = make_protobuf_type(TaskRequest, namespace='io.statefun_tasks.types')
+TASK_RESULT_TYPE = make_protobuf_type(TaskResult, namespace='io.statefun_tasks.types')
+TASK_EXCEPTION_TYPE = make_protobuf_type(TaskException, namespace='io.statefun_tasks.types')
+TASK_ACTION_REQUEST_TYPE = make_protobuf_type(TaskActionRequest, namespace='io.statefun_tasks.types')
+TASK_ACTION_RESULT_TYPE = make_protobuf_type(TaskActionResult, namespace='io.statefun_tasks.types')
+TASK_ACTION_EXCEPTION_TYPE = make_protobuf_type(TaskActionException, namespace='io.statefun_tasks.types')
+
+
+_VALUE_TYPE_MAP = {
+    TaskState: TASK_STATE_TYPE,
+    TaskRequest: TASK_REQUEST_TYPE,
+    TaskResult: TASK_RESULT_TYPE,
+    TaskException: TASK_EXCEPTION_TYPE,
+    TaskActionRequest: TASK_ACTION_REQUEST_TYPE,
+    TaskActionResult: TASK_ACTION_RESULT_TYPE,
+    TaskActionException: TASK_ACTION_EXCEPTION_TYPE
+}
 
 
 class _TaskEntry(object):
@@ -148,8 +173,9 @@ class _GroupEntry(object):
         return self._group.__repr__()
 
 
-class RetryPolicy(NamedTuple):
-    retry_for: list = [Exception]
+@dataclass
+class RetryPolicy:
+    retry_for: list = field(default_factory=lambda: [Exception])
     max_retries: int = 1
     delay: timedelta = timedelta()
     exponential_back_off: bool = False
