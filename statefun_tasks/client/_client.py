@@ -29,9 +29,10 @@ class FlinkTasksClient(object):
     :param reply_topic: topic to listen on for responses (a unique consumer group id will be created)
     :param optional group_id: kafka group id to use when subscribing to reply_topic
     :param optional serialiser: serialiser to use (will use DefaultSerialiser if not set)
+    :param optional kafka_properties: additional properties to be passed to the KafkaConsumer and KafkaProducer
     """
 
-    def __init__(self, kafka_broker_url, request_topics, action_topics, reply_topic, group_id=None, serialiser=None):
+    def __init__(self, kafka_broker_url, request_topics, action_topics, reply_topic, group_id=None, serialiser=None, kafka_properties=None):
         self._kafka_broker_url = kafka_broker_url
         self._requests = {}
 
@@ -41,13 +42,16 @@ class FlinkTasksClient(object):
         self._group_id = group_id
         self._serialiser = serialiser if serialiser is not None else DefaultSerialiser()
 
-        self._producer = KafkaProducer(bootstrap_servers=[kafka_broker_url])
+        kafka_properties = kafka_properties or {}
+
+        self._producer = KafkaProducer(bootstrap_servers=[kafka_broker_url], **kafka_properties)
 
         self._consumer = KafkaConsumer(
             self._reply_topic,
             bootstrap_servers=[self._kafka_broker_url],
             auto_offset_reset='earliest',
-            group_id=self._group_id)
+            group_id=self._group_id, 
+            **kafka_properties)
 
         self._consumer_thread = Thread(target=self._consume, args=())
         self._consumer_thread.daemon = True
@@ -289,7 +293,7 @@ class FlinkTasksClientFactory():
     __clients = {}
 
     @staticmethod
-    def get_client(kafka_broker_url, request_topics: dict, action_topics: dict, reply_topic, serialiser=None) -> FlinkTasksClient:
+    def get_client(kafka_broker_url, request_topics: dict, action_topics: dict, reply_topic, serialiser=None, kafka_properties=None) -> FlinkTasksClient:
         """
         Creates a FlinkTasksClient for submitting tasks to flink.  Clients are memoized by broker url and reply topic.
 
@@ -299,12 +303,13 @@ class FlinkTasksClientFactory():
         :param action_toptics: as per request_topics but used for action requests
         :param reply_topic: topic to listen on for responses (a unique consumer group id will be created)
         :param optional serialiser: serialiser to use (will use DefaultSerialiser if not set)
+        :param optional kafka_properties: additional properties to be passed to the KafkaConsumer and KafkaProducer
         """
 
         key = f'{kafka_broker_url}.{reply_topic}'
 
         if key not in FlinkTasksClientFactory.__clients:
-            client = FlinkTasksClient(kafka_broker_url, request_topics, action_topics, reply_topic, serialiser=serialiser, group_id=str(uuid4()))
+            client = FlinkTasksClient(kafka_broker_url, request_topics, action_topics, reply_topic, serialiser=serialiser, group_id=str(uuid4()), kafka_properties=kafka_properties)
             FlinkTasksClientFactory.__clients[key] = client
 
         return FlinkTasksClientFactory.__clients[key]
