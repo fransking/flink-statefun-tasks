@@ -46,6 +46,27 @@ _KNOWN_PROTO_TYPES = [
 ]
 
 
+def pack_any(value) -> Any:
+    if isinstance(value, Any):
+        return value
+        
+    proto = Any()
+    proto.Pack(value)
+    return proto
+
+
+def unpack_any(value, known_proto_types):
+    if isinstance(value, Any):
+        for proto_type in known_proto_types:
+            if value.Is(proto_type.DESCRIPTOR):
+                unwrapped = proto_type()
+                value.Unpack(unwrapped)
+                return unwrapped
+        return value
+
+    return value
+    
+
 def _wrap_value(v):
     # if none return NoneValue wrapper
     if v is None:
@@ -75,27 +96,6 @@ def _unwrap_value(v):
     if proto_type in _SCALAR_TYPE_MAP.values():
         return v.value
     return v
-
-
-def pack_any(value) -> Any:
-    if isinstance(value, Any):
-        return value
-        
-    proto = Any()
-    proto.Pack(value)
-    return proto
-
-
-def unpack_any(value, known_proto_types):
-    if isinstance(value, Any):
-        for proto_type in known_proto_types:
-            if value.Is(proto_type.DESCRIPTOR):
-                unwrapped = proto_type()
-                value.Unpack(unwrapped)
-                return unwrapped
-        return value
-
-    return value
 
 
 def _parse_any_from_bytes(bytes) -> Any:
@@ -145,9 +145,6 @@ def _convert_to_proto(data) -> Union[MapOfStringToAny, ArrayOfAny, TupleOfAny, M
 def _convert_from_proto(proto: Union[MapOfStringToAny, ArrayOfAny, TupleOfAny, Message], known_proto_types = []):
 
     all_known_proto_types = _KNOWN_PROTO_TYPES + list(known_proto_types)
-    # # map of known proto types
-    # all_known_proto_types = {t.DESCRIPTOR.full_name: t for t in _KNOWN_PROTO_TYPES}
-    # all_known_proto_types.update({t.DESCRIPTOR.full_name: t for t in known_proto_types})
 
     def convert(obj):
         if isinstance(obj, MapOfStringToAny):

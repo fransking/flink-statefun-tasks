@@ -88,7 +88,6 @@ class FlinkTasks(object):
         fun.type_name = _task_type_for(fun, module_name)
         self._bindings[fun.type_name] = _FlinkTask(fun, self._serialiser, **params)
 
-
     def bind(self, namespace: str = None, worker_name: str = None, retry_policy: RetryPolicy = None,  with_state: bool = False, is_fruitful: bool = True, module_name: str = None):
         """
         Binds a function as a Flink Task
@@ -136,13 +135,12 @@ class FlinkTasks(object):
         else:
             raise RuntimeError(f'{task_type} is not a registered FlinkTask')
 
-
     async def run_async(self, context: Context, message: Message):
         """
         Runs an async Flink Task
 
         :param context: context object provided by Flink
-        :param task_input: the task input protobuf message
+        :param message: the task input protobuf message
         """
         with _TaskContext(context, self._egress_type_name, self._serialiser) as task_context:
 
