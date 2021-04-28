@@ -6,7 +6,7 @@ from ._utils import _type_name
 import json
 
 
-class _TaskEntry(object):
+class Task(object):
     def __init__(self, task_id, task_type, args, kwargs, parameters=None, is_finally=False):
         self.task_id = task_id
         self.task_type = task_type
@@ -64,7 +64,7 @@ class _TaskEntry(object):
     def from_proto(proto: PipelineEntry, serialiser):
         args, kwargs = serialiser.deserialise_args_and_kwargs(proto.task_entry.request)
 
-        entry = _TaskEntry(
+        entry = Task(
             task_id=proto.task_entry.task_id, 
             task_type=proto.task_entry.task_type, 
             args=args, 
@@ -80,7 +80,7 @@ class _TaskEntry(object):
         return self.task_id
 
 
-class _GroupEntry(object):
+class Group(object):
     def __init__(self, group_id):
         self.group_id = group_id
         self._group = []
@@ -127,7 +127,7 @@ class _GroupEntry(object):
 
     @staticmethod 
     def from_proto(proto: PipelineEntry, serialiser):
-        entry = _GroupEntry(group_id=proto.group_entry.group_id)
+        entry = Group(group_id=proto.group_entry.group_id)
 
         group = []
         for pipeline in proto.group_entry.group:
@@ -135,9 +135,9 @@ class _GroupEntry(object):
             
             for proto in pipeline.entries:
                 if proto.HasField('task_entry'):
-                    entries.append(_TaskEntry.from_proto(proto, serialiser))
+                    entries.append(Task.from_proto(proto, serialiser))
                 elif proto.HasField('group_entry'):
-                    entries.append(_GroupEntry.from_proto(proto, serialiser))
+                    entries.append(Group.from_proto(proto, serialiser))
 
             group.append(entries)
 

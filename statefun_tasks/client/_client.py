@@ -1,5 +1,5 @@
 from statefun_tasks import DefaultSerialiser, PipelineBuilder, TaskRequest, TaskResult, TaskException, TaskAction, \
-    TaskActionRequest, TaskActionResult, TaskActionException, TaskStatus as TaskStatusProto
+    TaskActionRequest, TaskActionResult, TaskActionException, TaskStatus as TaskStatusProto, Task
 from statefun_tasks.client import TaskError, TaskStatus
 
 from google.protobuf.any_pb2 import Any
@@ -10,6 +10,7 @@ from uuid import uuid4
 from threading import Thread
 import asyncio
 from concurrent.futures import Future
+from typing import Union
 
 
 _log = logging.getLogger('FlinkTasks')
@@ -22,7 +23,7 @@ class FlinkTasksClient(object):
     Replies are handled on a dedicated thread created per instance so FlinkTasksClientFactory.get_client() is preferred to 
     instantiating this class directly.
 
-    :param kafka_broker_url: url of the kafka broker used for ingress and egress
+    :param kafka_broker_url: url of the kafka broker (or list of urls) used for ingress and egress
     :param request_topics: dictionary of worker to ingress topic mappings  (use None for default)
                             e.g. {'example/worker': 'example.requests', None: 'example.default.requests'}
     :param action_toptics: as per request_topics but used for action requests
@@ -44,11 +45,12 @@ class FlinkTasksClient(object):
 
         kafka_properties = kafka_properties or {}
 
-        self._producer = KafkaProducer(bootstrap_servers=[kafka_broker_url], **kafka_properties)
+        bootstrap_servers = [kafka_broker_url] if isinstance(kafka_broker_url, str) else kafka_broker_url
+        self._producer = KafkaProducer(bootstrap_servers=bootstrap_servers, **kafka_properties)
 
         self._consumer = KafkaConsumer(
             self._reply_topic,
-            bootstrap_servers=[self._kafka_broker_url],
+            bootstrap_servers=bootstrap_servers,
             auto_offset_reset='earliest',
             group_id=self._group_id, 
             **kafka_properties)
@@ -67,11 +69,12 @@ class FlinkTasksClient(object):
             raise ValueError(f'Unsupported request type {type(item)}')
 
     @staticmethod
-    def _try_get_topic_for(pipeline: PipelineBuilder, topics, topic=None):
+    def _try_get_topic_for(pipeline_or_task: Union[PipelineBuilder, Task], topics, topic=None):
         if topic is not None:
             return topic
 
-        destination = pipeline.get_inital_destination()
+        destination = pipeline_or_task.get_destination()
+        
         if destination in topics:
             return topics[destination]
 
@@ -87,8 +90,8 @@ class FlinkTasksClient(object):
         else:
             return topic
 
-    def _get_action_topic(self, pipeline: PipelineBuilder, topic=None):
-        topic = self._try_get_topic_for(pipeline, self._action_topics, topic)
+    def _get_action_topic(self, pipeline_or_task: Union[PipelineBuilder, Task], topic=None):
+        topic = self._try_get_topic_for(pipeline_or_task, self._action_topics, topic)
         if topic is None:
             raise ValueError(f'Could not find a topic to send this action to')
         else:
@@ -142,68 +145,68 @@ class FlinkTasksClient(object):
         """
         return await asyncio.wrap_future(self.submit(pipeline, topic=topic))
 
-    def get_status(self, pipeline: PipelineBuilder, topic=None) -> Future:
+    def get_status(self, pipeline_or_task: Union[PipelineBuilder, Task], topic=None) -> Future:
         """
-        Get the status of a previously submitted pipeline
+        Get the status of a previously submitted pipeline or task
 
-        :param pipeline: the pipeline
+        :param pipeline_or_task: the pipeline or task
         :param optional topic: override the default ingress topic
         :return: a Future encapsulating the status of the pipeline
         """
-        topic = self._get_action_topic(pipeline, topic)
-        return self._submit_action(pipeline.id, TaskAction.GET_STATUS, topic)
+        topic = self._get_action_topic(pipeline_or_task, topic)
+        return self._submit_action(pipeline_or_task.id, TaskAction.GET_STATUS, topic)
 
-    async def get_status_async(self, pipeline: PipelineBuilder, topic=None):
+    async def get_status_async(self, pipeline_or_task: Union[PipelineBuilder, Task], topic=None):
         """
-        Get the status of a previously submitted pipeline
+        Get the status of a previously submitted pipeline or task
 
-        :param pipeline: the pipeline
+        :param pipeline_or_task: the pipeline or task
         :param optional topic: override the default ingress topic
         :return: the status of the pipeline
         """
-        return await asyncio.wrap_future(self.get_status(pipeline, topic))
+        return await asyncio.wrap_future(self.get_status(pipeline_or_task, topic))
     
-    def get_request(self, pipeline: PipelineBuilder, topic=None) -> Future:
+    def get_request(self, pipeline_or_task: Union[PipelineBuilder, Task], topic=None) -> Future:
         """
-        Get the original TaskRequest for a previously submitted pipeline
+        Get the original TaskRequest for a previously submitted pipeline or task
 
-        :param pipeline: the pipeline
+        :param pipeline_or_task: the pipeline or task
         :param optional topic: override the default ingress topic
         :return: a Future encapsulating the original TaskRequest
         """
-        topic = self._get_action_topic(pipeline, topic)
-        return self._submit_action(pipeline.id, TaskAction.GET_REQUEST, topic)
+        topic = self._get_action_topic(pipeline_or_task, topic)
+        return self._submit_action(pipeline_or_task.id, TaskAction.GET_REQUEST, topic)
 
-    async def get_request_async(self, pipeline: PipelineBuilder, topic=None):
+    async def get_request_async(self, pipeline_or_task: Union[PipelineBuilder, Task], topic=None):
         """
-        Get the original TaskRequest for a previously submitted pipeline
+        Get the original TaskRequest for a previously submitted pipeline or task
 
-        :param pipeline: the pipeline
+        :param pipeline_or_task: the pipeline or task
         :param optional topic: override the default ingress topic
         :return: the original TaskRequest
         """
-        return await asyncio.wrap_future(self.get_request(pipeline, topic))
+        return await asyncio.wrap_future(self.get_request(pipeline_or_task, topic))
 
-    def get_result(self, pipeline: PipelineBuilder, topic=None) -> Future:
+    def get_result(self, pipeline_or_task: Union[PipelineBuilder, Task], topic=None) -> Future:
         """
-        Get the TaskResult for a previously submitted pipeline
+        Get the TaskResult for a previously submitted pipeline or task
 
-        :param pipeline: the pipeline
+        :param pipeline_or_task: the pipeline or task
         :param optional topic: override the default ingress topic
         :return: a Future encapsulating the original TaskResult
         """
-        topic = self._get_action_topic(pipeline, topic)
-        return self._submit_action(pipeline.id, TaskAction.GET_RESULT, topic)
+        topic = self._get_action_topic(pipeline_or_task, topic)
+        return self._submit_action(pipeline_or_task.id, TaskAction.GET_RESULT, topic)
 
-    async def get_result_async(self, pipeline: PipelineBuilder, topic=None):
+    async def get_result_async(self, pipeline_or_task: Union[PipelineBuilder, Task], topic=None):
         """
-        Get the TaskResult for a previously submitted pipeline
+        Get the TaskResult for a previously submitted pipeline or task
 
-        :param pipeline: the pipeline
+        :param pipeline_or_task: the pipeline or task
         :param optional topic: override the default ingress topic
         :return: the original TaskResult
         """
-        return await asyncio.wrap_future(self.get_result(pipeline, topic))
+        return await asyncio.wrap_future(self.get_result(pipeline_or_task, topic))
 
     def _consume(self):
         while True:
@@ -212,17 +215,17 @@ class FlinkTasksClient(object):
 
                     _log.info(f'Message received - {message}')
 
-                    any = Any()
-                    any.ParseFromString(message.value)
+                    proto = Any()
+                    proto.ParseFromString(message.value)
 
-                    if any.Is(TaskException.DESCRIPTOR):
-                        self._raise_exception(any, TaskException)
-                    elif any.Is(TaskResult.DESCRIPTOR):
-                        self._return_result(any, TaskResult)
-                    elif any.Is(TaskActionException.DESCRIPTOR):
-                        self._raise_exception(any, TaskActionException)
-                    elif any.Is(TaskActionResult.DESCRIPTOR):
-                        self._return_action_result(any, TaskActionResult)
+                    if proto.Is(TaskException.DESCRIPTOR):
+                        self._raise_exception(proto, TaskException)
+                    elif proto.Is(TaskResult.DESCRIPTOR):
+                        self._return_result(proto, TaskResult)
+                    elif proto.Is(TaskActionException.DESCRIPTOR):
+                        self._raise_exception(proto, TaskActionException)
+                    elif proto.Is(TaskActionResult.DESCRIPTOR):
+                        self._return_action_result(proto, TaskActionResult)
 
             except Exception as ex:
                 _log.warning(f'Exception in consumer thread - {ex}', exc_info=ex)
@@ -297,7 +300,7 @@ class FlinkTasksClientFactory():
         """
         Creates a FlinkTasksClient for submitting tasks to flink.  Clients are memoized by broker url and reply topic.
 
-        :param kafka_broker_url: url of the kafka broker used for ingress and egress
+        :param kafka_broker_url: url of the kafka broker (or list of urls) used for ingress and egress
         :param request_topics: dictionary of worker to ingress topic mappings  (use None for default)
                               e.g. {'example/worker': 'example.requests', None: 'example.default.requests'}
         :param action_toptics: as per request_topics but used for action requests

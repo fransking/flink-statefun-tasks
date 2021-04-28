@@ -3,6 +3,7 @@ from ._protobuf import _convert_from_proto, _convert_to_proto, _pack_any, _unpac
 from ._utils import _is_tuple
 from google.protobuf.any_pb2 import Any
 from google.protobuf.message import Message
+from typing import Union
 
 
 class DefaultSerialiser(object):
@@ -128,3 +129,18 @@ class DefaultSerialiser(object):
         state = _convert_from_proto(task_result.state, self._known_proto_types)
 
         return result, state
+
+    def deserialise_response(self, task_result_or_exception: Union[TaskResult, TaskException]):
+        """
+        Deserialises a TaskResult or TaskException back into result and state.
+        If a TaskException is provided as input then the return value will be (), TaskException.state
+        
+        :param task_result: the TaskResult
+        :return: tuple of result and state. 
+        """
+        if isinstance(task_result_or_exception, TaskResult):
+            return self.deserialise_result(task_result_or_exception)
+        elif isinstance(task_result_or_exception, TaskException):
+            return (), self.from_proto(task_result_or_exception.state)
+        else:
+            raise ValueError(f'task_result_or_exception was neither TaskResult or TaskException')

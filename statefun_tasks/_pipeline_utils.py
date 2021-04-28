@@ -1,4 +1,4 @@
-from ._types import _GroupEntry, _TaskEntry
+from ._types import Group, Task
 from ._utils import _try_next, _is_tuple, _gen_id
 from ._protobuf import _pack_any
 from .messages_pb2 import TaskResult, TaskException, TaskResults
@@ -7,10 +7,10 @@ from typing import Union
 
 def _get_initial_tasks(entry):
     tasks = []
-    if isinstance(entry, _GroupEntry):
+    if isinstance(entry, Group):
         for t in entry:
             tasks.extend(_get_initial_tasks(t[0]))
-    elif isinstance(entry, _TaskEntry):
+    elif isinstance(entry, Task):
         tasks.append(entry)
     else:
         raise ValueError(f'Expected either a task or a group at the start of each pipeline')
@@ -19,7 +19,7 @@ def _get_initial_tasks(entry):
 
 def _get_task_entry(task_id, pipeline):
     for entry in pipeline:
-        if isinstance(entry, _GroupEntry):
+        if isinstance(entry, Group):
             for pipeline_in_group in entry:
                 task_entry = _get_task_entry(task_id, pipeline_in_group)
                 if task_entry is not None:
@@ -37,7 +37,7 @@ def _mark_task_complete(task_id, pipeline):
 
 
 def _try_get_finally_task(task_id, pipeline):
-    finally_task = next((task for task in pipeline if isinstance(task, _TaskEntry) and task.is_finally), None)
+    finally_task = next((task for task in pipeline if isinstance(task, Task) and task.is_finally), None)
     return None if finally_task is None or finally_task.task_id == task_id else finally_task
 
 
@@ -53,7 +53,7 @@ def _get_next_step_in_pipeline(task_id, pipeline):
         try:
             entry = next(iterator)
 
-            if isinstance(entry, _GroupEntry):
+            if isinstance(entry, Group):
                 for pipeline_in_group in entry:
                     current_t, next_t, _ = _get_next_step_in_pipeline(task_id, pipeline_in_group)
 
@@ -88,13 +88,13 @@ def _save_task_result_or_exception(task_id, state: dict, task_result_or_exceptio
     task_results.by_id[task_id].CopyFrom(_pack_any(task_result_or_exception))
     return task_results
 
-def _save_group_result(group: _GroupEntry, caller_id, state: dict, task_result: TaskResult):
+def _save_group_result(group: Group, caller_id, state: dict, task_result: TaskResult):
     group_results = state.setdefault(group.group_id, GroupResults())
     group_results.results[caller_id].CopyFrom(task_result)
     return group_results
 
 
-def _aggregate_group_results(group: _GroupEntry, task_results: TaskResults, serialiser):
+def _aggregate_group_results(group: Group, task_results: TaskResults, serialiser):
 
     def aggregate_results(grp):
         aggregated_results = []
@@ -103,7 +103,7 @@ def _aggregate_group_results(group: _GroupEntry, task_results: TaskResults, seri
 
         for pipeline in grp:
             last_task = pipeline[-1]
-            if isinstance(last_task, _GroupEntry):
+            if isinstance(last_task, Group):
                 results, states, errors = aggregate_results(last_task)
                 aggregated_results.append(results)
                 aggregated_states.append(states)
