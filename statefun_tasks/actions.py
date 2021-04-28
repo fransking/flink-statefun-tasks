@@ -20,6 +20,9 @@ class _FlinkAction(object):
 
     def _get_task_status(self):
 
+        state = self._context.get_state()
+        print(state)
+
         if self._context.storage.task_exception is not None:
             return TaskStatus(status=TaskStatus.Status.FAILED)
 

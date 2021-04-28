@@ -88,7 +88,14 @@ class FlinkTasks(object):
         fun.type_name = _task_type_for(fun, module_name)
         self._bindings[fun.type_name] = _FlinkTask(fun, self._serialiser, **params)
 
-    def bind(self, namespace: str = None, worker_name: str = None, retry_policy: RetryPolicy = None,  with_state: bool = False, is_fruitful: bool = True, module_name: str = None):
+    def bind(
+        self, 
+        namespace: str = None, 
+        worker_name: str = None, 
+        retry_policy: RetryPolicy = None, 
+        with_state: bool = False, 
+        is_fruitful: bool = True, 
+        module_name: str = None):
         """
         Binds a function as a Flink Task
 
@@ -99,7 +106,6 @@ class FlinkTasks(object):
         :param is_fruitful: whether the function produces a fruitful result or simply returns None (default True)
         :param module_name: if specified then the task type used in addressing will be module_name.function_name
                             otherwise the Python module containing the function will be used
-
         """
         def wrapper(function):
             def defaults():

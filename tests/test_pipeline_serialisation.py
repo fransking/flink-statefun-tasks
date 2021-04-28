@@ -2,7 +2,7 @@ import unittest
 
 from statefun.request_reply_pb2 import Address
 
-from statefun_tasks.types import _TaskEntry, _GroupEntry
+from statefun_tasks.types import Task, Group
 from statefun_tasks import DefaultSerialiser, RetryPolicy
 
 class PipelineSerialisationTests(unittest.TestCase):
@@ -13,11 +13,11 @@ class PipelineSerialisationTests(unittest.TestCase):
         kwargs = {'arg': [1, 2, 3]}
         parameters = {'a_parameter': 'some_value'}
 
-        entry = _TaskEntry('task_id', 'task_type', args, kwargs, parameters, True)
+        entry = Task('task_id', 'task_type', args, kwargs, parameters, True)
         entry.mark_complete()
 
         entry_proto = entry.to_proto(serialiser)
-        reconsituted_entry = _TaskEntry.from_proto(entry_proto, serialiser)
+        reconsituted_entry = Task.from_proto(entry_proto, serialiser)
 
         self.assertEqual(entry_proto.task_entry.request.type_url, 'type.googleapis.com/statefun_tasks.ArgsAndKwargs')
         self.assertEqual(reconsituted_entry.task_id, entry.task_id)
@@ -32,10 +32,10 @@ class PipelineSerialisationTests(unittest.TestCase):
         serialiser = DefaultSerialiser(known_proto_types=[Address])
 
         args = Address(namespace='test')
-        entry = _TaskEntry('task_id', 'task_type', args, {}, {}, True)
+        entry = Task('task_id', 'task_type', args, {}, {}, True)
 
         entry_proto = entry.to_proto(serialiser)
-        reconsituted_entry = _TaskEntry.from_proto(entry_proto, serialiser)
+        reconsituted_entry = Task.from_proto(entry_proto, serialiser)
 
         self.assertEqual(entry_proto.task_entry.request.type_url, 'type.googleapis.com/io.statefun.sdk.reqreply.Address')
 
@@ -49,26 +49,26 @@ class PipelineSerialisationTests(unittest.TestCase):
         args = (1,'2', Address(namespace='test'))
         kwargs = {'arg': [1, 2, 3]}
   
-        group_entry = _GroupEntry(group_id='inner_group_id')
+        group_entry = Group(group_id='inner_group_id')
 
         group_entry.add_to_group([
-            _TaskEntry('inner_task_id_1', 'task_type', args, kwargs),
-            _TaskEntry('inner_task_id_2', 'task_type', args, kwargs)
+            Task('inner_task_id_1', 'task_type', args, kwargs),
+            Task('inner_task_id_2', 'task_type', args, kwargs)
         ])
 
-        entry = _GroupEntry(group_id='group_id')
+        entry = Group(group_id='group_id')
         entry.add_to_group([
             group_entry,
-            _TaskEntry('grouped_task_chain_1_1', 'task_type', args, kwargs),
-            _TaskEntry('grouped_task_chain_1_2', 'task_type', args, kwargs)
+            Task('grouped_task_chain_1_1', 'task_type', args, kwargs),
+            Task('grouped_task_chain_1_2', 'task_type', args, kwargs)
         ])
 
         entry.add_to_group([
-            _TaskEntry('grouped_task_chain_2_1', 'task_type', args, kwargs)
+            Task('grouped_task_chain_2_1', 'task_type', args, kwargs)
         ])
 
         proto = entry.to_proto(serialiser)
-        reconsituted_entry = _GroupEntry.from_proto(proto, serialiser)
+        reconsituted_entry = Group.from_proto(proto, serialiser)
         self.assertEqual(str(reconsituted_entry), str(entry))
 
     def test_task_entry_serialisation_with_task_retry_policy(self):
@@ -78,10 +78,10 @@ class PipelineSerialisationTests(unittest.TestCase):
         kwargs = {}
         parameters = {'retry_policy': RetryPolicy(retry_for=[Exception, ValueError]).to_proto()}
 
-        entry = _TaskEntry('task_id', 'task_type', args, kwargs, parameters)
+        entry = Task('task_id', 'task_type', args, kwargs, parameters)
 
         entry_proto = entry.to_proto(serialiser)
-        reconsituted_entry = _TaskEntry.from_proto(entry_proto, serialiser)
+        reconsituted_entry = Task.from_proto(entry_proto, serialiser)
         retry_policy = reconsituted_entry.get_parameter('retry_policy')
         self.assertEqual(['builtins.Exception', 'builtins.ValueError'], retry_policy.retry_for)
 
