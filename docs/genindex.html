@@ -175,6 +175,7 @@
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
+ | <a href="#U"><strong>U</strong></a>
  | <a href="#V"><strong>V</strong></a>
  
 </div>
@@ -193,6 +194,8 @@
         <li><a href="api/generated/statefun_tasks.FlinkTasks.html#statefun_tasks.FlinkTasks.__init__">(statefun_tasks.FlinkTasks method)</a>
 </li>
         <li><a href="api/generated/statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder.__init__">(statefun_tasks.PipelineBuilder method)</a>
+</li>
+        <li><a href="api/generated/statefun_tasks.TaskContext.html#statefun_tasks.TaskContext.__init__">(statefun_tasks.TaskContext method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -237,6 +240,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/generated/statefun_tasks.DefaultSerialiser.html#statefun_tasks.DefaultSerialiser.deserialise_request">deserialise_request() (statefun_tasks.DefaultSerialiser method)</a>
 </li>
+      <li><a href="api/generated/statefun_tasks.DefaultSerialiser.html#statefun_tasks.DefaultSerialiser.deserialise_response">deserialise_response() (statefun_tasks.DefaultSerialiser method)</a>
+</li>
       <li><a href="api/generated/statefun_tasks.DefaultSerialiser.html#statefun_tasks.DefaultSerialiser.deserialise_result">deserialise_result() (statefun_tasks.DefaultSerialiser method)</a>
 </li>
   </ul></td>
@@ -267,9 +272,15 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/generated/statefun_tasks.TaskContext.html#statefun_tasks.TaskContext.get_address">get_address() (statefun_tasks.TaskContext method)</a>
+</li>
+      <li><a href="api/generated/statefun_tasks.TaskContext.html#statefun_tasks.TaskContext.get_caller_address">get_caller_address() (statefun_tasks.TaskContext method)</a>
+</li>
+      <li><a href="api/generated/statefun_tasks.TaskContext.html#statefun_tasks.TaskContext.get_caller_id">get_caller_id() (statefun_tasks.TaskContext method)</a>
+</li>
       <li><a href="api/generated/statefun_tasks.client.FlinkTasksClientFactory.html#statefun_tasks.client.FlinkTasksClientFactory.get_client">get_client() (statefun_tasks.client.FlinkTasksClientFactory static method)</a>
 </li>
-      <li><a href="api/generated/statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder.get_inital_destination">get_inital_destination() (statefun_tasks.PipelineBuilder method)</a>
+      <li><a href="api/generated/statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder.get_destination">get_destination() (statefun_tasks.PipelineBuilder method)</a>
 </li>
       <li><a href="api/generated/statefun_tasks.client.FlinkTasksClient.html#statefun_tasks.client.FlinkTasksClient.get_request">get_request() (statefun_tasks.client.FlinkTasksClient method)</a>
 </li>
@@ -281,11 +292,15 @@
 </li>
       <li><a href="api/generated/statefun_tasks.client.FlinkTasksClient.html#statefun_tasks.client.FlinkTasksClient.get_result_async">get_result_async() (statefun_tasks.client.FlinkTasksClient method)</a>
 </li>
+      <li><a href="api/generated/statefun_tasks.TaskContext.html#statefun_tasks.TaskContext.get_state">get_state() (statefun_tasks.TaskContext method)</a>
+</li>
       <li><a href="api/generated/statefun_tasks.client.FlinkTasksClient.html#statefun_tasks.client.FlinkTasksClient.get_status">get_status() (statefun_tasks.client.FlinkTasksClient method)</a>
 </li>
       <li><a href="api/generated/statefun_tasks.client.FlinkTasksClient.html#statefun_tasks.client.FlinkTasksClient.get_status_async">get_status_async() (statefun_tasks.client.FlinkTasksClient method)</a>
 </li>
       <li><a href="api/generated/statefun_tasks.FlinkTasks.html#statefun_tasks.FlinkTasks.get_task">get_task() (statefun_tasks.FlinkTasks method)</a>
+</li>
+      <li><a href="api/generated/statefun_tasks.TaskContext.html#statefun_tasks.TaskContext.get_task_id">get_task_id() (statefun_tasks.TaskContext method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -329,15 +344,23 @@
         <li><a href="api/generated/statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder.send">(statefun_tasks.PipelineBuilder method)</a>
 </li>
       </ul></li>
-      <li><a href="api/generated/statefun_tasks.DefaultSerialiser.html#statefun_tasks.DefaultSerialiser.serialise_args_and_kwargs">serialise_args_and_kwargs() (statefun_tasks.DefaultSerialiser method)</a>
+      <li><a href="api/generated/statefun_tasks.TaskContext.html#statefun_tasks.TaskContext.send_egress_message">send_egress_message() (statefun_tasks.TaskContext method)</a>
 </li>
-      <li><a href="api/generated/statefun_tasks.DefaultSerialiser.html#statefun_tasks.DefaultSerialiser.serialise_request">serialise_request() (statefun_tasks.DefaultSerialiser method)</a>
+      <li><a href="api/generated/statefun_tasks.TaskContext.html#statefun_tasks.TaskContext.send_message">send_message() (statefun_tasks.TaskContext method)</a>
+</li>
+      <li><a href="api/generated/statefun_tasks.TaskContext.html#statefun_tasks.TaskContext.send_message_after">send_message_after() (statefun_tasks.TaskContext method)</a>
+</li>
+      <li><a href="api/generated/statefun_tasks.DefaultSerialiser.html#statefun_tasks.DefaultSerialiser.serialise_args_and_kwargs">serialise_args_and_kwargs() (statefun_tasks.DefaultSerialiser method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/generated/statefun_tasks.DefaultSerialiser.html#statefun_tasks.DefaultSerialiser.serialise_request">serialise_request() (statefun_tasks.DefaultSerialiser method)</a>
+</li>
       <li><a href="api/generated/statefun_tasks.DefaultSerialiser.html#statefun_tasks.DefaultSerialiser.serialise_result">serialise_result() (statefun_tasks.DefaultSerialiser method)</a>
 </li>
       <li><a href="api/generated/statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder.set">set() (statefun_tasks.PipelineBuilder method)</a>
+</li>
+      <li><a href="api/generated/statefun_tasks.TaskContext.html#statefun_tasks.TaskContext.set_state">set_state() (statefun_tasks.TaskContext method)</a>
 </li>
       <li><a href="api/generated/statefun_tasks.client.FlinkTasksClient.html#statefun_tasks.client.FlinkTasksClient.submit">submit() (statefun_tasks.client.FlinkTasksClient method)</a>
 </li>
@@ -349,12 +372,16 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/generated/statefun_tasks.TaskContext.html#statefun_tasks.TaskContext">TaskContext (class in statefun_tasks)</a>
+</li>
       <li><a href="api/generated/statefun_tasks.client.TaskStatus.html#statefun_tasks.client.TaskStatus">TaskStatus (class in statefun_tasks.client)</a>
 </li>
-      <li><a href="api/generated/statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder.to_pipeline">to_pipeline() (statefun_tasks.PipelineBuilder method)</a>
+      <li><a href="api/generated/statefun_tasks.TaskContext.html#statefun_tasks.TaskContext.to_address_and_id">to_address_and_id() (statefun_tasks.TaskContext static method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/generated/statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder.to_pipeline">to_pipeline() (statefun_tasks.PipelineBuilder method)</a>
+</li>
       <li><a href="api/generated/statefun_tasks.DefaultSerialiser.html#statefun_tasks.DefaultSerialiser.to_proto">to_proto() (statefun_tasks.DefaultSerialiser method)</a>
 
       <ul>
@@ -362,6 +389,14 @@
 </li>
       </ul></li>
       <li><a href="api/generated/statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder.to_task_request">to_task_request() (statefun_tasks.PipelineBuilder method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="U">U</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/generated/statefun_tasks.TaskContext.html#statefun_tasks.TaskContext.update_state">update_state() (statefun_tasks.TaskContext method)</a>
 </li>
   </ul></td>
 </tr></table>

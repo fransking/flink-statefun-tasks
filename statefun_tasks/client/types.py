@@ -1,4 +1,5 @@
 from statefun_tasks import TaskException, TaskActionResult, TaskStatus as TaskStatusProto
+from dataclasses import dataclass
 from enum import Enum
 
 class TaskError(Exception):

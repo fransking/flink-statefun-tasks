@@ -8,7 +8,7 @@ from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, 
     TaskAction, TaskStatus, TaskState
 
 from statefun_tasks.type_helpers import _create_task_result, _create_task_exception
-from statefun_tasks.context import _TaskContext
+from statefun_tasks.context import TaskContext
 from statefun_tasks.utils import _gen_id, _task_type_for, _is_tuple, _type_name, _annotated_protos_for
 from statefun_tasks.pipeline import _Pipeline
 
@@ -88,18 +88,26 @@ class FlinkTasks(object):
         fun.type_name = _task_type_for(fun, module_name)
         self._bindings[fun.type_name] = _FlinkTask(fun, self._serialiser, **params)
 
-    def bind(self, namespace: str = None, worker_name: str = None, retry_policy: RetryPolicy = None,  with_state: bool = False, is_fruitful: bool = True, module_name: str = None):
+    def bind(
+        self, 
+        namespace: str = None, 
+        worker_name: str = None, 
+        retry_policy: RetryPolicy = None, 
+        with_state: bool = False, 
+        is_fruitful: bool = True, 
+        module_name: str = None,
+        with_context: bool = False):
         """
         Binds a function as a Flink Task
 
         :param namespace: namespace to use in place of the default
         :param worker_name: worker name to use in place of the default
         :param retry_policy: retry policy to use should the task throw an exception
-        :param with_state: whether to pass a state object as the first parameter - return value should be a tuple of state, result (default False)
+        :param with_state: whether to pass a state object as the first (second if with_context is also set) parameter.  The return value should be a tuple of state, result (default False)
         :param is_fruitful: whether the function produces a fruitful result or simply returns None (default True)
         :param module_name: if specified then the task type used in addressing will be module_name.function_name
                             otherwise the Python module containing the function will be used
-
+        :param with_context: whether to pass a Flink context object as the first parameter (default false)
         """
         def wrapper(function):
             def defaults():
@@ -109,7 +117,8 @@ class FlinkTasks(object):
                     'retry_policy': None if retry_policy is None else retry_policy.to_proto(),
                     'with_state': with_state,
                     'is_fruitful': is_fruitful,
-                    'module_name': module_name
+                    'module_name': module_name,
+                    'with_context': with_context
                 }
 
             def send(*args, **kwargs):
@@ -142,7 +151,7 @@ class FlinkTasks(object):
         :param context: context object provided by Flink
         :param message: the task input protobuf message
         """
-        with _TaskContext(context, self._egress_type_name, self._serialiser) as task_context:
+        with TaskContext(context, self._egress_type_name, self._serialiser) as task_context:
 
             try:
 
@@ -210,7 +219,7 @@ class FlinkTasks(object):
         context.storage.task_request = task_request
 
         flink_task = self.get_task(task_request.type)
-        task_result, task_exception, pipeline = await flink_task.run(task_request)
+        task_result, task_exception, pipeline = await flink_task.run(context, task_request)
 
         # if task returns a pipeline then start it
         if pipeline is not None:
@@ -232,6 +241,8 @@ class FlinkTasks(object):
         _log.info(f'Finished {task_request.type}, {context}')
 
     def _invoke_action(self, context, action_request):
+        _log.info(f'Started Action [{TaskAction.Name(action_request.action)}]')
+
         flink_action = _FlinkAction(context)
 
         try:
@@ -241,6 +252,8 @@ class FlinkTasks(object):
 
         except Exception as ex:
             self._emit_result(context, action_request, _create_task_exception(action_request, ex))
+
+        _log.info(f'Finished Action [{TaskAction.Name(action_request.action)}]')
 
     def _emit_result(self, context, task_input, task_result):
         state = context.get_state()

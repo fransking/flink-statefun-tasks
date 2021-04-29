@@ -1,4 +1,4 @@
-from statefun_tasks.types import _GroupEntry, _TaskEntry
+from statefun_tasks.types import Group, Task
 from statefun_tasks.utils import _try_next, _is_tuple, _gen_id
 from statefun_tasks.messages_pb2 import TaskResults, TaskResult, TaskException
 
@@ -10,13 +10,14 @@ class _PipelineHelper(object):
         self._pipeline = pipeline
         self._serialiser = serialiser
 
-    @staticmethod
-    def get_initial_tasks(entry):
+    def get_initial_tasks(self, entry=None):
+        entry = entry or self._pipeline[0]
+
         tasks = []
-        if isinstance(entry, _GroupEntry):
+        if isinstance(entry, Group):
             for t in entry:
-                tasks.extend(_PipelineHelper.get_initial_tasks(t[0]))
-        elif isinstance(entry, _TaskEntry):
+                tasks.extend(self.get_initial_tasks(t[0]))
+        elif isinstance(entry, Task):
             tasks.append(entry)
         else:
             raise ValueError(f'Expected either a task or a group at the start of each pipeline')
@@ -27,7 +28,7 @@ class _PipelineHelper(object):
         pipeline = pipeline or self._pipeline
 
         for entry in pipeline:
-            if isinstance(entry, _GroupEntry):
+            if isinstance(entry, Group):
                 for pipeline_in_group in entry:
                     task_entry = self.get_task_entry(task_id, pipeline_in_group)
                     if task_entry is not None:
@@ -43,11 +44,9 @@ class _PipelineHelper(object):
         if task_entry is not None:
             task_entry.mark_complete()
 
-
     def try_get_finally_task(self, task_id):
-        finally_task = next((task for task in self._pipeline if isinstance(task, _TaskEntry) and task.is_finally), None)
+        finally_task = next((task for task in self._pipeline if isinstance(task, Task) and task.is_finally), None)
         return None if finally_task is None or finally_task.task_id == task_id else finally_task
-
 
     def get_next_step_in_pipeline(self, task_id, pipeline=None):
         # figure out the next step for the pipeline
@@ -62,7 +61,7 @@ class _PipelineHelper(object):
             try:
                 entry = next(iterator)
 
-                if isinstance(entry, _GroupEntry):
+                if isinstance(entry, Group):
                     for pipeline_in_group in entry:
                         current_t, next_t, _ = self.get_next_step_in_pipeline(task_id, pipeline_in_group)
 
@@ -81,7 +80,7 @@ class _PipelineHelper(object):
             except StopIteration:
                 return None, None, None
 
-    def aggregate_group_results(self, group: _GroupEntry, task_results: TaskResults):
+    def aggregate_group_results(self, group: Group, task_results: TaskResults):
 
         def aggregate_results(grp):
             aggregated_results = []
@@ -90,7 +89,7 @@ class _PipelineHelper(object):
 
             for pipeline in grp:
                 last_task = pipeline[-1]
-                if isinstance(last_task, _GroupEntry):
+                if isinstance(last_task, Group):
                     results, states, errors = aggregate_results(last_task)
                     aggregated_results.append(results)
                     aggregated_states.append(states)

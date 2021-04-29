@@ -1,3 +1,4 @@
+from statefun_tasks.context import TaskContext
 from statefun_tasks.pipeline_builder import PipelineBuilder
 from statefun_tasks.utils import _gen_id, _task_type_for, _is_tuple, _type_name, _annotated_protos_for
 from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException
@@ -8,12 +9,13 @@ import asyncio
 
 
 class _FlinkTask(object):
-    def __init__(self, fun, serialiser, retry_policy=None, with_state=False, is_fruitful=True, **kwargs):
+    def __init__(self, fun, serialiser, retry_policy=None, with_state=False, is_fruitful=True, with_context=False, **kwargs):
         self._fun = fun
         self._serialiser = serialiser
         self._retry_policy = retry_policy
         self._with_state = with_state
         self._is_fruitful = is_fruitful
+        self._with_context = with_context
 
         full_arg_spec = inspect.getfullargspec(fun)
         self._args = full_arg_spec.args
@@ -25,12 +27,13 @@ class _FlinkTask(object):
         proto_types = _annotated_protos_for(fun)
         self._serialiser.register_proto_types(proto_types)
 
-    async def run(self, task_request: TaskRequest):
+    async def run(self, task_context: TaskContext, task_request: TaskRequest):
         task_result, task_exception, pipeline = None, None, None
+        task_parameters = self._serialiser.from_proto(task_request.parameters, {})
 
         try:
             # run the flink task
-            task_args, kwargs, original_state = self._to_task_args_and_kwargs(task_request)
+            task_args, kwargs, fn_state = self._to_task_args_and_kwargs(task_context, task_request)
 
             fn_result = self._fun(*task_args, **kwargs)
 
@@ -38,16 +41,16 @@ class _FlinkTask(object):
             if asyncio.iscoroutine(fn_result):
                 fn_result = await fn_result
 
-            pipeline, task_result = self._to_pipeline_or_task_result(task_request, fn_result, original_state)
+            pipeline, task_result = self._to_pipeline_or_task_result(task_request, task_parameters, fn_result, fn_state)
 
         # we errored so return a task_exception instead
         except Exception as e:
-            task_exception = self._to_task_exception(task_request, e)
+            task_exception = self._to_task_exception(task_request, task_parameters, e)
 
         return task_result, task_exception, pipeline
 
-    def _to_pipeline_or_task_result(self, task_request, fn_result, original_state):
-        pipeline, task_result, fn_state = None, None, original_state
+    def _to_pipeline_or_task_result(self, task_request, task_parameters, fn_result, fn_state):
+        pipeline, task_result = None, None
 
         if not self._is_fruitful:
             fn_result = ()
@@ -69,6 +72,8 @@ class _FlinkTask(object):
 
             # result of the task might be a Flink pipeline
             if isinstance(fn_result, PipelineBuilder):
+                # this new pipeline which once complete will yield the result of the whole pipeline
+                # back to the caller as if it were a simple task
                 pipeline = fn_result.to_pipeline()
                 fn_result = None
 
@@ -77,9 +82,8 @@ class _FlinkTask(object):
 
         return pipeline, task_result
 
-    def _to_task_exception(self, task_request, ex):
+    def _to_task_exception(self, task_request, task_parameters, ex):
         # use retry policy on task request first then fallback to task definition
-        task_parameters = self._serialiser.from_proto(task_request.parameters, {})
         task_retry_policy = task_parameters.get('retry_policy', self._retry_policy)
         maybe_retry = False
 
@@ -95,7 +99,7 @@ class _FlinkTask(object):
 
         return task_exception
 
-    def _to_task_args_and_kwargs(self, task_request):
+    def _to_task_args_and_kwargs(self, task_context, task_request):
         args, kwargs, state = self._serialiser.deserialise_request(task_request)
 
         # listify
@@ -113,5 +117,9 @@ class _FlinkTask(object):
         # add state as first argument if required by this task
         if self._with_state:
             args = [state] + args
+
+        # add context if required by this task
+        if self._with_context:
+            args = [task_context] + args
 
         return args, kwargs, state

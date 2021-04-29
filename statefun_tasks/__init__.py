@@ -2,6 +2,10 @@
 from statefun_tasks.task_builder import FlinkTasks
 
 
+# context
+from statefun_tasks.context import TaskContext
+
+
 # pipeline builder
 from statefun_tasks.pipeline_builder import PipelineBuilder, in_parallel
 
@@ -12,7 +16,7 @@ from statefun_tasks.serialisation import DefaultSerialiser
 
 
 # types
-from statefun_tasks.types import RetryPolicy, TaskAlreadyExistsException
+from statefun_tasks.types import Task, Group, RetryPolicy, TaskAlreadyExistsException
 from statefun_tasks.type_helpers import flink_value_type_for
 
 

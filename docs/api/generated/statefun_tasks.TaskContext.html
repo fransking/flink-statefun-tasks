@@ -1,0 +1,435 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>TaskContext &mdash; Flink Tasks  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="PipelineBuilder" href="statefun_tasks.PipelineBuilder.html" />
+    <link rel="prev" title="FlinkTasks" href="statefun_tasks.FlinkTasks.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Flink Tasks
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tasks_vs_functions.html">Tasks vs Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tasks.html">Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pipelines.html">Pipelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../actions.html">Actions</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Developer Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../flink_tasks.html">Tasks API</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="statefun_tasks.FlinkTasks.html">FlinkTasks</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">TaskContext</a></li>
+<li class="toctree-l3"><a class="reference internal" href="statefun_tasks.PipelineBuilder.html">PipelineBuilder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="statefun_tasks.DefaultSerialiser.html">DefaultSerialiser</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../flink_tasks_client.html">Client API</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Flink Tasks</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../api.html">API Reference</a> &raquo;</li>
+        
+          <li><a href="../flink_tasks.html">Tasks API</a> &raquo;</li>
+        
+      <li>TaskContext</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="taskcontext">
+<h1>TaskContext<a class="headerlink" href="#taskcontext" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="statefun_tasks.TaskContext">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">statefun_tasks.</span></code><code class="sig-name descname"><span class="pre">TaskContext</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">egress_type_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">serialiser</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext" title="Permalink to this definition">¶</a></dt>
+<dd><p>Task context wrapper around Flink context</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>context</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Context</span></code>) – Flink context</p></li>
+<li><p><strong>egress_type_name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – egress type name to use when calling send_egress_message()</p></li>
+<li><p><strong>serialiser</strong> (<em>optional</em>) – serialiser to use (will use DefaultSerialiser if not set)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="statefun_tasks.TaskContext.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">egress_type_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">serialiser</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.__init__" title="statefun_tasks.TaskContext.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(context, egress_type_name[, serialiser])</p></td>
+<td><p>Initialize self.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_address" title="statefun_tasks.TaskContext.get_address"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_address</span></code></a>()</p></td>
+<td><p>Own address in the form of context.address.typename</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_caller_address" title="statefun_tasks.TaskContext.get_caller_address"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_caller_address</span></code></a>()</p></td>
+<td><p>Caller address in the form of context.caller.typename</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_caller_id" title="statefun_tasks.TaskContext.get_caller_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_caller_id</span></code></a>()</p></td>
+<td><p>Caller task Id in the form of context.caller.id</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_state" title="statefun_tasks.TaskContext.get_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_state</span></code></a>()</p></td>
+<td><p>Returns the TaskState for this task</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_task_id" title="statefun_tasks.TaskContext.get_task_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_task_id</span></code></a>()</p></td>
+<td><p>Own task Id in the form of context.address.id</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.send_egress_message" title="statefun_tasks.TaskContext.send_egress_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_egress_message</span></code></a>(topic, value)</p></td>
+<td><p>Sends a message to an egress topic</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.send_message" title="statefun_tasks.TaskContext.send_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_message</span></code></a>(destination, target_id, value)</p></td>
+<td><p>Sends a message to another Flink Task worker</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.send_message_after" title="statefun_tasks.TaskContext.send_message_after"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_message_after</span></code></a>(delay, destination, …)</p></td>
+<td><p>Sends a message to another Flink Task worker after some delay</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.set_state" title="statefun_tasks.TaskContext.set_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_state</span></code></a>(data)</p></td>
+<td><p>Sets (overwrites) the TaskState for this task</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.to_address_and_id" title="statefun_tasks.TaskContext.to_address_and_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_address_and_id</span></code></a>(address)</p></td>
+<td><p>Converts SdkAddress into a string representation</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.update_state" title="statefun_tasks.TaskContext.update_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_state</span></code></a>(updates)</p></td>
+<td><p>Updates (merges) state with the TaskState for this task</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt id="statefun_tasks.TaskContext.get_address">
+<code class="sig-name descname"><span class="pre">get_address</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_address" title="Permalink to this definition">¶</a></dt>
+<dd><p>Own address in the form of context.address.typename</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>address</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.TaskContext.get_caller_address">
+<code class="sig-name descname"><span class="pre">get_caller_address</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_caller_address" title="Permalink to this definition">¶</a></dt>
+<dd><p>Caller address in the form of context.caller.typename</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>address</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.TaskContext.get_caller_id">
+<code class="sig-name descname"><span class="pre">get_caller_id</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_caller_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Caller task Id in the form of context.caller.id</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>task Id</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.TaskContext.get_state">
+<code class="sig-name descname"><span class="pre">get_state</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the TaskState for this task</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the TaskState as a dictionary</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.TaskContext.get_task_id">
+<code class="sig-name descname"><span class="pre">get_task_id</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_task_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Own task Id in the form of context.address.id</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>task Id</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.TaskContext.send_egress_message">
+<code class="sig-name descname"><span class="pre">send_egress_message</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.send_egress_message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends a message to an egress topic</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>topic</strong> – the topic name</p></li>
+<li><p><strong>value</strong> – the message to send</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.TaskContext.send_message">
+<code class="sig-name descname"><span class="pre">send_message</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">destination</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.send_message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends a message to another Flink Task worker</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>destination</strong> – the destination to send the message to (e.g. example/worker)</p></li>
+<li><p><strong>target_id</strong> – the target Id</p></li>
+<li><p><strong>value</strong> – the message to send</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.TaskContext.send_message_after">
+<code class="sig-name descname"><span class="pre">send_message_after</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">destination</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.send_message_after" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends a message to another Flink Task worker after some delay</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>delay</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">timedelta</span></code>) – the delay</p></li>
+<li><p><strong>destination</strong> – the destination to send the message to (e.g. example/worker)</p></li>
+<li><p><strong>target_id</strong> – the target Id</p></li>
+<li><p><strong>value</strong> – the message to send</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.TaskContext.set_state">
+<code class="sig-name descname"><span class="pre">set_state</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.set_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets (overwrites) the TaskState for this task</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – state to set</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.TaskContext.to_address_and_id">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">to_address_and_id</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.to_address_and_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts SdkAddress into a string representation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>address</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">SdkAddress</span></code>) – SDK address</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>address and id in the format namespace/type/id</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.TaskContext.update_state">
+<code class="sig-name descname"><span class="pre">update_state</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">updates</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.update_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates (merges) state with the TaskState for this task</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> – state to update</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="statefun_tasks.PipelineBuilder.html" class="btn btn-neutral float-right" title="PipelineBuilder" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="statefun_tasks.FlinkTasks.html" class="btn btn-neutral float-left" title="FlinkTasks" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020-2021, Frans King.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

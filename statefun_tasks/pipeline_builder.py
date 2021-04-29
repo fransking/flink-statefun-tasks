@@ -1,4 +1,4 @@
-from statefun_tasks.types import _TaskEntry, _GroupEntry, RetryPolicy
+from statefun_tasks.types import Task, Group, RetryPolicy
 from statefun_tasks.utils import _gen_id, _is_tuple, _task_type_for
 from statefun_tasks.pipeline import _Pipeline
 from statefun_tasks.messages_pb2 import TaskRequest, Pipeline
@@ -44,7 +44,7 @@ class PipelineBuilder(object):
         :param other: the other pipeline builder
         :return: the builder
         """
-        group = _GroupEntry(_gen_id())
+        group = Group(_gen_id())
 
         for pipeline in pipelines:
             pipeline._add_to_group(group)
@@ -52,7 +52,7 @@ class PipelineBuilder(object):
         self._pipeline.append(group)
         return self
 
-    def _add_to_group(self, group: _GroupEntry):
+    def _add_to_group(self, group: Group):
         group.add_to_group(self._pipeline)
 
     @staticmethod
@@ -74,7 +74,7 @@ class PipelineBuilder(object):
         """
         args = self._unpack_single_tuple_args(args)
         task_type, parameters = self._task_type_and_parameters_for(fun)
-        self._pipeline.append(_TaskEntry(_gen_id(), task_type, args, kwargs, parameters=parameters))
+        self._pipeline.append(Task(_gen_id(), task_type, args, kwargs, parameters=parameters))
         return self
 
     def set(self, retry_policy:RetryPolicy = None, **params) -> 'PipelineBuilder':
@@ -108,14 +108,15 @@ class PipelineBuilder(object):
         else:
             args = self._unpack_single_tuple_args(args)
             task_type, parameters = self._task_type_and_parameters_for(continuation)
-            self._pipeline.append(_TaskEntry(_gen_id(), task_type, args, kwargs, parameters=parameters))
+            self._pipeline.append(Task(_gen_id(), task_type, args, kwargs, parameters=parameters))
         return self
 
-    def get_inital_destination(self):
+    def get_destination(self):
         """
-        Returns the initial destination of the pipeline - i.e. where the first task should be sent
+        Returns the initial destination of the pipeline - i.e. where the first task should be sent 
+        or None if it should be set to the default namespace/worker
 
-        :return: the initial desintation (e.g. example/worker)
+        :return: the initial destination (e.g. example/worker) or None if it should use the default
         """
         return None if not any(self._pipeline) else self._pipeline[0].get_destination()
 
@@ -152,7 +153,7 @@ class PipelineBuilder(object):
         """
         args = self._unpack_single_tuple_args(args)
         task_type, parameters = self._task_type_and_parameters_for(finally_action)
-        task_entry = _TaskEntry(_gen_id(), task_type, args, kwargs, parameters=parameters, is_finally=True)
+        task_entry = Task(_gen_id(), task_type, args, kwargs, parameters=parameters, is_finally=True)
         task_entry.set_parameters({'is_fruitful': False})
         self._pipeline.append(task_entry)
         return self
@@ -178,7 +179,7 @@ class PipelineBuilder(object):
         for entry in self._pipeline:
             entry.validate(errors)
 
-        finally_tasks = [task for task in self._pipeline if isinstance(task, _TaskEntry) and task.is_finally]
+        finally_tasks = [task for task in self._pipeline if isinstance(task, Task) and task.is_finally]
         if len(finally_tasks) > 1:
             errors.append('Cannot have more than one "finally_do" method')
         if len(finally_tasks) == 1 and finally_tasks[0] != self._pipeline[-1]:
@@ -212,9 +213,9 @@ class PipelineBuilder(object):
 
         for proto in pipeline_proto.entries:
             if proto.HasField('task_entry'):
-                pipeline.append(_TaskEntry.from_proto(proto, serialiser))
+                pipeline.append(Task.from_proto(proto, serialiser))
             elif proto.HasField('group_entry'):
-                pipeline.append(_GroupEntry.from_proto(proto, serialiser))
+                pipeline.append(Group.from_proto(proto, serialiser))
 
         return PipelineBuilder(pipeline)
 
@@ -228,3 +229,9 @@ class PipelineBuilder(object):
             return task_type, parameters
         except AttributeError:
             raise AttributeError(f'Function {fun.__module__}.{fun.__name__} should be decorated with tasks.bind')
+
+    def __iter__(self):
+        return self._pipeline.__iter__()
+
+    def __next__(self):
+        return self._pipeline.__next__()

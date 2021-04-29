@@ -5,11 +5,19 @@ from statefun_tasks.protobuf import pack_any
 
 from statefun import kafka_egress_message, message_builder, Context, SdkAddress
 from google.protobuf.any_pb2 import Any
+from datetime import timedelta
 
 from typing import Callable
 
 
-class _TaskContext(object):
+class TaskContext(object):
+    """
+    Task context wrapper around Flink context
+
+    :param context: Flink context
+    :param egress_type_name: egress type name to use when calling send_egress_message()
+    :param optional serialiser: serialiser to use (will use DefaultSerialiser if not set)
+    """
     def __init__(self, context: Context, egress_type_name: str, serialiser=None):
         self._context = context
         self._egress_type_name = egress_type_name
@@ -21,46 +29,105 @@ class _TaskContext(object):
         self._state = self._serialiser.from_proto(task_state.data)
 
     def get_address(self):
+        """
+        Own address in the form of context.address.typename
+
+        :return: address
+        """
         return f'{self._context.address.typename}'
 
     def get_task_id(self):
+        """
+        Own task Id in the form of context.address.id
+
+        :return: task Id
+        """
         return self._context.address.id
 
     def get_caller_address(self):
+        """
+        Caller address in the form of context.caller.typename
+
+        :return: address
+        """
         return f'{self._context.caller.typename}'
 
     def get_caller_id(self):
+        """
+        Caller task Id in the form of context.caller.id
+
+        :return: task Id
+        """
         return None if self._context.caller.id == "" else self._context.caller.id
 
     @staticmethod
     def to_address_and_id(address: SdkAddress):
+        """
+        Converts SdkAddress into a string representation
+
+        :param address: SDK address
+        :return: address and id in the format namespace/type/id
+        """
         return f'{address.namespace}/{address.type}', address.id
 
-    def send_message_after(self, delay, destination, task_id, value):
+    def send_message_after(self, delay: timedelta, destination, target_id, value):
+        """
+        Sends a message to another Flink Task worker after some delay
+
+        :param delay: the delay
+        :param destination: the destination to send the message to (e.g. example/worker)
+        :param target_id: the target Id
+        :param value: the message to send
+        """
         value_type = flink_value_type_for(value)
-        message = message_builder(target_typename=destination, target_id=task_id, value=value, value_type=value_type)
+        message = message_builder(target_typename=destination, target_id=target_id, value=value, value_type=value_type)
         self._context.send_after(delay, message)
 
-    def send_message(self, destination, task_id, value):
+    def send_message(self, destination, target_id, value):
+        """
+        Sends a message to another Flink Task worker
+
+        :param destination: the destination to send the message to (e.g. example/worker)
+        :param target_id: the target Id
+        :param value: the message to send
+        """
         value_type = flink_value_type_for(value)
-        message = message_builder(target_typename=destination, target_id=task_id, value=value, value_type=value_type)
+        message = message_builder(target_typename=destination, target_id=target_id, value=value, value_type=value_type)
         self._context.send(message)
 
     def send_egress_message(self, topic, value):
+        """
+        Sends a message to an egress topic
+
+        :param topic: the topic name
+        :param value: the message to send
+        """
         proto_bytes = pack_any(value).SerializeToString()
         message = kafka_egress_message(typename=self._egress_type_name, topic=topic, value=proto_bytes)
         self._context.send_egress(message)
 
-    def delete(self, key):
-        del self._context[key]
-
     def set_state(self, data:dict):
+        """
+        Sets (overwrites) the TaskState for this task
+
+        :param data: state to set
+        """
         self._state = data
 
     def get_state(self) -> dict:
+        """
+        Returns the TaskState for this task
+
+        :return: the TaskState as a dictionary
+        """
         return self._state
 
     def update_state(self, updates:dict):
+        """
+        Updates (merges) state with the TaskState for this task
+
+        :param data: state to update
+        """
         self._state.update(updates)
 
     def __enter__(self):

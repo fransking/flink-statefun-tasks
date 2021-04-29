@@ -39,7 +39,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="DefaultSerialiser" href="statefun_tasks.DefaultSerialiser.html" />
-    <link rel="prev" title="FlinkTasks" href="statefun_tasks.FlinkTasks.html" /> 
+    <link rel="prev" title="TaskContext" href="statefun_tasks.TaskContext.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -98,6 +98,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../../api.html">API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../flink_tasks.html">Tasks API</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="statefun_tasks.FlinkTasks.html">FlinkTasks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="statefun_tasks.TaskContext.html">TaskContext</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">PipelineBuilder</a></li>
 <li class="toctree-l3"><a class="reference internal" href="statefun_tasks.DefaultSerialiser.html">DefaultSerialiser</a></li>
 </ul>
@@ -216,8 +217,8 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.from_proto" title="statefun_tasks.PipelineBuilder.from_proto"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_proto</span></code></a>(pipeline_proto, serialiser)</p></td>
 <td><p>Deserialises the pipeline from protobuf</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.get_inital_destination" title="statefun_tasks.PipelineBuilder.get_inital_destination"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_inital_destination</span></code></a>()</p></td>
-<td><p>Returns the initial destination of the pipeline - i.e. where the first task should be sent.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.get_destination" title="statefun_tasks.PipelineBuilder.get_destination"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_destination</span></code></a>()</p></td>
+<td><p>Returns the initial destination of the pipeline - i.e. where the first task should be sent or None if it should be set to the default namespace/worker.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.send" title="statefun_tasks.PipelineBuilder.send"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send</span></code></a>(fun, *args, **kwargs)</p></td>
 <td><p>Adds a task entry for the given Flink Task and arguments</p></td>
@@ -351,12 +352,13 @@
 </dd></dl>
 
 <dl class="py method">
-<dt id="statefun_tasks.PipelineBuilder.get_inital_destination">
-<code class="sig-name descname"><span class="pre">get_inital_destination</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.get_inital_destination" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the initial destination of the pipeline - i.e. where the first task should be sent</p>
+<dt id="statefun_tasks.PipelineBuilder.get_destination">
+<code class="sig-name descname"><span class="pre">get_destination</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.get_destination" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the initial destination of the pipeline - i.e. where the first task should be sent
+or None if it should be set to the default namespace/worker</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>the initial desintation (e.g. example/worker)</p>
+<dd class="field-odd"><p>the initial destination (e.g. example/worker) or None if it should use the default</p>
 </dd>
 </dl>
 </dd></dl>
@@ -481,7 +483,7 @@
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="statefun_tasks.DefaultSerialiser.html" class="btn btn-neutral float-right" title="DefaultSerialiser" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="statefun_tasks.FlinkTasks.html" class="btn btn-neutral float-left" title="FlinkTasks" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="statefun_tasks.TaskContext.html" class="btn btn-neutral float-left" title="TaskContext" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
