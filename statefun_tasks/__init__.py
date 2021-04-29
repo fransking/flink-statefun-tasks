@@ -2,6 +2,10 @@
 from statefun_tasks.task_builder import FlinkTasks
 
 
+# context
+from statefun_tasks.context import TaskContext
+
+
 # pipeline builder
 from statefun_tasks.pipeline_builder import PipelineBuilder, in_parallel
 

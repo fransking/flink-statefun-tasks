@@ -15,6 +15,7 @@ DefaultSerialiser
       ~DefaultSerialiser.__init__
       ~DefaultSerialiser.deserialise_args_and_kwargs
       ~DefaultSerialiser.deserialise_request
+      ~DefaultSerialiser.deserialise_response
       ~DefaultSerialiser.deserialise_result
       ~DefaultSerialiser.from_proto
       ~DefaultSerialiser.register_proto_types

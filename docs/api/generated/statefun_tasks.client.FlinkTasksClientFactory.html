@@ -208,7 +208,7 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kafka_broker_url</strong> – url of the kafka broker used for ingress and egress</p></li>
+<li><p><strong>kafka_broker_url</strong> – url of the kafka broker (or list of urls) used for ingress and egress</p></li>
 <li><p><strong>request_topics</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – dictionary of worker to ingress topic mappings  (use None for default)
 e.g. {‘example/worker’: ‘example.requests’, None: ‘example.default.requests’}</p></li>
 <li><p><strong>action_toptics</strong> – as per request_topics but used for action requests</p></li>

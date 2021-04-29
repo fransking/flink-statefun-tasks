@@ -1,7 +1,7 @@
 from statefun_tasks.serialisation import DefaultSerialiser
 from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskResults, TaskException, TaskEntry, Pipeline
 from statefun_tasks.protobuf import pack_any, unpack_any
-from statefun_tasks.context import _TaskContext
+from statefun_tasks.context import TaskContext
 from statefun_tasks.types import Task, Group, RetryPolicy
 from statefun_tasks.utils import _extend_args
 from statefun_tasks.pipeline_helper import _PipelineHelper
@@ -31,7 +31,7 @@ class _Pipeline(object):
 
         return _Pipeline(pipeline, serialiser)
         
-    def begin(self, context: _TaskContext):
+    def begin(self, context: TaskContext):
         # 1. record all the continuations into a pipeline and save into state with caller id and address
 
         state = {
@@ -60,7 +60,7 @@ class _Pipeline(object):
 
             context.send_message(task.get_destination(), task_id, request)
 
-    def resume(self, context: _TaskContext, task_result_or_exception: Union[TaskResult, TaskException]):
+    def resume(self, context: TaskContext, task_result_or_exception: Union[TaskResult, TaskException]):
         caller_id = context.get_caller_id()
         state = context.get_state()
 
@@ -127,7 +127,7 @@ class _Pipeline(object):
                     self.terminate(context, task_result_or_exception)
 
 
-    def terminate(self, context: _TaskContext, task_result_or_exception: Union[TaskResult, TaskException]):
+    def terminate(self, context: TaskContext, task_result_or_exception: Union[TaskResult, TaskException]):
         task_request = context.storage.task_request or TaskRequest()
 
         result_before_finally = context.get_state().get('result_before_finally')

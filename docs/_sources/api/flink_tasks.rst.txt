@@ -6,5 +6,6 @@ Tasks API
    :toctree: generated/
 
    ~statefun_tasks.FlinkTasks
+   ~statefun_tasks.TaskContext
    ~statefun_tasks.PipelineBuilder
    ~statefun_tasks.DefaultSerialiser

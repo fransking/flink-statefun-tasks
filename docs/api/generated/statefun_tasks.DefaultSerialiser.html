@@ -98,6 +98,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../../api.html">API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../flink_tasks.html">Tasks API</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="statefun_tasks.FlinkTasks.html">FlinkTasks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="statefun_tasks.TaskContext.html">TaskContext</a></li>
 <li class="toctree-l3"><a class="reference internal" href="statefun_tasks.PipelineBuilder.html">PipelineBuilder</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">DefaultSerialiser</a></li>
 </ul>
@@ -207,25 +208,28 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.DefaultSerialiser.deserialise_request" title="statefun_tasks.DefaultSerialiser.deserialise_request"><code class="xref py py-obj docutils literal notranslate"><span class="pre">deserialise_request</span></code></a>(task_request)</p></td>
 <td><p>Dserialises a TaskRequest back into args, kwargs and state</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.DefaultSerialiser.deserialise_result" title="statefun_tasks.DefaultSerialiser.deserialise_result"><code class="xref py py-obj docutils literal notranslate"><span class="pre">deserialise_result</span></code></a>(task_result)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.DefaultSerialiser.deserialise_response" title="statefun_tasks.DefaultSerialiser.deserialise_response"><code class="xref py py-obj docutils literal notranslate"><span class="pre">deserialise_response</span></code></a>(task_result_or_exception)</p></td>
+<td><p>Deserialises a TaskResult or TaskException back into result and state.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.DefaultSerialiser.deserialise_result" title="statefun_tasks.DefaultSerialiser.deserialise_result"><code class="xref py py-obj docutils literal notranslate"><span class="pre">deserialise_result</span></code></a>(task_result)</p></td>
 <td><p>Dserialises a TaskResult back into result and state</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.DefaultSerialiser.from_proto" title="statefun_tasks.DefaultSerialiser.from_proto"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_proto</span></code></a>(proto[, default])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.DefaultSerialiser.from_proto" title="statefun_tasks.DefaultSerialiser.from_proto"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_proto</span></code></a>(proto[, default])</p></td>
 <td><p>Converts from protobuf to Python</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_proto_types</span></code>(proto_types)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_proto_types</span></code>(proto_types)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.DefaultSerialiser.serialise_args_and_kwargs" title="statefun_tasks.DefaultSerialiser.serialise_args_and_kwargs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serialise_args_and_kwargs</span></code></a>(args, kwargs)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.DefaultSerialiser.serialise_args_and_kwargs" title="statefun_tasks.DefaultSerialiser.serialise_args_and_kwargs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serialise_args_and_kwargs</span></code></a>(args, kwargs)</p></td>
 <td><p>Serialises Python args and kwargs into protobuf</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.DefaultSerialiser.serialise_request" title="statefun_tasks.DefaultSerialiser.serialise_request"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serialise_request</span></code></a>(task_request, args, kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.DefaultSerialiser.serialise_request" title="statefun_tasks.DefaultSerialiser.serialise_request"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serialise_request</span></code></a>(task_request, args, kwargs)</p></td>
 <td><p>Serialises args, kwargs and optional state into a TaskRequest</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.DefaultSerialiser.serialise_result" title="statefun_tasks.DefaultSerialiser.serialise_result"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serialise_result</span></code></a>(task_result, result, state)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.DefaultSerialiser.serialise_result" title="statefun_tasks.DefaultSerialiser.serialise_result"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serialise_result</span></code></a>(task_result, result, state)</p></td>
 <td><p>Serialises the result of a task invocation into a TaskResult</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.DefaultSerialiser.to_proto" title="statefun_tasks.DefaultSerialiser.to_proto"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_proto</span></code></a>(item)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.DefaultSerialiser.to_proto" title="statefun_tasks.DefaultSerialiser.to_proto"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_proto</span></code></a>(item)</p></td>
 <td><p>Converts from Python to protobuf</p></td>
 </tr>
 </tbody>
@@ -254,6 +258,21 @@
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>tuple of task args, kwargs and state</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.DefaultSerialiser.deserialise_response">
+<code class="sig-name descname"><span class="pre">deserialise_response</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_result_or_exception</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.DefaultSerialiser.deserialise_response" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deserialises a TaskResult or TaskException back into result and state.
+If a TaskException is provided as input then the return value will be (), TaskException.state</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>task_result</strong> – the TaskResult</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>tuple of result and state.</p>
 </dd>
 </dl>
 </dd></dl>

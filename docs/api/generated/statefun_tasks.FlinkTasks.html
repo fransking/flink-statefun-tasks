@@ -38,7 +38,7 @@
     
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="PipelineBuilder" href="statefun_tasks.PipelineBuilder.html" />
+    <link rel="next" title="TaskContext" href="statefun_tasks.TaskContext.html" />
     <link rel="prev" title="Tasks API" href="../flink_tasks.html" /> 
 </head>
 
@@ -98,6 +98,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../../api.html">API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../flink_tasks.html">Tasks API</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">FlinkTasks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="statefun_tasks.TaskContext.html">TaskContext</a></li>
 <li class="toctree-l3"><a class="reference internal" href="statefun_tasks.PipelineBuilder.html">PipelineBuilder</a></li>
 <li class="toctree-l3"><a class="reference internal" href="statefun_tasks.DefaultSerialiser.html">DefaultSerialiser</a></li>
 </ul>
@@ -233,7 +234,7 @@ to be exposed as tasks.</p>
 </table>
 <dl class="py method">
 <dt id="statefun_tasks.FlinkTasks.bind">
-<code class="sig-name descname"><span class="pre">bind</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">worker_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retry_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_fruitful</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.bind" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">bind</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">worker_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retry_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_fruitful</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.bind" title="Permalink to this definition">¶</a></dt>
 <dd><p>Binds a function as a Flink Task</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -241,10 +242,11 @@ to be exposed as tasks.</p>
 <li><p><strong>namespace</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – namespace to use in place of the default</p></li>
 <li><p><strong>worker_name</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – worker name to use in place of the default</p></li>
 <li><p><strong>retry_policy</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">RetryPolicy</span></code>]) – retry policy to use should the task throw an exception</p></li>
-<li><p><strong>with_state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to pass a state object as the first parameter - return value should be a tuple of state, result (default False)</p></li>
+<li><p><strong>with_state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to pass a state object as the first (second if with_context is also set) parameter.  The return value should be a tuple of state, result (default False)</p></li>
 <li><p><strong>is_fruitful</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether the function produces a fruitful result or simply returns None (default True)</p></li>
 <li><p><strong>module_name</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – if specified then the task type used in addressing will be module_name.function_name
 otherwise the Python module containing the function will be used</p></li>
+<li><p><strong>with_context</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to pass a Flink context object as the first parameter (default false)</p></li>
 </ul>
 </dd>
 </dl>
@@ -341,7 +343,7 @@ This should only be used if you want to provide your own built in (pre-defined) 
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="statefun_tasks.PipelineBuilder.html" class="btn btn-neutral float-right" title="PipelineBuilder" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="statefun_tasks.TaskContext.html" class="btn btn-neutral float-right" title="TaskContext" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="../flink_tasks.html" class="btn btn-neutral float-left" title="Tasks API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
