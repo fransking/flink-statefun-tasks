@@ -1,6 +1,5 @@
 from statefun_tasks.serialisation import DefaultSerialiser
 from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskResults, TaskException, TaskEntry, Pipeline
-from statefun_tasks.protobuf import pack_any, unpack_any
 from statefun_tasks.context import TaskContext
 from statefun_tasks.types import Task, Group, RetryPolicy
 from statefun_tasks.utils import _extend_args
@@ -64,13 +63,12 @@ class _Pipeline(object):
         caller_id = context.get_caller_id()
         state = context.get_state()
 
-        # mark pipeline step as complete
-        self._pipeline_helper.mark_task_complete(caller_id)
-
         # record the task result / exception - returns current map of task_id to task_result
         task_results = state.setdefault('task_results', TaskResults())
-        task_results.by_id[caller_id].CopyFrom(pack_any(task_result_or_exception))
-        
+
+        # mark pipeline step as complete
+        self._pipeline_helper.mark_task_complete(caller_id, task_result_or_exception, task_results)
+
         # save updated pipeline state
         context.update_state({'pipeline': self.to_proto()})
 
