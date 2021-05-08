@@ -124,6 +124,28 @@ class ParallelWorkflowTests(unittest.TestCase):
         self.assertEqual(join_results2_called, True)
         self.assertEqual(join_results3_called, True)
 
+
+    def test_continuation_into_parallel_workflow(self):
+        pipeline = _say_hello.send("John", "Smith").continue_with(in_parallel([
+            _say_goodbye.send(goodbye_message="see you later!"),
+            _say_goodbye.send(goodbye_message="see you later!")
+        ]))
+
+        result = self.test_harness.run_pipeline(pipeline)
+
+        self.assertEqual(result, ['Hello John Smith. So now I will say see you later!', 'Hello John Smith. So now I will say see you later!'])
+
+    def test_continuation_into_parallel_workflow_with_contination(self):
+        pipeline = _say_hello.send("John", "Smith").continue_with(in_parallel([
+            _say_goodbye.send(goodbye_message="see you later!"),
+            _say_goodbye.send(goodbye_message="see you later!")
+        ]).continue_with(_join_results))
+
+        result = self.test_harness.run_pipeline(pipeline)
+
+        self.assertEqual(result, 'Hello John Smith. So now I will say see you later!; Hello John Smith. So now I will say see you later!')
+
+
     def test_continuation_into_nested_parallel_workflow(self):
         pipeline = _say_hello.send("John", "Smith").continue_with(in_parallel([in_parallel([
             _say_goodbye.send(goodbye_message="see you later!"),
