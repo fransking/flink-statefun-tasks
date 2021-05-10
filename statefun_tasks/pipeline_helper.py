@@ -1,8 +1,10 @@
 from statefun_tasks.types import Group, Task
 from statefun_tasks.utils import _try_next, _is_tuple, _gen_id
+from statefun_tasks.protobuf import pack_any
 from statefun_tasks.messages_pb2 import TaskResults, TaskResult, TaskException
 
 from typing import Union
+from collections import deque
 
 
 class _PipelineHelper(object):
@@ -10,90 +12,141 @@ class _PipelineHelper(object):
         self._pipeline = pipeline
         self._serialiser = serialiser
 
-    def get_initial_tasks(self, entry=None):
-        entry = entry or self._pipeline[0]
+    @staticmethod
+    def walk_pipeline(pipeline, func, state):
+        stack = deque([pipeline])  # FIFO
 
+        while len(stack) > 0:
+            pipeline = stack.popleft()
+            
+            for entry in pipeline:
+                if isinstance(entry, Group):
+                    for pipeline_in_group in entry:
+                        stack.append(pipeline_in_group)
+                else:
+                    state, end = func(state, pipeline, entry)
+
+                    if end:
+                        return
+
+    @staticmethod
+    def get_task_chain(pipeline, parent_task_id):
+        
+        def extract_task_chain(state, pipeline, entry):
+            tasks, matched = state
+
+            if matched or entry.task_id == parent_task_id:
+                matched = True
+                tasks.append(entry)
+
+            return (tasks, matched), False # continue
+
+        task_chain = []
+        _PipelineHelper.walk_pipeline(pipeline, extract_task_chain, (task_chain, False))
+
+        return task_chain
+
+    def get_initial_tasks(self, entry=None):
+        stack = deque([entry or self._pipeline[0]])  # FIFO
         tasks = []
-        if isinstance(entry, Group):
-            for t in entry:
-                tasks.extend(self.get_initial_tasks(t[0]))
-        elif isinstance(entry, Task):
-            tasks.append(entry)
-        else:
-            raise ValueError(f'Expected either a task or a group at the start of each pipeline')
+
+        while len(stack) > 0:
+            entry = stack.popleft()
+
+            if isinstance(entry, Group):
+                for pipeline_in_group in entry:
+                    stack.append(pipeline_in_group[0])
+            elif isinstance(entry, Task):
+                tasks.append(entry)
+            else:
+                raise ValueError(f'Expected either a task or a group at the start of each pipeline')
 
         return tasks
 
-    def get_task_entry(self, task_id, pipeline=None):
-        pipeline = pipeline or self._pipeline
+    def mark_task_complete(self, task_id, task_result_or_exception, task_results):
+        packed_result_or_exception = pack_any(task_result_or_exception)
+        failed = isinstance(task_result_or_exception, TaskException)
 
-        for entry in pipeline:
-            if isinstance(entry, Group):
-                for pipeline_in_group in entry:
-                    task_entry = self.get_task_entry(task_id, pipeline_in_group)
-                    if task_entry is not None:
-                        return task_entry
-            else:
-                if entry.task_id == task_id:
-                    return entry
+        def mark_complete(state, pipeline, entry):
+            if entry.task_id == task_id:
+                tasks = self.get_task_chain(pipeline, task_id)
+                
+                if failed:
+                    # mark this task complete and its children
+                    for task in tasks:
+                        task.mark_complete()
+                        task_results.by_id[task.task_id].CopyFrom(packed_result_or_exception)
+                else:
+                    tasks[0].mark_complete()
+                    task_results.by_id[task_id].CopyFrom(packed_result_or_exception)
 
-    def mark_task_complete(self, task_id):
-        task_entry = self.get_task_entry(task_id)
+                return None, True # stop
 
-        # defensive
-        if task_entry is not None:
-            task_entry.mark_complete()
+            return None, False # continue
+
+        self.walk_pipeline(self._pipeline, mark_complete, None)                           
 
     def try_get_finally_task(self, task_id):
         finally_task = next((task for task in self._pipeline if isinstance(task, Task) and task.is_finally), None)
         return None if finally_task is None or finally_task.task_id == task_id else finally_task
 
-    def get_next_step_in_pipeline(self, task_id, pipeline=None):
-        # figure out the next step for the pipeline
-        # a group must be complete before you can move onto its continuation
-        # groups are executed in parallel so a pipeline_in_group that is complete should jump
-        # to the continuation of the group (if any) but only if the group as a whole is complete
+    def get_next_step_in_pipeline(self, task_id):
+        stack = deque([(self._pipeline, None, None, None)])  # FIFO (pipeline, entry after group, group, parent_group)
 
-        pipeline = pipeline or self._pipeline
-        iterator = iter(pipeline)
+        while len(stack) > 0:
+            pipeline, entry_after_group, group_entry, parent_group = stack.popleft()
+            iterator = iter(pipeline)
 
-        while True:
-            try:
-                entry = next(iterator)
+            for entry in pipeline:
+                _try_next(iterator)
 
                 if isinstance(entry, Group):
+                    stack_entry_after_group = _try_next(iterator)
+                    stack_group_entry = entry
+
+                    # don't overwrite the parent if already recorded on stack
+                    # we need the top most parent for tasks inside groups nested inside groups
+                    parent_group = parent_group or group_entry  
+                    
                     for pipeline_in_group in entry:
-                        current_t, next_t, _ = self.get_next_step_in_pipeline(task_id, pipeline_in_group)
+                        stack.append((pipeline_in_group, stack_entry_after_group, stack_group_entry, parent_group))
 
-                        if current_t is not None:
-
-                            if next_t is None:
-                                # at the end of pipeline_in_group so roll onto the next task but only if the group is complete
-                                next_t = _try_next(iterator) if entry.is_complete() else None
-
-                            return current_t, next_t, entry
                 else:
                     if entry.task_id == task_id:
                         next_entry = _try_next(iterator)
-                        return entry, next_entry, None
 
-            except StopIteration:
-                return None, None, None
+                        if next_entry is None and parent_group is not None and parent_group.is_complete():
+                            # bubble up to the top most parent
+                            return entry, entry_after_group, parent_group
+                        else:
+                            # otherwise if there is no next task and the group containing this task is complete 
+                            # bubble up to the task after the group
+                            if group_entry is not None and group_entry.is_complete() and next_entry is None:
+                                next_entry = entry_after_group
+
+                        return entry, next_entry, group_entry
+
+        return None, None, None
+
 
     def aggregate_group_results(self, group: Group, task_results: TaskResults):
+        
+        aggregated_results, aggregated_states, aggregated_errors = [], [], []
+        stack = deque([(group, aggregated_results, aggregated_states)])  # FIFO, errors are flat not nested so don't get stacked
 
-        def aggregate_results(grp):
-            aggregated_results = []
-            aggregated_states = []
-            aggregated_errors = []
+        while len(stack) > 0:
+            group, results, states = stack.popleft()
+            
+            for pipeline in group:
+                last_entry = pipeline[-1]
 
-            for pipeline in grp:
-                last_task = pipeline[-1]
-                if isinstance(last_task, Group):
-                    results, states, errors = aggregate_results(last_task)
-                    aggregated_results.append(results)
-                    aggregated_states.append(states)
-                    aggregated_states.append(errors)
+                if isinstance(last_entry, Group):
+                    stack_results, stack_states = [], []
+
+                    results.append(stack_results)
+                    states.append(stack_states)
+
+                    stack.append((last_entry, stack_results, stack_states))
                 else:
                     result, state, error = None, {}, None
 
@@ -105,16 +158,14 @@ class _PipelineHelper(object):
                     elif isinstance(task_result_or_exception, TaskException):
                         error = task_result_or_exception
 
-                    aggregated_results.append(result)
-                    aggregated_states.append(state)
-                    aggregated_errors.append(error)
-            
-            return aggregated_results, aggregated_states, aggregated_errors
+                    results.append(result)
+                    states.append(state)
+                    aggregated_errors.append(error)  # errors are flat not nested so don't get stacked
 
-        aggregated_results, aggregated_states, aggregated_errors = aggregate_results(group)
         aggregated_errors = [error for error in aggregated_errors if error is not None]
 
         if any(aggregated_errors):
+
             task_exception = TaskException(            
                 id=group.group_id,
                 type=f'__aggregate.error',
