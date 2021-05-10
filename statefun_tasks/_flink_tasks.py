@@ -2,7 +2,7 @@ from ._serialisation import DefaultSerialiser
 from ._utils import _gen_id, _task_type_for, _is_tuple, _type_name, _annotated_protos_for
 from ._types import RetryPolicy, TaskAlreadyExistsException
 from ._pipeline import _Pipeline, PipelineBuilder
-from ._context import _TaskContext
+from ._context import TaskContext
 from ._builtins import run_pipeline
 from ._protobuf import _pack_any
 from ._task_actions import _invoke_task_action
@@ -121,18 +121,18 @@ class FlinkTasks(object):
         fun.type_name = _task_type_for(fun, module_name)
         self._bindings[fun.type_name] = _FlinkTask(fun, self._serialiser, **params)
 
-    def bind(self, namespace: str = None, worker_name: str = None, retry_policy: RetryPolicy = None,  with_state: bool = False, is_fruitful: bool = True, module_name: str = None):
+    def bind(self, namespace: str = None, worker_name: str = None, retry_policy: RetryPolicy = None,  with_state: bool = False, is_fruitful: bool = True, module_name: str = None, with_context: bool = False):
         """
         Binds a function as a Flink Task
 
         :param namespace: namespace to use in place of the default
         :param worker_name: worker name to use in place of the default
         :param retry_policy: retry policy to use should the task throw an exception
-        :param with_state: whether to pass a state object as the first parameter - return value should be a tuple of state, result (default False)
+        :param with_state: whether to pass a state object as the first (second if with_context is also set) parameter.  The return value should be a tuple of state, result (default False)
         :param is_fruitful: whether the function produces a fruitful result or simply returns None (default True)
-        :param module_name: if specified then the task type used in addressingwill be module_name.function_name
+        :param module_name: if specified then the task type used in addressing will be module_name.function_name
                             otherwise the Python module containing the function will be used
-
+        :param with_context: whether to pass a Flink context object as the first parameter (default false)
         """
         def wrapper(function):
             def defaults():
@@ -142,7 +142,8 @@ class FlinkTasks(object):
                     'retry_policy': None if retry_policy is None else retry_policy.to_proto(),
                     'with_state': with_state,
                     'is_fruitful': is_fruitful,
-                    'module_name': module_name
+                    'module_name': module_name,
+                    'with_context': with_context
                 }
 
             def send(*args, **kwargs):
@@ -189,7 +190,7 @@ class FlinkTasks(object):
         :param task_input: the task input protobuf message
         """
 
-        with _TaskContext(context, _task_name(task_input), self._egress_type_name, self._serialiser) as task_context:
+        with TaskContext(context, _task_name(task_input), self._egress_type_name, self._serialiser) as task_context:
             try:
                 _log.info(f'Started {task_context}')
 
@@ -215,7 +216,7 @@ class FlinkTasks(object):
         :param context: context object provided by Flink
         :param task_input: the task input protobuf message
         """
-        with _TaskContext(context, _task_name(task_input), self._egress_type_name, self._serialiser) as task_context:
+        with TaskContext(context, _task_name(task_input), self._egress_type_name, self._serialiser) as task_context:
             try:
                 _log.info(f'Started {task_context}')
 
@@ -306,7 +307,7 @@ class FlinkTasks(object):
         flink_task = self.get_task(task_request.type)
         fn = flink_task.run_async if flink_task.is_async else flink_task.run
 
-        return task_request, fn(task_request)
+        return task_request, fn(context, task_request)
 
     def _emit_result(self, context, task_input, task_result):
         state = context.get_state()
@@ -389,12 +390,13 @@ class FlinkTasks(object):
 
 
 class _FlinkTask(object):
-    def __init__(self, fun, serialiser, retry_policy=None, with_state=False, is_fruitful=True, **kwargs):
+    def __init__(self, fun, serialiser, retry_policy=None, with_state=False, is_fruitful=True, with_context=False, **kwargs):
         self._fun = fun
         self._serialiser = serialiser
         self._retry_policy = retry_policy
         self._with_state = with_state
         self._is_fruitful = is_fruitful
+        self._with_context = with_context
 
         full_arg_spec = inspect.getfullargspec(fun)
         self._args = full_arg_spec.args
@@ -406,12 +408,12 @@ class _FlinkTask(object):
         proto_types = _annotated_protos_for(fun)
         self._serialiser.register_proto_types(proto_types)
 
-    def run(self, task_request: TaskRequest):
+    def run(self, task_context: TaskContext, task_request: TaskRequest):
         task_result, task_exception, pipeline = None, None, None
 
         try:
             # run the flink task
-            task_args, kwargs, original_state = self._to_task_args_and_kwargs(task_request)
+            task_args, kwargs, original_state = self._to_task_args_and_kwargs(task_context, task_request)
 
             fn_result = self._fun(*task_args, **kwargs)
 
@@ -423,12 +425,12 @@ class _FlinkTask(object):
 
         return task_result, task_exception, pipeline
 
-    async def run_async(self, task_request: TaskRequest):
+    async def run_async(self, task_context: TaskContext, task_request: TaskRequest):
         task_result, task_exception, pipeline = None, None, None
 
         try:
             # run the flink task
-            task_args, kwargs, original_state = self._to_task_args_and_kwargs(task_request)
+            task_args, kwargs, original_state = self._to_task_args_and_kwargs(task_context, task_request)
 
             fn_result = self._fun(*task_args, **kwargs)
 
@@ -493,7 +495,7 @@ class _FlinkTask(object):
 
         return task_exception
 
-    def _to_task_args_and_kwargs(self, task_request):
+    def _to_task_args_and_kwargs(self, task_context, task_request):
         args, kwargs, state = self._serialiser.deserialise_request(task_request)
 
         # listify
@@ -511,6 +513,10 @@ class _FlinkTask(object):
         # add state as first argument if required by this task
         if self._with_state:
             args = [state] + args
+
+        # add context if required by this task
+        if self._with_context:
+            args = [task_context] + args
 
         return args, kwargs, state
 

@@ -1,10 +1,10 @@
 from ._utils import _gen_id, _task_type_for, _is_tuple
 from ._serialisation import DefaultSerialiser
 from ._types import Task, Group, RetryPolicy
-from ._context import _TaskContext
-from ._pipeline_utils import _get_initial_tasks, _mark_task_complete, _get_task_entry, _get_next_step_in_pipeline, \
-    _extend_args, _save_task_result_or_exception, _aggregate_group_results, _try_get_finally_task
-from .messages_pb2 import TaskRequest, TaskResult, TaskException, GroupEntry, TaskEntry, Pipeline
+from ._context import TaskContext
+from ._pipeline_utils import _get_initial_tasks, _mark_task_complete, _get_next_step_in_pipeline, \
+    _extend_args, _aggregate_group_results, _try_get_finally_task
+from .messages_pb2 import TaskRequest, TaskResult, TaskException, GroupEntry, TaskEntry, Pipeline, TaskResults
 
 from typing import Union, Iterable
 from uuid import uuid4
@@ -32,7 +32,7 @@ class _Pipeline(object):
         return _Pipeline(pipeline, serialiser)
         
 
-    def begin(self, context: _TaskContext):
+    def begin(self, context: TaskContext):
         # 1. record all the continuations into a pipeline and save into state with caller id and address
 
         state = {
@@ -61,15 +61,15 @@ class _Pipeline(object):
 
             context.pack_and_send(task.get_destination(), task_id, request)
 
-    def resume(self, context: _TaskContext, task_result_or_exception: Union[TaskResult, TaskException]):
+    def resume(self, context: TaskContext, task_result_or_exception: Union[TaskResult, TaskException]):
         caller_id = context.get_caller_id()
         state = context.get_state()
 
-        # mark pipeline step as complete
-        _mark_task_complete(caller_id, self._pipeline)
-
         # record the task result / exception - returns current map of task_id to task_result
-        task_results =_save_task_result_or_exception(caller_id, state, task_result_or_exception)
+        task_results = state.setdefault('task_results', TaskResults())
+
+        # mark pipeline step as complete
+        _mark_task_complete(caller_id, self._pipeline, task_result_or_exception, task_results)
 
         # save updated pipeline state
         context.update_state({'pipeline': self.to_proto()})
@@ -126,7 +126,7 @@ class _Pipeline(object):
                     # else if have an exception then terminate but waiting for any parallel tasks in the group to complete first
                     self.terminate(context, task_result_or_exception)
 
-    def terminate(self, context: _TaskContext, task_result_or_exception: Union[TaskResult, TaskException]):
+    def terminate(self, context: TaskContext, task_result_or_exception: Union[TaskResult, TaskException]):
         task_request = context.unpack('task_request', TaskRequest)
 
         result_before_finally = context.get_state().get('result_before_finally')

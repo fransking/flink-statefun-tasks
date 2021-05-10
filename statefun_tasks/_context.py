@@ -8,7 +8,7 @@ from statefun.request_reply_pb2 import Address
 from typing import Callable
 
 
-class _TaskContext(object):
+class TaskContext(object):
     def __init__(self, context: BatchContext, task_name: str, egress_type_name: str, serialiser=None):
         self._context = context
         self._task_name = task_name

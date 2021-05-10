@@ -3,37 +3,82 @@ from ._utils import _try_next, _is_tuple, _gen_id
 from ._protobuf import _pack_any
 from .messages_pb2 import TaskResult, TaskException, TaskResults
 from typing import Union
+from collections import deque
+
+
+def _walk_pipeline(pipeline, func, state):
+    stack = deque([pipeline])  # FIFO
+
+    while len(stack) > 0:
+        pipeline = stack.popleft()
+        
+        for entry in pipeline:
+            if isinstance(entry, Group):
+                for pipeline_in_group in entry:
+                    stack.append(pipeline_in_group)
+            else:
+                state, end = func(state, pipeline, entry)
+
+                if end:
+                    return
 
 
 def _get_initial_tasks(entry):
+    stack = deque([entry])  # FIFO
     tasks = []
-    if isinstance(entry, Group):
-        for t in entry:
-            tasks.extend(_get_initial_tasks(t[0]))
-    elif isinstance(entry, Task):
-        tasks.append(entry)
-    else:
-        raise ValueError(f'Expected either a task or a group at the start of each pipeline')
+
+    while len(stack) > 0:
+        entry = stack.popleft()
+
+        if isinstance(entry, Group):
+            for pipeline_in_group in entry:
+                stack.append(pipeline_in_group[0])
+        elif isinstance(entry, Task):
+            tasks.append(entry)
+        else:
+            raise ValueError(f'Expected either a task or a group at the start of each pipeline')
 
     return tasks
 
-def _get_task_entry(task_id, pipeline):
-    for entry in pipeline:
-        if isinstance(entry, Group):
-            for pipeline_in_group in entry:
-                task_entry = _get_task_entry(task_id, pipeline_in_group)
-                if task_entry is not None:
-                    return task_entry
-        else:
-            if entry.task_id == task_id:
-                return entry
+def _get_task_chain(pipeline, parent_task_id):
+    
+    def extract_task_chain(state, pipeline, entry):
+        tasks, matched = state
 
-def _mark_task_complete(task_id, pipeline):
-    task_entry = _get_task_entry(task_id, pipeline)
+        if matched or entry.task_id == parent_task_id:
+            matched = True
+            tasks.append(entry)
 
-    # defensive
-    if task_entry is not None:
-        task_entry.mark_complete()
+        return (tasks, matched), False # continue
+
+    task_chain = []
+    _walk_pipeline(pipeline, extract_task_chain, (task_chain, False))
+
+    return task_chain
+
+
+def _mark_task_complete(task_id, pipeline, task_result_or_exception, task_results):
+    packed_result_or_exception = _pack_any(task_result_or_exception)
+    failed = isinstance(task_result_or_exception, TaskException)
+
+    def mark_complete(state, pipeline, entry):
+        if entry.task_id == task_id:
+            tasks = _get_task_chain(pipeline, task_id)
+            
+            if failed:
+                # mark this task complete and its children
+                for task in tasks:
+                    task.mark_complete()
+                    task_results.by_id[task.task_id].CopyFrom(packed_result_or_exception)
+            else:
+                tasks[0].mark_complete()
+                task_results.by_id[task_id].CopyFrom(packed_result_or_exception)
+
+            return None, True # stop
+
+        return None, False # continue
+
+    _walk_pipeline(pipeline, mark_complete, None)  
 
 
 def _try_get_finally_task(task_id, pipeline):
@@ -82,32 +127,23 @@ def _extend_args(args, task_args):
 
     return args + task_args
 
+def _aggregate_group_results(group: Group, task_results: TaskResults, serialiser):    
+    aggregated_results, aggregated_states, aggregated_errors = [], [], []
+    stack = deque([(group, aggregated_results, aggregated_states)])  # FIFO, errors are flat not nested so don't get stacked
 
-def _save_task_result_or_exception(task_id, state: dict, task_result_or_exception: Union[TaskResult, TaskException]) -> TaskResults:
-    task_results = state.setdefault('task_results', TaskResults())
-    task_results.by_id[task_id].CopyFrom(_pack_any(task_result_or_exception))
-    return task_results
+    while len(stack) > 0:
+        group, results, states = stack.popleft()
+        
+        for pipeline in group:
+            last_entry = pipeline[-1]
 
-def _save_group_result(group: Group, caller_id, state: dict, task_result: TaskResult):
-    group_results = state.setdefault(group.group_id, GroupResults())
-    group_results.results[caller_id].CopyFrom(task_result)
-    return group_results
+            if isinstance(last_entry, Group):
+                stack_results, stack_states = [], []
 
+                results.append(stack_results)
+                states.append(stack_states)
 
-def _aggregate_group_results(group: Group, task_results: TaskResults, serialiser):
-
-    def aggregate_results(grp):
-        aggregated_results = []
-        aggregated_states = []
-        aggregated_errors = []
-
-        for pipeline in grp:
-            last_task = pipeline[-1]
-            if isinstance(last_task, Group):
-                results, states, errors = aggregate_results(last_task)
-                aggregated_results.append(results)
-                aggregated_states.append(states)
-                aggregated_states.append(errors)
+                stack.append((last_entry, stack_results, stack_states))
             else:
                 result, state, error = None, {}, None
 
@@ -119,13 +155,10 @@ def _aggregate_group_results(group: Group, task_results: TaskResults, serialiser
                 elif isinstance(task_result_or_exception, TaskException):
                     error = task_result_or_exception
 
-                aggregated_results.append(result)
-                aggregated_states.append(state)
-                aggregated_errors.append(error)
-        
-        return aggregated_results, aggregated_states, aggregated_errors
+                results.append(result)
+                states.append(state)
+                aggregated_errors.append(error)  # errors are flat not nested so don't get stacked
 
-    aggregated_results, aggregated_states, aggregated_errors = aggregate_results(group)
     aggregated_errors = [error for error in aggregated_errors if error is not None]
 
     if any(aggregated_errors):
