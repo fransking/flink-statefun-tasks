@@ -206,8 +206,12 @@ class FlinkTasks(object):
             raise ValueError(f'Missing pipleline for task_id - {context.get_task_id()}')
 
     def _resume_pipeline(self, context, task_result_or_exception: Union[TaskResult, TaskException]):
+        _log.info(f'Started {task_result_or_exception.type}, {context}')
+
         pipeline = self._get_pipeline(context)
         pipeline.resume(context, task_result_or_exception)
+        
+        _log.info(f'Finished {task_result_or_exception.type}, {context}')
 
     async def _invoke_task(self, context, task_request):
         _log.info(f'Started {task_request.type}, {context}')
