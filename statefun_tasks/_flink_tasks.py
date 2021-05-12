@@ -12,7 +12,6 @@ from .messages_pb2 import TaskRequest, TaskResult, TaskException, TaskActionRequ
 from statefun.request_reply import BatchContext
 from datetime import timedelta
 from typing import Union
-from functools import partial
 import logging
 import traceback as tb
 import inspect
@@ -92,7 +91,7 @@ class FlinkTasks(object):
 
         self._bindings = {}
 
-        self.register_builtin('run_pipeline', partial(run_pipeline, serialiser=self._serialiser))
+        self.register_builtin('run_pipeline', run_pipeline)
 
     def register_builtin(self, type_name, fun, **params):
         """

@@ -17,16 +17,14 @@ class PipelineSerialisationTests(unittest.TestCase):
         entry.mark_complete()
 
         entry_proto = entry.to_proto(serialiser)
-        reconsituted_entry = Task.from_proto(entry_proto, serialiser)
+        reconsituted_entry = Task.from_proto(entry_proto).unpack(serialiser)
 
         self.assertEqual(entry_proto.task_entry.request.type_url, 'type.googleapis.com/statefun_tasks.ArgsAndKwargs')
         self.assertEqual(reconsituted_entry.task_id, entry.task_id)
         self.assertEqual(reconsituted_entry.task_type, entry.task_type)
-        self.assertEqual(reconsituted_entry.args, tuple(entry.args,))
-        self.assertEqual(reconsituted_entry.kwargs, kwargs)
-        self.assertEqual(reconsituted_entry.parameters, parameters)
         self.assertEqual(reconsituted_entry.is_finally, True)
         self.assertEqual(reconsituted_entry.is_complete(), True)
+        self.assertEqual(reconsituted_entry.to_tuple(), entry.to_tuple())
 
     def test_task_entry_serialisation_with_single_protobuf_arg(self):
         serialiser = DefaultSerialiser(known_proto_types=[Address])
@@ -35,13 +33,10 @@ class PipelineSerialisationTests(unittest.TestCase):
         entry = Task('task_id', 'task_type', args, {}, {}, True)
 
         entry_proto = entry.to_proto(serialiser)
-        reconsituted_entry = Task.from_proto(entry_proto, serialiser)
+        reconsituted_entry = Task.from_proto(entry_proto).unpack(serialiser)
 
         self.assertEqual(entry_proto.task_entry.request.type_url, 'type.googleapis.com/org.apache.flink.statefun.flink.core.polyglot.Address')
-
-        self.assertEqual(reconsituted_entry.args, entry.args)
-        self.assertEqual(reconsituted_entry.kwargs, {})
-
+        self.assertEqual(reconsituted_entry.to_tuple(), entry.to_tuple())
 
     def test_group_entry_serialisation(self):
         serialiser = DefaultSerialiser(known_proto_types=[Address])
@@ -68,7 +63,7 @@ class PipelineSerialisationTests(unittest.TestCase):
         ])
 
         proto = entry.to_proto(serialiser)
-        reconsituted_entry = Group.from_proto(proto, serialiser)
+        reconsituted_entry = Group.from_proto(proto)
         self.assertEqual(str(reconsituted_entry), str(entry))
 
     def test_task_entry_serialisation_with_task_retry_policy(self):
@@ -81,7 +76,7 @@ class PipelineSerialisationTests(unittest.TestCase):
         entry = Task('task_id', 'task_type', args, kwargs, parameters)
 
         entry_proto = entry.to_proto(serialiser)
-        reconsituted_entry = Task.from_proto(entry_proto, serialiser)
+        reconsituted_entry = Task.from_proto(entry_proto).unpack(serialiser)
         retry_policy = reconsituted_entry.get_parameter('retry_policy')
         self.assertEqual(['builtins.Exception', 'builtins.ValueError'], retry_policy.retry_for)
 

@@ -99,8 +99,6 @@ class ParallelWorkflowTests(unittest.TestCase):
 
         result = self.test_harness.run_pipeline(pipeline)
 
-        print(result)
-
         self.assertEqual(result, [['Hello John Smith; Hello Jane Doe. So now I will say see you later!']])
 
     def test_nested_parallel_workflow_continuations(self):

@@ -87,35 +87,42 @@ def _try_get_finally_task(task_id, pipeline):
 
 
 def _get_next_step_in_pipeline(task_id, pipeline):
-    # figure out the next step for the pipeline
-    # a group must be complete before you can move onto its continuation
-    # groups are executed in parallel so a pipeline_in_group that is complete should jump
-    # to the continuation of the group (if any) but only if the group as a whole is complete
+    stack = deque([(pipeline, None, None, None)])  # FIFO (pipeline, entry after group, group, parent_group)
 
-    iterator = iter(pipeline)
+    while len(stack) > 0:
+        pipeline, entry_after_group, group_entry, parent_group = stack.popleft()
+        iterator = iter(pipeline)
 
-    while True:
-        try:
-            entry = next(iterator)
+        for entry in pipeline:
+            _try_next(iterator)
 
             if isinstance(entry, Group):
+                stack_entry_after_group = _try_next(iterator)
+                stack_group_entry = entry
+
+                # don't overwrite the parent if already recorded on stack
+                # we need the top most parent for tasks inside groups nested inside groups
+                parent_group = parent_group or group_entry  
+                
                 for pipeline_in_group in entry:
-                    current_t, next_t, _ = _get_next_step_in_pipeline(task_id, pipeline_in_group)
+                    stack.append((pipeline_in_group, stack_entry_after_group, stack_group_entry, parent_group))
 
-                    if current_t is not None:
-
-                        if next_t is None:
-                            # at the end of pipeline_in_group so roll onto the next task but only if the group is complete
-                            next_t = _try_next(iterator) if entry.is_complete() else None
-
-                        return current_t, next_t, entry
             else:
                 if entry.task_id == task_id:
                     next_entry = _try_next(iterator)
-                    return entry, next_entry, None
 
-        except StopIteration:
-            return None, None, None
+                    if next_entry is None and parent_group is not None and parent_group.is_complete():
+                        # bubble up to the top most parent
+                        return entry, entry_after_group, parent_group
+                    else:
+                        # otherwise if there is no next task and the group containing this task is complete 
+                        # bubble up to the task after the group
+                        if group_entry is not None and group_entry.is_complete() and next_entry is None:
+                            next_entry = entry_after_group
+
+                    return entry, next_entry, group_entry
+
+    return None, None, None
 
 
 def _extend_args(args, task_args):

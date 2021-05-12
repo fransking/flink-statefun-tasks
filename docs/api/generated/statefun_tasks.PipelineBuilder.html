@@ -13,6 +13,8 @@
   
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
 
   
   
@@ -29,6 +31,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
@@ -177,8 +180,8 @@
   <div class="section" id="pipelinebuilder">
 <h1>PipelineBuilder<a class="headerlink" href="#pipelinebuilder" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
-<dt id="statefun_tasks.PipelineBuilder">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">statefun_tasks.</span></code><code class="sig-name descname"><span class="pre">PipelineBuilder</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="statefun_tasks.PipelineBuilder">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">statefun_tasks.</span></span><span class="sig-name descname"><span class="pre">PipelineBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Builder class for creating pipelines of Flink Tasks</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -186,8 +189,8 @@
 </dd>
 </dl>
 <dl class="py method">
-<dt id="statefun_tasks.PipelineBuilder.__init__">
-<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.__init__" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="statefun_tasks.PipelineBuilder.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
 </dd></dl>
 
@@ -213,11 +216,11 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.finally_do" title="statefun_tasks.PipelineBuilder.finally_do"><code class="xref py py-obj docutils literal notranslate"><span class="pre">finally_do</span></code></a>(finally_action, *args, **kwargs)</p></td>
 <td><p>Adds finally to the pipeline</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.from_proto" title="statefun_tasks.PipelineBuilder.from_proto"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_proto</span></code></a>(pipeline_proto, serialiser)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.from_proto" title="statefun_tasks.PipelineBuilder.from_proto"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_proto</span></code></a>(pipeline_proto)</p></td>
 <td><p>Deserialises the pipeline from protobuf</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.get_inital_destination" title="statefun_tasks.PipelineBuilder.get_inital_destination"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_inital_destination</span></code></a>()</p></td>
-<td><p>Returns the initial destination of the pipeline - i.e. where the first task should be sent.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.get_destination" title="statefun_tasks.PipelineBuilder.get_destination"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_destination</span></code></a>()</p></td>
+<td><p>Returns the initial destination of the pipeline - i.e. where the first task should be sent or None if it should be set to the default namespace/worker.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.send" title="statefun_tasks.PipelineBuilder.send"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send</span></code></a>(fun, *args, **kwargs)</p></td>
 <td><p>Adds a task entry for the given Flink Task and arguments</p></td>
@@ -255,15 +258,15 @@
 </tbody>
 </table>
 <dl class="py method">
-<dt id="statefun_tasks.PipelineBuilder.append_group">
-<code class="sig-name descname"><span class="pre">append_group</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipelines</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.append_group" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="statefun_tasks.PipelineBuilder.append_group">
+<span class="sig-name descname"><span class="pre">append_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipelines</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.append_group" title="Permalink to this definition">¶</a></dt>
 <dd><p>Appends tasks from another pipeline builder into a new in_parallel group inside this one</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>other</strong> – the other pipeline builder</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></p>
+<dd class="field-even"><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder" title="statefun_tasks._pipeline.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a></p>
 </dd>
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>the builder</p>
@@ -272,15 +275,15 @@
 </dd></dl>
 
 <dl class="py method">
-<dt id="statefun_tasks.PipelineBuilder.append_to">
-<code class="sig-name descname"><span class="pre">append_to</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.append_to" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="statefun_tasks.PipelineBuilder.append_to">
+<span class="sig-name descname"><span class="pre">append_to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.append_to" title="Permalink to this definition">¶</a></dt>
 <dd><p>Appends tasks from another pipeline builder into this one</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>other</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code>) – the other pipeline builder</p>
+<dd class="field-odd"><p><strong>other</strong> (<a class="reference internal" href="#statefun_tasks.PipelineBuilder" title="statefun_tasks._pipeline.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>) – the other pipeline builder</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></p>
+<dd class="field-even"><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder" title="statefun_tasks._pipeline.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a></p>
 </dd>
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>the builder</p>
@@ -289,8 +292,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt id="statefun_tasks.PipelineBuilder.continue_with">
-<code class="sig-name descname"><span class="pre">continue_with</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">continuation</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.continue_with" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="statefun_tasks.PipelineBuilder.continue_with">
+<span class="sig-name descname"><span class="pre">continue_with</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">continuation</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.continue_with" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds continuation to the pipeline</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -301,7 +304,7 @@
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></p>
+<dd class="field-even"><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder" title="statefun_tasks._pipeline.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a></p>
 </dd>
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>the builder</p>
@@ -310,8 +313,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt id="statefun_tasks.PipelineBuilder.finally_do">
-<code class="sig-name descname"><span class="pre">finally_do</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">finally_action</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.finally_do" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="statefun_tasks.PipelineBuilder.finally_do">
+<span class="sig-name descname"><span class="pre">finally_do</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">finally_action</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.finally_do" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds finally to the pipeline</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -322,7 +325,7 @@
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></p>
+<dd class="field-even"><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder" title="statefun_tasks._pipeline.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a></p>
 </dd>
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>the builder</p>
@@ -331,18 +334,15 @@
 </dd></dl>
 
 <dl class="py method">
-<dt id="statefun_tasks.PipelineBuilder.from_proto">
-<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">from_proto</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_proto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">serialiser</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.from_proto" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="statefun_tasks.PipelineBuilder.from_proto">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">from_proto</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_proto</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.from_proto" title="Permalink to this definition">¶</a></dt>
 <dd><p>Deserialises the pipeline from protobuf</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>pipeline_proto</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>) – the pipeline as protobuf</p></li>
-<li><p><strong>serialiser</strong> – the serialiser to use such as DefaultSerialiser</p></li>
-</ul>
+<dd class="field-odd"><p><strong>pipeline_proto</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>) – the pipeline as protobuf</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></p>
+<dd class="field-even"><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder" title="statefun_tasks._pipeline.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a></p>
 </dd>
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>Pipeline protobuf message</p>
@@ -351,25 +351,26 @@
 </dd></dl>
 
 <dl class="py method">
-<dt id="statefun_tasks.PipelineBuilder.get_inital_destination">
-<code class="sig-name descname"><span class="pre">get_inital_destination</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.get_inital_destination" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the initial destination of the pipeline - i.e. where the first task should be sent</p>
+<dt class="sig sig-object py" id="statefun_tasks.PipelineBuilder.get_destination">
+<span class="sig-name descname"><span class="pre">get_destination</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.get_destination" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the initial destination of the pipeline - i.e. where the first task should be sent
+or None if it should be set to the default namespace/worker</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>the initial desintation (e.g. example/worker)</p>
+<dd class="field-odd"><p>the initial destination (e.g. example/worker) or None if it should use the default</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="statefun_tasks.PipelineBuilder.id">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">id</span></code><a class="headerlink" href="#statefun_tasks.PipelineBuilder.id" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="statefun_tasks.PipelineBuilder.id">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.id" title="Permalink to this definition">¶</a></dt>
 <dd><p>The ID of this pipeline</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="statefun_tasks.PipelineBuilder.send">
-<code class="sig-name descname"><span class="pre">send</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fun</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.send" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="statefun_tasks.PipelineBuilder.send">
+<span class="sig-name descname"><span class="pre">send</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fun</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.send" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a task entry for the given Flink Task and arguments</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -380,7 +381,7 @@
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></p>
+<dd class="field-even"><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder" title="statefun_tasks._pipeline.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a></p>
 </dd>
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>the builder</p>
@@ -389,8 +390,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt id="statefun_tasks.PipelineBuilder.set">
-<code class="sig-name descname"><span class="pre">set</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">retry_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.set" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="statefun_tasks.PipelineBuilder.set">
+<span class="sig-name descname"><span class="pre">set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">retry_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.set" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets task properties on the last entry added to the builder</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -400,7 +401,7 @@
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></p>
+<dd class="field-even"><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder" title="statefun_tasks._pipeline.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a></p>
 </dd>
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>the builder</p>
@@ -409,8 +410,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt id="statefun_tasks.PipelineBuilder.to_pipeline">
-<code class="sig-name descname"><span class="pre">to_pipeline</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">serialiser</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.to_pipeline" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="statefun_tasks.PipelineBuilder.to_pipeline">
+<span class="sig-name descname"><span class="pre">to_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">serialiser</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.to_pipeline" title="Permalink to this definition">¶</a></dt>
 <dd><p>Concretises the builder into a pipeline</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -423,8 +424,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt id="statefun_tasks.PipelineBuilder.to_proto">
-<code class="sig-name descname"><span class="pre">to_proto</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">serialiser</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.to_proto" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="statefun_tasks.PipelineBuilder.to_proto">
+<span class="sig-name descname"><span class="pre">to_proto</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">serialiser</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.to_proto" title="Permalink to this definition">¶</a></dt>
 <dd><p>Serialises the pipeline to protobuf</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -440,8 +441,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt id="statefun_tasks.PipelineBuilder.to_task_request">
-<code class="sig-name descname"><span class="pre">to_task_request</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">serialiser</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.to_task_request" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="statefun_tasks.PipelineBuilder.to_task_request">
+<span class="sig-name descname"><span class="pre">to_task_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">serialiser</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.to_task_request" title="Permalink to this definition">¶</a></dt>
 <dd><p>Serialises the pipeline as a TaskRequest with a task type of ‘__builtins.run_pipeline’</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -457,12 +458,12 @@
 </dd></dl>
 
 <dl class="py method">
-<dt id="statefun_tasks.PipelineBuilder.validate">
-<code class="sig-name descname"><span class="pre">validate</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.validate" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="statefun_tasks.PipelineBuilder.validate">
+<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.validate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Validates the pipeline</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></p>
+<dd class="field-odd"><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder" title="statefun_tasks._pipeline.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a></p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>the builder</p>

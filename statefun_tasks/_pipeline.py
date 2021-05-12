@@ -4,7 +4,7 @@ from ._types import Task, Group, RetryPolicy
 from ._context import TaskContext
 from ._pipeline_utils import _get_initial_tasks, _mark_task_complete, _get_next_step_in_pipeline, \
     _extend_args, _aggregate_group_results, _try_get_finally_task
-from .messages_pb2 import TaskRequest, TaskResult, TaskException, GroupEntry, TaskEntry, Pipeline, TaskResults
+from .messages_pb2 import TaskRequest, TaskResult, TaskException, Pipeline, TaskResults
 
 from typing import Union, Iterable
 from uuid import uuid4
@@ -25,9 +25,9 @@ class _Pipeline(object):
 
         for proto in pipeline_proto.entries:
             if proto.HasField('task_entry'):
-                pipeline.append(Task.from_proto(proto, serialiser))
+                pipeline.append(Task.from_proto(proto))
             elif proto.HasField('group_entry'):
-                pipeline.append(Group.from_proto(proto, serialiser))
+                pipeline.append(Group.from_proto(proto))
 
         return _Pipeline(pipeline, serialiser)
         
@@ -51,7 +51,7 @@ class _Pipeline(object):
         # 3. call each task
         for task in tasks:
 
-            task_id, task_type, args, kwargs, parameters = task.to_tuple()
+            task_id, task_type, args, kwargs, parameters = task.unpack(self._serialiser).to_tuple()
 
             # set extra pipeline related parameters
             self._add_initial_pipeline_meta(context, parameters)
@@ -101,7 +101,7 @@ class _Pipeline(object):
             args, task_state = self._serialiser.deserialise_response(task_result_or_exception)
 
             for task in remainder:
-                task_id, task_type, task_args, kwargs, parameters = task.to_tuple()
+                task_id, task_type, task_args, kwargs, parameters = task.unpack(self._serialiser).to_tuple()
 
                 # set extra pipeline related parameters
                 self._add_pipeline_meta(context, state, caller_id, parameters)
@@ -350,9 +350,6 @@ class PipelineBuilder(object):
         """
         errors = []
 
-        for entry in self._pipeline:
-            entry.validate(errors)
-
         finally_tasks = [task for task in self._pipeline if isinstance(task, Task) and task.is_finally]
         if len(finally_tasks) > 1:
             errors.append('Cannot have more than one "finally_do" method')
@@ -375,21 +372,20 @@ class PipelineBuilder(object):
         return _Pipeline(self._pipeline, serialiser=serialiser).to_proto()
 
     @staticmethod
-    def from_proto(pipeline_proto: Pipeline, serialiser) -> 'PipelineBuilder':
+    def from_proto(pipeline_proto: Pipeline) -> 'PipelineBuilder':
         """
         Deserialises the pipeline from protobuf
 
         :param pipeline_proto: the pipeline as protobuf
-        :param serialiser: the serialiser to use such as DefaultSerialiser
         :return: Pipeline protobuf message
         """
         pipeline = []
 
         for proto in pipeline_proto.entries:
             if proto.HasField('task_entry'):
-                pipeline.append(Task.from_proto(proto, serialiser))
+                pipeline.append(Task.from_proto(proto))
             elif proto.HasField('group_entry'):
-                pipeline.append(Group.from_proto(proto, serialiser))
+                pipeline.append(Group.from_proto(proto))
 
         return PipelineBuilder(pipeline)
 
