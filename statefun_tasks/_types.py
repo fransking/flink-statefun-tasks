@@ -111,6 +111,9 @@ class Task:
     def is_complete(self):
         return self._proto.complete
 
+    def get_destination(self):
+        return None  # _GroupEntries don't have a single destination
+
     def to_proto(self, serialiser) -> PipelineEntry:
         if not self._proto_backed:
             request = serialiser.serialise_args_and_kwargs(self._args, self._kwargs)
