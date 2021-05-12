@@ -168,6 +168,9 @@ class Group:
     def is_complete(self):
         return all(entry.is_complete() for entries in self._group for entry in entries)
 
+    def get_destination(self):
+        return None  # _GroupEntries don't have a single destination
+
     def to_proto(self, serialiser) -> PipelineEntry:
         proto = GroupEntry(group_id=self.group_id)
 
