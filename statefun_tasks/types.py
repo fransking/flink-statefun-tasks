@@ -186,7 +186,7 @@ class Group:
         return PipelineEntry(group_entry=proto)
 
     @staticmethod 
-    def from_proto(proto: PipelineEntry, serialiser=None):
+    def from_proto(proto: PipelineEntry):
         entry = Group(group_id=proto.group_entry.group_id)
 
         group = []

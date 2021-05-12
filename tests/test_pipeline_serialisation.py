@@ -63,7 +63,7 @@ class PipelineSerialisationTests(unittest.TestCase):
         ])
 
         proto = entry.to_proto(serialiser)
-        reconsituted_entry = Group.from_proto(proto, serialiser)
+        reconsituted_entry = Group.from_proto(proto)
         self.assertEqual(str(reconsituted_entry), str(entry))
 
     def test_task_entry_serialisation_with_task_retry_policy(self):
