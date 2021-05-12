@@ -2,14 +2,13 @@ from statefun_tasks.serialisation import DefaultSerialiser
 from statefun_tasks.pipeline_builder import PipelineBuilder
 
 from statefun_tasks.types import RetryPolicy, TaskAlreadyExistsException, \
-    TASK_STATE_TYPE, TASK_REQUEST_TYPE, TASK_RESULT_TYPE, TASK_EXCEPTION_TYPE, TASK_ACTION_REQUEST_TYPE, TASK_ACTION_RESULT_TYPE, TASK_ACTION_EXCEPTION_TYPE
+    TASK_STATE_TYPE, TASK_REQUEST_TYPE, TASK_RESULT_TYPE, TASK_EXCEPTION_TYPE, TASK_ACTION_REQUEST_TYPE
 
-from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, TaskActionRequest, TaskActionResult, TaskActionException, \
-    TaskAction, TaskStatus, TaskState
+from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, TaskAction
 
 from statefun_tasks.type_helpers import _create_task_result, _create_task_exception
 from statefun_tasks.context import TaskContext
-from statefun_tasks.utils import _gen_id, _task_type_for, _is_tuple, _type_name, _annotated_protos_for
+from statefun_tasks.utils import _task_type_for
 from statefun_tasks.pipeline import _Pipeline
 
 from statefun_tasks.tasks import _FlinkTask
@@ -18,15 +17,13 @@ from statefun_tasks.actions import _FlinkAction
 from statefun import ValueSpec, Context, Message
 from datetime import timedelta
 from typing import Union
-from functools import partial
 import logging
-import asyncio
 
 _log = logging.getLogger('FlinkTasks')
 
 
-def _run_pipeline(pipeline_proto, serialiser):
-    return PipelineBuilder.from_proto(pipeline_proto, serialiser)
+def _run_pipeline(pipeline_proto):
+    return PipelineBuilder.from_proto(pipeline_proto)
 
 
 class FlinkTasks(object):
@@ -56,7 +53,7 @@ class FlinkTasks(object):
             ValueSpec(name="task_state", type=TASK_STATE_TYPE),
         ]
 
-        self.register_builtin('run_pipeline', partial(_run_pipeline, serialiser=self._serialiser))
+        self.register_builtin('run_pipeline', _run_pipeline)
 
     def value_specs(self):
         return self._value_specs
@@ -206,8 +203,12 @@ class FlinkTasks(object):
             raise ValueError(f'Missing pipleline for task_id - {context.get_task_id()}')
 
     def _resume_pipeline(self, context, task_result_or_exception: Union[TaskResult, TaskException]):
+        _log.info(f'Started {task_result_or_exception.type}, {context}')
+
         pipeline = self._get_pipeline(context)
         pipeline.resume(context, task_result_or_exception)
+        
+        _log.info(f'Finished {task_result_or_exception.type}, {context}')
 
     async def _invoke_task(self, context, task_request):
         _log.info(f'Started {task_request.type}, {context}')

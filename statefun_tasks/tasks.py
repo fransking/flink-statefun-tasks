@@ -74,7 +74,7 @@ class _FlinkTask(object):
             if isinstance(fn_result, PipelineBuilder):
                 # this new pipeline which once complete will yield the result of the whole pipeline
                 # back to the caller as if it were a simple task
-                pipeline = fn_result.to_pipeline()
+                pipeline = fn_result.to_pipeline(self._serialiser)
                 fn_result = None
 
         task_result = _create_task_result(task_request)

@@ -129,7 +129,7 @@ class PipelineBuilder(object):
         """
         task_id = self._builder_id
         task_type = '__builtins.run_pipeline'
-        args = self.validate().to_proto(serialiser=serialiser)
+        args = self.validate().to_proto(serialiser)
         kwargs = {}
         parameters = {}    
 
@@ -176,9 +176,6 @@ class PipelineBuilder(object):
         """
         errors = []
 
-        for entry in self._pipeline:
-            entry.validate(errors)
-
         finally_tasks = [task for task in self._pipeline if isinstance(task, Task) and task.is_finally]
         if len(finally_tasks) > 1:
             errors.append('Cannot have more than one "finally_do" method')
@@ -201,21 +198,20 @@ class PipelineBuilder(object):
         return _Pipeline(self._pipeline, serialiser=serialiser).to_proto()
 
     @staticmethod
-    def from_proto(pipeline_proto: Pipeline, serialiser) -> 'PipelineBuilder':
+    def from_proto(pipeline_proto: Pipeline) -> 'PipelineBuilder':
         """
         Deserialises the pipeline from protobuf
 
         :param pipeline_proto: the pipeline as protobuf
-        :param serialiser: the serialiser to use such as DefaultSerialiser
         :return: Pipeline protobuf message
         """
         pipeline = []
 
         for proto in pipeline_proto.entries:
             if proto.HasField('task_entry'):
-                pipeline.append(Task.from_proto(proto, serialiser))
+                pipeline.append(Task.from_proto(proto))
             elif proto.HasField('group_entry'):
-                pipeline.append(Group.from_proto(proto, serialiser))
+                pipeline.append(Group.from_proto(proto))
 
         return PipelineBuilder(pipeline)
 

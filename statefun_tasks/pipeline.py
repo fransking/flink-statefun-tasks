@@ -24,9 +24,9 @@ class _Pipeline(object):
 
         for proto in pipeline_proto.entries:
             if proto.HasField('task_entry'):
-                pipeline.append(Task.from_proto(proto, serialiser))
+                pipeline.append(Task.from_proto(proto))
             elif proto.HasField('group_entry'):
-                pipeline.append(Group.from_proto(proto, serialiser))
+                pipeline.append(Group.from_proto(proto))
 
         return _Pipeline(pipeline, serialiser)
         
@@ -49,7 +49,7 @@ class _Pipeline(object):
         # 3. call each task
         for task in tasks:
 
-            task_id, task_type, args, kwargs, parameters = task.to_tuple()
+            task_id, task_type, args, kwargs, parameters = task.unpack(self._serialiser).to_tuple()
 
             # set extra pipeline related parameters
             self._add_initial_pipeline_meta(context, parameters)
@@ -99,7 +99,7 @@ class _Pipeline(object):
             args, task_state = self._serialiser.deserialise_response(task_result_or_exception)
 
             for task in remainder:
-                task_id, task_type, task_args, kwargs, parameters = task.to_tuple()
+                task_id, task_type, task_args, kwargs, parameters = task.unpack(self._serialiser).to_tuple()
 
                 # set extra pipeline related parameters
                 self._add_pipeline_meta(context, state, caller_id, parameters)

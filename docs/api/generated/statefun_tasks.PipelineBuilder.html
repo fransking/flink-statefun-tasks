@@ -214,7 +214,7 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.finally_do" title="statefun_tasks.PipelineBuilder.finally_do"><code class="xref py py-obj docutils literal notranslate"><span class="pre">finally_do</span></code></a>(finally_action, *args, **kwargs)</p></td>
 <td><p>Adds finally to the pipeline</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.from_proto" title="statefun_tasks.PipelineBuilder.from_proto"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_proto</span></code></a>(pipeline_proto, serialiser)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.from_proto" title="statefun_tasks.PipelineBuilder.from_proto"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_proto</span></code></a>(pipeline_proto)</p></td>
 <td><p>Deserialises the pipeline from protobuf</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.get_destination" title="statefun_tasks.PipelineBuilder.get_destination"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_destination</span></code></a>()</p></td>
@@ -333,14 +333,11 @@
 
 <dl class="py method">
 <dt id="statefun_tasks.PipelineBuilder.from_proto">
-<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">from_proto</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_proto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">serialiser</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.from_proto" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">from_proto</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_proto</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.from_proto" title="Permalink to this definition">¶</a></dt>
 <dd><p>Deserialises the pipeline from protobuf</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>pipeline_proto</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>) – the pipeline as protobuf</p></li>
-<li><p><strong>serialiser</strong> – the serialiser to use such as DefaultSerialiser</p></li>
-</ul>
+<dd class="field-odd"><p><strong>pipeline_proto</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>) – the pipeline as protobuf</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></p>
