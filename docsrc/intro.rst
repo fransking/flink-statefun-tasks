@@ -91,7 +91,7 @@ Let's revisit our stocks example and try to implement it as Flink Stateful Funct
 
 Some issues with this:
 
-1. load_timeseries() always calls compute_std_dev().  It's no longer a resusable function so I cannot use it in other workflows. The is true for compute_std_dev().
+1. load_timeseries() always calls compute_std_dev().  It's no longer a resusable function so I cannot use it in other workflows. The same is true for compute_std_dev().
 
 2. compute_average() has to wait for all standand deviations to be received before it calculates the average, storing intermdiate values in state
 

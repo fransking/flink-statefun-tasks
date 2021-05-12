@@ -246,7 +246,7 @@ The Pipeline becomes the Flink state.</p>
 </div>
 <p>Some issues with this:</p>
 <ol class="arabic simple">
-<li><p>load_timeseries() always calls compute_std_dev().  It’s no longer a resusable function so I cannot use it in other workflows. The is true for compute_std_dev().</p></li>
+<li><p>load_timeseries() always calls compute_std_dev().  It’s no longer a resusable function so I cannot use it in other workflows. The same is true for compute_std_dev().</p></li>
 <li><p>compute_average() has to wait for all standand deviations to be received before it calculates the average, storing intermdiate values in state</p></li>
 <li><p>None of the functions are fruitful so they cannot be tested by chaining them together outside of Flink</p></li>
 </ol>
