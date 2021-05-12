@@ -32,28 +32,91 @@ _VALUE_TYPE_MAP = {
 
 
 class Task:
-    def __init__(self, task_id, task_type, args, kwargs, parameters=None, is_finally=False):
-        self.task_id = task_id
-        self.task_type = task_type
-        self.args = args
-        self.kwargs = kwargs
-        self.complete = False
-        self.parameters = {} if parameters is None else parameters
-        self.is_finally = is_finally
+    def __init__(self, task_id=None, task_type=None, args=None, kwargs=None, parameters=None, is_finally=False, proto=None):
+
+        if proto is None:
+            proto = TaskEntry(
+                task_id=task_id, 
+                task_type=task_type, 
+                complete=False, 
+                is_finally=is_finally)
+
+            self._proto_backed = False
+            self._unpacked = True
+            self._args = args
+            self._kwargs = kwargs
+        else:
+            self._proto_backed = True
+            self._unpacked = False
+            self._args = None
+            self._kwargs = None
+
+        self._proto = proto
+        self._parameters = {} if parameters is None else parameters
 
     @property
     def id(self):
         """
         The ID of this task
         """
-        return self.task_id
+        return self._proto.task_id
+
+    @property
+    def task_id(self):
+        """
+        The ID of this task
+        """
+        return self._proto.task_id
+
+    @property
+    def task_type(self):
+        """
+        The type of this task
+        """
+        return self._proto.task_type
+
+    @property
+    def complete(self):
+        """
+        Whether this task is considered complete or not
+        """
+        return self._proto.complete
+
+    @property
+    def is_finally(self):
+        """
+        Whether this task is a finally task
+        """
+        return self._proto.is_finally 
+
+    def unpack(self, serialiser):
+        if self._unpacked or not self._proto_backed:
+            return self
+
+        # unpack args and kwargs
+        self._args, self._kwargs = serialiser.deserialise_args_and_kwargs(self._proto.request)
+
+        # unpack parameters - those already set via set_parameters() take precedence
+        parameters = serialiser.from_proto(self._proto.parameters)
+        parameters.update(self._parameters)
+        self._parameters = parameters 
+
+        self._unpacked = True
+
+        return self
 
     def set_parameters(self, parameters):
-        self.parameters.update(parameters)
+        if not self._unpacked:
+            raise ValueError('Task not fully unpacked from protobuf. Call task.unpack(seraliser) first')
+
+        self._parameters.update(parameters)
 
     def get_parameter(self, parameter_name):
-        if parameter_name in self.parameters:
-            return self.parameters[parameter_name]
+        if not self._unpacked:
+            raise ValueError('Task not fully unpacked from protobuf. Call task.unpack(seraliser) first')
+
+        if parameter_name in self._parameters:
+            return self._parameters[parameter_name]
         else:
             return None
 
@@ -62,54 +125,30 @@ class Task:
         return f'{self.get_parameter("namespace")}/{self.get_parameter("worker_name")}'
 
     def to_tuple(self):
-        return self.task_id, self.task_type, self.args, self.kwargs, self.parameters
+        if not self._unpacked:
+            raise ValueError('Task not fully unpacked from protobuf. Call task.unpack(seraliser) first')
+
+        return self.task_id, self.task_type, self._args, self._kwargs, self._parameters
 
     def mark_complete(self):
-        self.complete = True
+        self._proto.complete = True
 
     def is_complete(self):
-        return self.complete
-
-    def validate(self, errors):
-        if self.task_id is None:
-            errors.append(f'task {self.task_type} is missing a task_id')
-
-        if self.get_parameter('namespace') is None:
-            errors.append(f'task {self.task_type} [{self.task_id}] is missing "namespace"')
-
-        if self.get_parameter('worker_name') is None:
-            errors.append(f'task {self.task_type} [{self.task_id}] is missing "worker_name"')
+        return self._proto.complete
 
     def to_proto(self, serialiser) -> PipelineEntry:
-        proto = TaskEntry(
-            task_id=self.task_id, 
-            task_type=self.task_type, 
-            complete=self.complete, 
-            is_finally=self.is_finally)
-        
-        request = serialiser.serialise_args_and_kwargs(self.args, self.kwargs)
-        proto.request.CopyFrom(request)
+        if not self._proto_backed:
+            request = serialiser.serialise_args_and_kwargs(self._args, self._kwargs)
+            self._proto.request.CopyFrom(request)
 
-        if self.parameters is not None:
-            proto.parameters.CopyFrom(serialiser.to_proto(self.parameters))
+        if any(self._parameters):
+            self._proto.parameters.CopyFrom(serialiser.to_proto(self._parameters))
         
-        return PipelineEntry(task_entry=proto)
+        return PipelineEntry(task_entry=self._proto)
 
     @staticmethod 
-    def from_proto(proto: PipelineEntry, serialiser):
-        args, kwargs = serialiser.deserialise_args_and_kwargs(proto.task_entry.request)
-
-        entry = Task(
-            task_id=proto.task_entry.task_id, 
-            task_type=proto.task_entry.task_type, 
-            args=args, 
-            kwargs=kwargs, 
-            parameters=serialiser.from_proto(proto.task_entry.parameters), 
-            is_finally=proto.task_entry.is_finally)
-
-        entry.complete = proto.task_entry.complete
-
-        return entry
+    def from_proto(proto: PipelineEntry):
+        return Task(proto=proto.task_entry)
 
     def __repr__(self):
         return self.task_id
@@ -119,15 +158,6 @@ class Group:
     def __init__(self, group_id):
         self.group_id = group_id
         self._group = []
-
-    def set_parameters(self, parameters):
-        pass  # do nothing for now
-
-    def get_parameter(self, parameter_name):
-        return None
-
-    def get_destination(self):
-        return None  # _GroupEntries don't have a single destination
 
     def add_to_group(self, tasks):
         self._group.append(tasks)
@@ -140,11 +170,6 @@ class Group:
 
     def is_complete(self):
         return all(entry.is_complete() for entries in self._group for entry in entries)
-
-    def validate(self, errors):
-        for entries in self._group:
-            for entry in entries:
-                entry.validate(errors)
 
     def to_proto(self, serialiser) -> PipelineEntry:
         proto = GroupEntry(group_id=self.group_id)
@@ -161,7 +186,7 @@ class Group:
         return PipelineEntry(group_entry=proto)
 
     @staticmethod 
-    def from_proto(proto: PipelineEntry, serialiser):
+    def from_proto(proto: PipelineEntry, serialiser=None):
         entry = Group(group_id=proto.group_entry.group_id)
 
         group = []
@@ -170,9 +195,9 @@ class Group:
             
             for proto in pipeline.entries:
                 if proto.HasField('task_entry'):
-                    entries.append(Task.from_proto(proto, serialiser))
+                    entries.append(Task.from_proto(proto))
                 elif proto.HasField('group_entry'):
-                    entries.append(Group.from_proto(proto, serialiser))
+                    entries.append(Group.from_proto(proto))
 
             group.append(entries)
 
