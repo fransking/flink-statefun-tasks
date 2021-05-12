@@ -3,12 +3,9 @@ from statefun_tasks.messages_pb2 import TaskState, TaskRequest, TaskResult, Task
     TaskActionRequest, TaskActionResult, TaskActionException, TaskEntry, GroupEntry, PipelineEntry, TaskRetryPolicy, Pipeline
 
 from statefun import make_protobuf_type
-from google.protobuf.message import Message
 
 from dataclasses import dataclass, field
 from datetime import timedelta
-import json
-
 
 # Protobuf type registrations required by Flink Statefun API
 TASK_STATE_TYPE = make_protobuf_type(TaskState, namespace='io.statefun_tasks.types')
