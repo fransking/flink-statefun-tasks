@@ -1,6 +1,7 @@
 from statefun_tasks.utils import _type_name
 from statefun_tasks.messages_pb2 import PipelineState, TaskState, TaskRequest, TaskResult, TaskException, \
-    TaskActionRequest, TaskActionResult, TaskActionException, TaskEntry, GroupEntry, PipelineEntry, TaskRetryPolicy, Pipeline
+    TaskActionRequest, TaskActionResult, TaskActionException, TaskEntry, GroupEntry, PipelineEntry, TaskRetryPolicy, \
+    Pipeline
 
 from statefun import make_protobuf_type
 
@@ -17,7 +18,6 @@ TASK_ACTION_REQUEST_TYPE = make_protobuf_type(TaskActionRequest, namespace='io.s
 TASK_ACTION_RESULT_TYPE = make_protobuf_type(TaskActionResult, namespace='io.statefun_tasks.types')
 TASK_ACTION_EXCEPTION_TYPE = make_protobuf_type(TaskActionException, namespace='io.statefun_tasks.types')
 
-
 _VALUE_TYPE_MAP = {
     TaskState: PIPELINE_STATE_TYPE,
     TaskState: TASK_STATE_TYPE,
@@ -31,27 +31,45 @@ _VALUE_TYPE_MAP = {
 
 
 class Task:
-    def __init__(self, task_id=None, task_type=None, args=None, kwargs=None, parameters=None, is_finally=False, proto=None):
+    def __init__(self, proto: TaskEntry, task_args=None, task_kwargs=None):
 
-        if proto is None:
-            proto = TaskEntry(
-                task_id=task_id, 
-                task_type=task_type, 
-                complete=False, 
-                is_finally=is_finally)
-
-            self._proto_backed = False
-            self._unpacked = True
-            self._args = args
-            self._kwargs = kwargs
-        else:
+        if task_args is None and task_kwargs is None:
             self._proto_backed = True
             self._unpacked = False
             self._args = None
             self._kwargs = None
+        else:
+            self._proto_backed = False
+            self._unpacked = True
+            self._args = task_args
+            self._kwargs = task_kwargs
 
         self._proto = proto
-        self._parameters = {} if parameters is None else parameters
+
+    @staticmethod
+    def from_fields(task_id, task_type, task_args, task_kwargs, is_finally=None, namespace=None, worker_name=None,
+                    message_type=None, pipeline_address=None, pipeline_id=None, parent_task_address=None,
+                    parent_task_id=None, is_fruitful=None, retry_policy=None, module_name=None, with_state=None,
+                    with_context=None):
+        proto = TaskEntry(
+            task_id=task_id,
+            task_type=task_type,
+            complete=False,
+            is_finally=is_finally,
+            namespace=namespace,
+            worker_name=worker_name,
+            message_type=message_type,
+            pipeline_address=pipeline_address,
+            pipeline_id=pipeline_id,
+            parent_task_address=parent_task_address,
+            parent_task_id=parent_task_id,
+            is_fruitful=is_fruitful,
+            retry_policy=retry_policy,
+            module_name=module_name,
+            with_state=with_state,
+            with_context=with_context
+        )
+        return Task(proto, task_args, task_kwargs)
 
     @property
     def id(self):
@@ -86,7 +104,31 @@ class Task:
         """
         Whether this task is a finally task
         """
-        return self._proto.is_finally 
+        return self._proto.is_finally
+
+    @property
+    def is_fruitful(self):
+        return self._proto.is_fruitful
+
+    @property
+    def retry_policy(self):
+        return self._proto.retry_policy
+
+    @property
+    def pipeline_address(self):
+        return self._proto.pipeline_address
+
+    @pipeline_address.setter
+    def pipeline_address(self, value):
+        self._proto.pipeline_address = value
+
+    @property
+    def pipeline_id(self):
+        return self._proto.pipeline_id
+
+    @pipeline_id.setter
+    def pipeline_id(self, value):
+        self._proto.pipeline_id = value
 
     def unpack(self, serialiser):
         if self._unpacked or not self._proto_backed:
@@ -95,39 +137,19 @@ class Task:
         # unpack args and kwargs
         self._args, self._kwargs = serialiser.deserialise_args_and_kwargs(self._proto.request)
 
-        # unpack parameters - those already set via set_parameters() take precedence
-        parameters = serialiser.from_proto(self._proto.parameters)
-        parameters.update(self._parameters)
-        self._parameters = parameters 
-
         self._unpacked = True
 
         return self
 
-    def set_parameters(self, parameters):
-        if not self._unpacked:
-            raise ValueError('Task not fully unpacked from protobuf. Call task.unpack(seraliser) first')
-
-        self._parameters.update(parameters)
-
-    def get_parameter(self, parameter_name):
-        if not self._unpacked:
-            raise ValueError('Task not fully unpacked from protobuf. Call task.unpack(seraliser) first')
-
-        if parameter_name in self._parameters:
-            return self._parameters[parameter_name]
-        else:
-            return None
-
     def get_destination(self):
         # task destination of form 'namespace/worker_name'
-        return f'{self.get_parameter("namespace")}/{self.get_parameter("worker_name")}'
+        return f'{self._proto.namespace}/{self._proto.worker_name}'
 
     def to_tuple(self):
         if not self._unpacked:
             raise ValueError('Task not fully unpacked from protobuf. Call task.unpack(seraliser) first')
 
-        return self.task_id, self.task_type, self._args, self._kwargs, self._parameters
+        return self.task_id, self.task_type, self._args, self._kwargs
 
     def mark_complete(self):
         self._proto.complete = True
@@ -140,12 +162,9 @@ class Task:
             request = serialiser.serialise_args_and_kwargs(self._args, self._kwargs)
             self._proto.request.CopyFrom(request)
 
-        if any(self._parameters):
-            self._proto.parameters.CopyFrom(serialiser.to_proto(self._parameters))
-        
         return PipelineEntry(task_entry=self._proto)
 
-    @staticmethod 
+    @staticmethod
     def from_proto(proto: PipelineEntry):
         return Task(proto=proto.task_entry)
 
@@ -187,14 +206,14 @@ class Group:
 
         return PipelineEntry(group_entry=proto)
 
-    @staticmethod 
+    @staticmethod
     def from_proto(proto: PipelineEntry):
         entry = Group(group_id=proto.group_entry.group_id)
 
         group = []
         for pipeline in proto.group_entry.group:
             entries = []
-            
+
             for proto in pipeline.entries:
                 if proto.HasField('task_entry'):
                     entries.append(Task.from_proto(proto))
@@ -220,8 +239,8 @@ class RetryPolicy:
     def to_proto(self):
         return TaskRetryPolicy(
             retry_for=[_type_name(ex) for ex in self.retry_for],
-            max_retries=self.max_retries, 
-            delay_ms=self.delay.total_seconds() * 1000, 
+            max_retries=self.max_retries,
+            delay_ms=self.delay.total_seconds() * 1000,
             exponential_back_off=self.exponential_back_off)
 
 

@@ -46,13 +46,13 @@ class _Pipeline(object):
         # 3. call each task
         for task in tasks:
 
-            task_id, task_type, args, kwargs, parameters = task.unpack(self._serialiser).to_tuple()
+            task_id, task_type, args, kwargs = task.unpack(self._serialiser).to_tuple()
 
             # set extra pipeline related parameters
-            self._add_initial_pipeline_meta(context, parameters)
+            self._add_initial_pipeline_meta(context, task)
 
-            request = TaskRequest(id=task_id, type=task_type, parameters=self._serialiser.to_proto(parameters))
-            self._serialiser.serialise_request(request, args, kwargs)
+            request = TaskRequest(id=task_id, type=task_type)
+            self._serialiser.serialise_request(request, args, kwargs, retry_policy=task.retry_policy)
 
             context.send_message(task.get_destination(), task_id, request)
 
@@ -96,16 +96,16 @@ class _Pipeline(object):
             args, task_state = self._serialiser.deserialise_response(task_result_or_exception)
 
             for task in remainder:
-                task_id, task_type, task_args, kwargs, parameters = task.unpack(self._serialiser).to_tuple()
+                task_id, task_type, task_args, kwargs = task.unpack(self._serialiser).to_tuple()
 
                 # set extra pipeline related parameters
-                self._add_pipeline_meta(context, caller_id, parameters)
+                self._add_pipeline_meta(context, caller_id, task)
 
                 # extend with any args passed to the task explicitly
                 # noting that args from previous tasks are not passed to finally 
                 args = _extend_args(() if task.is_finally else args, task_args)
 
-                request = TaskRequest(id=task_id, type=task_type, parameters=self._serialiser.to_proto(parameters))
+                request = TaskRequest(id=task_id, type=task_type)
                 self._serialiser.serialise_request(request, args, kwargs, task_state)
                 
                 context.send_message(task.get_destination(), task_id, request)
@@ -171,15 +171,15 @@ class _Pipeline(object):
                 context.send_message(context.pipeline_state.caller_address, context.pipeline_state.caller_id, task_result_or_exception)
 
     @staticmethod
-    def _add_initial_pipeline_meta(context, parameters):
-        parameters['pipeline_address'] = context.pipeline_state.address
-        parameters['pipeline_id'] = context.pipeline_state.pipeline_id
+    def _add_initial_pipeline_meta(context, task: Task):
+        task.pipeline_address = context.pipeline_state.address
+        task.pipeline_id = context.pipeline_state.pipeline_id
     
     @staticmethod
-    def _add_pipeline_meta(context, caller_id, parameters):
-        parameters['pipeline_address'] = context.pipeline_state.address
-        parameters['pipeline_id'] = context.pipeline_state.pipeline_id
+    def _add_pipeline_meta(context, caller_id, task: Task):
+        task.pipeline_address = context.pipeline_state.address
+        task.pipeline_id = context.pipeline_state.pipeline_id
 
         if caller_id is not None:
-            parameters['parent_task_address'] = context.get_caller_address()
-            parameters['parent_task_id'] = caller_id
+            task.parent_task_address = context.get_caller_address()
+            task.parent_task_id = caller_id

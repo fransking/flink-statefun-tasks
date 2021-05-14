@@ -16,6 +16,7 @@ class PipelineBuilder(object):
 
     :param optional pipeline: list of initial pipeline entries e.g. from another builder
     """
+
     def __init__(self, pipeline: list = None):
         self._pipeline = [] if pipeline is None else pipeline
         self._builder_id = _gen_id()
@@ -74,23 +75,21 @@ class PipelineBuilder(object):
         """
         args = self._unpack_single_tuple_args(args)
         task_type, parameters = self._task_type_and_parameters_for(fun)
-        self._pipeline.append(Task(_gen_id(), task_type, args, kwargs, parameters=parameters))
+        self._pipeline.append(Task.from_fields(_gen_id(), task_type, args, kwargs, **parameters))
         return self
 
-    def set(self, retry_policy:RetryPolicy = None, **params) -> 'PipelineBuilder':
+    def set(self, retry_policy: RetryPolicy = None) -> 'PipelineBuilder':
         """
         Sets task properties on the last entry added to the builder
 
         :param option retry_policy: the task retry policy to use
-        :param params: any other parameters to the task
         :return: the builder
         """
-        if retry_policy is not None:
-            params['retry_policy'] = retry_policy.to_proto()
 
         if any(self._pipeline):
             entry = self._pipeline[-1]
-            entry.set_parameters(params)
+            if retry_policy is not None:
+                entry.retry_policy.CopyFrom(retry_policy.to_proto())
 
         return self
 
@@ -108,7 +107,7 @@ class PipelineBuilder(object):
         else:
             args = self._unpack_single_tuple_args(args)
             task_type, parameters = self._task_type_and_parameters_for(continuation)
-            self._pipeline.append(Task(_gen_id(), task_type, args, kwargs, parameters=parameters))
+            self._pipeline.append(Task.from_fields(_gen_id(), task_type, args, kwargs, **parameters))
         return self
 
     def get_destination(self):
@@ -131,30 +130,29 @@ class PipelineBuilder(object):
         task_type = '__builtins.run_pipeline'
         args = self.validate().to_proto(serialiser)
         kwargs = {}
-        parameters = {}    
 
         # send a single argument by itself instead of wrapped inside a tuple
         if _is_tuple(args) and len(args) == 1:
             args = args[0]
 
-        task_request = TaskRequest(id=task_id, type=task_type, parameters=serialiser.to_proto(parameters))
+        task_request = TaskRequest(id=task_id, type=task_type)
         serialiser.serialise_request(task_request, args, kwargs)
-        
+
         return task_request
 
     def finally_do(self, finally_action, *args, **kwargs) -> 'PipelineBuilder':
         """
         Adds finally to the pipeline
 
-        :param continuation: the python function which should be decorated with @tasks.bind()
+        :param finally_action: the python function which should be decorated with @tasks.bind()
         :param args: the task args
         :param kwargs: the task kwargs
         :return: the builder
         """
         args = self._unpack_single_tuple_args(args)
         task_type, parameters = self._task_type_and_parameters_for(finally_action)
-        task_entry = Task(_gen_id(), task_type, args, kwargs, parameters=parameters, is_finally=True)
-        task_entry.set_parameters({'is_fruitful': False})
+        combined_parameters = {**parameters, 'is_fruitful': False}
+        task_entry = Task.from_fields(_gen_id(), task_type, args, kwargs, is_finally=True, **combined_parameters)
         self._pipeline.append(task_entry)
         return self
 
@@ -181,7 +179,7 @@ class PipelineBuilder(object):
             errors.append('Cannot have more than one "finally_do" method')
         if len(finally_tasks) == 1 and finally_tasks[0] != self._pipeline[-1]:
             errors.append('"finally_do" must be called at the end of a pipeline')
-        
+
         if any(errors):
             error = ', '.join(errors)
             raise ValueError(f'Invalid pipeline: {error}')

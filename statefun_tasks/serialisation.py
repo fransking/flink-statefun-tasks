@@ -12,6 +12,7 @@ class DefaultSerialiser(object):
     
     :param known_proto_types: an array of known protobuf types that will not be packed inside Any
     """
+
     def __init__(self, known_proto_types=[]):
         self._known_proto_types = set(known_proto_types)
 
@@ -38,7 +39,6 @@ class DefaultSerialiser(object):
 
         result = _convert_from_proto(proto, self._known_proto_types)
         return result if result is not None else default
-
 
     def serialise_args_and_kwargs(self, args, kwargs) -> Any:
         """
@@ -84,7 +84,7 @@ class DefaultSerialiser(object):
 
         return args, kwargs
 
-    def serialise_request(self, task_request: TaskRequest, args, kwargs, state=None):
+    def serialise_request(self, task_request: TaskRequest, args, kwargs, state=None, retry_policy=None):
         """
         Serialises args, kwargs and optional state into a TaskRequest
         
@@ -92,10 +92,13 @@ class DefaultSerialiser(object):
         :param args: task args
         :param kwargs: task kwargs
         :param optional state: task state
+        :param optional retry_policy: task retry policy
         """
         request = self.serialise_args_and_kwargs(args, kwargs)
         task_request.request.CopyFrom(request)
         task_request.state.CopyFrom(pack_any(_convert_to_proto(state)))
+        if retry_policy:
+            task_request.retry_policy.CopyFrom(retry_policy)
 
     def deserialise_request(self, task_request: TaskRequest):
         """
