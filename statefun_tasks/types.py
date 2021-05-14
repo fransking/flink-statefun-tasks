@@ -131,6 +131,22 @@ class Task:
         self._proto.pipeline_id = value
 
     @property
+    def namespace(self):
+        return self._proto.namespace
+
+    @namespace.setter
+    def namespace(self, value):
+        self._proto.namespace = value
+
+    @property
+    def worker_name(self):
+        return self._proto.worker_name
+
+    @worker_name.setter
+    def worker_name(self, value):
+        self._proto.worker_name = value
+
+    @property
     def request(self):
         return self._proto.request
 

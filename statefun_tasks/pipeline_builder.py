@@ -78,11 +78,14 @@ class PipelineBuilder(object):
         self._pipeline.append(Task.from_fields(_gen_id(), task_type, args, kwargs, **parameters))
         return self
 
-    def set(self, retry_policy: RetryPolicy = None) -> 'PipelineBuilder':
+    def set(self, retry_policy: RetryPolicy = None, namespace: str = None,
+            worker_name: str = None) -> 'PipelineBuilder':
         """
         Sets task properties on the last entry added to the builder
 
         :param option retry_policy: the task retry policy to use
+        :param option namespace: the task namespace
+        :param option worker_name: the task worker_name
         :return: the builder
         """
 
@@ -90,6 +93,10 @@ class PipelineBuilder(object):
             entry = self._pipeline[-1]
             if retry_policy is not None:
                 entry.retry_policy.CopyFrom(retry_policy.to_proto())
+            if namespace is not None:
+                entry.namespace = namespace
+            if worker_name is not None:
+                entry.worker_name = worker_name
 
         return self
 
