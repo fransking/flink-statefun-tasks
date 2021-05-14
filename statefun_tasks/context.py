@@ -1,13 +1,10 @@
 from statefun_tasks.serialisation import DefaultSerialiser
 from statefun_tasks.type_helpers import flink_value_type_for
-from statefun_tasks.messages_pb2 import TaskState
+from statefun_tasks.messages_pb2 import TaskState, PipelineState
 from statefun_tasks.protobuf import pack_any
 
 from statefun import kafka_egress_message, message_builder, Context, SdkAddress
-from google.protobuf.any_pb2 import Any
 from datetime import timedelta
-
-from typing import Callable
 
 
 class TaskContext(object):
@@ -24,9 +21,8 @@ class TaskContext(object):
         self._serialiser = serialiser if serialiser is not None else DefaultSerialiser()
 
         self.storage = context.storage
-
-        task_state = self.storage.task_state or TaskState()
-        self._state = self._serialiser.from_proto(task_state.data)
+        self.task_state = self.storage.task_state or TaskState()
+        self.pipeline_state = self.storage.pipeline_state or PipelineState()
 
     def get_address(self):
         """
@@ -106,36 +102,12 @@ class TaskContext(object):
         message = kafka_egress_message(typename=self._egress_type_name, topic=topic, value=proto_bytes)
         self._context.send_egress(message)
 
-    def set_state(self, data:dict):
-        """
-        Sets (overwrites) the TaskState for this task
-
-        :param data: state to set
-        """
-        self._state = data
-
-    def get_state(self) -> dict:
-        """
-        Returns the TaskState for this task
-
-        :return: the TaskState as a dictionary
-        """
-        return self._state
-
-    def update_state(self, updates:dict):
-        """
-        Updates (merges) state with the TaskState for this task
-
-        :param data: state to update
-        """
-        self._state.update(updates)
-
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        task_state = TaskState(data=self._serialiser.to_proto(self._state))
-        self._context.storage.task_state = task_state
+        self._context.storage.task_state = self.task_state
+        self._context.storage.pipeline_state = self.pipeline_state
 
     def __str__(self):
         return f'task_id: {self.get_task_id()}, caller: {self.get_caller_id()}'

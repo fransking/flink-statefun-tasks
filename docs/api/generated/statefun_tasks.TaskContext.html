@@ -215,29 +215,20 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_caller_id" title="statefun_tasks.TaskContext.get_caller_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_caller_id</span></code></a>()</p></td>
 <td><p>Caller task Id in the form of context.caller.id</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_state" title="statefun_tasks.TaskContext.get_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_state</span></code></a>()</p></td>
-<td><p>Returns the TaskState for this task</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_task_id" title="statefun_tasks.TaskContext.get_task_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_task_id</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_task_id" title="statefun_tasks.TaskContext.get_task_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_task_id</span></code></a>()</p></td>
 <td><p>Own task Id in the form of context.address.id</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.send_egress_message" title="statefun_tasks.TaskContext.send_egress_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_egress_message</span></code></a>(topic, value)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.send_egress_message" title="statefun_tasks.TaskContext.send_egress_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_egress_message</span></code></a>(topic, value)</p></td>
 <td><p>Sends a message to an egress topic</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.send_message" title="statefun_tasks.TaskContext.send_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_message</span></code></a>(destination, target_id, value)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.send_message" title="statefun_tasks.TaskContext.send_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_message</span></code></a>(destination, target_id, value)</p></td>
 <td><p>Sends a message to another Flink Task worker</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.send_message_after" title="statefun_tasks.TaskContext.send_message_after"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_message_after</span></code></a>(delay, destination, …)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.send_message_after" title="statefun_tasks.TaskContext.send_message_after"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_message_after</span></code></a>(delay, destination, …)</p></td>
 <td><p>Sends a message to another Flink Task worker after some delay</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.set_state" title="statefun_tasks.TaskContext.set_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_state</span></code></a>(data)</p></td>
-<td><p>Sets (overwrites) the TaskState for this task</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.to_address_and_id" title="statefun_tasks.TaskContext.to_address_and_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_address_and_id</span></code></a>(address)</p></td>
 <td><p>Converts SdkAddress into a string representation</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.update_state" title="statefun_tasks.TaskContext.update_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_state</span></code></a>(updates)</p></td>
-<td><p>Updates (merges) state with the TaskState for this task</p></td>
 </tr>
 </tbody>
 </table>
@@ -270,20 +261,6 @@
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>task Id</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="statefun_tasks.TaskContext.get_state">
-<code class="sig-name descname"><span class="pre">get_state</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_state" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the TaskState for this task</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>the TaskState as a dictionary</p>
 </dd>
 </dl>
 </dd></dl>
@@ -345,17 +322,6 @@
 </dd></dl>
 
 <dl class="py method">
-<dt id="statefun_tasks.TaskContext.set_state">
-<code class="sig-name descname"><span class="pre">set_state</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.set_state" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets (overwrites) the TaskState for this task</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – state to set</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt id="statefun_tasks.TaskContext.to_address_and_id">
 <em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">to_address_and_id</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.to_address_and_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts SdkAddress into a string representation</p>
@@ -365,17 +331,6 @@
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>address and id in the format namespace/type/id</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="statefun_tasks.TaskContext.update_state">
-<code class="sig-name descname"><span class="pre">update_state</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">updates</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.update_state" title="Permalink to this definition">¶</a></dt>
-<dd><p>Updates (merges) state with the TaskState for this task</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>data</strong> – state to update</p>
 </dd>
 </dl>
 </dd></dl>

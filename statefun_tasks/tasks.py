@@ -1,7 +1,7 @@
 from statefun_tasks.context import TaskContext
 from statefun_tasks.pipeline_builder import PipelineBuilder
 from statefun_tasks.utils import _gen_id, _task_type_for, _is_tuple, _type_name, _annotated_protos_for
-from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException
+from statefun_tasks.messages_pb2 import TaskRequest
 from statefun_tasks.type_helpers import _create_task_result, _create_task_exception
 
 import inspect
@@ -29,7 +29,6 @@ class _FlinkTask(object):
 
     async def run(self, task_context: TaskContext, task_request: TaskRequest):
         task_result, task_exception, pipeline = None, None, None
-        task_parameters = self._serialiser.from_proto(task_request.parameters, {})
 
         try:
             # run the flink task
@@ -41,15 +40,15 @@ class _FlinkTask(object):
             if asyncio.iscoroutine(fn_result):
                 fn_result = await fn_result
 
-            pipeline, task_result = self._to_pipeline_or_task_result(task_request, task_parameters, fn_result, fn_state)
+            pipeline, task_result = self._to_pipeline_or_task_result(task_request, fn_result, fn_state)
 
         # we errored so return a task_exception instead
         except Exception as e:
-            task_exception = self._to_task_exception(task_request, task_parameters, e)
+            task_exception = self._to_task_exception(task_request, e)
 
         return task_result, task_exception, pipeline
 
-    def _to_pipeline_or_task_result(self, task_request, task_parameters, fn_result, fn_state):
+    def _to_pipeline_or_task_result(self, task_request, fn_result, fn_state):
         pipeline, task_result = None, None
 
         if not self._is_fruitful:
@@ -82,8 +81,9 @@ class _FlinkTask(object):
 
         return pipeline, task_result
 
-    def _to_task_exception(self, task_request, task_parameters, ex):
+    def _to_task_exception(self, task_request, ex):
         # use retry policy on task request first then fallback to task definition
+        task_parameters = self._serialiser.from_proto(task_request.parameters, {})
         task_retry_policy = task_parameters.get('retry_policy', self._retry_policy)
         maybe_retry = False
 

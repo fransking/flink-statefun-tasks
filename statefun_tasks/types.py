@@ -1,5 +1,5 @@
 from statefun_tasks.utils import _type_name
-from statefun_tasks.messages_pb2 import TaskState, TaskRequest, TaskResult, TaskException, \
+from statefun_tasks.messages_pb2 import PipelineState, TaskState, TaskRequest, TaskResult, TaskException, \
     TaskActionRequest, TaskActionResult, TaskActionException, TaskEntry, GroupEntry, PipelineEntry, TaskRetryPolicy, Pipeline
 
 from statefun import make_protobuf_type
@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from datetime import timedelta
 
 # Protobuf type registrations required by Flink Statefun API
+PIPELINE_STATE_TYPE = make_protobuf_type(PipelineState, namespace='io.statefun_tasks.types')
 TASK_STATE_TYPE = make_protobuf_type(TaskState, namespace='io.statefun_tasks.types')
 TASK_REQUEST_TYPE = make_protobuf_type(TaskRequest, namespace='io.statefun_tasks.types')
 TASK_RESULT_TYPE = make_protobuf_type(TaskResult, namespace='io.statefun_tasks.types')
@@ -18,6 +19,7 @@ TASK_ACTION_EXCEPTION_TYPE = make_protobuf_type(TaskActionException, namespace='
 
 
 _VALUE_TYPE_MAP = {
+    TaskState: PIPELINE_STATE_TYPE,
     TaskState: TASK_STATE_TYPE,
     TaskRequest: TASK_REQUEST_TYPE,
     TaskResult: TASK_RESULT_TYPE,
