@@ -130,6 +130,10 @@ class Task:
     def pipeline_id(self, value):
         self._proto.pipeline_id = value
 
+    @property
+    def request(self):
+        return self._proto.request
+
     def unpack(self, serialiser):
         if self._unpacked or not self._proto_backed:
             return self

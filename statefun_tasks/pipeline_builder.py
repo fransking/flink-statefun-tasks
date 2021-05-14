@@ -136,7 +136,8 @@ class PipelineBuilder(object):
             args = args[0]
 
         task_request = TaskRequest(id=task_id, type=task_type)
-        serialiser.serialise_request(task_request, args, kwargs)
+        args_and_kwargs = serialiser.serialise_args_and_kwargs(args, kwargs)
+        serialiser.serialise_request(task_request, args_and_kwargs)
 
         return task_request
 
