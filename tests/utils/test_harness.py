@@ -1,11 +1,11 @@
-from statefun_tasks import TaskRequest, TaskResult, TaskException, TaskActionRequest, TaskActionResult, TaskActionException, TaskAction, \
+from statefun_tasks import TaskResult, TaskException, TaskActionRequest, TaskActionResult, TaskActionException, TaskAction, \
     PipelineBuilder, FlinkTasks, DefaultSerialiser
 
 from statefun_tasks.type_helpers import flink_value_type_for
 from statefun_tasks.client import TaskError
 from statefun_tasks.protobuf import unpack_any
 
-from statefun import RequestReplyHandler, StatefulFunctions, Message
+from statefun import RequestReplyHandler, StatefulFunctions
 from statefun.kafka_egress_pb2 import KafkaProducerRecord
 from statefun.request_reply_pb2 import FromFunction, ToFunction, Address, TypedValue
 
@@ -51,7 +51,8 @@ class TestHarness:
         self.__initial_state_keys = ['task_request',
                                      'task_state',
                                      'task_result',
-                                     'task_exception']
+                                     'task_exception',
+                                     'pipeline_state']
         self.__states = {}
         self.__topic = 'statefun-test.requests'
         self.__initial_target_type = 'worker'

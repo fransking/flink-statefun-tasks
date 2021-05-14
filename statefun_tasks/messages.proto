@@ -93,7 +93,22 @@ message TaskException {
 }
 
 message TaskState {
-    MapOfStringToAny data = 1;
+    int32 retry_count = 1;
+    string original_caller_address = 2;
+    string original_caller_id = 3;
+}
+
+message PipelineState {
+    string address = 1;
+    string caller_id = 2;
+    string caller_address = 3;
+    string pipeline_id = 4;
+    Pipeline pipeline = 5;
+    TaskResults task_results = 6;
+    oneof before_finally {
+        TaskResult result_before_finally = 7;
+        TaskException exception_before_finally = 8;
+    }
 }
 
 message TaskResults {

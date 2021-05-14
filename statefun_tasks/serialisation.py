@@ -35,6 +35,7 @@ class DefaultSerialiser(object):
         :param option default: an optional default value to return
         :return: the Python type or default value if deserialisation return None
         """
+
         result = _convert_from_proto(proto, self._known_proto_types)
         return result if result is not None else default
 

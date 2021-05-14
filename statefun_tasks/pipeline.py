@@ -32,16 +32,13 @@ class _Pipeline(object):
         
     def begin(self, context: TaskContext):
         # 1. record all the continuations into a pipeline and save into state with caller id and address
+        context.pipeline_state.address = context.get_address()
+        context.pipeline_state.pipeline.CopyFrom(self.to_proto())
 
-        state = {
-            'pipeline_id': context.get_task_id(),
-            'pipeline': self.to_proto(),
-            'address': context.get_address(),
-            'caller_id': context.get_caller_id(),
-            'caller_address': context.get_caller_address()
-        }
+        if context.get_caller_id() is not None:
+            context.pipeline_state.caller_id = context.get_caller_id()
+            context.pipeline_state.caller_address = context.get_caller_address()
 
-        context.set_state(state)
 
         # 2. get initial tasks(s) to call - might be single start of chain task or a group of tasks to call in parallel
         tasks = self._pipeline_helper.get_initial_tasks()
@@ -61,16 +58,10 @@ class _Pipeline(object):
 
     def resume(self, context: TaskContext, task_result_or_exception: Union[TaskResult, TaskException]):
         caller_id = context.get_caller_id()
-        state = context.get_state()
+        task_results = context.pipeline_state.task_results
 
-        # record the task result / exception - returns current map of task_id to task_result
-        task_results = state.setdefault('task_results', TaskResults())
-
-        # mark pipeline step as complete
+        # mark pipeline step as complete & record task result
         self._pipeline_helper.mark_task_complete(caller_id, task_result_or_exception, task_results)
-
-        # save updated pipeline state
-        context.update_state({'pipeline': self.to_proto()})
 
         # get the next step of the pipeline to run (if any)
         _, next_step, group = self._pipeline_helper.get_next_step_in_pipeline(caller_id)
@@ -88,7 +79,13 @@ class _Pipeline(object):
             remainder = [next_step]
             if next_step.is_finally:
                 # record the result of the task prior to the finally task so we can return it once the finally task completes
-                context.update_state({'result_before_finally': task_result_or_exception})
+
+                before_finally = context.pipeline_state.exception_before_finally \
+                    if isinstance(task_result_or_exception, TaskException) \
+                        else context.pipeline_state.result_before_finally
+
+                before_finally.CopyFrom(task_result_or_exception)
+            
         elif isinstance(next_step, Group):
             remainder = self._pipeline_helper.get_initial_tasks(next_step)
         else:
@@ -102,7 +99,7 @@ class _Pipeline(object):
                 task_id, task_type, task_args, kwargs, parameters = task.unpack(self._serialiser).to_tuple()
 
                 # set extra pipeline related parameters
-                self._add_pipeline_meta(context, state, caller_id, parameters)
+                self._add_pipeline_meta(context, caller_id, parameters)
 
                 # extend with any args passed to the task explicitly
                 # noting that args from previous tasks are not passed to finally 
@@ -128,7 +125,14 @@ class _Pipeline(object):
     def terminate(self, context: TaskContext, task_result_or_exception: Union[TaskResult, TaskException]):
         task_request = context.storage.task_request or TaskRequest()
 
-        result_before_finally = context.get_state().get('result_before_finally')
+        # if result_before_finally or exception_before_finally are set then we are in a finally block
+        if context.pipeline_state.HasField('result_before_finally'):
+            result_before_finally = context.pipeline_state.result_before_finally
+        elif context.pipeline_state.HasField('exception_before_finally'):
+            result_before_finally = context.pipeline_state.exception_before_finally
+        else:
+            result_before_finally = None
+
         if result_before_finally is not None and isinstance(task_result_or_exception, TaskResult):
             # finally ran successfully, so return the result of the previous task (rather than cleanup result from finally)
             task_result_or_exception = result_before_finally
@@ -162,22 +166,19 @@ class _Pipeline(object):
             context.send_message(address, identifer, task_result_or_exception)
 
         # or call back to our caller (if there is one)
-        else:
-            state = context.get_state()
-            caller_id = context.get_caller_id()
-
-            if 'caller_id' in state and state['caller_id'] != caller_id:  # don't call back to self
-                context.send_message(state['caller_address'], state['caller_id'], task_result_or_exception)
+        elif context.pipeline_state.caller_id is not None:
+             if context.pipeline_state.caller_id != context.get_caller_id():  # don't call back to self
+                context.send_message(context.pipeline_state.caller_address, context.pipeline_state.caller_id, task_result_or_exception)
 
     @staticmethod
     def _add_initial_pipeline_meta(context, parameters):
-        parameters['pipeline_address'] = context.get_address()
-        parameters['pipeline_id'] = context.get_task_id()
+        parameters['pipeline_address'] = context.pipeline_state.address
+        parameters['pipeline_id'] = context.pipeline_state.pipeline_id
     
     @staticmethod
-    def _add_pipeline_meta(context, state, caller_id, parameters):
-        parameters['pipeline_address'] = state.get('pipeline_address', None)
-        parameters['pipeline_id'] = state.get('pipeline_id', None)
+    def _add_pipeline_meta(context, caller_id, parameters):
+        parameters['pipeline_address'] = context.pipeline_state.address
+        parameters['pipeline_id'] = context.pipeline_state.pipeline_id
 
         if caller_id is not None:
             parameters['parent_task_address'] = context.get_caller_address()
