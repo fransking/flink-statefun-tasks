@@ -1,4 +1,4 @@
-from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, TaskActionResult, TaskAction, TaskStatus
+from statefun_tasks.messages_pb2 import TaskAction, TaskStatus
 
 
 class _FlinkAction(object):
