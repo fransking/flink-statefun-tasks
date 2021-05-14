@@ -15,6 +15,7 @@ module:
               - task_state
               - task_result
               - task_exception
+              - pipeline_state
             maxNumBatchRequests: 500
             timeout: 10min
       - function:
@@ -28,6 +29,7 @@ module:
               - task_state
               - task_result
               - task_exception
+              - pipeline_state
             maxNumBatchRequests: 500
             timeout: 10min
     ingresses:

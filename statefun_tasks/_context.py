@@ -1,11 +1,10 @@
 from ._serialisation import DefaultSerialiser
-from .messages_pb2 import TaskState
+from .messages_pb2 import TaskState, PipelineState
 
 from google.protobuf.any_pb2 import Any
 from statefun import kafka_egress_record
 from statefun.request_reply import BatchContext
 from statefun.request_reply_pb2 import Address
-from typing import Callable
 
 
 class TaskContext(object):
@@ -15,11 +14,8 @@ class TaskContext(object):
         self._egress_type_name = egress_type_name
         self._serialiser = serialiser if serialiser is not None else DefaultSerialiser()
 
-        try:
-            task_state = self.unpack('task_state', TaskState)
-            self._state = self._serialiser.from_proto(task_state.data)
-        except:
-            self._state = {}
+        self.task_state = self.unpack('task_state', TaskState) or TaskState()
+        self.pipeline_state = self.unpack('pipeline_state', PipelineState) or PipelineState()
 
     def get_address(self):
         return f'{self._context.address.namespace}/{self._context.address.type}'
@@ -61,21 +57,12 @@ class TaskContext(object):
     def delete(self, key):
         del self._context[key]
 
-    def set_state(self, data:dict):
-        self._state = data
-
-    def get_state(self) -> dict:
-        return self._state
-
-    def update_state(self, updates:dict):
-        self._state.update(updates)
-
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        task_state = TaskState(data=self._serialiser.to_proto(self._state))
-        self.pack_and_save('task_state', task_state)
+        self.pack_and_save('task_state', self.task_state)
+        self.pack_and_save('pipeline_state', self.pipeline_state)
 
     def __str__(self):
         return f'{self._task_name} [{self.get_task_id()}], caller: {self.get_caller_id()}]'

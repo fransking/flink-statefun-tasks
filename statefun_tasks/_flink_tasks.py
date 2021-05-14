@@ -275,8 +275,7 @@ class FlinkTasks(object):
             raise ValueError(f'Unexpected type for task_input: {type(task_input)}')
 
     def _get_pipeline(self, context):
-        state = context.get_state()
-        pipeline_protos = state.get('pipeline', None)
+        pipeline_protos = context.pipeline_state.pipeline
 
         if pipeline_protos is not None:
             return _Pipeline.from_proto(pipeline_protos, self._serialiser)
@@ -309,8 +308,6 @@ class FlinkTasks(object):
         return task_request, fn(context, task_request)
 
     def _emit_result(self, context, task_input, task_result):
-        state = context.get_state()
-
         # either send a message to egress if reply_topic was specified
         if task_input.HasField('reply_topic'):
             context.pack_and_send_egress(topic=task_input.reply_topic, value=task_result)
@@ -323,8 +320,8 @@ class FlinkTasks(object):
         elif isinstance(task_input, TaskRequest):
             # if this was a task request it could be part of a pipeline - i.e. called from another tasks so
             # either call back to original caller (e.g. if this is a result of a retry)
-            if isinstance(task_input, TaskRequest) and 'original_caller_address' in state and 'original_caller_id' in state:
-                context.pack_and_send(state['original_caller_address'], state['original_caller_id'], task_result)
+            if context.task_state.original_caller_id != '':
+                context.pack_and_send(context.task_state.original_caller_address, context.task_state.original_caller_id, task_result)
 
             # or call back to our caller (if there is one)
             elif context.get_caller_id() is not None:
@@ -350,27 +347,24 @@ class FlinkTasks(object):
             self._emit_result(context, task_request, return_value)
 
     def _attempt_retry(self, context, task_request, task_exception):
-        state = context.get_state()
-
         if task_exception.maybe_retry and task_exception.retry_policy is not None:
-
-            retry_count = state.get('retry_count', 0)
-            if retry_count >= task_exception.retry_policy.max_retries:
+            if context.task_state.retry_count >= task_exception.retry_policy.max_retries:
                 return False
 
             # save the original caller address and id for this task_request prior to calling back to ourselves which would overwrite
-            if not 'original_caller_id' in state or not 'original_caller_id' in state:
-                context.update_state({'original_caller_address': context.get_caller_address(), 'original_caller_id': context.get_caller_id()})
+            if context.task_state.original_caller_id == '':
+                context.task_state.original_caller_id = context.get_caller_id()
+                context.task_state.original_caller_address = context.get_caller_address()
 
             # remove previous task_request from state, increment retry count
             context.delete('task_request')
-            state['retry_count'] = retry_count + 1
+            context.task_state.retry_count += 1
 
             # send retry
             delay = timedelta(milliseconds=task_exception.retry_policy.delay_ms)
 
             if task_exception.retry_policy.exponential_back_off:
-                delay = timedelta(milliseconds=task_exception.retry_policy.delay_ms ^ retry_count)
+                delay = timedelta(milliseconds=task_exception.retry_policy.delay_ms ^ context.task_state.retry_count)
 
             if delay:
                 context.pack_and_send_after(delay, context.get_address(), context.get_task_id(), task_request)

@@ -48,7 +48,8 @@ class TestHarness:
         self.__initial_state_keys = ['task_request',
                                      'task_state',
                                      'task_result',
-                                     'task_exception']
+                                     'task_exception',
+                                     'pipeline_state']
         self.__states = {}
         self.__topic = 'statefun-test.requests'
         self.__initial_target_type = 'worker'
