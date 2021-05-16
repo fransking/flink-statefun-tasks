@@ -15,14 +15,16 @@ DefaultSerialiser
       ~DefaultSerialiser.__init__
       ~DefaultSerialiser.deserialise_args_and_kwargs
       ~DefaultSerialiser.deserialise_request
-      ~DefaultSerialiser.deserialise_response
       ~DefaultSerialiser.deserialise_result
       ~DefaultSerialiser.from_proto
+      ~DefaultSerialiser.merge_args_and_kwargs
       ~DefaultSerialiser.register_proto_types
       ~DefaultSerialiser.serialise_args_and_kwargs
       ~DefaultSerialiser.serialise_request
       ~DefaultSerialiser.serialise_result
+      ~DefaultSerialiser.to_args_and_kwargs
       ~DefaultSerialiser.to_proto
+      ~DefaultSerialiser.unpack_response
    
     
    

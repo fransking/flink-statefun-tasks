@@ -55,6 +55,8 @@ def pack_any(value) -> Any:
 
 
 def unpack_any(value, known_proto_types):
+    known_proto_types = _KNOWN_PROTO_TYPES + list(known_proto_types)
+
     if isinstance(value, Any):
         for proto_type in known_proto_types:
             if value.Is(proto_type.DESCRIPTOR):
@@ -64,11 +66,6 @@ def unpack_any(value, known_proto_types):
         return value
 
     return value
-
-
-def unpack_any_including_default_types(value, known_proto_types):
-    return unpack_any(value, _KNOWN_PROTO_TYPES + list(known_proto_types))
-
 
 def _wrap_value(v):
     # if none return NoneValue wrapper

@@ -89,24 +89,21 @@ class _Pipeline(object):
 
         # call next steps (if any)
         if any(remainder):
-            task_result, task_state = self._serialiser.deserialise_response(task_result_or_exception)
+            task_result, task_state = self._serialiser.unpack_response(task_result_or_exception)
 
             for task in remainder:
                 task_id = task.task_id
                 task_args_and_kwargs = self._serialiser.to_args_and_kwargs(task.request)
+                
+                # extend task_result with any args & kwargs passed to the task explicitly
+                # noting that args from previous tasks are not passed to finally
+                task_request = self._serialiser.merge_args_and_kwargs(task_result if not task.is_finally else TupleOfAny(), task_args_and_kwargs)
 
                 # set extra pipeline related parameters
                 self._add_pipeline_meta(context, caller_id, task)
 
-                # extend with any args passed to the task explicitly
-                # noting that args from previous tasks are not passed to finally
-                args_to_append = [] if task.is_finally else task_result.items if isinstance(task_result, TupleOfAny) \
-                    else [pack_any(task_result)]
-                task_args_and_kwargs.args.items.extend(args_to_append)
-
                 request = TaskRequest(id=task_id, type=task.task_type)
-                self._serialiser.serialise_request(request, task_args_and_kwargs, state=task_state,
-                                                   retry_policy=task.retry_policy)
+                self._serialiser.serialise_request(request, task_request, state=task_state, retry_policy=task.retry_policy)
 
                 context.send_message(task.get_destination(), task_id, request)
         else:
