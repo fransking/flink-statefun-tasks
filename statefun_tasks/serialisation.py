@@ -1,5 +1,7 @@
-from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, ArgsAndKwargs
-from statefun_tasks.protobuf import pack_any, unpack_any, _convert_from_proto, _convert_to_proto, _parse_any_from_bytes
+from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, ArgsAndKwargs, MapOfStringToAny, \
+    TupleOfAny
+from statefun_tasks.protobuf import pack_any, unpack_any, _convert_from_proto, _convert_to_proto, _parse_any_from_bytes, \
+    unpack_any_including_default_types
 from statefun_tasks.utils import _is_tuple
 from google.protobuf.any_pb2 import Any
 from google.protobuf.message import Message
@@ -12,6 +14,7 @@ class DefaultSerialiser(object):
     
     :param known_proto_types: an array of known protobuf types that will not be packed inside Any
     """
+
     def __init__(self, known_proto_types=[]):
         self._known_proto_types = set(known_proto_types)
 
@@ -38,7 +41,6 @@ class DefaultSerialiser(object):
 
         result = _convert_from_proto(proto, self._known_proto_types)
         return result if result is not None else default
-
 
     def serialise_args_and_kwargs(self, args, kwargs) -> Any:
         """
@@ -84,18 +86,31 @@ class DefaultSerialiser(object):
 
         return args, kwargs
 
-    def serialise_request(self, task_request: TaskRequest, args, kwargs, state=None):
+    def to_args_and_kwargs(self, request: Any) -> ArgsAndKwargs:
+        request = _convert_from_proto(request, self._known_proto_types)
+        if isinstance(request, ArgsAndKwargs):
+            return request
+        else:
+            args = TupleOfAny()
+            args.items.append(_convert_to_proto(request))
+            return ArgsAndKwargs(args=args, kwargs=MapOfStringToAny())
+
+    @staticmethod
+    def serialise_request(task_request: TaskRequest, args_and_kwargs: Any, state=None, retry_policy=None):
         """
         Serialises args, kwargs and optional state into a TaskRequest
         
         :param task_request: the TaskRequest
-        :param args: task args
-        :param kwargs: task kwargs
+        :param args_and_kwargs: task args and kwargs (proto format)
         :param optional state: task state
+        :param optional retry_policy: task retry policy
         """
-        request = self.serialise_args_and_kwargs(args, kwargs)
-        task_request.request.CopyFrom(request)
+        if isinstance(args_and_kwargs, ArgsAndKwargs):
+            args_and_kwargs = pack_any(args_and_kwargs)
+        task_request.request.CopyFrom(args_and_kwargs)
         task_request.state.CopyFrom(pack_any(_convert_to_proto(state)))
+        if retry_policy:
+            task_request.retry_policy.CopyFrom(retry_policy)
 
     def deserialise_request(self, task_request: TaskRequest):
         """
@@ -141,8 +156,11 @@ class DefaultSerialiser(object):
         :return: tuple of result and state. 
         """
         if isinstance(task_result_or_exception, TaskResult):
-            return self.deserialise_result(task_result_or_exception)
+            task_result = unpack_any_including_default_types(task_result_or_exception.result, self._known_proto_types)
+            task_state = task_result_or_exception.state
         elif isinstance(task_result_or_exception, TaskException):
-            return (), self.from_proto(task_result_or_exception.state)
+            task_result = TupleOfAny()
+            task_state = task_result_or_exception.state
         else:
             raise ValueError(f'task_result_or_exception was neither TaskResult or TaskException')
+        return task_result, task_state

@@ -1,7 +1,7 @@
 from statefun_tasks.context import TaskContext
 from statefun_tasks.pipeline_builder import PipelineBuilder
 from statefun_tasks.utils import _gen_id, _task_type_for, _is_tuple, _type_name, _annotated_protos_for
-from statefun_tasks.messages_pb2 import TaskRequest
+from statefun_tasks.messages_pb2 import TaskRequest, NoneValue
 from statefun_tasks.type_helpers import _create_task_result, _create_task_exception
 
 import inspect
@@ -9,7 +9,8 @@ import asyncio
 
 
 class _FlinkTask(object):
-    def __init__(self, fun, serialiser, retry_policy=None, with_state=False, is_fruitful=True, with_context=False, **kwargs):
+    def __init__(self, fun, serialiser, retry_policy=None, with_state=False, is_fruitful=True, with_context=False,
+                 **kwargs):
         self._fun = fun
         self._serialiser = serialiser
         self._retry_policy = retry_policy
@@ -83,8 +84,10 @@ class _FlinkTask(object):
 
     def _to_task_exception(self, task_request, ex):
         # use retry policy on task request first then fallback to task definition
-        task_parameters = self._serialiser.from_proto(task_request.parameters, {})
-        task_retry_policy = task_parameters.get('retry_policy', self._retry_policy)
+        task_retry_policy = task_request.retry_policy
+        if not task_request.HasField('retry_policy'):
+            task_retry_policy = self._retry_policy
+
         maybe_retry = False
 
         if task_retry_policy is not None:

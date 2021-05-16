@@ -1,11 +1,11 @@
-from statefun_tasks.serialisation import DefaultSerialiser
-from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskResults, TaskException, TaskEntry, Pipeline
-from statefun_tasks.context import TaskContext
-from statefun_tasks.types import Task, Group, RetryPolicy
-from statefun_tasks.utils import _extend_args
-from statefun_tasks.pipeline_helper import _PipelineHelper
+from typing import Union
 
-from typing import Union, Iterable
+from statefun_tasks.context import TaskContext
+from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, Pipeline, TupleOfAny
+from statefun_tasks.pipeline_helper import _PipelineHelper
+from statefun_tasks.protobuf import pack_any
+from statefun_tasks.serialisation import DefaultSerialiser
+from statefun_tasks.types import Task, Group
 
 
 class _Pipeline(object):
@@ -29,7 +29,7 @@ class _Pipeline(object):
                 pipeline.append(Group.from_proto(proto))
 
         return _Pipeline(pipeline, serialiser)
-        
+
     def begin(self, context: TaskContext):
         # 1. record all the continuations into a pipeline and save into state with caller id and address
         context.pipeline_state.address = context.get_address()
@@ -39,22 +39,18 @@ class _Pipeline(object):
             context.pipeline_state.caller_id = context.get_caller_id()
             context.pipeline_state.caller_address = context.get_caller_address()
 
-
         # 2. get initial tasks(s) to call - might be single start of chain task or a group of tasks to call in parallel
         tasks = self._pipeline_helper.get_initial_tasks()
 
         # 3. call each task
         for task in tasks:
-
-            task_id, task_type, args, kwargs, parameters = task.unpack(self._serialiser).to_tuple()
-
             # set extra pipeline related parameters
-            self._add_initial_pipeline_meta(context, parameters)
+            self._add_initial_pipeline_meta(context, task)
 
-            request = TaskRequest(id=task_id, type=task_type, parameters=self._serialiser.to_proto(parameters))
-            self._serialiser.serialise_request(request, args, kwargs)
+            request = TaskRequest(id=task.task_id, type=task.task_type)
+            self._serialiser.serialise_request(request, task.request, retry_policy=task.retry_policy)
 
-            context.send_message(task.get_destination(), task_id, request)
+            context.send_message(task.get_destination(), task.task_id, request)
 
     def resume(self, context: TaskContext, task_result_or_exception: Union[TaskResult, TaskException]):
         caller_id = context.get_caller_id()
@@ -82,10 +78,10 @@ class _Pipeline(object):
 
                 before_finally = context.pipeline_state.exception_before_finally \
                     if isinstance(task_result_or_exception, TaskException) \
-                        else context.pipeline_state.result_before_finally
+                    else context.pipeline_state.result_before_finally
 
                 before_finally.CopyFrom(task_result_or_exception)
-            
+
         elif isinstance(next_step, Group):
             remainder = self._pipeline_helper.get_initial_tasks(next_step)
         else:
@@ -93,21 +89,25 @@ class _Pipeline(object):
 
         # call next steps (if any)
         if any(remainder):
-            args, task_state = self._serialiser.deserialise_response(task_result_or_exception)
+            task_result, task_state = self._serialiser.deserialise_response(task_result_or_exception)
 
             for task in remainder:
-                task_id, task_type, task_args, kwargs, parameters = task.unpack(self._serialiser).to_tuple()
+                task_id = task.task_id
+                task_args_and_kwargs = self._serialiser.to_args_and_kwargs(task.request)
 
                 # set extra pipeline related parameters
-                self._add_pipeline_meta(context, caller_id, parameters)
+                self._add_pipeline_meta(context, caller_id, task)
 
                 # extend with any args passed to the task explicitly
-                # noting that args from previous tasks are not passed to finally 
-                args = _extend_args(() if task.is_finally else args, task_args)
+                # noting that args from previous tasks are not passed to finally
+                args_to_append = [] if task.is_finally else task_result.items if isinstance(task_result, TupleOfAny) \
+                    else [pack_any(task_result)]
+                task_args_and_kwargs.args.items.extend(args_to_append)
 
-                request = TaskRequest(id=task_id, type=task_type, parameters=self._serialiser.to_proto(parameters))
-                self._serialiser.serialise_request(request, args, kwargs, task_state)
-                
+                request = TaskRequest(id=task_id, type=task.task_type)
+                self._serialiser.serialise_request(request, task_args_and_kwargs, state=task_state,
+                                                   retry_policy=task.retry_policy)
+
                 context.send_message(task.get_destination(), task_id, request)
         else:
             last_step = self._pipeline[-1]
@@ -120,7 +120,6 @@ class _Pipeline(object):
                 if group is None or group.is_complete():
                     # else if have an exception then terminate but waiting for any parallel tasks in the group to complete first
                     self.terminate(context, task_result_or_exception)
-
 
     def terminate(self, context: TaskContext, task_result_or_exception: Union[TaskResult, TaskException]):
         task_request = context.storage.task_request or TaskRequest()
@@ -167,19 +166,20 @@ class _Pipeline(object):
 
         # or call back to our caller (if there is one)
         elif context.pipeline_state.caller_id is not None:
-             if context.pipeline_state.caller_id != context.get_caller_id():  # don't call back to self
-                context.send_message(context.pipeline_state.caller_address, context.pipeline_state.caller_id, task_result_or_exception)
+            if context.pipeline_state.caller_id != context.get_caller_id():  # don't call back to self
+                context.send_message(context.pipeline_state.caller_address, context.pipeline_state.caller_id,
+                                     task_result_or_exception)
 
     @staticmethod
-    def _add_initial_pipeline_meta(context, parameters):
-        parameters['pipeline_address'] = context.pipeline_state.address
-        parameters['pipeline_id'] = context.pipeline_state.pipeline_id
-    
+    def _add_initial_pipeline_meta(context, task: Task):
+        task.pipeline_address = context.pipeline_state.address
+        task.pipeline_id = context.pipeline_state.pipeline_id
+
     @staticmethod
-    def _add_pipeline_meta(context, caller_id, parameters):
-        parameters['pipeline_address'] = context.pipeline_state.address
-        parameters['pipeline_id'] = context.pipeline_state.pipeline_id
+    def _add_pipeline_meta(context, caller_id, task: Task):
+        task.pipeline_address = context.pipeline_state.address
+        task.pipeline_id = context.pipeline_state.pipeline_id
 
         if caller_id is not None:
-            parameters['parent_task_address'] = context.get_caller_address()
-            parameters['parent_task_id'] = caller_id
+            task.parent_task_address = context.get_caller_address()
+            task.parent_task_id = caller_id
