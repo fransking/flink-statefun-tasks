@@ -83,8 +83,10 @@ class _FlinkTask(object):
 
     def _to_task_exception(self, task_request, ex):
         # use retry policy on task request first then fallback to task definition
-        task_parameters = self._serialiser.from_proto(task_request.parameters, {})
-        task_retry_policy = task_parameters.get('retry_policy', self._retry_policy)
+        task_retry_policy = task_request.retry_policy
+        if not task_request.HasField('retry_policy'):
+            task_retry_policy = self._retry_policy
+
         maybe_retry = False
 
         if task_retry_policy is not None:

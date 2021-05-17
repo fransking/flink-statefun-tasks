@@ -25,6 +25,11 @@ def receive_and_reply_protobuf_not_annotated(test_proto) -> Any:
 
 
 @tasks.bind()
+def protobuf_fully_annotated_continuation(test_proto: TestResultProto) -> TestResultProto:
+    return TestResultProto(value_str=str(type(test_proto)))
+
+
+@tasks.bind()
 def receive_and_reply_primitives(a, b, c, d):
     return [a, b, {'c': c}, (d,)]
 
@@ -48,6 +53,12 @@ class RequestResultSerialisationTests(unittest.TestCase):
         result = self.test_harness.run_pipeline(pipeline)
         self.assertIsInstance(result, TestResultProto)
         self.assertEqual("<class 'test_messages_pb2.TestProto'>", result.value_str)
+
+    def test_sending_protobuf_to_function_continations_with_annotations_uses_exact_protos(self):
+        pipeline = tasks.send(receive_and_reply_protobuf_fully_annotated, TestProto()).continue_with(protobuf_fully_annotated_continuation)
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertIsInstance(result, TestResultProto)
+        self.assertEqual("<class 'test_messages_pb2.TestResultProto'>", result.value_str)
 
     def test_sending_protobuf_to_function_without_annotations_packs_as_any(self):
         pipeline = tasks.send(receive_and_reply_protobuf_not_annotated, UnknownProto())
