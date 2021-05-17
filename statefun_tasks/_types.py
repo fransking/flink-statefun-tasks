@@ -22,6 +22,10 @@ class Task:
         self._proto = proto
 
     @staticmethod
+    def from_id(task_id, namespace=None, worker_name=None):
+        return Task(TaskEntry(task_id=task_id, namespace=namespace, worker_name=worker_name))
+
+    @staticmethod
     def from_fields(task_id, task_type, task_args, task_kwargs, is_finally=None, namespace=None, worker_name=None,
                     message_type=None, pipeline_address=None, pipeline_id=None, parent_task_address=None,
                     parent_task_id=None, is_fruitful=None, retry_policy=None, module_name=None, with_state=None,
