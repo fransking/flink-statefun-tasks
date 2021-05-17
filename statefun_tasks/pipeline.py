@@ -3,7 +3,6 @@ from typing import Union
 from statefun_tasks.context import TaskContext
 from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, Pipeline, TupleOfAny
 from statefun_tasks.pipeline_helper import _PipelineHelper
-from statefun_tasks.protobuf import pack_any
 from statefun_tasks.serialisation import DefaultSerialiser
 from statefun_tasks.types import Task, Group
 
