@@ -119,12 +119,9 @@ class PipelineBuilder(object):
 
     def get_destination(self):
         """
-        Returns the initial destination of the pipeline - i.e. where the first task should be sent 
-        or None if it should be set to the default namespace/worker
-
-        :return: the initial destination (e.g. example/worker) or None if it should use the default
+        Returns the initial destination of the pipeline as None - i.e. use the default ingress
         """
-        return None if not any(self._pipeline) else self._pipeline[0].get_destination()
+        return None
 
     def to_task_request(self, serialiser) -> TaskRequest:
         """
