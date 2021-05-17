@@ -4,7 +4,7 @@ from ._types import Task, Group, RetryPolicy
 from ._context import TaskContext
 from ._pipeline_utils import _get_initial_tasks, _mark_task_complete, _get_next_step_in_pipeline, \
     _extend_args, _aggregate_group_results, _try_get_finally_task
-from .messages_pb2 import TaskRequest, TaskResult, TaskException, Pipeline, TaskResults
+from .messages_pb2 import TaskRequest, TaskResult, TaskException, Pipeline, TupleOfAny
 
 from typing import Union, Iterable
 from uuid import uuid4
@@ -47,15 +47,13 @@ class _Pipeline(object):
         # 3. call each task
         for task in tasks:
 
-            task_id, task_type, args, kwargs, parameters = task.unpack(self._serialiser).to_tuple()
-
             # set extra pipeline related parameters
-            self._add_initial_pipeline_meta(context, parameters)
+            self._add_initial_pipeline_meta(context, task)
 
-            request = TaskRequest(id=task_id, type=task_type, parameters=self._serialiser.to_proto(parameters))
-            self._serialiser.serialise_request(request, args, kwargs)
+            request = TaskRequest(id=task.task_id, type=task.task_type)
+            self._serialiser.serialise_request(request, task.request, retry_policy=task.retry_policy)
 
-            context.pack_and_send(task.get_destination(), task_id, request)
+            context.pack_and_send(task.get_destination(), task.task_id, request)
 
     def resume(self, context: TaskContext, task_result_or_exception: Union[TaskResult, TaskException]):
         caller_id = context.get_caller_id()
@@ -94,20 +92,21 @@ class _Pipeline(object):
 
         # call next steps (if any)
         if any(remainder):
-            args, task_state = self._serialiser.deserialise_response(task_result_or_exception)
+            task_result, task_state = self._serialiser.unpack_response(task_result_or_exception)
 
             for task in remainder:
-                task_id, task_type, task_args, kwargs, parameters = task.unpack(self._serialiser).to_tuple()
+                task_id = task.task_id
+                task_args_and_kwargs = self._serialiser.to_args_and_kwargs(task.request)
+                
+                # extend task_result with any args & kwargs passed to the task explicitly
+                # noting that args from previous tasks are not passed to finally
+                task_request = self._serialiser.merge_args_and_kwargs(task_result if not task.is_finally else TupleOfAny(), task_args_and_kwargs)
 
                 # set extra pipeline related parameters
-                self._add_pipeline_meta(context, caller_id, parameters)
+                self._add_pipeline_meta(context, caller_id, task)
 
-                # extend with any args passed to the task explicitly
-                # noting that args from previous tasks are not passed to finally 
-                args = _extend_args(() if task.is_finally else args, task_args)
-
-                request = TaskRequest(id=task_id, type=task_type, parameters=self._serialiser.to_proto(parameters))
-                self._serialiser.serialise_request(request, args, kwargs, task_state)
+                request = TaskRequest(id=task_id, type=task.task_type)
+                self._serialiser.serialise_request(request, task_request, state=task_state, retry_policy=task.retry_policy)
                 
                 context.pack_and_send(task.get_destination(), task_id, request)
         else:
@@ -169,18 +168,18 @@ class _Pipeline(object):
                 context.pack_and_send(context.pipeline_state.caller_address, context.pipeline_state.caller_id, task_result_or_exception)
 
     @staticmethod
-    def _add_initial_pipeline_meta(context, parameters):
-        parameters['pipeline_address'] = context.pipeline_state.address
-        parameters['pipeline_id'] = context.pipeline_state.pipeline_id
-    
+    def _add_initial_pipeline_meta(context, task: Task):
+        task.pipeline_address = context.pipeline_state.address
+        task.pipeline_id = context.pipeline_state.pipeline_id
+
     @staticmethod
-    def _add_pipeline_meta(context, caller_id, parameters):
-        parameters['pipeline_address'] = context.pipeline_state.address
-        parameters['pipeline_id'] = context.pipeline_state.pipeline_id
+    def _add_pipeline_meta(context, caller_id, task: Task):
+        task.pipeline_address = context.pipeline_state.address
+        task.pipeline_id = context.pipeline_state.pipeline_id
 
         if caller_id is not None:
-            parameters['parent_task_address'] = context.get_caller_address()
-            parameters['parent_task_id'] = caller_id
+            task.parent_task_address = context.get_caller_address()
+            task.parent_task_id = caller_id
 
 
 
@@ -248,23 +247,28 @@ class PipelineBuilder(object):
         """
         args = self._unpack_single_tuple_args(args)
         task_type, parameters = self._task_type_and_parameters_for(fun)
-        self._pipeline.append(Task(_gen_id(), task_type, args, kwargs, parameters=parameters))
+        self._pipeline.append(Task.from_fields(_gen_id(), task_type, args, kwargs, **parameters))
         return self
 
-    def set(self, retry_policy:RetryPolicy = None, **params) -> 'PipelineBuilder':
+    def set(self, retry_policy: RetryPolicy = None, namespace: str = None,
+            worker_name: str = None) -> 'PipelineBuilder':
         """
         Sets task properties on the last entry added to the builder
 
         :param option retry_policy: the task retry policy to use
-        :param params: any other parameters to the task
+        :param option namespace: the task namespace
+        :param option worker_name: the task worker_name
         :return: the builder
         """
-        if retry_policy is not None:
-            params['retry_policy'] = retry_policy.to_proto()
 
         if any(self._pipeline):
             entry = self._pipeline[-1]
-            entry.set_parameters(params)
+            if retry_policy is not None:
+                entry.retry_policy.CopyFrom(retry_policy.to_proto())
+            if namespace is not None:
+                entry.namespace = namespace
+            if worker_name is not None:
+                entry.worker_name = worker_name
 
         return self
 
@@ -282,7 +286,7 @@ class PipelineBuilder(object):
         else:
             args = self._unpack_single_tuple_args(args)
             task_type, parameters = self._task_type_and_parameters_for(continuation)
-            self._pipeline.append(Task(_gen_id(), task_type, args, kwargs, parameters=parameters))
+            self._pipeline.append(Task.from_fields(_gen_id(), task_type, args, kwargs, **parameters))
         return self
 
     def get_destination(self):
@@ -311,8 +315,9 @@ class PipelineBuilder(object):
         if _is_tuple(args) and len(args) == 1:
             args = args[0]
 
-        task_request = TaskRequest(id=task_id, type=task_type, parameters=serialiser.to_proto(parameters))
-        serialiser.serialise_request(task_request, args, kwargs)
+        task_request = TaskRequest(id=task_id, type=task_type)
+        args_and_kwargs = serialiser.serialise_args_and_kwargs(args, kwargs)
+        serialiser.serialise_request(task_request, args_and_kwargs)
         
         return task_request
 
@@ -327,8 +332,8 @@ class PipelineBuilder(object):
         """
         args = self._unpack_single_tuple_args(args)
         task_type, parameters = self._task_type_and_parameters_for(finally_action)
-        task_entry = Task(_gen_id(), task_type, args, kwargs, parameters=parameters, is_finally=True)
-        task_entry.set_parameters({'is_fruitful': False})
+        combined_parameters = {**parameters, 'is_fruitful': False}
+        task_entry = Task.from_fields(_gen_id(), task_type, args, kwargs, is_finally=True, **combined_parameters)
         self._pipeline.append(task_entry)
         return self
 

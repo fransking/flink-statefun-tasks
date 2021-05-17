@@ -3,7 +3,7 @@ from google.protobuf.any_pb2 import Any
 from google.protobuf.message import Message
 from .messages_pb2 import MapOfStringToAny, ArrayOfAny, TupleOfAny, TaskEntry, GroupEntry, NoneValue, \
     TaskRetryPolicy, TaskRequest, TaskResult, TaskException, TaskState, TaskResults, Pipeline, PipelineEntry, Address, \
-        ArgsAndKwargs, TaskActionRequest, TaskActionResult, TaskActionException
+        ArgsAndKwargs, PipelineState
 from ._utils import _is_tuple
 from typing import Union
  
@@ -40,7 +40,8 @@ _KNOWN_PROTO_TYPES = [
     Pipeline, 
     PipelineEntry,
     Address,
-    ArgsAndKwargs
+    ArgsAndKwargs,
+    PipelineState
 ]
 
 def _wrap_value(v):
@@ -90,17 +91,19 @@ def _parse_any_from_bytes(bytes) -> Any:
 
 
 def _is_wrapped_known_proto_type(value, known_proto_types):
-    if isinstance(value, Any):
-        return value.TypeName() in known_proto_types
-
-    return False
+    return isinstance(value, Any) and any([value.Is(proto_type.DESCRIPTOR) for proto_type in known_proto_types])
 
 
 def _unpack_any(value, known_proto_types):
-    if _is_wrapped_known_proto_type(value, known_proto_types):
-        unwrapped = known_proto_types[value.TypeName()]()
-        value.Unpack(unwrapped)
-        return unwrapped
+    known_proto_types = _KNOWN_PROTO_TYPES + list(known_proto_types)
+
+    if isinstance(value, Any):
+        for proto_type in known_proto_types:
+            if value.Is(proto_type.DESCRIPTOR):
+                unwrapped = proto_type()
+                value.Unpack(unwrapped)
+                return unwrapped
+        return value
 
     return value
 
@@ -142,8 +145,7 @@ def _convert_to_proto(data) -> Union[MapOfStringToAny, ArrayOfAny, TupleOfAny, M
 def _convert_from_proto(proto: Union[MapOfStringToAny, ArrayOfAny, TupleOfAny, Message], known_proto_types = []):
 
     # map of known proto types
-    all_known_proto_types = {t.DESCRIPTOR.full_name: t for t in _KNOWN_PROTO_TYPES}
-    all_known_proto_types.update({t.DESCRIPTOR.full_name: t for t in known_proto_types})
+    all_known_proto_types = _KNOWN_PROTO_TYPES + list(known_proto_types)
 
     def convert(obj):
         if isinstance(obj, MapOfStringToAny):
