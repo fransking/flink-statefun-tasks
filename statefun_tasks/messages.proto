@@ -33,16 +33,11 @@ message TaskEntry {
     bool is_finally = 5;
     string namespace = 6;
     string worker_name = 7;
-    string message_type = 8;
-    string pipeline_address = 9;
-    string pipeline_id = 10;
-    string parent_task_address = 11;
-    string parent_task_id = 12;
-    bool is_fruitful = 13;
-    TaskRetryPolicy retry_policy = 14;
-    string module_name = 15;
-    bool with_state = 16;
-    bool with_context = 17;
+    bool is_fruitful = 8;
+    TaskRetryPolicy retry_policy = 9;
+    string module_name = 10;
+    bool with_state = 11;
+    bool with_context = 12;
 }
 
 message GroupEntry {
@@ -83,6 +78,7 @@ message TaskRequest {
     google.protobuf.Any request = 5;
     google.protobuf.Any state = 6;
     TaskRetryPolicy retry_policy = 7;
+    map<string, string> meta = 8;
 }
 
 message TaskResult {

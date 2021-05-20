@@ -27,8 +27,7 @@ class Task:
 
     @staticmethod
     def from_fields(task_id, task_type, task_args, task_kwargs, is_finally=None, namespace=None, worker_name=None,
-                    message_type=None, pipeline_address=None, pipeline_id=None, parent_task_address=None,
-                    parent_task_id=None, is_fruitful=None, retry_policy=None, module_name=None, with_state=None,
+                    is_fruitful=None, retry_policy=None, module_name=None, with_state=None,
                     with_context=None):
         proto = TaskEntry(
             task_id=task_id,
@@ -37,11 +36,6 @@ class Task:
             is_finally=is_finally,
             namespace=namespace,
             worker_name=worker_name,
-            message_type=message_type,
-            pipeline_address=pipeline_address,
-            pipeline_id=pipeline_id,
-            parent_task_address=parent_task_address,
-            parent_task_id=parent_task_id,
             is_fruitful=is_fruitful,
             retry_policy=retry_policy,
             module_name=module_name,
