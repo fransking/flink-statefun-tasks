@@ -218,7 +218,7 @@
 <td><p>Deserialises the pipeline from protobuf</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.get_destination" title="statefun_tasks.PipelineBuilder.get_destination"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_destination</span></code></a>()</p></td>
-<td><p>Returns the initial destination of the pipeline - i.e. where the first task should be sent or None if it should be set to the default namespace/worker.</p></td>
+<td><p>Returns the initial destination of the pipeline as None - i.e. use the default ingress.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.send" title="statefun_tasks.PipelineBuilder.send"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send</span></code></a>(fun, *args, **kwargs)</p></td>
 <td><p>Adds a task entry for the given Flink Task and arguments</p></td>
@@ -351,13 +351,7 @@
 <dl class="py method">
 <dt id="statefun_tasks.PipelineBuilder.get_destination">
 <code class="sig-name descname"><span class="pre">get_destination</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.get_destination" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the initial destination of the pipeline - i.e. where the first task should be sent
-or None if it should be set to the default namespace/worker</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>the initial destination (e.g. example/worker) or None if it should use the default</p>
-</dd>
-</dl>
+<dd><p>Returns the initial destination of the pipeline as None - i.e. use the default ingress</p>
 </dd></dl>
 
 <dl class="py method">

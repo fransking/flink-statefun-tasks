@@ -123,6 +123,13 @@ class FlinkTasksClient(object):
         task_action = TaskActionRequest(id=task_id, action=action, reply_topic=self._reply_topic)
         return self._submit_request(task_action, topic)
 
+    @property
+    def serialiser(self) -> DefaultSerialiser:
+        """
+        Returns the serialiser used by this client
+        """
+        return self._serialiser
+
     def submit(self, pipeline: PipelineBuilder, topic=None) -> Future:
         """
         Submit a pipeline to Flink

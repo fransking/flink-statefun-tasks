@@ -30,6 +30,8 @@ class _Pipeline(object):
         return _Pipeline(pipeline, serialiser)
 
     def begin(self, context: TaskContext):
+        caller_id = context.get_caller_id()
+
         # 1. record all the continuations into a pipeline and save into state with caller id and address
         context.pipeline_state.address = context.get_address()
         context.pipeline_state.pipeline.CopyFrom(self.to_proto())
@@ -43,10 +45,11 @@ class _Pipeline(object):
 
         # 3. call each task
         for task in tasks:
-            # set extra pipeline related parameters
-            self._add_initial_pipeline_meta(context, task)
-
             request = TaskRequest(id=task.task_id, type=task.task_type)
+
+            # set extra pipeline related parameters
+            self._add_pipeline_meta(context, caller_id, request)
+
             self._serialiser.serialise_request(request, task.request, retry_policy=task.retry_policy)
 
             context.send_message(task.get_destination(), task.task_id, request)
@@ -98,10 +101,11 @@ class _Pipeline(object):
                 # noting that args from previous tasks are not passed to finally
                 task_request = self._serialiser.merge_args_and_kwargs(task_result if not task.is_finally else TupleOfAny(), task_args_and_kwargs)
 
-                # set extra pipeline related parameters
-                self._add_pipeline_meta(context, caller_id, task)
-
                 request = TaskRequest(id=task_id, type=task.task_type)
+
+                # set extra pipeline related parameters
+                self._add_pipeline_meta(context, caller_id, request)
+
                 self._serialiser.serialise_request(request, task_request, state=task_state, retry_policy=task.retry_policy)
 
                 context.send_message(task.get_destination(), task_id, request)
@@ -167,15 +171,10 @@ class _Pipeline(object):
                                      task_result_or_exception)
 
     @staticmethod
-    def _add_initial_pipeline_meta(context, task: Task):
-        task.pipeline_address = context.pipeline_state.address
-        task.pipeline_id = context.pipeline_state.pipeline_id
-
-    @staticmethod
-    def _add_pipeline_meta(context, caller_id, task: Task):
-        task.pipeline_address = context.pipeline_state.address
-        task.pipeline_id = context.pipeline_state.pipeline_id
+    def _add_pipeline_meta(context, caller_id, task_request: TaskRequest):
+        task_request.meta['pipeline_address'] = context.pipeline_state.address
+        task_request.meta['pipeline_id'] = context.pipeline_state.pipeline_id
 
         if caller_id is not None:
-            task.parent_task_address = context.get_caller_address()
-            task.parent_task_id = caller_id
+            task_request.meta['parent_task_address'] = context.get_caller_address()
+            task_request.meta['parent_task_id'] = caller_id

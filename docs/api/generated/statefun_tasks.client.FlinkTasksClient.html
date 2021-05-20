@@ -236,6 +236,21 @@ e.g. {‘example/worker’: ‘example.requests’, None: ‘example.default.req
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.client.FlinkTasksClient.submit_async" title="statefun_tasks.client.FlinkTasksClient.submit_async"><code class="xref py py-obj docutils literal notranslate"><span class="pre">submit_async</span></code></a>(pipeline[, topic])</p></td>
 <td><p>Submit a pipeline to Flink</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.client.FlinkTasksClient.serialiser" title="statefun_tasks.client.FlinkTasksClient.serialiser"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serialiser</span></code></a></p></td>
+<td><p>Returns the serialiser used by this client</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.client.FlinkTasksClient.serialiser" title="statefun_tasks.client.FlinkTasksClient.serialiser"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serialiser</span></code></a></p></td>
+<td><p>Returns the serialiser used by this client</p></td>
+</tr>
 </tbody>
 </table>
 <dl class="py method">
@@ -345,6 +360,17 @@ e.g. {‘example/worker’: ‘example.requests’, None: ‘example.default.req
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>the status of the pipeline</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.client.FlinkTasksClient.serialiser">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">serialiser</span></code><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.serialiser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the serialiser used by this client</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">DefaultSerialiser</span></code></p>
 </dd>
 </dl>
 </dd></dl>
