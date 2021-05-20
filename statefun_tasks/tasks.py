@@ -1,6 +1,6 @@
 from statefun_tasks.context import TaskContext
 from statefun_tasks.pipeline_builder import PipelineBuilder
-from statefun_tasks.utils import _gen_id, _task_type_for, _is_tuple, _type_name, _annotated_protos_for
+from statefun_tasks.utils import _is_tuple, _type_name, _annotated_protos_for
 from statefun_tasks.messages_pb2 import TaskRequest
 from statefun_tasks.type_helpers import _create_task_result, _create_task_exception
 
