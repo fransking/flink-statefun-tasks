@@ -37,6 +37,7 @@ class _Pipeline(object):
 
         # 1. record all the continuations into a pipeline and save into state with caller id and address
         context.pipeline_state.address = context.get_address()
+        context.pipeline_state.pipeline_id = context.get_task_id()
         context.pipeline_state.pipeline.CopyFrom(self.to_proto())
 
         if context.get_caller_id() is not None:
