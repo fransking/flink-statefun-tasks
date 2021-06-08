@@ -1,27 +1,46 @@
-import asyncio
 import unittest
 
 from tests.utils import TestHarness, tasks
 
 
-@tasks.bind()
-def hello_workflow(first_name, last_name):
+_root_pipeline_id = None
+
+@tasks.bind(with_context=True)
+def hello_workflow(context, first_name, last_name):
+    global _root_pipeline_id
+
+    if not (context.get_root_pipeline_id() == context.get_pipeline_id()):
+        raise ValueError('Root ID Mismatch')
+
+    _root_pipeline_id = context.get_root_pipeline_id()
+
     return tasks.send(hello_and_goodbye_workflow, first_name, last_name)
 
 
-@tasks.bind()
-def hello_and_goodbye_workflow(first_name, last_name):
+@tasks.bind(with_context=True)
+def hello_and_goodbye_workflow(context, first_name, last_name):
+
+    if not (context.get_root_pipeline_id() == _root_pipeline_id):
+        raise ValueError('Root ID Mismatch')
+
     return tasks.send(_say_hello, first_name, last_name).continue_with(_say_goodbye, goodbye_message="see you later!")
 
 
-@tasks.bind()
-def _say_hello(first_name, last_name):
+@tasks.bind(with_context=True)
+def _say_hello(context, first_name, last_name):
+
+    if not (context.get_root_pipeline_id() == _root_pipeline_id):
+        raise ValueError('Root ID Mismatch')
+
     return f'Hello {first_name} {last_name}'
 
 
-@tasks.bind()
-async def _say_goodbye(greeting, goodbye_message):
-    await asyncio.sleep(0)
+@tasks.bind(with_context=True)
+def _say_goodbye(context, greeting, goodbye_message):
+
+    if not (context.get_root_pipeline_id() == _root_pipeline_id):
+        raise ValueError('Root ID Mismatch')
+
     return f'{greeting}.  So now I will say {goodbye_message}'
 
 

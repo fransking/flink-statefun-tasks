@@ -268,6 +268,7 @@ class FlinkTasks(object):
         elif isinstance(task_input, TaskRequest):
             # otherwise we invoke the task
             task_request = task_input  # type: TaskRequest
+            context.apply_task_meta(task_request)
             return self._invoke_task(context, task_request)
 
         else:
@@ -331,7 +332,7 @@ class FlinkTasks(object):
         task_result, task_exception, pipeline = result_tuple  # unpack
 
         if pipeline is not None:
-            pipeline.begin(context)
+            pipeline.begin(context, task_request)
         else:
             if task_exception is not None:
                 if self._attempt_retry(context, task_request, task_exception):

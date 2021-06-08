@@ -1,5 +1,5 @@
 from ._serialisation import DefaultSerialiser
-from .messages_pb2 import TaskState, PipelineState
+from .messages_pb2 import TaskState, PipelineState, TaskRequest
 
 from google.protobuf.any_pb2 import Any
 from statefun import kafka_egress_record
@@ -16,6 +16,56 @@ class TaskContext(object):
 
         self.task_state = self.unpack('task_state', TaskState) or TaskState()
         self.pipeline_state = self.unpack('pipeline_state', PipelineState) or PipelineState()
+        self._task_meta = {}
+
+    def apply_task_meta(self, task_request: TaskRequest):
+        """
+        Applies the task meta from the given TaskRequest to this context
+
+        :param task_request: the task request
+        """
+        self._task_meta = task_request.meta or {}
+
+    def get_root_pipeline_id(self):
+        """
+        ID of the top most pipeline if this task is called as part of a pipeline else None.  This will be different from 
+        get_pipeline_id() if the pipeline is nested
+
+        :return: root pipeline ID
+        """
+        return self._task_meta.get('root_pipeline_id', None)
+
+    def get_root_pipeline_address(self):
+        """
+        Address of the top most pipeline if this task is called as part of a pipeline else None.
+
+        :return: root pipeline address
+        """
+        return self._task_meta.get('root_pipeline_address', None)
+
+    def get_pipeline_id(self):
+        """
+        ID of the pipeline if this task is called as part of a pipeline else None
+
+        :return: pipeline ID
+        """
+        return self._task_meta.get('pipeline_id', None)
+
+    def get_parent_task_id(self):
+        """
+        ID of the parent task if this task has one else None
+
+        :return: parent task ID
+        """
+        return self._task_meta.get('parent_task_id', None)
+
+    def get_parent_task_address(self):
+        """
+        ID of the parent task address if this task has one else None
+
+        :return: parent task address
+        """
+        return self._task_meta.get('parent_task_address', None)
 
     def get_address(self):
         return f'{self._context.address.namespace}/{self._context.address.type}'

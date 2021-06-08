@@ -106,15 +106,17 @@ message TaskState {
 }
 
 message PipelineState {
-    string address = 1;
-    string caller_id = 2;
-    string caller_address = 3;
-    string pipeline_id = 4;
-    Pipeline pipeline = 5;
-    TaskResults task_results = 6;
+    string id = 1;
+    string address = 2;
+    string root_id = 3;
+    string root_address = 4;
+    string caller_id = 5;
+    string caller_address = 6;
+    Pipeline pipeline = 7;
+    TaskResults task_results = 8;
     oneof before_finally {
-        TaskResult result_before_finally = 7;
-        TaskException exception_before_finally = 8;
+        TaskResult result_before_finally = 9;
+        TaskException exception_before_finally = 10;
     }
 }
 

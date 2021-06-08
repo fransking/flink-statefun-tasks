@@ -32,17 +32,21 @@ class _Pipeline(object):
         return _Pipeline(pipeline, serialiser)
         
 
-    def begin(self, context: TaskContext):
+    def begin(self, context: TaskContext, invoking_task: TaskRequest):
         caller_id = context.get_caller_id()
 
         # 1. record all the continuations into a pipeline and save into state with caller id and address
+        context.pipeline_state.id = context.get_task_id()
         context.pipeline_state.address = context.get_address()
-        context.pipeline_state.pipeline_id = context.get_task_id()
         context.pipeline_state.pipeline.CopyFrom(self.to_proto())
 
-        if context.get_caller_id() is not None:
-            context.pipeline_state.caller_id = context.get_caller_id()
+        if caller_id is not None:
+            context.pipeline_state.caller_id = caller_id
             context.pipeline_state.caller_address = context.get_caller_address()
+
+        # record the root pipeline details from the calling task into our pipeline state to aid in tracking nested pipelines
+        context.pipeline_state.root_id = invoking_task.meta['root_pipeline_id'] or context.pipeline_state.id
+        context.pipeline_state.root_address = invoking_task.meta['root_pipeline_address'] or context.pipeline_state.address
 
         # 2. get initial tasks(s) to call - might be single start of chain task or a group of tasks to call in parallel
         tasks = _get_initial_tasks(self._pipeline[0])
@@ -175,11 +179,14 @@ class _Pipeline(object):
     @staticmethod
     def _add_pipeline_meta(context, caller_id, task_request: TaskRequest):
         task_request.meta['pipeline_address'] = context.pipeline_state.address
-        task_request.meta['pipeline_id'] = context.pipeline_state.pipeline_id
+        task_request.meta['pipeline_id'] = context.pipeline_state.id
+        task_request.meta['root_pipeline_id'] = context.pipeline_state.root_id
+        task_request.meta['root_pipeline_address'] = context.pipeline_state.root_address
 
         if caller_id is not None:
             task_request.meta['parent_task_address'] = context.get_caller_address()
             task_request.meta['parent_task_id'] = caller_id
+
 
 
 
