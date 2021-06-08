@@ -1,6 +1,6 @@
 from statefun_tasks.serialisation import DefaultSerialiser
 from statefun_tasks.type_helpers import flink_value_type_for
-from statefun_tasks.messages_pb2 import TaskState, PipelineState
+from statefun_tasks.messages_pb2 import TaskState, PipelineState, TaskRequest
 from statefun_tasks.protobuf import pack_any
 
 from statefun import kafka_egress_message, message_builder, Context, SdkAddress
@@ -23,6 +23,40 @@ class TaskContext(object):
         self.storage = context.storage
         self.task_state = self.storage.task_state or TaskState()
         self.pipeline_state = self.storage.pipeline_state or PipelineState()
+        self._task_meta = {}
+
+    def apply_task_meta(self, task_request: TaskRequest):
+        """
+        Applies the task meta from the given TaskRequest to this context
+
+        :param task_request: the task request
+        """
+        self._task_meta = task_request.meta or {}
+
+    def get_root_pipeline_id(self):
+        """
+        ID of the top most pipeline if this task is called as part of a pipeline else None.  This will be different from 
+        get_pipeline_id() if the pipeline is nested
+
+        :return: root pipeline ID
+        """
+        return self._task_meta.get('root_pipeline_id', None)
+
+    def get_pipeline_id(self):
+        """
+        ID of the pipeline if this task is called as part of a pipeline else None
+
+        :return: pipeline ID
+        """
+        return self._task_meta.get('pipeline_id', None)
+
+    def get_parent_task_id(self):
+        """
+        ID of the parent task if this task has one else None
+
+        :return: parnent task ID
+        """
+        return self._task_meta.get('parent_task_id', None)
 
     def get_address(self):
         """

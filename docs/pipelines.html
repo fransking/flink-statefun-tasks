@@ -93,6 +93,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#continuations">Continuations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fan-out-fan-in">Fan out / Fan in</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#passing-state">Passing State</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#accessing-the-context">Accessing the Context</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#error-handling">Error Handling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#orchestrator-tasks">Orchestrator Tasks</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#composition">Composition</a></li>
@@ -242,6 +243,16 @@ declare so in <em>&#64;tasks.bind()</em>:</p>
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> \   <span class="c1"># 6</span>
     <span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">subtract</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> \  <span class="c1"># 5</span>
     <span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">add_state</span><span class="p">)</span>      <span class="c1"># 15</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="accessing-the-context">
+<h2>Accessing the Context<a class="headerlink" href="#accessing-the-context" title="Permalink to this headline">¶</a></h2>
+<p>A wrapper around the Flink context can also be accessed by declaring so in <em>&#64;tasks.bind()</em>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">with_context</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">task_using_context</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+    <span class="n">caller</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">get_caller_id</span><span class="p">()</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">caller</span><span class="si">}</span><span class="s1">, you called me&#39;</span>
 </pre></div>
 </div>
 </div>

@@ -155,6 +155,7 @@ class FlinkTasks(object):
 
                 if message.is_type(TASK_REQUEST_TYPE):
                     task_input = message.as_type(TASK_REQUEST_TYPE)
+                    task_context.apply_task_meta(task_input)
                     await self._invoke_task(task_context, task_input)
 
                 elif message.is_type(TASK_ACTION_REQUEST_TYPE):
@@ -224,7 +225,7 @@ class FlinkTasks(object):
 
         # if task returns a pipeline then start it
         if pipeline is not None:
-            pipeline.begin(context) 
+            pipeline.begin(context, task_request) 
 
         # else if we have a task result return it
         elif task_result is not None:
