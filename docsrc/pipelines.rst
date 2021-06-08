@@ -84,6 +84,20 @@ declare so in *@tasks.bind()*:
         .continue_with(add_state)      # 15
 
 
+Accessing the Context
+---------------------
+
+A wrapper around the Flink context can also be accessed by declaring so in *@tasks.bind()*:
+
+.. code-block:: python
+
+    @tasks.bind(with_context=True)
+    def task_using_context(context):
+        caller = context.get_caller_id()
+        return f'{caller}, you called me'
+
+
+
 Error Handling
 --------------
 

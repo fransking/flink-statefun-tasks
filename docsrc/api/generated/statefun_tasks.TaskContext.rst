@@ -13,9 +13,15 @@ TaskContext
    .. autosummary::
    
       ~TaskContext.__init__
+      ~TaskContext.apply_task_meta
       ~TaskContext.get_address
       ~TaskContext.get_caller_address
       ~TaskContext.get_caller_id
+      ~TaskContext.get_parent_task_address
+      ~TaskContext.get_parent_task_id
+      ~TaskContext.get_pipeline_id
+      ~TaskContext.get_root_pipeline_address
+      ~TaskContext.get_root_pipeline_id
       ~TaskContext.get_task_id
       ~TaskContext.send_egress_message
       ~TaskContext.send_message

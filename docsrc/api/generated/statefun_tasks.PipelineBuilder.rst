@@ -19,6 +19,7 @@ PipelineBuilder
       ~PipelineBuilder.finally_do
       ~PipelineBuilder.from_proto
       ~PipelineBuilder.get_destination
+      ~PipelineBuilder.get_tasks
       ~PipelineBuilder.send
       ~PipelineBuilder.set
       ~PipelineBuilder.to_pipeline

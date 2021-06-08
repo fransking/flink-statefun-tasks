@@ -206,14 +206,32 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.__init__" title="statefun_tasks.TaskContext.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(context, egress_type_name[, serialiser])</p></td>
 <td><p>Initialize self.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_address" title="statefun_tasks.TaskContext.get_address"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_address</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.apply_task_meta" title="statefun_tasks.TaskContext.apply_task_meta"><code class="xref py py-obj docutils literal notranslate"><span class="pre">apply_task_meta</span></code></a>(task_request)</p></td>
+<td><p>Applies the task meta from the given TaskRequest to this context</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_address" title="statefun_tasks.TaskContext.get_address"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_address</span></code></a>()</p></td>
 <td><p>Own address in the form of context.address.typename</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_caller_address" title="statefun_tasks.TaskContext.get_caller_address"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_caller_address</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_caller_address" title="statefun_tasks.TaskContext.get_caller_address"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_caller_address</span></code></a>()</p></td>
 <td><p>Caller address in the form of context.caller.typename</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_caller_id" title="statefun_tasks.TaskContext.get_caller_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_caller_id</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_caller_id" title="statefun_tasks.TaskContext.get_caller_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_caller_id</span></code></a>()</p></td>
 <td><p>Caller task Id in the form of context.caller.id</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_parent_task_address" title="statefun_tasks.TaskContext.get_parent_task_address"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_parent_task_address</span></code></a>()</p></td>
+<td><p>ID of the parent task address if this task has one else None</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_parent_task_id" title="statefun_tasks.TaskContext.get_parent_task_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_parent_task_id</span></code></a>()</p></td>
+<td><p>ID of the parent task if this task has one else None</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_pipeline_id" title="statefun_tasks.TaskContext.get_pipeline_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_pipeline_id</span></code></a>()</p></td>
+<td><p>ID of the pipeline if this task is called as part of a pipeline else None</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_root_pipeline_address" title="statefun_tasks.TaskContext.get_root_pipeline_address"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_root_pipeline_address</span></code></a>()</p></td>
+<td><p>Address of the top most pipeline if this task is called as part of a pipeline else None.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_root_pipeline_id" title="statefun_tasks.TaskContext.get_root_pipeline_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_root_pipeline_id</span></code></a>()</p></td>
+<td><p>ID of the top most pipeline if this task is called as part of a pipeline else None.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_task_id" title="statefun_tasks.TaskContext.get_task_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_task_id</span></code></a>()</p></td>
 <td><p>Own task Id in the form of context.address.id</p></td>
@@ -232,6 +250,17 @@
 </tr>
 </tbody>
 </table>
+<dl class="py method">
+<dt id="statefun_tasks.TaskContext.apply_task_meta">
+<code class="sig-name descname"><span class="pre">apply_task_meta</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_request</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.apply_task_meta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies the task meta from the given TaskRequest to this context</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>task_request</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TaskRequest</span></code>) – the task request</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt id="statefun_tasks.TaskContext.get_address">
 <code class="sig-name descname"><span class="pre">get_address</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_address" title="Permalink to this definition">¶</a></dt>
@@ -261,6 +290,62 @@
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>task Id</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.TaskContext.get_parent_task_address">
+<code class="sig-name descname"><span class="pre">get_parent_task_address</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_parent_task_address" title="Permalink to this definition">¶</a></dt>
+<dd><p>ID of the parent task address if this task has one else None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>parent task address</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.TaskContext.get_parent_task_id">
+<code class="sig-name descname"><span class="pre">get_parent_task_id</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_parent_task_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>ID of the parent task if this task has one else None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>parent task ID</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.TaskContext.get_pipeline_id">
+<code class="sig-name descname"><span class="pre">get_pipeline_id</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_pipeline_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>ID of the pipeline if this task is called as part of a pipeline else None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>pipeline ID</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.TaskContext.get_root_pipeline_address">
+<code class="sig-name descname"><span class="pre">get_root_pipeline_address</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_root_pipeline_address" title="Permalink to this definition">¶</a></dt>
+<dd><p>Address of the top most pipeline if this task is called as part of a pipeline else None.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>root pipeline address</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.TaskContext.get_root_pipeline_id">
+<code class="sig-name descname"><span class="pre">get_root_pipeline_id</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_root_pipeline_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>ID of the top most pipeline if this task is called as part of a pipeline else None.  This will be different from
+get_pipeline_id() if the pipeline is nested</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>root pipeline ID</p>
 </dd>
 </dl>
 </dd></dl>
