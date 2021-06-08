@@ -42,6 +42,14 @@ class TaskContext(object):
         """
         return self._task_meta.get('root_pipeline_id', None)
 
+    def get_root_pipeline_address(self):
+        """
+        Address of the top most pipeline if this task is called as part of a pipeline else None.
+
+        :return: root pipeline address
+        """
+        return self._task_meta.get('root_pipeline_address', None)
+
     def get_pipeline_id(self):
         """
         ID of the pipeline if this task is called as part of a pipeline else None
@@ -54,9 +62,17 @@ class TaskContext(object):
         """
         ID of the parent task if this task has one else None
 
-        :return: parnent task ID
+        :return: parent task ID
         """
         return self._task_meta.get('parent_task_id', None)
+
+    def get_parent_task_address(self):
+        """
+        ID of the parent task address if this task has one else None
+
+        :return: parent task address
+        """
+        return self._task_meta.get('parent_task_address', None)
 
     def get_address(self):
         """
