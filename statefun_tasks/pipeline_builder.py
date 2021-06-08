@@ -218,6 +218,22 @@ class PipelineBuilder(object):
 
         return PipelineBuilder(pipeline)
 
+    def get_tasks(self) -> list:
+        """
+        Returns a list of all tasks identifiers (namespace, worker name, id) that make up this pipeline
+
+        :return: list of tuples of namespace, worker name, id for each task
+        """
+        def yield_tasks(entry):
+            for task_or_group in entry:
+                if isinstance(task_or_group, Group):
+                    for group_entry in task_or_group:
+                        yield from yield_tasks(group_entry)
+                else:
+                    yield task_or_group.namespace, task_or_group.worker_name, task_or_group.id
+        
+        return list(yield_tasks(self))
+
     @staticmethod
     def _task_type_and_parameters_for(fun):
         try:

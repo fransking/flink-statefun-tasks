@@ -220,25 +220,28 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.get_destination" title="statefun_tasks.PipelineBuilder.get_destination"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_destination</span></code></a>()</p></td>
 <td><p>Returns the initial destination of the pipeline as None - i.e. use the default ingress.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.send" title="statefun_tasks.PipelineBuilder.send"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send</span></code></a>(fun, *args, **kwargs)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.get_tasks" title="statefun_tasks.PipelineBuilder.get_tasks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_tasks</span></code></a>()</p></td>
+<td><p>Returns a list of all tasks identifiers (namespace, worker name, id) that make up this pipeline</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.send" title="statefun_tasks.PipelineBuilder.send"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send</span></code></a>(fun, *args, **kwargs)</p></td>
 <td><p>Adds a task entry for the given Flink Task and arguments</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.set" title="statefun_tasks.PipelineBuilder.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set</span></code></a>([retry_policy, namespace, worker_name])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.set" title="statefun_tasks.PipelineBuilder.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set</span></code></a>([retry_policy, namespace, worker_name])</p></td>
 <td><p>Sets task properties on the last entry added to the builder</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.to_pipeline" title="statefun_tasks.PipelineBuilder.to_pipeline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_pipeline</span></code></a>([serialiser])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.to_pipeline" title="statefun_tasks.PipelineBuilder.to_pipeline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_pipeline</span></code></a>([serialiser])</p></td>
 <td><p>Concretises the builder into a pipeline</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.to_proto" title="statefun_tasks.PipelineBuilder.to_proto"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_proto</span></code></a>([serialiser])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.to_proto" title="statefun_tasks.PipelineBuilder.to_proto"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_proto</span></code></a>([serialiser])</p></td>
 <td><p>Serialises the pipeline to protobuf</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.to_task_request" title="statefun_tasks.PipelineBuilder.to_task_request"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_task_request</span></code></a>(serialiser)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.to_task_request" title="statefun_tasks.PipelineBuilder.to_task_request"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_task_request</span></code></a>(serialiser)</p></td>
 <td><p>Serialises the pipeline as a TaskRequest with a task type of ‘__builtins.run_pipeline’</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.validate" title="statefun_tasks.PipelineBuilder.validate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.validate" title="statefun_tasks.PipelineBuilder.validate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate</span></code></a>()</p></td>
 <td><p>Validates the pipeline</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.id" title="statefun_tasks.PipelineBuilder.id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">id</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.id" title="statefun_tasks.PipelineBuilder.id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">id</span></code></a></p></td>
 <td><p>The ID of this pipeline</p></td>
 </tr>
 </tbody>
@@ -352,6 +355,20 @@
 <dt id="statefun_tasks.PipelineBuilder.get_destination">
 <code class="sig-name descname"><span class="pre">get_destination</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.get_destination" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the initial destination of the pipeline as None - i.e. use the default ingress</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.PipelineBuilder.get_tasks">
+<code class="sig-name descname"><span class="pre">get_tasks</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.get_tasks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of all tasks identifiers (namespace, worker name, id) that make up this pipeline</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of tuples of namespace, worker name, id for each task</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
