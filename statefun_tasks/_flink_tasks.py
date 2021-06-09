@@ -104,12 +104,13 @@ class FlinkTasks(object):
         """
         self._bindings[f'__builtins.{type_name}'] = _FlinkTask(fun, self._serialiser, **params)
 
-    def register(self, fun, module_name=None, **params):
+    def register(self, fun, wrapper=None, module_name=None, **params):
         """
         Registers a Python function as a Flink Task.
         Normally you would attribute the function with @tasks.bind() instead
 
         :param fun: the python function
+        :param optional wrapper: if wrapping a task function with e.g. functools.wraps then pass the wrapper here
         :param optional module_name: the module name to register the task under which by default is the Python module name containing the function
         :param params: any additional parameters to the Flink Task (such as a retry policy)
         """
@@ -118,7 +119,7 @@ class FlinkTasks(object):
             raise ValueError("function instance must be provided")
 
         fun.type_name = _task_type_for(fun, module_name)
-        self._bindings[fun.type_name] = _FlinkTask(fun, self._serialiser, **params)
+        self._bindings[fun.type_name] = _FlinkTask(wrapper or fun, self._serialiser, **params)
 
     def bind(self, namespace: str = None, worker_name: str = None, retry_policy: RetryPolicy = None,  with_state: bool = False, is_fruitful: bool = True, module_name: str = None, with_context: bool = False):
         """
