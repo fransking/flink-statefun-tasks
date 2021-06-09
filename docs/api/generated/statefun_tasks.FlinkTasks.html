@@ -215,7 +215,7 @@ to be exposed as tasks.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.get_task" title="statefun_tasks.FlinkTasks.get_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_task</span></code></a>(task_type)</p></td>
 <td><p>Returns the Flink Task instance for a given task type name</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.register" title="statefun_tasks.FlinkTasks.register"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register</span></code></a>(fun[, module_name])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.register" title="statefun_tasks.FlinkTasks.register"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register</span></code></a>(fun[, wrapper, module_name])</p></td>
 <td><p>Registers a Python function as a Flink Task.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.register_builtin" title="statefun_tasks.FlinkTasks.register_builtin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_builtin</span></code></a>(type_name, fun, **params)</p></td>
@@ -268,13 +268,14 @@ otherwise the Python module containing the function will be used</p></li>
 
 <dl class="py method">
 <dt id="statefun_tasks.FlinkTasks.register">
-<code class="sig-name descname"><span class="pre">register</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fun</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.register" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">register</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fun</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wrapper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.register" title="Permalink to this definition">¶</a></dt>
 <dd><p>Registers a Python function as a Flink Task.
 Normally you would attribute the function with &#64;tasks.bind() instead</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>fun</strong> – the python function</p></li>
+<li><p><strong>wrapper</strong> (<em>optional</em>) – if wrapping a task function with e.g. functools.wraps then pass the wrapper here</p></li>
 <li><p><strong>module_name</strong> (<em>optional</em>) – the module name to register the task under which by default is the Python module name containing the function</p></li>
 <li><p><strong>params</strong> – any additional parameters to the Flink Task (such as a retry policy)</p></li>
 </ul>
