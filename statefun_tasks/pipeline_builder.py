@@ -161,15 +161,17 @@ class PipelineBuilder(object):
         self._pipeline.append(task_entry)
         return self
 
-    def to_pipeline(self, serialiser=None):
+    def to_pipeline(self, serialiser=None, is_fruitful=True):
         """
         Concretises the builder into a pipeline
 
         :param option serialiser: the serialiser to use such as DefaultSerialiser
+        :param option is_fruitful: whether this pipeline is fruitful (i.e. returns a result). Default is True
+
         :return: a Flink Tasks pipeline
         """
         self.validate()
-        return _Pipeline(self._pipeline, serialiser=serialiser)
+        return _Pipeline(self._pipeline, serialiser=serialiser, is_fruitful=is_fruitful)
 
     def validate(self) -> 'PipelineBuilder':
         """

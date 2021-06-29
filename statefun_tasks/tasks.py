@@ -51,30 +51,34 @@ class _FlinkTask(object):
     def _to_pipeline_or_task_result(self, task_request, fn_result, fn_state):
         pipeline, task_result = None, None
 
-        if not self._is_fruitful:
+        # if single result then wrap in tuple as this is the maximal case
+        if not _is_tuple(fn_result):
+            fn_result = (fn_result,)
+
+        # if this task accesses state then we expect the first element in the result tuple
+        # to be the mutated state and the task results to be remainder
+        if self._with_state:
+
+            if len(fn_result) < 1:
+                raise ValueError('Expecting a tuple with at least the state as the first element')
+
+            fn_state = fn_result[0]
+            fn_result = fn_result[1:] if len(fn_result) > 1 else ()
+
+        # if a single element tuple remains then unpack back to single value
+        # so (8,) becomes 8 but (8,9) remains a tuple
+        fn_result = fn_result[0] if len(fn_result) == 1 else fn_result
+
+        # result of the task might be a Flink pipeline
+        if isinstance(fn_result, PipelineBuilder):
+            # this new pipeline which once complete will yield the result of the whole pipeline
+            # back to the caller as if it were a simple task
+            pipeline = fn_result.to_pipeline(self._serialiser, is_fruitful=self._is_fruitful)
             fn_result = ()
 
-        else:
-            # if single result then wrap in tuple as this is the maximal case
-            if not _is_tuple(fn_result):
-                fn_result = (fn_result,)
-
-            # if this task accesses state then we expect the first element in the result tuple
-            # to be the mutated state and the task results to be remainder
-            if self._with_state:
-                fn_state = fn_result[0]
-                fn_result = fn_result[1:] if len(fn_result) > 1 else ()
-
-            # if a single element tuple then unpack back to single value
-            # so (8,) becomes 8 but (8,9) remains a tuple
-            fn_result = fn_result[0] if len(fn_result) == 1 else fn_result
-
-            # result of the task might be a Flink pipeline
-            if isinstance(fn_result, PipelineBuilder):
-                # this new pipeline which once complete will yield the result of the whole pipeline
-                # back to the caller as if it were a simple task
-                pipeline = fn_result.to_pipeline(self._serialiser)
-                fn_result = None
+        # drop the result if the task is marked as not fruitful
+        if not self._is_fruitful:
+            fn_result = ()
 
         task_result = _create_task_result(task_request)
         self._serialiser.serialise_result(task_result, fn_result, fn_state)
