@@ -380,6 +380,9 @@ class FlinkTasks(object):
     def _fail(self, context, task_input, ex):
         task_exception = _create_task_exception(task_input, ex)
 
+        context.delete('task_result')
+        context.pack_and_save('task_exception', task_exception)
+
         # emit the error - either by replying to caller or sending some egress
         self._emit_result(context, task_input, task_exception)
 

@@ -18,6 +18,17 @@ class TaskContext(object):
         self.pipeline_state = self.unpack('pipeline_state', PipelineState) or PipelineState()
         self._task_meta = {}
 
+    @property
+    def task_name(self):
+        """
+        The name of this task
+        """
+        return self._task_name
+
+    @task_name.setter
+    def task_name(self, value):
+        self._task_name = value
+
     def apply_task_meta(self, task_request: TaskRequest):
         """
         Applies the task meta from the given TaskRequest to this context
