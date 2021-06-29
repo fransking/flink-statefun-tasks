@@ -118,6 +118,7 @@ message PipelineState {
         TaskResult result_before_finally = 9;
         TaskException exception_before_finally = 10;
     }
+    bool is_fruitful = 11;
 }
 
 message TaskResults {

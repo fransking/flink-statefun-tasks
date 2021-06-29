@@ -44,6 +44,22 @@ def _say_goodbye(context, greeting, goodbye_message):
     return f'{greeting}.  So now I will say {goodbye_message}'
 
 
+@tasks.bind(is_fruitful=False)
+def _non_fruitful_workflow():
+    return _task.send()
+
+_return = None
+
+@tasks.bind()
+def _task():
+    global _return
+    _return = 5
+    return 'ignore this'
+
+@tasks.bind()
+def _task2():
+    return _return
+
 class NestedPipelineTests(unittest.TestCase):
     def setUp(self) -> None:
         self.test_harness = TestHarness()
@@ -52,6 +68,11 @@ class NestedPipelineTests(unittest.TestCase):
         pipeline = tasks.send(hello_workflow, 'Jane', 'Doe')
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, 'Hello Jane Doe.  So now I will say see you later!')
+
+    def test_nested_non_fruitful_pipeline(self):
+        pipeline = _non_fruitful_workflow.send().continue_with(_task2)
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, 5)
 
 if __name__ == '__main__':
     unittest.main()

@@ -8,9 +8,10 @@ from statefun_tasks.types import Task, Group
 
 
 class _Pipeline(object):
-    def __init__(self, pipeline: list, serialiser=None):
+    def __init__(self, pipeline: list, serialiser=None, is_fruitful=True):
         self._pipeline = pipeline
         self._serialiser = serialiser if serialiser is not None else DefaultSerialiser()
+        self._is_fruitful = is_fruitful
         self._pipeline_helper = _PipelineHelper(self._pipeline, self._serialiser)
 
     def to_proto(self) -> Pipeline:
@@ -36,6 +37,7 @@ class _Pipeline(object):
         context.pipeline_state.id = context.get_task_id()
         context.pipeline_state.address = context.get_address()
         context.pipeline_state.pipeline.CopyFrom(self.to_proto())
+        context.pipeline_state.is_fruitful = self._is_fruitful
 
         if caller_id is not None:
             context.pipeline_state.caller_id = caller_id
@@ -152,10 +154,15 @@ class _Pipeline(object):
         # finally emit the result (to egress, destination address or caller address)
         self._emit_result(context, task_request, task_result_or_exception)
 
-    @staticmethod
-    def _emit_result(context, task_request, task_result_or_exception):
+    def _emit_result(self, context, task_request, task_result_or_exception):
         # the result of this task is the result of the pipeline
         if isinstance(task_result_or_exception, TaskResult):
+
+            # if we are not a fruitful pipeline then zero out the result
+            if not context.storage.pipeline_state.is_fruitful:
+                no_result = self._serialiser.serialise_args_and_kwargs((), {})
+                task_result_or_exception.result.CopyFrom(no_result)
+
             context.storage.task_result = task_result_or_exception
         else:
             context.storage.task_exception = task_result_or_exception

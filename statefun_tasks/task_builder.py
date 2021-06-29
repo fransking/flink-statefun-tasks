@@ -234,16 +234,16 @@ class FlinkTasks(object):
 
         # else if we have a task result return it
         elif task_result is not None:
-                context.storage.task_result = task_result
-                self._emit_result(context, task_request, task_result)
+            context.storage.task_result = task_result
+            self._emit_result(context, task_request, task_result)
 
         # else if we have an task exception, attempt retry or return the error
         elif task_exception is not None:
-                if self._attempt_retry(context, task_request, task_exception):
-                    return  # we have triggered a retry so ignore the result of this invocation
+            if self._attempt_retry(context, task_request, task_exception):
+                return  # we have triggered a retry so ignore the result of this invocation
 
-                context.storage.task_exception = task_exception
-                self._emit_result(context, task_request, task_exception)
+            context.storage.task_exception = task_exception
+            self._emit_result(context, task_request, task_exception)
 
         _log.info(f'Finished {task_request.type}, {context}')
 
