@@ -11,8 +11,9 @@ from uuid import uuid4
 
 
 class _Pipeline(object):
-    def __init__(self, pipeline: list, serialiser=None):
+    def __init__(self, pipeline: list, serialiser=None, is_fruitful=True):
         self._pipeline = pipeline
+        self._is_fruitful = is_fruitful
         self._serialiser = serialiser if serialiser is not None else DefaultSerialiser()
 
     def to_proto(self) -> Pipeline:
@@ -39,6 +40,7 @@ class _Pipeline(object):
         context.pipeline_state.id = context.get_task_id()
         context.pipeline_state.address = context.get_address()
         context.pipeline_state.pipeline.CopyFrom(self.to_proto())
+        context.pipeline_state.is_fruitful = self._is_fruitful
 
         if caller_id is not None:
             context.pipeline_state.caller_id = caller_id
@@ -156,11 +158,18 @@ class _Pipeline(object):
         # finally emit the result (to egress, destination address or caller address)
         self._emit_result(context, task_request, task_result_or_exception)
 
-    @staticmethod
-    def _emit_result(context, task_request, task_result_or_exception):
+    def _emit_result(self, context, task_request, task_result_or_exception):
         # the result of this task is the result of the pipeline
-        key = 'task_result' if isinstance(task_result_or_exception, TaskResult) else 'task_exception'
-        context.pack_and_save(key, task_result_or_exception)
+        if isinstance(task_result_or_exception, TaskResult):
+
+            # if we are not a fruitful pipeline then zero out the result
+            if not context.pipeline_state.is_fruitful:
+                no_result = self._serialiser.serialise_args_and_kwargs((), {})
+                task_result_or_exception.result.CopyFrom(no_result)
+
+            context.pack_and_save('task_result', task_result_or_exception)
+        else:
+            context.pack_and_save('task_exception', task_result_or_exception)
 
         # either send a message to egress if reply_topic was specified
         if task_request.HasField('reply_topic'):
@@ -342,15 +351,17 @@ class PipelineBuilder(object):
         self._pipeline.append(task_entry)
         return self
 
-    def to_pipeline(self, serialiser=None):
+    def to_pipeline(self, serialiser=None, is_fruitful=True):
         """
         Concretises the builder into a pipeline
 
         :param option serialiser: the serialiser to use such as DefaultSerialiser
+        :param option is_fruitful: whether this pipeline is fruitful (i.e. returns a result). Default is True
+
         :return: a Flink Tasks pipeline
         """
         self.validate()
-        return _Pipeline(self._pipeline, serialiser=serialiser)
+        return _Pipeline(self._pipeline, serialiser=serialiser, is_fruitful=is_fruitful)
 
     def validate(self) -> 'PipelineBuilder':
         """
