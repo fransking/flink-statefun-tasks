@@ -156,19 +156,23 @@ class FlinkTasks(object):
 
                 if message.is_type(TASK_REQUEST_TYPE):
                     task_input = message.as_type(TASK_REQUEST_TYPE)
+                    task_context.task_name = task_input.type
                     task_context.apply_task_meta(task_input)
                     await self._invoke_task(task_context, task_input)
 
                 elif message.is_type(TASK_ACTION_REQUEST_TYPE):
                     task_input = message.as_type(TASK_ACTION_REQUEST_TYPE)
+                    task_context.task_name = f'Action [{TaskAction.Name(task_input.action)}]'
                     self._invoke_action(task_context, task_input)
                     
                 elif message.is_type(TASK_RESULT_TYPE):
                     task_input = message.as_type(TASK_RESULT_TYPE)
+                    task_context.task_name = task_input.type
                     self._resume_pipeline(task_context, task_input)
 
                 elif message.is_type(TASK_EXCEPTION_TYPE):
                     task_input = message.as_type(TASK_EXCEPTION_TYPE)
+                    task_context.task_name = task_input.type
                     self._resume_pipeline(task_context, task_input)
 
                 else:
@@ -309,4 +313,8 @@ class FlinkTasks(object):
 
     def _fail(self, context, task_input, ex):
         task_exception = _create_task_exception(task_input, ex)
+
+        del context.storage.task_result
+        context.storage.task_exception = task_exception
+
         self._emit_result(context, task_input, task_exception)
