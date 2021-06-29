@@ -24,6 +24,18 @@ class TaskContext(object):
         self.task_state = self.storage.task_state or TaskState()
         self.pipeline_state = self.storage.pipeline_state or PipelineState()
         self._task_meta = {}
+        self._task_name = None
+
+    @property
+    def task_name(self):
+        """
+        The name of this task
+        """
+        return self._task_name
+
+    @task_name.setter
+    def task_name(self, value):
+        self._task_name = value
 
     def apply_task_meta(self, task_request: TaskRequest):
         """
@@ -160,4 +172,4 @@ class TaskContext(object):
         self._context.storage.pipeline_state = self.pipeline_state
 
     def __str__(self):
-        return f'task_id: {self.get_task_id()}, caller: {self.get_caller_id()}'
+        return f'task_name: {self.task_name}, task_id: {self.get_task_id()}, caller: {self.get_caller_id()}'

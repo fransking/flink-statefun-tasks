@@ -30,10 +30,17 @@ TaskContext
    
     
    
+      ~TaskContext.task_name
 
    
    
 
    
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~TaskContext.task_name
    
    
