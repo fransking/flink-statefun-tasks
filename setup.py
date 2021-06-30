@@ -10,7 +10,7 @@ install_requires = [
 
 setuptools.setup(
     name="statefun-tasks",
-    version="0.9.14",
+    version="0.9.18",
     author="Frans King",
     author_email="frans.king@sbbsystems.com",
     description="Tasks API for Stateful Functions on Flink",

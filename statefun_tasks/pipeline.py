@@ -1,9 +1,9 @@
-from typing import Union
+from typing import Tuple, Union
 
 from statefun_tasks.context import TaskContext
 from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, Pipeline, TupleOfAny
 from statefun_tasks.pipeline_helper import _PipelineHelper
-from statefun_tasks.serialisation import DefaultSerialiser
+from statefun_tasks.serialisation import DefaultSerialiser, pack_any
 from statefun_tasks.types import Task, Group
 
 
@@ -160,8 +160,7 @@ class _Pipeline(object):
 
             # if we are not a fruitful pipeline then zero out the result
             if not context.storage.pipeline_state.is_fruitful:
-                no_result = self._serialiser.serialise_args_and_kwargs((), {})
-                task_result_or_exception.result.CopyFrom(no_result)
+                task_result_or_exception.result.CopyFrom(pack_any(TupleOfAny()))
 
             context.storage.task_result = task_result_or_exception
         else:
