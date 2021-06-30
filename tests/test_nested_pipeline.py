@@ -74,5 +74,10 @@ class NestedPipelineTests(unittest.TestCase):
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, 5)
 
+    def test_non_fruitful_pipeline(self):
+        pipeline = _non_fruitful_workflow.send()
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, None)
+
 if __name__ == '__main__':
     unittest.main()

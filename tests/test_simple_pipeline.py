@@ -1,4 +1,5 @@
 import asyncio
+from statefun_tasks.types import TASK_ACTION_REQUEST_TYPE
 import unittest
 
 from statefun_tasks import DefaultSerialiser
@@ -41,6 +42,11 @@ def _say_hello(first_name, last_name):
 async def _say_goodbye(greeting, goodbye_message):
     await asyncio.sleep(0)
     return f'{greeting}.  So now I will say {goodbye_message}'
+
+
+@tasks.bind(is_fruitful=False)
+async def _non_fruitful_task():
+    return 1
 
 
 class SimplePipelineTests(unittest.TestCase):
@@ -108,6 +114,12 @@ class SimplePipelineTests(unittest.TestCase):
         else:
             self.fail('Expected an exception')
 
+
+    def test_non_fruitful_pipeline(self):
+        pipeline = _non_fruitful_task.send()
+
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertIsNone(result)
 
 if __name__ == '__main__':
     unittest.main()
