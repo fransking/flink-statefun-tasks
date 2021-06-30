@@ -1,5 +1,5 @@
 from ._utils import _gen_id, _task_type_for, _is_tuple
-from ._serialisation import DefaultSerialiser
+from ._serialisation import DefaultSerialiser, _pack_any
 from ._types import Task, Group, RetryPolicy
 from ._context import TaskContext
 from ._pipeline_utils import _get_initial_tasks, _mark_task_complete, _get_next_step_in_pipeline, \
@@ -164,8 +164,7 @@ class _Pipeline(object):
 
             # if we are not a fruitful pipeline then zero out the result
             if not context.pipeline_state.is_fruitful:
-                no_result = self._serialiser.serialise_args_and_kwargs((), {})
-                task_result_or_exception.result.CopyFrom(no_result)
+                task_result_or_exception.result.CopyFrom(_pack_any(TupleOfAny()))
 
             context.pack_and_save('task_result', task_result_or_exception)
         else:

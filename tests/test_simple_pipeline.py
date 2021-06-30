@@ -1,4 +1,5 @@
 import asyncio
+from statefun_tasks.types import TASK_ACTION_REQUEST_TYPE
 import unittest
 
 from statefun_tasks import DefaultSerialiser
@@ -43,6 +44,11 @@ async def _say_goodbye(greeting, goodbye_message):
     return f'{greeting}.  So now I will say {goodbye_message}'
 
 
+@tasks.bind(is_fruitful=False)
+async def _non_fruitful_task():
+    return 1
+
+
 class SimplePipelineTests(unittest.TestCase):
     def setUp(self) -> None:
         self.test_harness = TestHarness()
@@ -55,7 +61,8 @@ class SimplePipelineTests(unittest.TestCase):
     def test_pipeline_using_kwargs(self):
         pipeline = tasks.send(hello_workflow, first_name='Jane', last_name='Doe')
         proto = pipeline.to_proto(serialiser=DefaultSerialiser())
-        self.assertEqual(proto.entries[0].task_entry.request.type_url, 'type.googleapis.com/statefun_tasks.ArgsAndKwargs')
+        self.assertEqual(proto.entries[0].task_entry.request.type_url,
+                         'type.googleapis.com/statefun_tasks.ArgsAndKwargs')
 
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, 'Hello Jane Doe')
@@ -87,6 +94,32 @@ class SimplePipelineTests(unittest.TestCase):
         else:
             self.fail('Expected a TaskErrorException')
 
+    def test_pipeline_with_unknown_namespace(self):
+        pipeline = tasks.send(hello_workflow, 'Jane', 'Doe').set(namespace='unknown')
+
+        try:
+            self.test_harness.run_pipeline(pipeline)
+        except KeyError as e:
+            self.assertEqual(str(e.args[0]), 'unknown/worker')
+        else:
+            self.fail('Expected an exception')
+
+    def test_pipeline_with_unknown_worker_name(self):
+        pipeline = tasks.send(hello_workflow, 'Jane', 'Doe').set(worker_name='unknown')
+
+        try:
+            self.test_harness.run_pipeline(pipeline)
+        except KeyError as e:
+            self.assertEqual(str(e.args[0]), 'test/unknown')
+        else:
+            self.fail('Expected an exception')
+
+
+    def test_non_fruitful_pipeline(self):
+        pipeline = _non_fruitful_task.send()
+
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertIsNone(result)
 
 if __name__ == '__main__':
     unittest.main()
