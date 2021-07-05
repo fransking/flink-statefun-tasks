@@ -229,7 +229,7 @@ class FlinkTasks(object):
         task_result, task_exception, pipeline = await flink_task.run(context, task_request)
 
         # if task returns a pipeline then start it
-        if pipeline is not None:
+        if pipeline is not None and not pipeline.is_empty():
             pipeline.begin(context, task_request) 
 
         # else if we have a task result return it
