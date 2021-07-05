@@ -332,7 +332,7 @@ class FlinkTasks(object):
     def _finalise_task_result(self, context, task_request, result_tuple):
         task_result, task_exception, pipeline = result_tuple  # unpack
 
-        if pipeline is not None:
+        if pipeline is not None and not pipeline.is_empty():
             pipeline.begin(context, task_request)
         else:
             if task_exception is not None:

@@ -31,7 +31,9 @@ class _Pipeline(object):
                 pipeline.append(Group.from_proto(proto))
 
         return _Pipeline(pipeline, serialiser)
-        
+    
+    def is_empty(self):
+        return not any(_get_initial_tasks(self._pipeline[0]))
 
     def begin(self, context: TaskContext, invoking_task: TaskRequest):
         caller_id = context.get_caller_id()
