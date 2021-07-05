@@ -30,6 +30,9 @@ class _Pipeline(object):
 
         return _Pipeline(pipeline, serialiser)
 
+    def is_empty(self):
+        return not any(self._pipeline_helper.get_initial_tasks())
+
     def begin(self, context: TaskContext, invoking_task: TaskRequest):
         caller_id = context.get_caller_id()
 

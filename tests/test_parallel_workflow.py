@@ -1,3 +1,4 @@
+from statefun_tasks.messages_pb2 import Pipeline
 import unittest
 
 from statefun_tasks import in_parallel
@@ -186,6 +187,12 @@ class ParallelWorkflowTests(unittest.TestCase):
 
         self.assertEqual(join_results_called, False)
         self.assertEqual(say_goodbye_called, True)
+
+    def test_empty_parallel_workflow(self):
+        pipeline = in_parallel([])
+
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, ())
 
 
 if __name__ == '__main__':
