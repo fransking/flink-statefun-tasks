@@ -44,6 +44,7 @@ def _create_task_exception(task_input, ex):
             exception_message=str(ex),
             stacktrace=tb.format_exc())
 
+        # if the task failed then ensure that exception retains the state from the task input (i.e. the TaskRequest)
         if isinstance(task_input, TaskRequest) and task_input.HasField('state'):
             task_exception.state.CopyFrom(task_input.state)
 
@@ -60,9 +61,6 @@ def _create_task_result(task_input, result=None):
         task_result = TaskResult(
             id=task_input.id,
             type=f'{_task_name(task_input)}.result')
-
-        if task_input.HasField('state'):
-            task_result.state.CopyFrom(task_input.state)
 
     if result is not None:
         task_result.result.CopyFrom(_pack_any(result))
@@ -330,10 +328,10 @@ class FlinkTasks(object):
                 context.pack_and_reply(task_result)
 
     def _finalise_task_result(self, context, task_request, result_tuple):
-        task_result, task_exception, pipeline = result_tuple  # unpack
+        task_result, task_exception, pipeline, task_state = result_tuple  # unpack
 
         if pipeline is not None and not pipeline.is_empty():
-            pipeline.begin(context, task_request)
+            pipeline.begin(context, task_request, task_state)
         else:
             if task_exception is not None:
                 if self._attempt_retry(context, task_request, task_exception):
@@ -409,40 +407,40 @@ class _FlinkTask(object):
     def run(self, task_context: TaskContext, task_request: TaskRequest):
         task_result, task_exception, pipeline = None, None, None
 
+        task_args, kwargs, fn_state = self._to_task_args_and_kwargs(task_context, task_request)
+
         try:
             # run the flink task
-            task_args, kwargs, original_state = self._to_task_args_and_kwargs(task_context, task_request)
-
             fn_result = self._fun(*task_args, **kwargs)
 
-            pipeline, task_result = self._to_pipeline_or_task_result(task_request, fn_result, original_state)
+            pipeline, task_result, fn_state = self._to_pipeline_or_task_result(task_request, fn_result, fn_state)
 
         # we errored so return a task_exception instead
         except Exception as e:
             task_exception = self._to_task_exception(task_request, e)
 
-        return task_result, task_exception, pipeline
+        return task_result, task_exception, pipeline, fn_state
 
     async def run_async(self, task_context: TaskContext, task_request: TaskRequest):
         task_result, task_exception, pipeline = None, None, None
 
+        task_args, kwargs, fn_state = self._to_task_args_and_kwargs(task_context, task_request)
+
         try:
             # run the flink task
-            task_args, kwargs, original_state = self._to_task_args_and_kwargs(task_context, task_request)
-
             fn_result = self._fun(*task_args, **kwargs)
 
             # await coro
             if asyncio.iscoroutine(fn_result):
                 fn_result = await fn_result
 
-            pipeline, task_result = self._to_pipeline_or_task_result(task_request, fn_result, original_state)
+            pipeline, task_result, fn_state = self._to_pipeline_or_task_result(task_request, fn_result, fn_state)
 
         # we errored so return a task_exception instead
         except Exception as e:
             task_exception = self._to_task_exception(task_request, e)
 
-        return task_result, task_exception, pipeline
+        return task_result, task_exception, pipeline, fn_state
 
     def _to_pipeline_or_task_result(self, task_request, fn_result, fn_state):
         pipeline, task_result = None, None
@@ -479,7 +477,7 @@ class _FlinkTask(object):
         task_result = _create_task_result(task_request)
         self._serialiser.serialise_result(task_result, fn_result, fn_state)
 
-        return pipeline, task_result
+        return pipeline, task_result, fn_state
 
     def _to_task_exception(self, task_request, ex):
         # use retry policy on task request first then fallback to task definition

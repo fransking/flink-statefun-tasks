@@ -3,7 +3,7 @@ from ._serialisation import DefaultSerialiser, _pack_any
 from ._types import Task, Group, RetryPolicy
 from ._context import TaskContext
 from ._pipeline_utils import _get_initial_tasks, _mark_task_complete, _get_next_step_in_pipeline, \
-    _extend_args, _aggregate_group_results, _try_get_finally_task
+    _extend_args, _aggregate_group_results, _try_get_finally_task, _add_to_task_results
 from .messages_pb2 import TaskRequest, TaskResult, TaskException, Pipeline, TupleOfAny
 
 from typing import Union, Iterable
@@ -35,7 +35,7 @@ class _Pipeline(object):
     def is_empty(self):
         return not any(_get_initial_tasks(self._pipeline[0]))
 
-    def begin(self, context: TaskContext, invoking_task: TaskRequest):
+    def begin(self, context: TaskContext, invoking_task: TaskRequest, task_state):
         caller_id = context.get_caller_id()
 
         # 1. record all the continuations into a pipeline and save into state with caller id and address
@@ -63,23 +63,25 @@ class _Pipeline(object):
             # set extra pipeline related parameters
             self._add_pipeline_meta(context, caller_id, request)
 
-            self._serialiser.serialise_request(request, task.request, retry_policy=task.retry_policy)
+            self._serialiser.serialise_request(request, task.request, state=task_state, retry_policy=task.retry_policy)
 
             context.pack_and_send(task.get_destination(), task.task_id, request)
 
     def resume(self, context: TaskContext, task_result_or_exception: Union[TaskResult, TaskException]):
         caller_id = context.get_caller_id()
-        task_results = context.pipeline_state.task_results
 
         # mark pipeline step as complete & record task result
-        _mark_task_complete(caller_id, self._pipeline, task_result_or_exception, task_results)
+        _mark_task_complete(caller_id, self._pipeline, task_result_or_exception)
 
         # get the next step of the pipeline to run (if any)
         _, next_step, group = _get_next_step_in_pipeline(caller_id, self._pipeline)
 
-        # if the group is complete the create the aggregate results as a list
-        if group is not None and group.is_complete():
-            task_result_or_exception = _aggregate_group_results(group, task_results, self._serialiser)
+        # if this task is part group then we need to record the results so we can aggregate later
+        if group is not None:
+            _add_to_task_results(caller_id, self._pipeline, task_result_or_exception, context.pipeline_state.task_results)
+
+            if group.is_complete():
+                task_result_or_exception = _aggregate_group_results(group, context.pipeline_state.task_results, self._serialiser)
 
         # if we got an exception then the next step is the finally_task if there is one (or none otherwise)
         if isinstance(task_result_or_exception, TaskException):
@@ -426,6 +428,14 @@ class PipelineBuilder(object):
                     yield task_or_group.namespace, task_or_group.worker_name, task_or_group.id
         
         return list(yield_tasks(self))
+
+    def is_empty(self):
+        """
+        Tests if the pipeline contains any tasks
+
+        :return: true if empty, false otherwise
+        """
+        return not any(self.get_tasks())
 
     @staticmethod
     def _task_type_and_parameters_for(fun):

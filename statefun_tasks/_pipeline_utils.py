@@ -3,6 +3,7 @@ from ._utils import _try_next, _is_tuple, _gen_id
 from ._protobuf import _pack_any
 from .messages_pb2 import TaskResult, TaskException, TaskResults
 from typing import Union
+from collections import ChainMap
 from collections import deque
 
 
@@ -57,8 +58,7 @@ def _get_task_chain(pipeline, parent_task_id):
     return task_chain
 
 
-def _mark_task_complete(task_id, pipeline, task_result_or_exception, task_results):
-    packed_result_or_exception = _pack_any(task_result_or_exception)
+def _mark_task_complete(task_id, pipeline, task_result_or_exception):
     failed = isinstance(task_result_or_exception, TaskException)
 
     def mark_complete(state, pipeline, entry):
@@ -69,16 +69,28 @@ def _mark_task_complete(task_id, pipeline, task_result_or_exception, task_result
                 # mark this task complete and its children
                 for task in tasks:
                     task.mark_complete()
-                    task_results.by_id[task.task_id].CopyFrom(packed_result_or_exception)
             else:
                 tasks[0].mark_complete()
-                task_results.by_id[task_id].CopyFrom(packed_result_or_exception)
 
             return None, True # stop
 
         return None, False # continue
 
     _walk_pipeline(pipeline, mark_complete, None)  
+
+
+def _add_to_task_results(task_id, pipeline, task_result_or_exception, task_results):
+    packed_result_or_exception = _pack_any(task_result_or_exception)
+    failed = isinstance(task_result_or_exception, TaskException)
+    
+    task_results.by_id[task_id].CopyFrom(packed_result_or_exception)
+
+    if failed:
+        # propgate failure onto this task and its children
+        for task in _get_task_chain(pipeline, task_id):
+            task_results.by_id[task.task_id].CopyFrom(packed_result_or_exception)
+    else:
+        task_results.by_id[task_id].CopyFrom(packed_result_or_exception)
 
 
 def _try_get_finally_task(task_id, pipeline):
@@ -155,6 +167,8 @@ def _aggregate_group_results(group: Group, task_results: TaskResults, serialiser
                 result, state, error = None, {}, None
 
                 proto = task_results.by_id[pipeline[-1].task_id]  # Any
+                del task_results.by_id[pipeline[-1].task_id]  # We don't need the individual task results anymore so remove to save space / reduce message size
+
                 task_result_or_exception = serialiser.from_proto(proto)
 
                 if isinstance(task_result_or_exception, TaskResult):
@@ -178,6 +192,14 @@ def _aggregate_group_results(group: Group, task_results: TaskResults, serialiser
         return task_exception
         
     else:
+
+        # if the group tasks all return dictionaries then attempt to flatten the state into a single dictionary
+        if all([isinstance(state, dict) for state in aggregated_states]):
+            aggregated_state = dict(ChainMap(*aggregated_states))
+        else: 
+            # otherwise return state of the first task in group as we only support state mutation in groups if the state is a mergable dictionary
+            aggregated_state = aggregated_states[0]
+
         task_result = TaskResult(id=group.group_id)
-        serialiser.serialise_result(task_result, aggregated_results, aggregated_states)
+        serialiser.serialise_result(task_result, aggregated_results, aggregated_state)
         return task_result

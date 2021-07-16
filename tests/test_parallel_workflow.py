@@ -59,9 +59,8 @@ def _say_goodbye_with_state(greeting, goodbye_message):
 
 
 @tasks.bind(with_state=True)
-def _join_results_with_state(states, results):
-    state = sum(states)/len(states)
-    return state, '; '.join(results) + f' Average name length is {state}'
+def _join_results_with_state(state, results):
+    return state, '; '.join(results) + f' {state}'
 
 
 class ParallelWorkflowTests(unittest.TestCase):
@@ -85,7 +84,7 @@ class ParallelWorkflowTests(unittest.TestCase):
         ]).continue_with(_join_results_with_state)
         result = self.test_harness.run_pipeline(pipeline)
 
-        self.assertEqual(result, 'Hello John Smith; Hello Jane Doe. So now I will say see you later! Average name length is 8.0')
+        self.assertEqual(result, 'Hello John Smith; Hello Jane Doe. So now I will say see you later! 9')
 
 
     def test_nested_parallel_workflow(self):
