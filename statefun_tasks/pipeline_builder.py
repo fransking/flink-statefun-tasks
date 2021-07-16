@@ -3,7 +3,7 @@ from statefun_tasks.utils import _gen_id, _is_tuple, _task_type_for
 from statefun_tasks.pipeline import _Pipeline
 from statefun_tasks.messages_pb2 import TaskRequest, Pipeline
 
-from typing import Union, Iterable
+from typing import Iterable
 
 
 def in_parallel(entries: list):
@@ -235,6 +235,14 @@ class PipelineBuilder(object):
                     yield task_or_group.namespace, task_or_group.worker_name, task_or_group.id
         
         return list(yield_tasks(self))
+
+    def is_empty(self):
+        """
+        Tests if the pipeline contains any tasks
+
+        :return: true if empty, false otherwise
+        """
+        return not any(self.get_tasks())
 
     @staticmethod
     def _task_type_and_parameters_for(fun):

@@ -20,6 +20,7 @@ PipelineBuilder
       ~PipelineBuilder.from_proto
       ~PipelineBuilder.get_destination
       ~PipelineBuilder.get_tasks
+      ~PipelineBuilder.is_empty
       ~PipelineBuilder.send
       ~PipelineBuilder.set
       ~PipelineBuilder.to_pipeline

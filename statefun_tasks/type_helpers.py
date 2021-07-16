@@ -32,6 +32,7 @@ def _create_task_exception(task_input, ex):
             exception_message=str(ex),
             stacktrace=tb.format_exc())
 
+        # if the task failed then ensure that exception retains the state from the task input (i.e. the TaskRequest)
         if isinstance(task_input, TaskRequest) and task_input.HasField('state'):
             task_exception.state.CopyFrom(task_input.state)
 
@@ -47,9 +48,6 @@ def _create_task_result(task_input, result=None):
         task_result = TaskResult(
             id=task_input.id,
             type=f'{task_input.type}.result')
-
-        if task_input.HasField('state'):
-            task_result.state.CopyFrom(task_input.state)
 
     if result is not None:
         task_result.result.CopyFrom(pack_any(result))
