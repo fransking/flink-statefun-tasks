@@ -67,7 +67,7 @@ class TaskActionsTests(unittest.TestCase):
         task_result = self._unpack(action_result.result, TaskResult)
         self.assertEqual(task_result.id, pipeline.id)
 
-    def test_get_tassk_result_for_failed_pipeline(self):
+    def test_get_task_result_for_failed_pipeline(self):
         pipeline = tasks.send(_say_hello, 'Jane')
         try:
             self.test_harness.run_pipeline(pipeline)

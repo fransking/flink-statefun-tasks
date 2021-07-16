@@ -2,8 +2,7 @@ from statefun_tasks.types import Group, Task
 from statefun_tasks.utils import _try_next, _is_tuple, _gen_id
 from statefun_tasks.protobuf import pack_any
 from statefun_tasks.messages_pb2 import TaskResults, TaskResult, TaskException
-
-from typing import Union
+from collections import ChainMap
 from collections import deque
 
 
@@ -63,8 +62,7 @@ class _PipelineHelper(object):
 
         return tasks
 
-    def mark_task_complete(self, task_id, task_result_or_exception, task_results):
-        packed_result_or_exception = pack_any(task_result_or_exception)
+    def mark_task_complete(self, task_id, task_result_or_exception):
         failed = isinstance(task_result_or_exception, TaskException)
 
         def mark_complete(state, pipeline, entry):
@@ -75,16 +73,28 @@ class _PipelineHelper(object):
                     # mark this task complete and its children
                     for task in tasks:
                         task.mark_complete()
-                        task_results.by_id[task.task_id].CopyFrom(packed_result_or_exception)
                 else:
                     tasks[0].mark_complete()
-                    task_results.by_id[task_id].CopyFrom(packed_result_or_exception)
 
                 return None, True # stop
 
             return None, False # continue
 
-        self.walk_pipeline(self._pipeline, mark_complete, None)                           
+        self.walk_pipeline(self._pipeline, mark_complete, None)                        
+
+    def add_to_task_results(self, task_id, task_result_or_exception, task_results):
+        packed_result_or_exception = pack_any(task_result_or_exception)
+        failed = isinstance(task_result_or_exception, TaskException)
+        
+        task_results.by_id[task_id].CopyFrom(packed_result_or_exception)
+
+        if failed:
+            # propgate failure onto this task and its children
+            for task in self.get_task_chain(self._pipeline, task_id):
+                task_results.by_id[task.task_id].CopyFrom(packed_result_or_exception)
+        else:
+            task_results.by_id[task_id].CopyFrom(packed_result_or_exception)
+
 
     def try_get_finally_task(self, task_id):
         finally_task = next((task for task in self._pipeline if isinstance(task, Task) and task.is_finally), None)
@@ -151,6 +161,8 @@ class _PipelineHelper(object):
                     result, state, error = None, {}, None
 
                     proto = task_results.by_id[pipeline[-1].task_id]  # Any
+                    del task_results.by_id[pipeline[-1].task_id]  # We don't need the individual task results anymore so remove to save space / reduce message size
+
                     task_result_or_exception = self._serialiser.from_proto(proto)
 
                     if isinstance(task_result_or_exception, TaskResult):
@@ -172,9 +184,19 @@ class _PipelineHelper(object):
                 exception_type='statefun_tasks.AggregatedError',
                 exception_message='|'.join([f'{e.id}, {e.type}, {e.exception_message}' for e in aggregated_errors]),
                 stacktrace='|'.join([f'{e.id}, {e.stacktrace}' for e in aggregated_errors]))
+            
             return task_exception
             
         else:
+
+            # if the group tasks all return dictionaries then attempt to flatten the state into a single dictionary
+            if all([isinstance(state, dict) for state in aggregated_states]):
+                aggregated_state = dict(ChainMap(*aggregated_states))
+            else: 
+                # otherwise return state of the first task in group as we only support state mutation in groups if the state is a mergable dictionary
+                aggregated_state = aggregated_states[0]
+
             task_result = TaskResult(id=group.group_id)
-            self._serialiser.serialise_result(task_result, aggregated_results, aggregated_states)
+            self._serialiser.serialise_result(task_result, aggregated_results, aggregated_state)
+
             return task_result

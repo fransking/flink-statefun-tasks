@@ -1,3 +1,4 @@
+from statefun_tasks import in_parallel
 import unittest
 
 from tests.utils import TestHarness, tasks
@@ -53,6 +54,36 @@ def _destroy_workflow_state(state):
     global _final_state
     _final_state = state
 
+
+@tasks.bind(with_state=True)
+def a_pipeline_calling_a_pipeline(state):
+    return {'Some': 'State'}, _that_calls_another_pipeline.send()
+
+
+@tasks.bind(with_state=True)
+def _that_calls_another_pipeline(state):
+    state['Some New State'] = 'New State'
+    return state, _task_that_returns_state.send()
+
+
+@tasks.bind(with_state=True)
+def _task_that_returns_state(state):
+    return state, state
+
+@tasks.bind(with_state=True)
+def a_parallel_pipeline(state):
+    return state, in_parallel([a_task_that_sets_state.send() for _ in range(0, 2)]).continue_with(an_aggregation_task)
+
+@tasks.bind(with_state=True)
+def a_task_that_sets_state(state):
+    return {'Some': 'State'}, True
+
+
+@tasks.bind(with_state=True)
+def an_aggregation_task(state, results):
+    return state, state
+
+
 class StatePassingTests(unittest.TestCase):
     def setUp(self) -> None:
         self.test_harness = TestHarness()
@@ -71,6 +102,17 @@ class StatePassingTests(unittest.TestCase):
             self.test_harness.run_pipeline(pipeline)
 
         self.assertEqual(_final_state, 4560)
+
+    def test_passing_state_through_tasks_that_are_pipelines(self):
+        pipeline = tasks.send(a_pipeline_calling_a_pipeline)
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual({'Some': 'State', 'Some New State': 'New State'}, result)
+
+    def test_passing_state_through_tasks_in_parallel(self):
+        pipeline = tasks.send(a_parallel_pipeline)
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual({'Some': 'State'}, result)
+
 
 if __name__ == '__main__':
     unittest.main()
