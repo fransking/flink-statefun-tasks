@@ -89,12 +89,10 @@ class _PipelineHelper(object):
         task_results.by_id[task_id].CopyFrom(packed_result_or_exception)
 
         if failed:
-            # propgate failure onto this task and its children
-            for task in self.get_task_chain(self._pipeline, task_id):
-                task_results.by_id[task.task_id].CopyFrom(packed_result_or_exception)
-        else:
-            task_results.by_id[task_id].CopyFrom(packed_result_or_exception)
-
+            # additionally propogate the error onto the last stage of this chain
+            task_chain = self.get_task_chain(self._pipeline, task_id)
+            last_task = task_chain[-1]
+            task_results.by_id[last_task.task_id].CopyFrom(packed_result_or_exception)
 
     def try_get_finally_task(self, task_id):
         finally_task = next((task for task in self._pipeline if isinstance(task, Task) and task.is_finally), None)
