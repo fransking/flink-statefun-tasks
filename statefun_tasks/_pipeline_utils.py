@@ -86,11 +86,10 @@ def _add_to_task_results(task_id, pipeline, task_result_or_exception, task_resul
     task_results.by_id[task_id].CopyFrom(packed_result_or_exception)
 
     if failed:
-        # propgate failure onto this task and its children
-        for task in _get_task_chain(pipeline, task_id):
-            task_results.by_id[task.task_id].CopyFrom(packed_result_or_exception)
-    else:
-        task_results.by_id[task_id].CopyFrom(packed_result_or_exception)
+        # additionally propogate the error onto the last stage of this chain
+        task_chain = _get_task_chain(pipeline, task_id)
+        last_task = task_chain[-1]
+        task_results.by_id[last_task.task_id].CopyFrom(packed_result_or_exception)
 
 
 def _try_get_finally_task(task_id, pipeline):
