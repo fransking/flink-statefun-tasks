@@ -56,18 +56,22 @@ def _destroy_workflow_state(state):
 
 
 @tasks.bind(with_state=True)
-def a_pipeline_calling_a_pipeline(state):
-    return {'Some': 'State'}, _that_calls_another_pipeline.send()
-
-
-@tasks.bind(with_state=True)
-def _that_calls_another_pipeline(state):
-    state['Some New State'] = 'New State'
-    return state, _task_that_returns_state.send()
-
+def a_pipeline_calling_pipeline_stages(initial_state):
+    initial_state= {'Some': 'State'}
+    return initial_state, set_pipeline_state.send().continue_with(a_pipeline_stage).continue_with(return_state)
 
 @tasks.bind(with_state=True)
-def _task_that_returns_state(state):
+def set_pipeline_state(initial_state):
+    initial_state= {'Some': 'State'}
+    return initial_state, True
+
+@tasks.bind(with_state=True)
+def a_pipeline_stage(state, *args):
+    state['New'] = 'State'
+    return state, a_task_that_sets_state.send()
+
+@tasks.bind(with_state=True)
+def return_state(state, *args):
     return state, state
 
 @tasks.bind(with_state=True)
@@ -75,9 +79,8 @@ def a_parallel_pipeline(state):
     return state, in_parallel([a_task_that_sets_state.send() for _ in range(0, 2)]).continue_with(an_aggregation_task)
 
 @tasks.bind(with_state=True)
-def a_task_that_sets_state(state):
+def a_task_that_sets_state(_):
     return {'Some': 'State'}, True
-
 
 @tasks.bind(with_state=True)
 def an_aggregation_task(state, results):
@@ -103,10 +106,10 @@ class StatePassingTests(unittest.TestCase):
 
         self.assertEqual(_final_state, 4560)
 
-    def test_passing_state_through_tasks_that_are_pipelines(self):
-        pipeline = tasks.send(a_pipeline_calling_a_pipeline)
+    def test_passing_state_through_pipeline_stages(self):
+        pipeline = tasks.send(a_pipeline_calling_pipeline_stages)
         result = self.test_harness.run_pipeline(pipeline)
-        self.assertEqual({'Some': 'State', 'Some New State': 'New State'}, result)
+        self.assertEqual({'New': 'State', 'Some': 'State'}, result)
 
     def test_passing_state_through_tasks_in_parallel(self):
         pipeline = tasks.send(a_parallel_pipeline)

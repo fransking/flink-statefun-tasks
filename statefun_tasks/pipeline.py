@@ -41,6 +41,7 @@ class _Pipeline(object):
         context.pipeline_state.address = context.get_address()
         context.pipeline_state.pipeline.CopyFrom(self.to_proto())
         context.pipeline_state.is_fruitful = self._is_fruitful
+        context.pipeline_state.task_state.CopyFrom(pack_any(self._serialiser.to_proto(task_state)))
 
         if caller_id is not None:
             context.pipeline_state.caller_id = caller_id
@@ -60,15 +61,15 @@ class _Pipeline(object):
             # set extra pipeline related parameters
             self._add_pipeline_meta(context, caller_id, request)
 
-            self._serialiser.serialise_request(request, task.request, state=task_state, retry_policy=task.retry_policy)
+            # n.b. pipelines get their own isolated state so don't add task_state
+            self._serialiser.serialise_request(request, task.request, retry_policy=task.retry_policy)
 
             context.send_message(task.get_destination(), task.task_id, request)
 
     def resume(self, context: TaskContext, task_result_or_exception: Union[TaskResult, TaskException]):
         caller_id = context.get_caller_id()
-        #task_results = context.pipeline_state.task_results
 
-        # mark pipeline step as complete & record task result
+        # mark pipeline step as complete
         self._pipeline_helper.mark_task_complete(caller_id, task_result_or_exception)
 
         # get the next step of the pipeline to run (if any)
@@ -156,7 +157,7 @@ class _Pipeline(object):
             'result' if isinstance(task_result_or_exception, TaskResult) else 'error')
 
         # pass back any state that we were given at the start of the pipeline
-        task_result_or_exception.state.CopyFrom(task_request.state)
+        task_result_or_exception.state.CopyFrom(context.pipeline_state.task_state)
 
         # finally emit the result (to egress, destination address or caller address)
         self._emit_result(context, task_request, task_result_or_exception)
