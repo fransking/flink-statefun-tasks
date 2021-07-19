@@ -119,6 +119,7 @@ message PipelineState {
         TaskException exception_before_finally = 10;
     }
     bool is_fruitful = 11;
+    google.protobuf.Any task_state = 12;
 }
 
 message TaskResults {
@@ -129,6 +130,8 @@ enum TaskAction {
     GET_STATUS = 0;
     GET_REQUEST = 1;
     GET_RESULT = 2;
+    PAUSE_PIPELINE = 3;
+    RESUME_PIPELINE = 4;
 }
 
 message TaskActionRequest {

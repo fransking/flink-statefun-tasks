@@ -126,4 +126,4 @@ class TaskContext(object):
         self.pack_and_save('pipeline_state', self.pipeline_state)
 
     def __str__(self):
-        return f'{self._task_name} [{self.get_task_id()}], caller: {self.get_caller_id()}]'
+        return f'task_name: {self.task_name}, task_id: {self.get_task_id()}, caller: {self.get_caller_id()}'
