@@ -206,7 +206,13 @@ class FlinkTasks(object):
         if pipeline_protos is not None:
             return _Pipeline.from_proto(pipeline_protos, self._serialiser)
         else:
-            raise ValueError(f'Missing pipleline for task_id - {context.get_task_id()}')
+            raise ValueError(f'Missing pipeline for task_id - {context.get_task_id()}')
+
+    def _try_get_pipeline(self, context):
+        try:
+            return self._get_pipeline(context)
+        except:
+            return None
 
     def _resume_pipeline(self, context, task_result_or_exception: Union[TaskResult, TaskException]):
         _log.info(f'Started {task_result_or_exception.type}, {context}')
@@ -250,12 +256,12 @@ class FlinkTasks(object):
     def _invoke_action(self, context, action_request):
         _log.info(f'Started Action [{TaskAction.Name(action_request.action)}]')
 
-        flink_action = _FlinkAction(context)
-
         try:
+            pipeline = self._try_get_pipeline(context)
+            flink_action = _FlinkAction(context, pipeline)
+            
             result = flink_action.run(action_request)
-            if result is not None:
-                self._emit_result(context, action_request, _create_task_result(action_request, result))
+            self._emit_result(context, action_request, _create_task_result(action_request, result))
 
         except Exception as ex:
             self._emit_result(context, action_request, _create_task_exception(action_request, ex))

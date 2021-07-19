@@ -215,6 +215,26 @@ class FlinkTasksClient(object):
         """
         return await asyncio.wrap_future(self.get_result(pipeline_or_task, topic))
 
+    def pause_pipeline(self, pipeline_or_task: Union[PipelineBuilder, Task], topic=None) -> Future:
+        """
+        Pauses a pipeline
+
+        :param pipeline_or_task: the pipeline or task
+        :param optional topic: override the default ingress topic
+        :return: a Future indicating whether the pipeline was successfully paused or not
+        """
+        topic = self._get_action_topic(pipeline_or_task, topic)
+        return self._submit_action(pipeline_or_task.id, TaskAction.PAUSE_PIPELINE, topic)
+
+    async def pause_pipeline_async(self, pipeline_or_task: Union[PipelineBuilder, Task], topic=None):
+        """
+        Pauses a pipeline
+
+        :param pipeline_or_task: the pipeline or task
+        :param optional topic: override the default ingress topic
+        """
+        await asyncio.wrap_future(self.pause_pipeline(pipeline_or_task, topic))
+
     def _consume(self):
         while True:
             try:
@@ -227,10 +247,13 @@ class FlinkTasksClient(object):
 
                     if proto.Is(TaskException.DESCRIPTOR):
                         self._raise_exception(proto, TaskException)
+                        
                     elif proto.Is(TaskResult.DESCRIPTOR):
                         self._return_result(proto, TaskResult)
+
                     elif proto.Is(TaskActionException.DESCRIPTOR):
                         self._raise_exception(proto, TaskActionException)
+
                     elif proto.Is(TaskActionResult.DESCRIPTOR):
                         self._return_action_result(proto, TaskActionResult)
 
@@ -272,7 +295,8 @@ class FlinkTasksClient(object):
                     future.set_result(self._unpack(proto.result, TaskResult))
 
                 else:
-                    raise ValueError(f'Unsupported action {TaskAction.Name(proto.action)}')
+                    future.set_result(None)
+
             except Exception as ex:
                 future.set_exception(ex)
 
