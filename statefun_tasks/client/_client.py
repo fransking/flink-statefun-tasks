@@ -285,7 +285,13 @@ class FlinkTasksClient(object):
                     future.set_result(self._unpack(proto.result, TaskRequest))
 
                 elif proto.action == TaskAction.GET_RESULT:
-                    future.set_result(self._unpack(proto.result, TaskResult))
+
+                    if proto.result.Is(TaskResult.DESCRIPTOR):
+                        result, _ = self._serialiser.deserialise_result(self._unpack(proto.result, TaskResult))
+                        future.set_result(result)
+
+                    elif proto.result.Is(TaskException.DESCRIPTOR):
+                        future.set_exception(TaskError(self._unpack(proto.result, TaskException)))
 
                 else:
                     future.set_result(None)
