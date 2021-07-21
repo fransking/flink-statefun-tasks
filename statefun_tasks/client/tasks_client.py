@@ -240,7 +240,7 @@ class FlinkTasksClient(object):
             try:
                 for message in self._consumer:
 
-                    _log.info(f'Message received - {message}')
+                    _log.debug(f'Message received - {message}')
 
                     proto = Any()
                     proto.ParseFromString(message.value)
