@@ -41,19 +41,35 @@ def _get_initial_tasks(entry):
 
     return tasks
 
-def _get_task_chain(pipeline, parent_task_id):
-    
+
+def _yield_tasks(pipeline):
+    for task_or_group in pipeline:
+        if isinstance(task_or_group, Group):
+            for group_entry in task_or_group:
+                yield from _yield_tasks(group_entry)
+        else:
+            yield task_or_group
+
+
+def _get_task_chain(pipeline, task_id):
+
     def extract_task_chain(state, pipeline, entry):
-        tasks, matched = state
+        tasks = state
 
-        if matched or entry.task_id == parent_task_id:
-            matched = True
-            tasks.append(entry)
+        if entry.task_id == task_id:
+            matched = False
 
-        return (tasks, matched), False # continue
+            for task in _yield_tasks(pipeline):
+                if matched or task.task_id == task_id:
+                    matched = True
+                    tasks.append(task)
+
+            return tasks, True # break
+
+        return tasks, False # continue
 
     task_chain = []
-    _walk_pipeline(pipeline, extract_task_chain, (task_chain, False))
+    _walk_pipeline(pipeline, extract_task_chain, task_chain)
 
     return task_chain
 
@@ -61,35 +77,29 @@ def _get_task_chain(pipeline, parent_task_id):
 def _mark_task_complete(task_id, pipeline, task_result_or_exception):
     failed = isinstance(task_result_or_exception, TaskException)
 
-    def mark_complete(state, pipeline, entry):
-        if entry.task_id == task_id:
-            tasks = _get_task_chain(pipeline, task_id)
-            
-            if failed:
-                # mark this task complete and its children
-                for task in tasks:
-                    task.mark_complete()
-            else:
-                tasks[0].mark_complete()
-
-            return None, True # stop
-
-        return None, False # continue
-
-    _walk_pipeline(pipeline, mark_complete, None)  
+    tasks = _get_task_chain(pipeline, task_id)
+    
+    if failed:
+        # mark this task complete and its children
+        for task in tasks:
+            task.mark_complete()
+    else:
+        tasks[0].mark_complete()
 
 
 def _add_to_task_results(task_id, pipeline, task_result_or_exception, task_results):
-    packed_result_or_exception = _pack_any(task_result_or_exception)
     failed = isinstance(task_result_or_exception, TaskException)
-    
-    task_results.by_id[task_id].CopyFrom(packed_result_or_exception)
 
-    if failed:
+    task_chain = _get_task_chain(pipeline, task_id)
+    last_task = task_chain[-1]
+    
+    if task_id == last_task.task_id:
+        # if we are the last task in this chain in the group then record this result so we can aggregate laster
+        task_results.by_id[last_task.task_id].CopyFrom(_pack_any(task_result_or_exception))
+
+    elif failed:
         # additionally propogate the error onto the last stage of this chain
-        task_chain = _get_task_chain(pipeline, task_id)
-        last_task = task_chain[-1]
-        task_results.by_id[last_task.task_id].CopyFrom(packed_result_or_exception)
+        task_results.by_id[last_task.task_id].CopyFrom(_pack_any(task_result_or_exception))
 
 
 def _try_get_finally_task(task_id, pipeline):
