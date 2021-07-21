@@ -45,6 +45,7 @@ class _FlinkAction(object):
 
 
     def _get_task_result(self):
+
         task_result = self._context.storage.task_result or None
         if task_result is not None:
             return task_result

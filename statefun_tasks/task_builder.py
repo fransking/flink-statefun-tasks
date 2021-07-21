@@ -254,7 +254,7 @@ class FlinkTasks(object):
         _log.info(f'Finished {task_request.type}, {context}')
 
     def _invoke_action(self, context, action_request):
-        _log.info(f'Started Action [{TaskAction.Name(action_request.action)}]')
+        _log.info(f'Started Action [{TaskAction.Name(action_request.action)}], task_id: {context.get_task_id()}')
 
         try:
             pipeline = self._try_get_pipeline(context)
@@ -266,7 +266,7 @@ class FlinkTasks(object):
         except Exception as ex:
             self._emit_result(context, action_request, _create_task_exception(action_request, ex))
 
-        _log.info(f'Finished Action [{TaskAction.Name(action_request.action)}]')
+        _log.info(f'Finished Action [{TaskAction.Name(action_request.action)}], task_id: {context.get_task_id()}')
 
     def _emit_result(self, context, task_input, task_result):
         # either send a message to egress if reply_topic was specified
