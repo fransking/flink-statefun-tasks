@@ -45,7 +45,7 @@ class PipelineSerialisationTests(unittest.TestCase):
         args = (1,'2', Address(namespace='test'))
         kwargs = {'arg': [1, 2, 3]}
   
-        group_entry = Group(group_id='inner_group_id')
+        group_entry = Group(group_id='inner_group_id', max_parallelism=10)
 
         group_entry.add_to_group([
             Task.from_fields('inner_task_id_1', 'task_type', args, kwargs),

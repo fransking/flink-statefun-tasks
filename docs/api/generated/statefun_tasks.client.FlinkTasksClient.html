@@ -230,6 +230,12 @@ e.g. {‘example/worker’: ‘example.requests’, None: ‘example.default.req
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.client.FlinkTasksClient.get_status_async" title="statefun_tasks.client.FlinkTasksClient.get_status_async"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_status_async</span></code></a>(pipeline_or_task[, topic])</p></td>
 <td><p>Get the status of a previously submitted pipeline or task</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.client.FlinkTasksClient.pause_pipeline" title="statefun_tasks.client.FlinkTasksClient.pause_pipeline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pause_pipeline</span></code></a>(pipeline_or_task[, topic])</p></td>
+<td><p>Pauses a pipeline</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.client.FlinkTasksClient.pause_pipeline_async" title="statefun_tasks.client.FlinkTasksClient.pause_pipeline_async"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pause_pipeline_async</span></code></a>(pipeline_or_task[, topic])</p></td>
+<td><p>Pauses a pipeline</p></td>
+</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.client.FlinkTasksClient.submit" title="statefun_tasks.client.FlinkTasksClient.submit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">submit</span></code></a>(pipeline[, topic])</p></td>
 <td><p>Submit a pipeline to Flink</p></td>
 </tr>
@@ -360,6 +366,40 @@ e.g. {‘example/worker’: ‘example.requests’, None: ‘example.default.req
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>the status of the pipeline</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.client.FlinkTasksClient.pause_pipeline">
+<code class="sig-name descname"><span class="pre">pause_pipeline</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_or_task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.pause_pipeline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pauses a pipeline</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pipeline_or_task</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>]) – the pipeline or task</p></li>
+<li><p><strong>topic</strong> (<em>optional</em>) – override the default ingress topic</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a Future indicating whether the pipeline was successfully paused or not</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.client.FlinkTasksClient.pause_pipeline_async">
+<em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">pause_pipeline_async</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_or_task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.pause_pipeline_async" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pauses a pipeline</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pipeline_or_task</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>]) – the pipeline or task</p></li>
+<li><p><strong>topic</strong> (<em>optional</em>) – override the default ingress topic</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>

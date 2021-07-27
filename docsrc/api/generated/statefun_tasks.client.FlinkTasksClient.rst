@@ -19,6 +19,8 @@ FlinkTasksClient
       ~FlinkTasksClient.get_result_async
       ~FlinkTasksClient.get_status
       ~FlinkTasksClient.get_status_async
+      ~FlinkTasksClient.pause_pipeline
+      ~FlinkTasksClient.pause_pipeline_async
       ~FlinkTasksClient.submit
       ~FlinkTasksClient.submit_async
    

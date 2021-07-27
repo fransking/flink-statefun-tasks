@@ -47,6 +47,14 @@ def _join_results3(results):
     join_results3_called = True
     return '; '.join(results)
 
+
+@tasks.bind()
+def _print_results(results):
+    global join_results_called
+    join_results_called = True
+    return str(results)
+
+
 @tasks.bind(with_state=True)
 def _say_hello_with_state(initial_state, first_name, last_name):
     state = len(first_name) + len(last_name)
@@ -190,6 +198,34 @@ class ParallelWorkflowTests(unittest.TestCase):
 
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, ())
+
+
+    def test_parallel_workflow_with_last_task_in_group_being_a_group(self):
+        pipeline = in_parallel([
+            _say_hello.send("John", "Smith"),
+            _say_hello.send("Jane", "Doe").continue_with(_say_goodbye, goodbye_message="see you later!"),
+            in_parallel([
+                _say_hello.send("Bob", "Smith"),
+                _say_hello.send("Tom", "Smith"),
+                ]),
+        ]).continue_with(_print_results)
+
+        result = self.test_harness.run_pipeline(pipeline)
+
+        self.assertEqual(result, "['Hello John Smith', 'Hello Jane Doe. So now I will say see you later!', ['Hello Bob Smith', 'Hello Tom Smith']]")
+
+
+    def test_parallel_workflow_with_max_parallelism(self):
+        pipeline = in_parallel([
+            _say_hello.send("Jane", "Doe"),
+            in_parallel([
+                _say_hello.send("Bob", "Smith").continue_with(_say_goodbye, goodbye_message="see you later!"),
+                _say_hello.send("Tom", "Smith"),
+                ], max_parallelism=1),
+        ]).continue_with(_print_results)
+
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, "['Hello Jane Doe', ['Hello Bob Smith. So now I will say see you later!', 'Hello Tom Smith']]")
 
 
 if __name__ == '__main__':
