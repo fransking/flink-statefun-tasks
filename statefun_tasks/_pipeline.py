@@ -2,12 +2,10 @@ from ._utils import _gen_id, _task_type_for, _is_tuple
 from ._serialisation import DefaultSerialiser, _pack_any
 from ._types import Task, Group, RetryPolicy
 from ._context import TaskContext
-from ._pipeline_utils import _get_initial_tasks, _mark_task_complete, _get_next_step_in_pipeline, \
-    _extend_args, _aggregate_group_results, _try_get_finally_task, _add_to_task_results
+from ._pipeline_behaviour import _PipelineBehaviour
 from .messages_pb2 import TaskRequest, TaskResult, TaskException, Pipeline, TupleOfAny
 
 from typing import Union, Iterable
-from uuid import uuid4
 
 
 class _Pipeline(object):
@@ -15,6 +13,7 @@ class _Pipeline(object):
         self._pipeline = pipeline
         self._is_fruitful = is_fruitful
         self._serialiser = serialiser if serialiser is not None else DefaultSerialiser()
+        self._behaviour = _PipelineBehaviour(self._pipeline, self._serialiser)
 
     def to_proto(self) -> Pipeline:
         pipeline = Pipeline(entries=[p.to_proto(self._serialiser) for p in self._pipeline])
@@ -33,7 +32,7 @@ class _Pipeline(object):
         return _Pipeline(pipeline, serialiser)
     
     def is_empty(self):
-        return not any(_get_initial_tasks(self._pipeline[0]))
+        return not any(self._behaviour.get_initial_tasks())
 
     def begin(self, context: TaskContext, invoking_task: TaskRequest, task_state):
         caller_id = context.get_caller_id()
@@ -54,44 +53,43 @@ class _Pipeline(object):
         context.pipeline_state.root_address = invoking_task.meta['root_pipeline_address'] or context.pipeline_state.address
 
         # 2. get initial tasks(s) to call - might be single start of chain task or a group of tasks to call in parallel
-        tasks = _get_initial_tasks(self._pipeline[0])
+        tasks, max_parallelism = self._behaviour.get_initial_tasks()
 
-        # 3. call each task
-        for task in tasks:
+        # 3. split into tasks to call now and those to defer if max parallelism is exceeded
+        tasks_to_call = self._behaviour.defer_tasks(context, tasks, max_parallelism=max_parallelism)
 
-            request = TaskRequest(id=task.task_id, type=task.task_type)
-
-            # set extra pipeline related parameters
-            self._add_pipeline_meta(context, caller_id, request)
-
-            # n.b. pipelines get their own isolated state so don't add task_state
-            self._serialiser.serialise_request(request, task.request, retry_policy=task.retry_policy)
-
-            context.pack_and_send(task.get_destination(), task.task_id, request)
+        # 4. call each task
+        for task, task_request in tasks_to_call:
+            context.pack_and_send(task.get_destination(), task.task_id, task_request)
 
     def resume(self, context: TaskContext, task_result_or_exception: Union[TaskResult, TaskException]):
         caller_id = context.get_caller_id()
 
         # mark pipeline step as complete & record task result
-        _mark_task_complete(caller_id, self._pipeline, task_result_or_exception)
+        self._behaviour.mark_task_complete(caller_id, task_result_or_exception)
+
+        # release deferred tasks if they can now run
+        self._behaviour.release_deferred_tasks(context, caller_id, task_result_or_exception)
 
         # get the next step of the pipeline to run (if any)
-        _, next_step, group = _get_next_step_in_pipeline(caller_id, self._pipeline)
+        _, next_step, group = self._behaviour.get_next_step_in_pipeline(caller_id)
 
         # if this task is part group then we need to record the results so we can aggregate later
         if group is not None:
-            _add_to_task_results(caller_id, self._pipeline, task_result_or_exception, context.pipeline_state.task_results)
+            self._behaviour.add_to_task_results(caller_id, task_result_or_exception, context.pipeline_state.task_results)
 
             if group.is_complete():
-                task_result_or_exception = _aggregate_group_results(group, context.pipeline_state.task_results, self._serialiser)
+                task_result_or_exception = self._behaviour.aggregate_group_results(group, context.pipeline_state.task_results)
 
         # if we got an exception then the next step is the finally_task if there is one (or none otherwise)
         if isinstance(task_result_or_exception, TaskException):
-            next_step = _try_get_finally_task(caller_id, self._pipeline)
+            next_step = self._behaviour.try_get_finally_task(caller_id)
 
         # turn next step into remainder of tasks to call
         if isinstance(next_step, Task):
-            remainder = [next_step]
+            tasks = [next_step]
+            max_parallelism = 1
+
             if next_step.is_finally:
                 # record the result of the task prior to the finally task so we can return it once the finally task completes
 
@@ -102,30 +100,18 @@ class _Pipeline(object):
                 before_finally.CopyFrom(task_result_or_exception)
 
         elif isinstance(next_step, Group):
-            remainder = _get_initial_tasks(next_step)
+            tasks, max_parallelism = self._behaviour.get_initial_tasks(next_step)
         else:
-            remainder = []
+            tasks = []
 
-        # call next steps (if any)
-        if any(remainder):
-            task_result, task_state = self._serialiser.unpack_response(task_result_or_exception)
+        if any(tasks):
+            # split into tasks to call now and those to defer if max parallelism is exceeded
+            tasks_to_call = self._behaviour.defer_tasks(context, tasks, task_result_or_exception=task_result_or_exception, max_parallelism=max_parallelism)
 
-            for task in remainder:
-                task_id = task.task_id
-                task_args_and_kwargs = self._serialiser.to_args_and_kwargs(task.request)
-                
-                # extend task_result with any args & kwargs passed to the task explicitly
-                # noting that args from previous tasks are not passed to finally
-                task_request = self._serialiser.merge_args_and_kwargs(task_result if not task.is_finally else TupleOfAny(), task_args_and_kwargs)
+            # call the tasks
+            for task, task_request in tasks_to_call:
+                context.pack_and_send(task.get_destination(), task.task_id, task_request)
 
-                request = TaskRequest(id=task_id, type=task.task_type)
-
-                # set extra pipeline related parameters
-                self._add_pipeline_meta(context, caller_id, request)
-
-                self._serialiser.serialise_request(request, task_request, state=task_state, retry_policy=task.retry_policy)
-                
-                context.pack_and_send(task.get_destination(), task_id, request)
         else:
             last_step = self._pipeline[-1]
 
@@ -190,16 +176,16 @@ class _Pipeline(object):
              if context.pipeline_state.caller_id != context.get_caller_id():  # don't call back to self
                 context.pack_and_send(context.pipeline_state.caller_address, context.pipeline_state.caller_id, task_result_or_exception)
 
-    @staticmethod
-    def _add_pipeline_meta(context, caller_id, task_request: TaskRequest):
-        task_request.meta['pipeline_address'] = context.pipeline_state.address
-        task_request.meta['pipeline_id'] = context.pipeline_state.id
-        task_request.meta['root_pipeline_id'] = context.pipeline_state.root_id
-        task_request.meta['root_pipeline_address'] = context.pipeline_state.root_address
+    # @staticmethod
+    # def _add_pipeline_meta(context, caller_id, task_request: TaskRequest):
+    #     task_request.meta['pipeline_address'] = context.pipeline_state.address
+    #     task_request.meta['pipeline_id'] = context.pipeline_state.id
+    #     task_request.meta['root_pipeline_id'] = context.pipeline_state.root_id
+    #     task_request.meta['root_pipeline_address'] = context.pipeline_state.root_address
 
-        if caller_id is not None:
-            task_request.meta['parent_task_address'] = context.get_caller_address()
-            task_request.meta['parent_task_id'] = caller_id
+    #     if caller_id is not None:
+    #         task_request.meta['parent_task_address'] = context.get_caller_address()
+    #         task_request.meta['parent_task_id'] = caller_id
 
 
 
@@ -232,14 +218,15 @@ class PipelineBuilder(object):
         other._pipeline.extend(self._pipeline)
         return self
 
-    def append_group(self, pipelines: Iterable['PipelineBuilder']) -> 'PipelineBuilder':
+    def append_group(self, pipelines: Iterable['PipelineBuilder'], max_parallelism=None) -> 'PipelineBuilder':
         """
         Appends tasks from another pipeline builder into a new in_parallel group inside this one
 
         :param other: the other pipeline builder
+        :param option max_parallelism: the maximum number of tasks to invoke in parallel for this group 
         :return: the builder
         """
-        group = Group(_gen_id())
+        group = Group(_gen_id(), max_parallelism=max_parallelism)
 
         for pipeline in pipelines:
             pipeline._add_to_group(group)

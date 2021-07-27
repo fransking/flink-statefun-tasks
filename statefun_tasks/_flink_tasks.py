@@ -525,5 +525,6 @@ class _FlinkTask(object):
         return args, kwargs, state
 
 
-def in_parallel(entries: list):
-    return PipelineBuilder().append_group(entries)
+def in_parallel(entries: list, max_parallelism=None):
+    return PipelineBuilder().append_group(entries, max_parallelism)
+

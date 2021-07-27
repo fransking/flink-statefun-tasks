@@ -4,4 +4,4 @@ from ._serialisation import DefaultSerialiser
 from ._types import RetryPolicy, TaskAlreadyExistsException, Task, Group
 from ._pipeline import PipelineBuilder
 from .messages_pb2 import TaskRequest, TaskResult, TaskException, TaskActionRequest, TaskActionResult, TaskActionException, \
-    TaskAction, TaskStatus
+    TaskAction, TaskStatus, TaskDeferral, DeferredTask
