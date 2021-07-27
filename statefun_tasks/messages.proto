@@ -43,6 +43,7 @@ message TaskEntry {
 message GroupEntry {
     string group_id = 1;
     repeated Pipeline group = 2;
+    int32 max_parallelism = 3;
 }
 
 message PipelineEntry {
@@ -105,6 +106,15 @@ message TaskState {
     string original_caller_id = 3;
 }
 
+message TaskDeferral {
+    repeated DeferredTask deferred_tasks = 1;
+}
+
+message DeferredTask {
+    string destination = 1;
+    TaskRequest task_request = 2;
+}
+
 message PipelineState {
     string id = 1;
     string address = 2;
@@ -120,6 +130,11 @@ message PipelineState {
     }
     bool is_fruitful = 11;
     google.protobuf.Any task_state = 12;
+
+    // optimised so we only store deferral data once not multiple times per task id
+    map<string, TaskDeferral> task_deferrals_by_id = 13;
+    map<string, string> task_deferral_ids_by_task_id = 14;
+    // end
 }
 
 message TaskResults {

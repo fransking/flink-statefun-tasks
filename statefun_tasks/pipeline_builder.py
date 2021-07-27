@@ -6,8 +6,8 @@ from statefun_tasks.messages_pb2 import TaskRequest, Pipeline
 from typing import Iterable
 
 
-def in_parallel(entries: list):
-    return PipelineBuilder().append_group(entries)
+def in_parallel(entries: list, max_parallelism=None):
+    return PipelineBuilder().append_group(entries, max_parallelism)
 
 
 class PipelineBuilder(object):
@@ -38,14 +38,15 @@ class PipelineBuilder(object):
         other._pipeline.extend(self._pipeline)
         return self
 
-    def append_group(self, pipelines: Iterable['PipelineBuilder']) -> 'PipelineBuilder':
+    def append_group(self, pipelines: Iterable['PipelineBuilder'], max_parallelism=None) -> 'PipelineBuilder':
         """
         Appends tasks from another pipeline builder into a new in_parallel group inside this one
 
         :param other: the other pipeline builder
+        :param option max_parallelism: the maximum number of tasks to invoke in parallel for this group 
         :return: the builder
         """
-        group = Group(_gen_id())
+        group = Group(_gen_id(), max_parallelism=max_parallelism)
 
         for pipeline in pipelines:
             pipeline._add_to_group(group)

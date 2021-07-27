@@ -202,7 +202,7 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.__init__" title="statefun_tasks.PipelineBuilder.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([pipeline])</p></td>
 <td><p>Initialize self.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.append_group" title="statefun_tasks.PipelineBuilder.append_group"><code class="xref py py-obj docutils literal notranslate"><span class="pre">append_group</span></code></a>(pipelines)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.append_group" title="statefun_tasks.PipelineBuilder.append_group"><code class="xref py py-obj docutils literal notranslate"><span class="pre">append_group</span></code></a>(pipelines[, max_parallelism])</p></td>
 <td><p>Appends tasks from another pipeline builder into a new in_parallel group inside this one</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.append_to" title="statefun_tasks.PipelineBuilder.append_to"><code class="xref py py-obj docutils literal notranslate"><span class="pre">append_to</span></code></a>(other)</p></td>
@@ -263,11 +263,14 @@
 </table>
 <dl class="py method">
 <dt id="statefun_tasks.PipelineBuilder.append_group">
-<code class="sig-name descname"><span class="pre">append_group</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipelines</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.append_group" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">append_group</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipelines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_parallelism</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.append_group" title="Permalink to this definition">¶</a></dt>
 <dd><p>Appends tasks from another pipeline builder into a new in_parallel group inside this one</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>other</strong> – the other pipeline builder</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> – the other pipeline builder</p></li>
+<li><p><strong>max_parallelism</strong> (<em>option</em>) – the maximum number of tasks to invoke in parallel for this group</p></li>
+</ul>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></p>

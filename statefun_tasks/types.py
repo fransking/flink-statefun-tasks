@@ -191,8 +191,9 @@ class Task:
 
 
 class Group:
-    def __init__(self, group_id):
+    def __init__(self, group_id, max_parallelism=None):
         self.group_id = group_id
+        self.max_parallelism = max_parallelism
         self._group = []
 
     def add_to_group(self, tasks):
@@ -211,7 +212,7 @@ class Group:
         return None  # _GroupEntries don't have a single destination
 
     def to_proto(self, serialiser) -> PipelineEntry:
-        proto = GroupEntry(group_id=self.group_id)
+        proto = GroupEntry(group_id=self.group_id, max_parallelism=self.max_parallelism)
 
         for entries in self._group:
             pipeline = Pipeline()
@@ -226,7 +227,7 @@ class Group:
 
     @staticmethod
     def from_proto(proto: PipelineEntry):
-        entry = Group(group_id=proto.group_entry.group_id)
+        entry = Group(group_id=proto.group_entry.group_id, max_parallelism=proto.group_entry.max_parallelism)
 
         group = []
         for pipeline in proto.group_entry.group:
