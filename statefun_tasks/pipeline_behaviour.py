@@ -1,8 +1,9 @@
 from statefun_tasks.types import Group, Task
-from statefun_tasks.utils import _try_next, _gen_id
+from statefun_tasks.utils import _try_next, _gen_id, _try_peek
 from statefun_tasks.protobuf import pack_any
 from statefun_tasks.messages_pb2 import TaskRequest, TaskResults, TaskResult, TaskException, DeferredTask, TupleOfAny
 from collections import ChainMap, deque
+from itertools import chain
 
 
 class _PipelineBehaviour(object):
@@ -177,7 +178,7 @@ class _PipelineBehaviour(object):
         return None if finally_task is None or finally_task.task_id == task_id else finally_task
 
     def get_next_step_in_pipeline(self, task_id):
-        stack = deque([(self._pipeline, None, None, None, None)])  # FIFO (pipeline, entry after group, group, parent_group)
+        stack = deque([(self._pipeline, None, None, None, None)])  # FIFO (pipeline, entry after group, group, parent_group, entry after parent group)
 
         while len(stack) > 0:
             pipeline, entry_after_group, group_entry, parent_group, entry_after_parent_group = stack.popleft()
@@ -187,7 +188,7 @@ class _PipelineBehaviour(object):
                 _try_next(iterator)
 
                 if isinstance(entry, Group):
-                    stack_entry_after_group = _try_next(iterator)
+                    stack_entry_after_group, iterator = _try_peek(iterator)
                     stack_group_entry = entry
 
                     # don't overwrite the parent if already recorded on stack

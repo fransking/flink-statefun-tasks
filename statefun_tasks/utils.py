@@ -1,9 +1,11 @@
+import itertools
 from google.protobuf.message import Message
 from google.protobuf.any_pb2 import Any
 
 import inspect
 from uuid import uuid4
 from typing import get_type_hints
+from itertools import chain
 
 
 def _gen_id():
@@ -27,6 +29,14 @@ def _try_next(iterator):
         return next(iterator)
     except StopIteration:
         return None
+
+
+def _try_peek(iterator):
+    try:
+        n = next(iterator)
+        return n, chain([n], iterator)
+    except StopIteration:
+        return None, iterator
 
 
 def _is_named_tuple(value):
