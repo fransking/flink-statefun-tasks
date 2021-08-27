@@ -114,7 +114,8 @@ class FlinkTasksClient(object):
         key = request.id.encode('utf-8')
         val = request.SerializeToString()
 
-        self._producer.send(topic=topic, key=key, value=val)
+        submit_response = self._producer.send(topic=topic, key=key, value=val)
+        submit_response.add_errback(future.set_exception)
         self._producer.flush()
 
         return future
