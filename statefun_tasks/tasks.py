@@ -19,6 +19,7 @@ class _FlinkTask(object):
 
         full_arg_spec = inspect.getfullargspec(fun)
         self._args = full_arg_spec.args
+        self._default_args = full_arg_spec.defaults
         self._num_args = len(self._args)
         self._accepts_varargs = full_arg_spec.varargs is not None
         self.is_async = inspect.iscoroutinefunction(fun)
@@ -114,18 +115,26 @@ class _FlinkTask(object):
         else:
             args = [args]
 
-        # merge in args passed as kwargs e.g. fun1.continue_with(fun2, arg1=a, arg2=b)
-        args_in_kwargs = [(idx, arg, kwargs[arg]) for idx, arg in enumerate(self._args) if arg in kwargs]
-        for idx, arg, val in args_in_kwargs:
-            args.insert(idx, val)
-            del kwargs[arg]
-
         # add state as first argument if required by this task
         if self._with_state:
-            args = [state] + args
-
+            args.insert(0, state)
         # add context if required by this task
         if self._with_context:
-            args = [task_context] + args
+            args.insert(0, task_context)
 
-        return args, kwargs, state
+        resolved_args = []
+        # merge in args passed as kwargs e.g. fun1.continue_with(fun2, arg1=a, arg2=b)
+        for idx, arg in enumerate(self._args):
+            if arg in kwargs:
+                resolved_args.append(kwargs[arg])
+                del kwargs[arg]
+            elif self._default_args is not None and len(args) == 0:
+                resolved_args.append(self._default_args[idx])
+            else:
+                resolved_args.append(args.pop(0))
+        if self._accepts_varargs:
+            resolved_args.extend(args)
+        elif len(args) > 0:
+            raise ValueError('Too many args supplied')
+
+        return resolved_args, kwargs, state
