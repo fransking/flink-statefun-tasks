@@ -523,7 +523,10 @@ class _FlinkTask(object):
                 resolved_args.append(kwargs[arg])
                 del kwargs[arg]
             elif self._default_args is not None and len(args) == 0:
-                resolved_args.append(self._default_args[idx])
+                default_arg_index = len(self._default_args) - len(self._args) + idx
+                if default_arg_index < 0:
+                    raise ValueError('Not enough args supplied')
+                resolved_args.append(self._default_args[default_arg_index])
             else:
                 resolved_args.append(args.pop(0))
         if self._accepts_varargs:
