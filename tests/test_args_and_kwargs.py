@@ -1,6 +1,6 @@
 import unittest
 
-from tests.utils import TestHarness, tasks
+from tests.utils import TestHarness, tasks, TaskErrorException
 
 
 @tasks.bind()
@@ -21,6 +21,11 @@ def pass_through(*args):
 
 @tasks.bind()
 def multi_arg_workflow(a, b, c, d):
+    return ','.join([a, b, c, d])
+
+
+@tasks.bind()
+def multi_arg_workflow_with_some_defaults(a, b, c='c', d='d'):
     return ','.join([a, b, c, d])
 
 
@@ -72,6 +77,30 @@ class ArgsAndKwargsTests(unittest.TestCase):
         pipeline = tasks.send(pass_into_multi_arg_workflow, ('a', 'b'), 'c', 'd')
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, 'a,b,c,d')
+
+    def test_omitting_only_default_args(self):
+        pipeline = tasks.send(multi_arg_workflow_with_some_defaults, 'a', 'b')
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, 'a,b,c,d')
+
+    def test_providing_mandatory_plus_one_default_arg(self):
+        pipeline = tasks.send(multi_arg_workflow_with_some_defaults, 'a', 'b', d='d')
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, 'a,b,c,d')
+
+    def test_providing_mandatory_and_default_args(self):
+        pipeline = tasks.send(multi_arg_workflow_with_some_defaults, 'a', 'b', c='c', d='d')
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, 'a,b,c,d')
+
+    def test_not_providing_mandatory_args(self):
+        pipeline = tasks.send(multi_arg_workflow_with_some_defaults, 'a', c='c', d='d')
+        try:
+            self.test_harness.run_pipeline(pipeline)
+        except TaskErrorException as e:
+            self.assertEqual(e.task_error.message, 'Not enough args supplied')
+        else:
+            self.fail('Expected an exception')
 
 
 if __name__ == '__main__':
