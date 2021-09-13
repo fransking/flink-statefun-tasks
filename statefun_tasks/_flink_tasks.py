@@ -364,7 +364,7 @@ class FlinkTasks(object):
             delay = timedelta(milliseconds=task_exception.retry_policy.delay_ms)
 
             if task_exception.retry_policy.exponential_back_off:
-                delay = timedelta(milliseconds=task_exception.retry_policy.delay_ms ^ float(context.task_state.retry_count))
+                delay = timedelta(milliseconds=task_exception.retry_policy.delay_ms * (2 ** context.task_state.retry_count))
 
             if delay:
                 context.pack_and_send_after(delay, context.get_address(), context.get_task_id(), task_request)

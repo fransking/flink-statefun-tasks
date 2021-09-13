@@ -1,5 +1,4 @@
 import asyncio
-from statefun_tasks.types import TASK_ACTION_REQUEST_TYPE
 import unittest
 
 from statefun_tasks import DefaultSerialiser
@@ -100,7 +99,7 @@ class SimplePipelineTests(unittest.TestCase):
         try:
             self.test_harness.run_pipeline(pipeline)
         except KeyError as e:
-            self.assertEqual(str(e.args[0]), 'unknown/worker')
+            self.assertEqual(str(e.args[0]), "('unknown', 'worker')")
         else:
             self.fail('Expected an exception')
 
@@ -110,7 +109,7 @@ class SimplePipelineTests(unittest.TestCase):
         try:
             self.test_harness.run_pipeline(pipeline)
         except KeyError as e:
-            self.assertEqual(str(e.args[0]), 'test/unknown')
+            self.assertEqual(str(e.args[0]), "('test', 'unknown')")
         else:
             self.fail('Expected an exception')
 
