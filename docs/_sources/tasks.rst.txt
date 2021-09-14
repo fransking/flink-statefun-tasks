@@ -33,7 +33,7 @@ a RetryPolicy:
 
 .. code-block:: python
 
-    @tasks.bind(retry_policy=RetryPolicy(retry_for=[ValueError], max_retries=2, delay=timedelta(seconds=5), exponential_backoff=True))
+    @tasks.bind(retry_policy=RetryPolicy(retry_for=[ValueError], max_retries=2, delay=timedelta(seconds=5), exponential_back_off=True))
     def unreliable_task():
         ...
 
