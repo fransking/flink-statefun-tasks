@@ -1,9 +1,7 @@
 import asyncio
-from statefun_tasks.types import TASK_ACTION_REQUEST_TYPE
 import unittest
 
 from statefun_tasks import DefaultSerialiser
-
 from tests.test_messages_pb2 import TestPerson, TestGreetingRequest, TestGreetingResponse
 from tests.utils import TestHarness, tasks, other_tasks_instance, TaskErrorException
 
@@ -114,12 +112,12 @@ class SimplePipelineTests(unittest.TestCase):
         else:
             self.fail('Expected an exception')
 
-
     def test_non_fruitful_pipeline(self):
         pipeline = _non_fruitful_task.send()
 
         result = self.test_harness.run_pipeline(pipeline)
         self.assertIsNone(result)
+
 
 if __name__ == '__main__':
     unittest.main()
