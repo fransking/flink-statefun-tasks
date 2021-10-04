@@ -17,13 +17,13 @@ from .test_utils import update_address, update_state
 
 default_namespace = 'test'
 default_worker_name = 'worker'
-serialiser = DefaultSerialiser()
+test_harness_serialiser = DefaultSerialiser()
 
 tasks = FlinkTasks(default_namespace=default_namespace, default_worker_name=default_worker_name,
-                   egress_type_name=f'{default_namespace}/kafka-generic-egress', serialiser=serialiser)
+                   egress_type_name=f'{default_namespace}/kafka-generic-egress', serialiser=test_harness_serialiser)
 
 other_tasks_instance = FlinkTasks(default_namespace=default_namespace, default_worker_name=default_worker_name,
-                                  egress_type_name=f'{default_namespace}/kafka-generic-egress', serialiser=serialiser)
+                                  egress_type_name=f'{default_namespace}/kafka-generic-egress', serialiser=test_harness_serialiser)
 
 functions = StatefulFunctions()
 
@@ -59,7 +59,7 @@ class TestHarness:
         self.__reply_topic = 'my_reply_topic'
 
     def run_pipeline(self, pipeline: PipelineBuilder, initial_target_type='worker'):
-        task_request = pipeline.to_task_request(serialiser)
+        task_request = pipeline.to_task_request(test_harness_serialiser)
         task_request.reply_topic = self.__reply_topic
 
         target = Address()
@@ -120,7 +120,7 @@ class TestHarness:
         result_proto = unpack_any(result_any, [TaskResult, TaskException, TaskActionResult, TaskActionException])
 
         if isinstance(result_proto, TaskResult):
-            result, _ = serialiser.deserialise_result(result_proto)
+            result, _ = test_harness_serialiser.deserialise_result(result_proto)
             return result
         elif isinstance(result_proto, TaskActionResult):
             return result_proto
