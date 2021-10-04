@@ -38,7 +38,7 @@ class RequestResultSerialisationTests(unittest.TestCase):
         try:
             self.test_harness.run_pipeline(pipeline)
         except Exception as e:
-            self.assertIn('Cannot wrap non-scalar', str(e))
+            self.assertIn('Cannot convert value', str(e))
         else:
             self.fail('Expected an exception')
 

@@ -1,10 +1,11 @@
 from .messages_pb2 import TaskRequest, TaskResult, TaskException, ArgsAndKwargs, MapOfStringToAny, \
     TupleOfAny
-from ._protobuf import _convert_from_proto, _convert_to_proto, _pack_any, _unpack_any
+from ._protobuf import _convert_from_proto, _convert_to_proto, _pack_any, _unpack_any, \
+    ObjectProtobufConverter, _generate_default_converters
 from ._utils import _is_tuple
 from google.protobuf.any_pb2 import Any
 from google.protobuf.message import Message
-from typing import Union
+from typing import Union, Type, Iterable
 
 
 class DefaultSerialiser(object):
@@ -13,11 +14,23 @@ class DefaultSerialiser(object):
     
     :param known_proto_types: an array of known protobuf types that will not be packed inside Any
     """
-    def __init__(self, known_proto_types=[]):
+    def __init__(
+            self,
+            known_proto_types: Iterable[Type[Message]] = None,
+            protobuf_converters: Iterable[ObjectProtobufConverter] = None):
+        known_proto_types = known_proto_types or []
+        # prepend default converters and
+        protobuf_converters = [*_generate_default_converters(), *(protobuf_converters or [])]
         self._known_proto_types = set(known_proto_types)
+        self._protobuf_converters = set(protobuf_converters)
 
-    def register_proto_types(self, proto_types):
+    def register_proto_types(self, proto_types: Iterable[Type[Message]]):
         self._known_proto_types.update(proto_types)
+
+    def register_converters(self, converters):
+        for converter in converters:
+            if converter not in self._protobuf_converters:
+                self._protobuf_converters.add(converter)
 
     def to_proto(self, item) -> Message:
         """
@@ -26,7 +39,7 @@ class DefaultSerialiser(object):
         :param item: the item to convert
         :return: the protobuf message possibly packed in an Any
         """
-        return _convert_to_proto(item)
+        return _convert_to_proto(item, self._protobuf_converters)
 
     def from_proto(self, proto: Message, default=None):
         """
@@ -36,7 +49,7 @@ class DefaultSerialiser(object):
         :param option default: an optional default value to return
         :return: the Python type or default value if deserialisation return None
         """
-        result = _convert_from_proto(proto, self._known_proto_types)
+        result = _convert_from_proto(proto, self._known_proto_types, self._protobuf_converters)
         return result if result is not None else default
 
     def serialise_args_and_kwargs(self, args, kwargs) -> Any:
@@ -60,8 +73,8 @@ class DefaultSerialiser(object):
         else:
             args = args if _is_tuple(args) else (args,)
             request = ArgsAndKwargs()
-            request.args.CopyFrom(_convert_to_proto(args))
-            request.kwargs.CopyFrom(_convert_to_proto(kwargs))
+            request.args.CopyFrom(_convert_to_proto(args, self._protobuf_converters))
+            request.kwargs.CopyFrom(_convert_to_proto(kwargs, self._protobuf_converters))
 
         return _pack_any(request)
 
@@ -72,11 +85,11 @@ class DefaultSerialiser(object):
         :param request: the protobuf message
         :return: tuple of args and kwargs
         """
-        request = _convert_from_proto(request, self._known_proto_types)
+        request = _convert_from_proto(request, self._known_proto_types, self._protobuf_converters)
 
         if isinstance(request, ArgsAndKwargs):
-            args = _convert_from_proto(request.args, self._known_proto_types)
-            kwargs = _convert_from_proto(request.kwargs, self._known_proto_types)
+            args = _convert_from_proto(request.args, self._known_proto_types, self._protobuf_converters)
+            kwargs = _convert_from_proto(request.kwargs, self._known_proto_types, self._protobuf_converters)
         else:
             args = request
             kwargs = {}
@@ -90,7 +103,7 @@ class DefaultSerialiser(object):
         :param request: the protobuf message
         :return: ArgsAndKwargs
         """
-        unpacked = _convert_from_proto(request, self._known_proto_types)
+        unpacked = _convert_from_proto(request, self._known_proto_types, self._protobuf_converters)
         if isinstance(unpacked, ArgsAndKwargs):
             return unpacked
         else:
@@ -125,8 +138,7 @@ class DefaultSerialiser(object):
 
         return _pack_any(ArgsAndKwargs(args=args, kwargs=kwargs))
 
-    @staticmethod
-    def serialise_request(task_request: TaskRequest, request: Any, state=None, retry_policy=None):
+    def serialise_request(self, task_request: TaskRequest, request: Any, state=None, retry_policy=None):
         """
         Serialises args, kwargs and optional state into a TaskRequest
         
@@ -136,7 +148,7 @@ class DefaultSerialiser(object):
         :param optional retry_policy: task retry policy
         """
         task_request.request.CopyFrom(request)
-        task_request.state.CopyFrom(_pack_any(_convert_to_proto(state)))
+        task_request.state.CopyFrom(_pack_any(_convert_to_proto(state, self._protobuf_converters)))
         
         if retry_policy:
             task_request.retry_policy.CopyFrom(retry_policy)
@@ -150,7 +162,7 @@ class DefaultSerialiser(object):
         """
         args, kwargs = self.deserialise_args_and_kwargs(task_request.request)
 
-        state = _convert_from_proto(task_request.state, self._known_proto_types)
+        state = _convert_from_proto(task_request.state, self._known_proto_types, self._protobuf_converters)
         return args, kwargs, state
 
     def serialise_result(self, task_result: TaskResult, result, state):
@@ -161,8 +173,8 @@ class DefaultSerialiser(object):
         :param result: task result
         :param state: task state
         """
-        task_result.result.CopyFrom(_pack_any(_convert_to_proto(result)))
-        task_result.state.CopyFrom(_pack_any(_convert_to_proto(state)))
+        task_result.result.CopyFrom(_pack_any(_convert_to_proto(result, self._protobuf_converters)))
+        task_result.state.CopyFrom(_pack_any(_convert_to_proto(state, self._protobuf_converters)))
 
     def deserialise_result(self, task_result: TaskResult):
         """
@@ -171,8 +183,8 @@ class DefaultSerialiser(object):
         :param task_result: the TaskResult
         :return: tuple of result and state
         """
-        result = _convert_from_proto(task_result.result, self._known_proto_types)
-        state = _convert_from_proto(task_result.state, self._known_proto_types)
+        result = _convert_from_proto(task_result.result, self._known_proto_types, self._protobuf_converters)
+        state = _convert_from_proto(task_result.state, self._known_proto_types, self._protobuf_converters)
 
         return result, state
 
@@ -181,7 +193,7 @@ class DefaultSerialiser(object):
         Unpacks a TaskResult or TaskException back into result and state.
         If a TaskException is provided as input then the return value will be TupleOfAny, TaskException.state
         
-        :param task_result: the TaskResult
+        :param task_result_or_exception: the TaskResult
         :return: tuple of result and state. 
         """
         if isinstance(task_result_or_exception, TaskResult):
