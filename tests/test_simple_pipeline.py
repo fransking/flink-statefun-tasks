@@ -113,9 +113,14 @@ class SimplePipelineTests(unittest.TestCase):
         else:
             self.fail('Expected an exception')
 
-
     def test_non_fruitful_pipeline(self):
         pipeline = _non_fruitful_task.send()
+
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertIsNone(result)
+
+    def test_pipeline_with_non_fruitful_override(self):
+        pipeline = _say_hello.send('A', 'B').set(is_fruitful=False)
 
         result = self.test_harness.run_pipeline(pipeline)
         self.assertIsNone(result)

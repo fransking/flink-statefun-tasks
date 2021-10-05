@@ -285,6 +285,9 @@ class _PipelineBehaviour(object):
 
         request = TaskRequest(id=task.task_id, type=task.task_type)
 
+        # allow callers to drop the results of fruitful tasks in their pipelines if they wish
+        request.is_fruitful = task.is_fruitful
+
         # set extra pipeline related parameters
         self._add_pipeline_meta(context, request)
 
