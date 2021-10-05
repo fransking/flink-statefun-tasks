@@ -118,6 +118,11 @@ class SimplePipelineTests(unittest.TestCase):
         result = self.test_harness.run_pipeline(pipeline)
         self.assertIsNone(result)
 
+    def test_pipeline_with_non_fruitful_override(self):
+        pipeline = _say_hello.send('A', 'B').set(is_fruitful=False)
+
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertIsNone(result)
 
 if __name__ == '__main__':
     unittest.main()
