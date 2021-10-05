@@ -1,14 +1,14 @@
 from statefun_tasks.serialisation import DefaultSerialiser
 from statefun_tasks.pipeline_builder import PipelineBuilder
 
-from statefun_tasks.types import RetryPolicy, TaskAlreadyExistsException, \
+from statefun_tasks.types import Task, RetryPolicy, TaskAlreadyExistsException, \
     TASK_STATE_TYPE, TASK_REQUEST_TYPE, TASK_RESULT_TYPE, TASK_EXCEPTION_TYPE, TASK_ACTION_REQUEST_TYPE, PIPELINE_STATE_TYPE
 
 from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, TaskAction
 
 from statefun_tasks.type_helpers import _create_task_result, _create_task_exception
 from statefun_tasks.context import TaskContext
-from statefun_tasks.utils import _task_type_for
+from statefun_tasks.utils import _task_type_for, _unpack_single_tuple_args, _gen_id
 from statefun_tasks.pipeline import _Pipeline
 
 from statefun_tasks.tasks import _FlinkTask
@@ -123,8 +123,20 @@ class FlinkTasks(object):
             def send(*args, **kwargs):
                 return PipelineBuilder().send(function, *args, **kwargs)
 
-            function.defaults = defaults
+            def to_task(args, kwargs, is_finally=False, parameters={}):
+                parameters = {**defaults(), **parameters}
+
+                if is_finally:
+                    parameters['is_fruitful'] = False
+                
+                module_name = parameters.get('module_name', None)
+                task_type = _task_type_for(function, module_name)
+
+                args = _unpack_single_tuple_args(args)
+                return Task.from_fields(_gen_id(), task_type, args, kwargs, is_finally=is_finally, **parameters)
+
             function.send = send
+            function.to_task = to_task
 
             self.register(function, **defaults())
             return function
@@ -324,3 +336,4 @@ class FlinkTasks(object):
         context.storage.task_exception = task_exception
 
         self._emit_result(context, task_input, task_exception)
+
