@@ -176,19 +176,6 @@ class _Pipeline(object):
              if context.pipeline_state.caller_id != context.get_caller_id():  # don't call back to self
                 context.pack_and_send(context.pipeline_state.caller_address, context.pipeline_state.caller_id, task_result_or_exception)
 
-    # @staticmethod
-    # def _add_pipeline_meta(context, caller_id, task_request: TaskRequest):
-    #     task_request.meta['pipeline_address'] = context.pipeline_state.address
-    #     task_request.meta['pipeline_id'] = context.pipeline_state.id
-    #     task_request.meta['root_pipeline_id'] = context.pipeline_state.root_id
-    #     task_request.meta['root_pipeline_address'] = context.pipeline_state.root_address
-
-    #     if caller_id is not None:
-    #         task_request.meta['parent_task_address'] = context.get_caller_address()
-    #         task_request.meta['parent_task_id'] = caller_id
-
-
-
 
 
 class PipelineBuilder(object):
@@ -237,14 +224,6 @@ class PipelineBuilder(object):
     def _add_to_group(self, group: Group):
         group.add_to_group(self._pipeline)
 
-    @staticmethod
-    def _unpack_single_tuple_args(args):
-        # send a single argument by itself instead of wrapped inside a tuple
-        if _is_tuple(args) and len(args) == 1:
-            args = args[0]
-
-        return args
-
     def send(self, fun, *args, **kwargs) -> 'PipelineBuilder':
         """
         Adds a task entry for the given Flink Task and arguments
@@ -254,9 +233,11 @@ class PipelineBuilder(object):
         :param kwargs: the task kwargs
         :return: the builder
         """
-        args = self._unpack_single_tuple_args(args)
-        task_type, parameters = self._task_type_and_parameters_for(fun)
-        self._pipeline.append(Task.from_fields(_gen_id(), task_type, args, kwargs, **parameters))
+        try:
+            task = fun.to_task(args, kwargs)
+            self._pipeline.append(task)
+        except AttributeError:
+            raise AttributeError(f'Function {fun.__module__}.{fun.__name__} should be decorated with tasks.bind')
         return self
 
     def set(self, retry_policy: RetryPolicy = None, namespace: str = None,
@@ -293,9 +274,11 @@ class PipelineBuilder(object):
         if isinstance(continuation, PipelineBuilder):
             continuation.append_to(self)
         else:
-            args = self._unpack_single_tuple_args(args)
-            task_type, parameters = self._task_type_and_parameters_for(continuation)
-            self._pipeline.append(Task.from_fields(_gen_id(), task_type, args, kwargs, **parameters))
+            try:
+                task = continuation.to_task(args, kwargs)
+                self._pipeline.append(task)
+            except AttributeError:
+                raise AttributeError(f'Function {continuation.__module__}.{continuation.__name__} should be decorated with tasks.bind')
         return self
 
     def get_destination(self):
@@ -336,11 +319,11 @@ class PipelineBuilder(object):
         :param kwargs: the task kwargs
         :return: the builder
         """
-        args = self._unpack_single_tuple_args(args)
-        task_type, parameters = self._task_type_and_parameters_for(finally_action)
-        combined_parameters = {**parameters, 'is_fruitful': False}
-        task_entry = Task.from_fields(_gen_id(), task_type, args, kwargs, is_finally=True, **combined_parameters)
-        self._pipeline.append(task_entry)
+        try:
+            task = finally_action.to_task(args, kwargs, is_finally=True)
+            self._pipeline.append(task)
+        except AttributeError:
+            raise AttributeError(f'Function {finally_action.__module__}.{finally_action.__name__} should be decorated with tasks.bind')
         return self
 
     def to_pipeline(self, serialiser=None, is_fruitful=True):
@@ -425,17 +408,6 @@ class PipelineBuilder(object):
         :return: true if empty, false otherwise
         """
         return not any(self.get_tasks())
-
-    @staticmethod
-    def _task_type_and_parameters_for(fun):
-        try:
-            parameters = fun.defaults()
-            module_name = parameters.get('module_name', None)
-            task_type = _task_type_for(fun, module_name)
-
-            return task_type, parameters
-        except AttributeError:
-            raise AttributeError(f'Function {fun.__module__}.{fun.__name__} should be decorated with tasks.bind')
 
     def __iter__(self):
         return self._pipeline.__iter__()

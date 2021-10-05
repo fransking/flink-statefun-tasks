@@ -1,6 +1,6 @@
 from ._serialisation import DefaultSerialiser
-from ._utils import _gen_id, _task_type_for, _is_tuple, _type_name, _annotated_protos_for
-from ._types import RetryPolicy, TaskAlreadyExistsException
+from ._utils import _gen_id, _task_type_for, _is_tuple, _type_name, _annotated_protos_for, _unpack_single_tuple_args
+from ._types import Task, RetryPolicy, TaskAlreadyExistsException
 from ._pipeline import _Pipeline, PipelineBuilder
 from ._context import TaskContext
 from ._builtins import run_pipeline
@@ -147,8 +147,20 @@ class FlinkTasks(object):
             def send(*args, **kwargs):
                 return PipelineBuilder().send(function, *args, **kwargs)
 
-            function.defaults = defaults
+            def to_task(args, kwargs, is_finally=False, parameters={}):
+                parameters = {**defaults(), **parameters}
+
+                if is_finally:
+                    parameters['is_fruitful'] = False
+                
+                module_name = parameters.get('module_name', None)
+                task_type = _task_type_for(function, module_name)
+
+                args = _unpack_single_tuple_args(args)
+                return Task.from_fields(_gen_id(), task_type, args, kwargs, is_finally=is_finally, **parameters)
+
             function.send = send
+            function.to_task = to_task
 
             self.register(function, **defaults())
             return function
