@@ -67,3 +67,11 @@ def _annotated_protos_for(fn):
         args = []
 
     return [arg for arg in args if inspect.isclass(arg) and issubclass(arg, Message) and arg != Any]
+
+
+def _unpack_single_tuple_args(args):
+    # send a single argument by itself instead of wrapped inside a tuple
+    if _is_tuple(args) and len(args) == 1:
+        args = args[0]
+
+    return args
