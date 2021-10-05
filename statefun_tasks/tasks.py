@@ -50,7 +50,10 @@ class _FlinkTask(object):
         return task_result, task_exception, pipeline, fn_state
 
     def _to_pipeline_or_task_result(self, task_request, fn_result, fn_state):
-        pipeline, task_result = None, None
+        pipeline, task_result, is_fruitful = None, None, self._is_fruitful
+
+        if is_fruitful and task_request.HasField('is_fruitful'):
+            is_fruitful = task_request.is_fruitful
 
         # if single result then wrap in tuple as this is the maximal case
         if not _is_tuple(fn_result):
@@ -74,13 +77,13 @@ class _FlinkTask(object):
         if isinstance(fn_result, PipelineBuilder):
             # this new pipeline which once complete will yield the result of the whole pipeline
             # back to the caller as if it were a simple task
-            pipeline = fn_result.to_pipeline(self._serialiser, is_fruitful=self._is_fruitful)
+            pipeline = fn_result.to_pipeline(self._serialiser, is_fruitful=is_fruitful)
             fn_result = ()
 
-        # drop the result if the task is marked as not fruitful
-        if not self._is_fruitful:
+        # drop the result if the task is marked as not fruitful or caller has asked for the result to be dropped
+        if not is_fruitful:
             fn_result = ()
-
+            
         task_result = _create_task_result(task_request)
         self._serialiser.serialise_result(task_result, fn_result, fn_state)
 

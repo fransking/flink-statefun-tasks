@@ -36,8 +36,6 @@ message TaskEntry {
     bool is_fruitful = 8;
     TaskRetryPolicy retry_policy = 9;
     string module_name = 10;
-    bool with_state = 11;
-    bool with_context = 12;
 }
 
 message GroupEntry {
@@ -80,6 +78,7 @@ message TaskRequest {
     google.protobuf.Any state = 6;
     TaskRetryPolicy retry_policy = 7;
     map<string, string> meta = 8;
+    optional bool is_fruitful = 9;
 }
 
 message TaskResult {
