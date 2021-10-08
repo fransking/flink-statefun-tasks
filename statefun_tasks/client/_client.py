@@ -3,7 +3,7 @@ from statefun_tasks import DefaultSerialiser, PipelineBuilder, TaskRequest, Task
 from statefun_tasks.client import TaskError, TaskStatus
 
 from google.protobuf.any_pb2 import Any
-from kafka import KafkaProducer, KafkaConsumer, TopicPartition
+from kafka import KafkaProducer, KafkaConsumer
 
 import logging
 from uuid import uuid4
@@ -31,9 +31,13 @@ class FlinkTasksClient(object):
     :param optional group_id: kafka group id to use when subscribing to reply_topic
     :param optional serialiser: serialiser to use (will use DefaultSerialiser if not set)
     :param optional kafka_properties: additional properties to be passed to the KafkaConsumer and KafkaProducer
+    :param optional kafka_consumer_properties: additional properties to be passed to the KafkaConsumer
+    :param optional kafka_producer_properties: additional properties to be passed to the KafkaProducer
     """
 
-    def __init__(self, kafka_broker_url, request_topics, action_topics, reply_topic, group_id=None, serialiser=None, kafka_properties=None):
+    def __init__(self, kafka_broker_url, request_topics, action_topics, reply_topic, group_id=None, serialiser=None, 
+            kafka_properties=None, kafka_consumer_properties=None, kafka_producer_properties=None):
+
         self._kafka_broker_url = kafka_broker_url
         self._requests = {}
 
@@ -44,16 +48,18 @@ class FlinkTasksClient(object):
         self._serialiser = serialiser if serialiser is not None else DefaultSerialiser()
 
         kafka_properties = kafka_properties or {}
+        kafka_consumer_properties = kafka_consumer_properties or {}
+        kafka_producer_properties = kafka_producer_properties or {}
 
         bootstrap_servers = [kafka_broker_url] if isinstance(kafka_broker_url, str) else kafka_broker_url
-        self._producer = KafkaProducer(bootstrap_servers=bootstrap_servers, **kafka_properties)
+        self._producer = KafkaProducer(bootstrap_servers=bootstrap_servers, **{**kafka_properties, **kafka_producer_properties})
 
         self._consumer = KafkaConsumer(
             self._reply_topic,
             bootstrap_servers=bootstrap_servers,
             auto_offset_reset='earliest',
             group_id=self._group_id, 
-            **kafka_properties)
+            **{**kafka_properties, **kafka_consumer_properties})
 
         self._consumer_thread = Thread(target=self._consume, args=())
         self._consumer_thread.daemon = True
@@ -123,6 +129,13 @@ class FlinkTasksClient(object):
     def _submit_action(self, task_id, action, topic):
         task_action = TaskActionRequest(id=task_id, action=action, reply_topic=self._reply_topic)
         return self._submit_request(task_action, topic)
+
+    @property
+    def serialiser(self) -> DefaultSerialiser:
+        """
+        Returns the serialiser used by this client
+        """
+        return self._serialiser
 
     def submit(self, pipeline: PipelineBuilder, topic=None) -> Future:
         """
@@ -286,7 +299,7 @@ class FlinkTasksClient(object):
                     future.set_result(self._unpack(proto.result, TaskRequest))
 
                 elif proto.action == TaskAction.GET_RESULT:
-
+                    
                     if proto.result.Is(TaskResult.DESCRIPTOR):
                         result, _ = self._serialiser.deserialise_result(self._unpack(proto.result, TaskResult))
                         future.set_result(result)
@@ -296,7 +309,7 @@ class FlinkTasksClient(object):
 
                 else:
                     future.set_result(None)
-                    
+
             except Exception as ex:
                 future.set_exception(ex)
 
@@ -327,7 +340,8 @@ class FlinkTasksClientFactory():
     __clients = {}
 
     @staticmethod
-    def get_client(kafka_broker_url, request_topics: dict, action_topics: dict, reply_topic, serialiser=None, kafka_properties=None) -> FlinkTasksClient:
+    def get_client(kafka_broker_url, request_topics: dict, action_topics: dict, reply_topic, serialiser=None, 
+            kafka_properties=None, kafka_consumer_properties=None, kafka_producer_properties=None) -> FlinkTasksClient:
         """
         Creates a FlinkTasksClient for submitting tasks to flink.  Clients are memoized by broker url and reply topic.
 
@@ -338,12 +352,15 @@ class FlinkTasksClientFactory():
         :param reply_topic: topic to listen on for responses (a unique consumer group id will be created)
         :param optional serialiser: serialiser to use (will use DefaultSerialiser if not set)
         :param optional kafka_properties: additional properties to be passed to the KafkaConsumer and KafkaProducer
+        :param optional kafka_consumer_properties: additional properties to be passed to the KafkaConsumer
+        :param optional kafka_producer_properties: additional properties to be passed to the KafkaProducer
         """
 
         key = f'{kafka_broker_url}.{reply_topic}'
 
         if key not in FlinkTasksClientFactory.__clients:
-            client = FlinkTasksClient(kafka_broker_url, request_topics, action_topics, reply_topic, serialiser=serialiser, group_id=str(uuid4()), kafka_properties=kafka_properties)
+            client = FlinkTasksClient(kafka_broker_url, request_topics, action_topics, reply_topic, serialiser=serialiser, group_id=str(uuid4()), 
+            kafka_properties=kafka_properties, kafka_consumer_properties=kafka_consumer_properties, kafka_producer_properties=kafka_producer_properties)
             FlinkTasksClientFactory.__clients[key] = client
 
         return FlinkTasksClientFactory.__clients[key]

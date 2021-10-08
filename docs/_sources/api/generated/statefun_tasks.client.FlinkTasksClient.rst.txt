@@ -26,10 +26,17 @@ FlinkTasksClient
    
     
    
+      ~FlinkTasksClient.serialiser
 
    
    
 
    
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~FlinkTasksClient.serialiser
    
    

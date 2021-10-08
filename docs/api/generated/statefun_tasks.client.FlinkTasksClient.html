@@ -181,7 +181,7 @@
 <h1>FlinkTasksClient<a class="headerlink" href="#flinktasksclient" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="statefun_tasks.client.FlinkTasksClient">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">statefun_tasks.client.</span></span><span class="sig-name descname"><span class="pre">FlinkTasksClient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kafka_broker_url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">request_topics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_topics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reply_topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">serialiser</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kafka_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">statefun_tasks.client.</span></span><span class="sig-name descname"><span class="pre">FlinkTasksClient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kafka_broker_url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">request_topics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_topics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reply_topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">serialiser</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kafka_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kafka_consumer_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kafka_producer_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient" title="Permalink to this definition">¶</a></dt>
 <dd><p>Client for submitting TaskRequests / TaskActionRequests</p>
 <p>Replies are handled on a dedicated thread created per instance so FlinkTasksClientFactory.get_client() is preferred to
 instantiating this class directly.</p>
@@ -196,12 +196,14 @@ e.g. {‘example/worker’: ‘example.requests’, None: ‘example.default.req
 <li><p><strong>group_id</strong> (<em>optional</em>) – kafka group id to use when subscribing to reply_topic</p></li>
 <li><p><strong>serialiser</strong> (<em>optional</em>) – serialiser to use (will use DefaultSerialiser if not set)</p></li>
 <li><p><strong>kafka_properties</strong> (<em>optional</em>) – additional properties to be passed to the KafkaConsumer and KafkaProducer</p></li>
+<li><p><strong>kafka_consumer_properties</strong> (<em>optional</em>) – additional properties to be passed to the KafkaConsumer</p></li>
+<li><p><strong>kafka_producer_properties</strong> (<em>optional</em>) – additional properties to be passed to the KafkaProducer</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.client.FlinkTasksClient.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kafka_broker_url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">request_topics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_topics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reply_topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">serialiser</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kafka_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.__init__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kafka_broker_url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">request_topics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_topics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reply_topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">serialiser</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kafka_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kafka_consumer_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kafka_producer_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
 </dd></dl>
 
@@ -244,6 +246,21 @@ e.g. {‘example/worker’: ‘example.requests’, None: ‘example.default.req
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.client.FlinkTasksClient.submit_async" title="statefun_tasks.client.FlinkTasksClient.submit_async"><code class="xref py py-obj docutils literal notranslate"><span class="pre">submit_async</span></code></a>(pipeline[, topic])</p></td>
 <td><p>Submit a pipeline to Flink</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.client.FlinkTasksClient.serialiser" title="statefun_tasks.client.FlinkTasksClient.serialiser"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serialiser</span></code></a></p></td>
+<td><p>Returns the serialiser used by this client</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.client.FlinkTasksClient.serialiser" title="statefun_tasks.client.FlinkTasksClient.serialiser"><code class="xref py py-obj docutils literal notranslate"><span class="pre">serialiser</span></code></a></p></td>
+<td><p>Returns the serialiser used by this client</p></td>
 </tr>
 </tbody>
 </table>
@@ -388,6 +405,17 @@ e.g. {‘example/worker’: ‘example.requests’, None: ‘example.default.req
 <li><p><strong>pipeline_or_task</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks._pipeline.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>]) – the pipeline or task</p></li>
 <li><p><strong>topic</strong> (<em>optional</em>) – override the default ingress topic</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="statefun_tasks.client.FlinkTasksClient.serialiser">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">serialiser</span></span><em class="property"><span class="pre">:</span> <span class="pre">statefun_tasks._serialisation.DefaultSerialiser</span></em><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.serialiser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the serialiser used by this client</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="statefun_tasks.DefaultSerialiser.html#statefun_tasks.DefaultSerialiser" title="statefun_tasks._serialisation.DefaultSerialiser"><code class="xref py py-class docutils literal notranslate"><span class="pre">DefaultSerialiser</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
