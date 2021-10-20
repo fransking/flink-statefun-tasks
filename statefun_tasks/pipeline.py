@@ -34,7 +34,11 @@ class _Pipeline(object):
         return not any(self._behaviour.get_initial_tasks())
 
     def begin(self, context: TaskContext, invoking_task: TaskRequest, task_state):
-        caller_id = context.get_caller_id()
+        # ensure we pick up the correct caller id when task producing this pipeline is a retry
+        if context.task_state.original_caller_id == '':
+            caller_id = context.get_caller_id()
+        else:
+            caller_id = context.task_state.original_caller_id
 
         # 1. record all the continuations into a pipeline and save into state with caller id and address
         context.pipeline_state.id = context.get_task_id()
