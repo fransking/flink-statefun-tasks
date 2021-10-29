@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
 from statefun_tasks.context import TaskContext
-from statefun_tasks.pipeline import Pipeline
 from statefun_tasks.serialisation import DefaultSerialiser
-from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, Pipeline
+from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException
 from statefun_tasks.pipeline_impl.helpers import PipelineGraph, DeferredTaskSubmitter, ResultAggregator, ResultEmitter
 from google.protobuf.any_pb2 import Any
 from typing import Union, Tuple
@@ -22,7 +21,7 @@ class PipelineMessageHandler(ABC):
         pass
 
     @abstractmethod
-    def handle_message(self, pipeline: Pipeline, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], task_state: Any = None) -> Tuple[bool, Union[TaskRequest, TaskResult, TaskException]]:
+    def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline: '_Pipeline', task_state: Any = None) -> Tuple[bool, Union[TaskRequest, TaskResult, TaskException]]:
         pass
     
     @property

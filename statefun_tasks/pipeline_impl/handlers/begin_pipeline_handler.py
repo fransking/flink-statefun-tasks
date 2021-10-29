@@ -1,9 +1,7 @@
 from statefun_tasks.context import TaskContext
-from statefun_tasks.pipeline import Pipeline
 from statefun_tasks.pipeline_impl.handlers import PipelineMessageHandler
-from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, Pipeline, TaskStatus, PipelineState, ChildPipeline, Address, DeferredTask
+from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, TaskStatus, PipelineState, ChildPipeline, Address
 from statefun_tasks.serialisation import pack_any
-from statefun_tasks.utils import _gen_id
 from google.protobuf.any_pb2 import Any
 from typing import Union
 
@@ -17,7 +15,7 @@ class BeginPipelineHandler(PipelineMessageHandler):
             and isinstance(message, TaskRequest) \
                 and not self.graph.is_empty()
 
-    def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline: Pipeline=None, task_state: Any=None):
+    def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline: '_Pipeline'=None, task_state: Any=None):
         invoking_task = message  # type: TaskRequest
 
         # ensure we pick up the correct caller id when task producing this pipeline is a retry

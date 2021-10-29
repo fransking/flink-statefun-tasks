@@ -14,11 +14,15 @@ FlinkTasks
    
       ~FlinkTasks.__init__
       ~FlinkTasks.bind
+      ~FlinkTasks.emit_result
+      ~FlinkTasks.fail
+      ~FlinkTasks.get_pipeline
       ~FlinkTasks.get_task
       ~FlinkTasks.register
       ~FlinkTasks.register_builtin
       ~FlinkTasks.run_async
       ~FlinkTasks.send
+      ~FlinkTasks.try_get_pipeline
       ~FlinkTasks.value_specs
    
     

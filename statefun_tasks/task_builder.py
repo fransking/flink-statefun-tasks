@@ -1,23 +1,19 @@
 from statefun_tasks.serialisation import DefaultSerialiser
 from statefun_tasks.pipeline_builder import PipelineBuilder
 
-from statefun_tasks.types import Task, RetryPolicy, TaskAlreadyExistsException, \
+from statefun_tasks.types import Task, RetryPolicy, \
     TASK_STATE_TYPE, TASK_REQUEST_TYPE, TASK_RESULT_TYPE, TASK_EXCEPTION_TYPE, TASK_ACTION_REQUEST_TYPE, PIPELINE_STATE_TYPE, \
         CHILD_PIPELINE_TYPE
 
-from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, TaskAction
-
-from statefun_tasks.type_helpers import _create_task_result, _create_task_exception
+from statefun_tasks.messages_pb2 import TaskRequest
+from statefun_tasks.type_helpers import _create_task_exception
 from statefun_tasks.context import TaskContext
 from statefun_tasks.utils import _task_type_for, _unpack_single_tuple_args, _gen_id
 from statefun_tasks.pipeline import _Pipeline
-
-from statefun_tasks.tasks import _FlinkTask
-from statefun_tasks.actions import _FlinkAction
+from statefun_tasks.tasks import FlinkTask
+from statefun_tasks.task_impl.handlers import TaskRequestHandler, TaskResponseHandler, TaskActionHandler, ChildPipelineHandler
 
 from statefun import ValueSpec, Context, Message
-from datetime import timedelta
-from typing import Union
 import logging
 
 _log = logging.getLogger('FlinkTasks')
@@ -57,6 +53,13 @@ class FlinkTasks(object):
 
         self.register_builtin('run_pipeline', _run_pipeline)
 
+        self._handlers = [
+            TaskRequestHandler(self._serialiser),
+            TaskResponseHandler(),
+            TaskActionHandler(),
+            ChildPipelineHandler()
+        ]
+
     def value_specs(self):
         return self._value_specs
 
@@ -69,7 +72,7 @@ class FlinkTasks(object):
         :param fun: a function, partial or lambda representing the built in
         :param params: any additional parameters to the built in
         """
-        self._bindings[f'__builtins.{type_name}'] = _FlinkTask(fun, self._serialiser, **params)
+        self._bindings[f'__builtins.{type_name}'] = FlinkTask(fun, self._serialiser, **params)
 
     def register(self, fun, wrapper=None, module_name=None, **params):
         """
@@ -86,7 +89,7 @@ class FlinkTasks(object):
             raise ValueError("function instance must be provided")
 
         fun.type_name = _task_type_for(fun, module_name)
-        self._bindings[fun.type_name] = _FlinkTask(wrapper or fun, self._serialiser, **params)
+        self._bindings[fun.type_name] = FlinkTask(wrapper or fun, self._serialiser, **params)
 
     def bind(
         self, 
@@ -144,7 +147,7 @@ class FlinkTasks(object):
 
         return wrapper
 
-    def get_task(self, task_type):
+    def get_task(self, task_type) -> FlinkTask:
         """
         Returns the Flink Task instance for a given task type name
 
@@ -166,33 +169,16 @@ class FlinkTasks(object):
         with TaskContext(context, self._egress_type_name, self._serialiser) as task_context:
 
             try:
+                for handler in self._handlers:
+                    task_input = handler.unpack(task_context, message)
+                    if task_input is not None:
 
-                # TODO refactor into handlers
-                if message.is_type(TASK_REQUEST_TYPE):
-                    task_input = message.as_type(TASK_REQUEST_TYPE)
-                    task_context.task_name = task_input.type
-                    task_context.apply_task_meta(task_input)
-                    await self._invoke_task(task_context, task_input)
+                        _log.info(f'Starting {task_context}')
 
-                elif message.is_type(TASK_ACTION_REQUEST_TYPE):
-                    task_input = message.as_type(TASK_ACTION_REQUEST_TYPE)
-                    task_context.task_name = f'Action [{TaskAction.Name(task_input.action)}]'
-                    self._invoke_action(task_context, task_input)
-                    
-                elif message.is_type(TASK_RESULT_TYPE):
-                    task_input = message.as_type(TASK_RESULT_TYPE)
-                    task_context.task_name = task_input.type
-                    self._resume_pipeline(task_context, task_input)
+                        await handler.handle_message(self, task_context, task_input)
 
-                elif message.is_type(TASK_EXCEPTION_TYPE):
-                    task_input = message.as_type(TASK_EXCEPTION_TYPE)
-                    task_context.task_name = task_input.type
-                    self._resume_pipeline(task_context, task_input)
-
-                elif message.is_type(CHILD_PIPELINE_TYPE):
-                    task_input = message.as_type(CHILD_PIPELINE_TYPE)
-                    task_context.task_name = f'New child pipeline: {task_input.id}'
-                    self._add_child_pipeline(task_context, task_input)
+                        _log.info(f'Finished {task_context}')
+                        return
 
                 else:
                     _log.error(f'Unsupported message type {message.typed_value.typename}')
@@ -200,7 +186,7 @@ class FlinkTasks(object):
 
             except Exception as ex:
                 _log.error(f'Error invoking {task_context} - {ex}')
-                self._fail(task_context, task_input, ex)
+                self.fail(task_context, task_input, ex)
 
     @staticmethod
     def send(func, *args, **kwargs) -> PipelineBuilder:
@@ -219,7 +205,7 @@ class FlinkTasks(object):
                 'Expected function to have a send attribute. Make sure it is decorated with @tasks.bind()')
         return send_func(*args, **kwargs)
 
-    def _get_pipeline(self, context):
+    def get_pipeline(self, context):
         pipeline_protos = context.pipeline_state.pipeline
 
         if pipeline_protos is not None:
@@ -227,77 +213,13 @@ class FlinkTasks(object):
         else:
             raise ValueError(f'Missing pipeline for task_id - {context.get_task_id()}')
 
-    def _try_get_pipeline(self, context):
+    def try_get_pipeline(self, context):
         try:
-            return self._get_pipeline(context)
+            return self.get_pipeline(context)
         except:
             return None
 
-    def _resume_pipeline(self, context, task_result_or_exception: Union[TaskResult, TaskException]):
-        _log.info(f'Started {context}')
-
-        pipeline = self._get_pipeline(context)
-        pipeline.handle_message(context, task_result_or_exception)
-        
-        _log.info(f'Finished {context}')
-
-    async def _invoke_task(self, context, task_request):
-        _log.info(f'Started {context}')
-
-        if context.storage.task_request is not None:
-            # don't allow tasks to be overwritten
-            raise TaskAlreadyExistsException(f'Task already exists: {task_request.id}')
-
-        context.storage.task_request = task_request
-
-        flink_task = self.get_task(task_request.type)
-        task_result, task_exception, pipeline, task_state = await flink_task.run(context, task_request)
-
-        # if task returns a pipeline then start it if we can
-        if pipeline is not None and pipeline.handle_message(context, task_request, task_state):
-            ()
-
-        # else if we have a task result return it
-        elif task_result is not None:
-            context.storage.task_result = task_result
-            self._emit_result(context, task_request, task_result)
-
-        # else if we have an task exception, attempt retry or return the error
-        elif task_exception is not None:
-            if self._attempt_retry(context, task_request, task_exception):
-                return  # we have triggered a retry so ignore the result of this invocation
-
-            context.storage.task_exception = task_exception
-            self._emit_result(context, task_request, task_exception)
-
-        _log.info(f'Finished {context}')
-
-    def _invoke_action(self, context, action_request):
-        _log.info(f'Started {context}')
-
-        try:
-            pipeline = self._try_get_pipeline(context)
-            flink_action = _FlinkAction(context, pipeline)
-            
-            result = flink_action.run(action_request)
-            self._emit_result(context, action_request, _create_task_result(action_request, result))
-
-        except Exception as ex:
-            self._emit_result(context, action_request, _create_task_exception(action_request, ex))
-
-        _log.info(f'Finished {context}')
-
-    def _add_child_pipeline(self, context, child_pipeline):
-        _log.info(f'Started {context}')
-
-        pipeline = self._try_get_pipeline(context)
-
-        if pipeline is not None:
-            pipeline.add_child(context, child_pipeline)
-
-        _log.info(f'Finished {context}')
-
-    def _emit_result(self, context, task_input, task_result):
+    def emit_result(self, context, task_input, task_result):
         # either send a message to egress if reply_topic was specified
         if task_input.HasField('reply_topic'):
             context.send_egress_message(topic=task_input.reply_topic, value=task_result)
@@ -317,40 +239,10 @@ class FlinkTasks(object):
             elif context.get_caller_id() is not None:
                 context.send_message(context.get_caller_address(), context.get_caller_id(), task_result)
 
-    def _attempt_retry(self, context, task_request, task_exception):
-        if task_exception.maybe_retry and task_exception.retry_policy is not None:           
-            if context.task_state.retry_count >= task_exception.retry_policy.max_retries:
-                return False
-
-            # save the original caller address and id for this task_request prior to calling back to ourselves which would overwrite
-            if context.task_state.original_caller_id == '':
-                context.task_state.original_caller_id = context.get_caller_id()
-                context.task_state.original_caller_address = context.get_caller_address()
-
-            # remove previous task_request from state, increment retry count
-            del context.storage.task_request
-            context.task_state.retry_count += 1
-
-            # send retry
-            delay = timedelta(milliseconds=task_exception.retry_policy.delay_ms)
-
-            if task_exception.retry_policy.exponential_back_off:
-                delay = timedelta(milliseconds=task_exception.retry_policy.delay_ms * (2 ** context.task_state.retry_count))
-
-            if delay:
-                context.send_message_after(delay, context.get_address(), context.get_task_id(), task_request)
-            else:
-                context.send_message(context.get_address(), context.get_task_id(), task_request)
-
-            return True
-
-        return False
-
-    def _fail(self, context, task_input, ex):
+    def fail(self, context, task_input, ex):
         task_exception = _create_task_exception(task_input, ex)
 
         del context.storage.task_result
         context.storage.task_exception = task_exception
 
-        self._emit_result(context, task_input, task_exception)
-
+        self.emit_result(context, task_input, task_exception)
