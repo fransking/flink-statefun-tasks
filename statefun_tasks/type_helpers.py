@@ -16,7 +16,7 @@ def flink_value_type_for(proto):
     raise ValueError(f'No Flink value type found for proto type {proto_type}')
 
 
-def _create_task_exception(task_input, ex):
+def _create_task_exception(task_input, ex, state=None):
     if isinstance(task_input, TaskActionRequest):
         return TaskActionException(
             id=task_input.id,
@@ -33,7 +33,9 @@ def _create_task_exception(task_input, ex):
             stacktrace=tb.format_exc())
 
         # if the task failed then ensure that exception retains the state from the task input (i.e. the TaskRequest)
-        if isinstance(task_input, TaskRequest) and task_input.HasField('state'):
+        if state is not None:
+            task_exception.state.CopyFrom(state)
+        elif isinstance(task_input, TaskRequest) and task_input.HasField('state'):
             task_exception.state.CopyFrom(task_input.state)
 
         return task_exception

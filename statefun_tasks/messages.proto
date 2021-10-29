@@ -114,6 +114,11 @@ message DeferredTask {
     TaskRequest task_request = 2;
 }
 
+message PausedTask {
+    string destination = 1;
+    TaskRequest task_request = 2;
+}
+
 message PipelineState {
     string id = 1;
     string address = 2;
@@ -134,6 +139,23 @@ message PipelineState {
     map<string, TaskDeferral> task_deferrals_by_id = 13;
     map<string, string> task_deferral_ids_by_task_id = 14;
     // end
+
+    TaskStatus status = 15;
+    repeated PausedTask paused_tasks = 16;
+
+    repeated ChildPipeline child_pipelines = 17;
+
+    google.protobuf.Any last_task_state = 18;
+}
+
+message ChildPipeline {
+    string id = 1;
+    string address = 2;
+    string root_id = 3;
+    string root_address = 4;
+    string caller_id = 5;
+    string caller_address = 6;
+    repeated Address tasks = 7;
 }
 
 message TaskResults {
@@ -145,7 +167,8 @@ enum TaskAction {
     GET_REQUEST = 1;
     GET_RESULT = 2;
     PAUSE_PIPELINE = 3;
-    RESUME_PIPELINE = 4;
+    UNPAUSE_PIPELINE = 4;
+    CANCEL_PIPELINE = 5;
 }
 
 message TaskActionRequest {
@@ -177,6 +200,9 @@ message TaskStatus {
         RUNNING = 1;
         COMPLETED = 2;
         FAILED = 3;
+        PAUSED = 4;
+        CANCELLING = 5;
+        CANCELLED = 6;
     }
-    Status status = 1;
+    Status value = 1;
 }

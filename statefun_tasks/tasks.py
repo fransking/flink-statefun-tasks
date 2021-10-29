@@ -8,7 +8,7 @@ import inspect
 import asyncio
 
 
-class _FlinkTask(object):
+class FlinkTask(object):
     def __init__(self, fun, serialiser, retry_policy=None, with_state=False, is_fruitful=True, with_context=False, **kwargs):
         self._fun = fun
         self._serialiser = serialiser
