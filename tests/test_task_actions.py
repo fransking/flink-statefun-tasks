@@ -26,13 +26,13 @@ class TaskActionsTests(unittest.TestCase):
     def test_get_status_for_pending_pipeline(self):
         pipeline = tasks.send(_say_hello, 'Jane', 'Doe')
         action_result = self.test_harness.run_action(pipeline, TaskAction.GET_STATUS)
-        self.assertEqual(self._unpack(action_result.result, TaskStatus).status, TaskStatus.PENDING)
+        self.assertEqual(self._unpack(action_result.result, TaskStatus).value, TaskStatus.PENDING)
 
     def test_get_status_for_completed_pipeline(self):
         pipeline = tasks.send(_say_hello, 'Jane', 'Doe')
         self.test_harness.run_pipeline(pipeline)
         action_result = self.test_harness.run_action(pipeline, TaskAction.GET_STATUS)
-        self.assertEqual(self._unpack(action_result.result, TaskStatus).status, TaskStatus.COMPLETED)
+        self.assertEqual(self._unpack(action_result.result, TaskStatus).value, TaskStatus.COMPLETED)
 
     def test_get_status_for_failed_pipeline(self):
         pipeline = tasks.send(_say_hello, 'Jane')
@@ -42,7 +42,7 @@ class TaskActionsTests(unittest.TestCase):
             pass
 
         action_result = self.test_harness.run_action(pipeline, TaskAction.GET_STATUS)
-        self.assertEqual(self._unpack(action_result.result, TaskStatus).status, TaskStatus.FAILED)
+        self.assertEqual(self._unpack(action_result.result, TaskStatus).value, TaskStatus.FAILED)
 
     def test_get_task_request_for_an_existing_pipeline(self):
         pipeline = tasks.send(_say_hello, 'Jane', 'Doe')

@@ -1,7 +1,7 @@
 from statefun_tasks.utils import _type_name
 from statefun_tasks.messages_pb2 import PipelineState, TaskState, TaskRequest, TaskResult, TaskException, \
     TaskActionRequest, TaskActionResult, TaskActionException, TaskEntry, GroupEntry, PipelineEntry, TaskRetryPolicy, \
-    Pipeline
+    Pipeline, ChildPipeline
 
 from statefun import make_protobuf_type
 
@@ -17,6 +17,7 @@ TASK_EXCEPTION_TYPE = make_protobuf_type(TaskException, namespace='io.statefun_t
 TASK_ACTION_REQUEST_TYPE = make_protobuf_type(TaskActionRequest, namespace='io.statefun_tasks.types')
 TASK_ACTION_RESULT_TYPE = make_protobuf_type(TaskActionResult, namespace='io.statefun_tasks.types')
 TASK_ACTION_EXCEPTION_TYPE = make_protobuf_type(TaskActionException, namespace='io.statefun_tasks.types')
+CHILD_PIPELINE_TYPE = make_protobuf_type(ChildPipeline, namespace='io.statefun_tasks.types')
 
 _VALUE_TYPE_MAP = {
     TaskState: PIPELINE_STATE_TYPE,
@@ -26,7 +27,8 @@ _VALUE_TYPE_MAP = {
     TaskException: TASK_EXCEPTION_TYPE,
     TaskActionRequest: TASK_ACTION_REQUEST_TYPE,
     TaskActionResult: TASK_ACTION_RESULT_TYPE,
-    TaskActionException: TASK_ACTION_EXCEPTION_TYPE
+    TaskActionException: TASK_ACTION_EXCEPTION_TYPE,
+    ChildPipeline: CHILD_PIPELINE_TYPE,
 }
 
 
@@ -265,5 +267,10 @@ class RetryPolicy:
 
 
 class TaskAlreadyExistsException(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
+
+class TaskCancelledException(Exception):
     def __init__(self, message):
         super().__init__(message)

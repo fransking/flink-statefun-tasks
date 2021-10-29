@@ -1,12 +1,14 @@
 from statefun_tasks.messages_pb2 import TaskAction, TaskStatus
-
+from statefun_tasks.pipeline import Pipeline
 
 class _FlinkAction(object):
-    def __init__(self, context, pipeline):
+    def __init__(self, context, pipeline:Pipeline=None):
         self._context = context
         self._pipeline = pipeline
         
     def run(self, action_request):
+
+        # TODO refactor into handlers
         if action_request.action == TaskAction.GET_STATUS:
             return self._get_task_status()
 
@@ -19,21 +21,26 @@ class _FlinkAction(object):
         elif action_request.action == TaskAction.PAUSE_PIPELINE:
             return self._pause_pipeline()
 
-        elif action_request.action == TaskAction.RESUME_PIPELINE:
-            return self._resume_pipeline()
+        elif action_request.action == TaskAction.UNPAUSE_PIPELINE:
+            return self._unpause_pipeline()
+
+        elif action_request.action == TaskAction.CANCEL_PIPELINE:
+            return self._cancel_pipeline()
 
         else:    
             raise ValueError(f'Unsupported task action {TaskAction.Name(action_request.action)}')
 
     def _get_task_status(self):
+        if self._pipeline is not None:
+            return self._pipeline.status(self._context)
 
         if self._context.storage.task_exception is not None:
-            return TaskStatus(status=TaskStatus.Status.FAILED)
+            return TaskStatus(value=TaskStatus.Status.FAILED)
 
         if self._context.storage.task_result is not None:
-            return TaskStatus(status=TaskStatus.Status.COMPLETED)
+            return TaskStatus(value=TaskStatus.Status.COMPLETED)
 
-        return TaskStatus(status=TaskStatus.Status.PENDING)
+        return TaskStatus(value=TaskStatus.Status.PENDING)
 
     def _get_task_request(self):
         task_request = self._context.storage.task_request or None
@@ -42,7 +49,6 @@ class _FlinkAction(object):
             return task_request
 
         raise ValueError(f'Task request not found')
-
 
     def _get_task_result(self):
 
@@ -59,13 +65,17 @@ class _FlinkAction(object):
     def _pause_pipeline(self):
         if self._pipeline is None:
             raise ValueError('Task is not a pipeline')
-        
-        if self._get_task_status().status != TaskStatus.Status.PENDING:
-            raise ValueError('Pipeline has already completed')
-            
-        return
+       
+        self._pipeline.pause(self._context)
 
-        raise ValueError(f'Not yet implemented')
+    def _unpause_pipeline(self):
+        if self._pipeline is None:
+            raise ValueError('Task is not a pipeline')
+       
+        self._pipeline.unpause(self._context)
 
-    def _resume_pipeline(self):
-        raise ValueError(f'Not yet implemented')
+    def _cancel_pipeline(self):
+        if self._pipeline is None:
+            raise ValueError('Task is not a pipeline')
+       
+        self._pipeline.cancel(self._context)

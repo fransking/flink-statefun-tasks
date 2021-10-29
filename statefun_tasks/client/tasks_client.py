@@ -242,6 +242,46 @@ class FlinkTasksClient(object):
         """
         await asyncio.wrap_future(self.pause_pipeline(pipeline_or_task, topic))
 
+    def unpause_pipeline(self, pipeline_or_task: Union[PipelineBuilder, Task], topic=None) -> Future:
+        """
+        Unpauses a pipeline
+
+        :param pipeline_or_task: the pipeline or task
+        :param optional topic: override the default ingress topic
+        :return: a Future indicating whether the pipeline was successfully paused or not
+        """
+        topic = self._get_action_topic(pipeline_or_task, topic)
+        return self._submit_action(pipeline_or_task.id, TaskAction.UNPAUSE_PIPELINE, topic)
+
+    async def unpause_pipeline_async(self, pipeline_or_task: Union[PipelineBuilder, Task], topic=None):
+        """
+        Unpauses a pipeline
+
+        :param pipeline_or_task: the pipeline or task
+        :param optional topic: override the default ingress topic
+        """
+        await asyncio.wrap_future(self.unpause_pipeline(pipeline_or_task, topic))
+
+    def cancel_pipeline(self, pipeline_or_task: Union[PipelineBuilder, Task], topic=None) -> Future:
+        """
+        Cancels a pipeline
+
+        :param pipeline_or_task: the pipeline or task
+        :param optional topic: override the default ingress topic
+        :return: a Future indicating whether the pipeline was successfully paused or not
+        """
+        topic = self._get_action_topic(pipeline_or_task, topic)
+        return self._submit_action(pipeline_or_task.id, TaskAction.CANCEL_PIPELINE, topic)
+
+    async def cancel_pipeline_async(self, pipeline_or_task: Union[PipelineBuilder, Task], topic=None):
+        """
+        Cancels a pipeline
+
+        :param pipeline_or_task: the pipeline or task
+        :param optional topic: override the default ingress topic
+        """
+        await asyncio.wrap_future(self.cancel_pipeline(pipeline_or_task, topic))
+
     def _consume(self):
         while True:
             try:
@@ -293,7 +333,7 @@ class FlinkTasksClient(object):
             try:
 
                 if proto.action == TaskAction.GET_STATUS:
-                    future.set_result(TaskStatus(self._unpack(proto.result, TaskStatusProto).status))
+                    future.set_result(TaskStatus(self._unpack(proto.result, TaskStatusProto).value))
                 
                 elif proto.action == TaskAction.GET_REQUEST:
                     future.set_result(self._unpack(proto.result, TaskRequest))

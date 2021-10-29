@@ -2,7 +2,8 @@ from statefun_tasks.serialisation import DefaultSerialiser
 from statefun_tasks.pipeline_builder import PipelineBuilder
 
 from statefun_tasks.types import Task, RetryPolicy, TaskAlreadyExistsException, \
-    TASK_STATE_TYPE, TASK_REQUEST_TYPE, TASK_RESULT_TYPE, TASK_EXCEPTION_TYPE, TASK_ACTION_REQUEST_TYPE, PIPELINE_STATE_TYPE
+    TASK_STATE_TYPE, TASK_REQUEST_TYPE, TASK_RESULT_TYPE, TASK_EXCEPTION_TYPE, TASK_ACTION_REQUEST_TYPE, PIPELINE_STATE_TYPE, \
+        CHILD_PIPELINE_TYPE
 
 from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, TaskAction
 
@@ -45,7 +46,7 @@ class FlinkTasks(object):
         self._serialiser = serialiser if serialiser is not None else DefaultSerialiser()
         self._bindings = {}
 
-        # state types to register in Flink's @functions.bind() attribute
+        # to register in Flink's @functions.bind() attribute
         self._value_specs = [
             ValueSpec(name="task_request", type=TASK_REQUEST_TYPE),
             ValueSpec(name="task_result", type=TASK_RESULT_TYPE),
@@ -166,6 +167,7 @@ class FlinkTasks(object):
 
             try:
 
+                # TODO refactor into handlers
                 if message.is_type(TASK_REQUEST_TYPE):
                     task_input = message.as_type(TASK_REQUEST_TYPE)
                     task_context.task_name = task_input.type
@@ -186,6 +188,11 @@ class FlinkTasks(object):
                     task_input = message.as_type(TASK_EXCEPTION_TYPE)
                     task_context.task_name = task_input.type
                     self._resume_pipeline(task_context, task_input)
+
+                elif message.is_type(CHILD_PIPELINE_TYPE):
+                    task_input = message.as_type(CHILD_PIPELINE_TYPE)
+                    task_context.task_name = f'New child pipeline: {task_input.id}'
+                    self._add_child_pipeline(task_context, task_input)
 
                 else:
                     _log.error(f'Unsupported message type {message.typed_value.typename}')
@@ -227,15 +234,15 @@ class FlinkTasks(object):
             return None
 
     def _resume_pipeline(self, context, task_result_or_exception: Union[TaskResult, TaskException]):
-        _log.info(f'Started {task_result_or_exception.type}, {context}')
+        _log.info(f'Started {context}')
 
         pipeline = self._get_pipeline(context)
         pipeline.resume(context, task_result_or_exception)
         
-        _log.info(f'Finished {task_result_or_exception.type}, {context}')
+        _log.info(f'Finished {context}')
 
     async def _invoke_task(self, context, task_request):
-        _log.info(f'Started {task_request.type}, {context}')
+        _log.info(f'Started {context}')
 
         if context.storage.task_request is not None:
             # don't allow tasks to be overwritten
@@ -263,10 +270,10 @@ class FlinkTasks(object):
             context.storage.task_exception = task_exception
             self._emit_result(context, task_request, task_exception)
 
-        _log.info(f'Finished {task_request.type}, {context}')
+        _log.info(f'Finished {context}')
 
     def _invoke_action(self, context, action_request):
-        _log.info(f'Started Action [{TaskAction.Name(action_request.action)}], task_id: {context.get_task_id()}')
+        _log.info(f'Started {context}')
 
         try:
             pipeline = self._try_get_pipeline(context)
@@ -278,7 +285,17 @@ class FlinkTasks(object):
         except Exception as ex:
             self._emit_result(context, action_request, _create_task_exception(action_request, ex))
 
-        _log.info(f'Finished Action [{TaskAction.Name(action_request.action)}], task_id: {context.get_task_id()}')
+        _log.info(f'Finished {context}')
+
+    def _add_child_pipeline(self, context, child_pipeline):
+        _log.info(f'Started {context}')
+
+        pipeline = self._try_get_pipeline(context)
+
+        if pipeline is not None:
+            pipeline.add_child(context, child_pipeline)
+
+        _log.info(f'Finished {context}')
 
     def _emit_result(self, context, task_input, task_result):
         # either send a message to egress if reply_topic was specified

@@ -16,10 +16,10 @@ from statefun_tasks.serialisation import DefaultSerialiser
 
 
 # types
-from statefun_tasks.types import Task, Group, RetryPolicy, TaskAlreadyExistsException
+from statefun_tasks.types import Task, Group, RetryPolicy, TaskAlreadyExistsException, TaskCancelledException
 from statefun_tasks.type_helpers import flink_value_type_for
 
 
 # protobuf message types
 from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, TaskActionRequest, TaskActionResult, \
-    TaskActionException, TaskAction, TaskStatus, TaskDeferral, DeferredTask
+    TaskActionException, TaskAction, TaskStatus, TaskDeferral, DeferredTask, PausedTask, ChildPipeline, Address

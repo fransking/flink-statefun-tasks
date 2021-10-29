@@ -1,9 +1,10 @@
-from statefun_tasks.types import Group, Task
+from statefun_tasks.types import Group, Task, TaskCancelledException
 from statefun_tasks.utils import _try_next, _gen_id, _try_peek
 from statefun_tasks.protobuf import pack_any
-from statefun_tasks.messages_pb2 import TaskRequest, TaskResults, TaskResult, TaskException, DeferredTask, TupleOfAny
+from statefun_tasks.messages_pb2 import TaskRequest, TaskResults, TaskResult, TaskException, DeferredTask, TupleOfAny, \
+    PausedTask, TaskStatus, ChildPipeline, Address, TaskActionRequest, TaskAction
+from statefun_tasks.type_helpers import _create_task_exception
 from collections import ChainMap, deque
-from itertools import chain
 
 
 class _PipelineBehaviour(object):
@@ -86,6 +87,25 @@ class _PipelineBehaviour(object):
 
         return tasks, None if max_parallelism < 1 else max_parallelism
 
+    def notify_pipeline_created(self, context):
+        # if this pipeline is the already root do nothing as it's not a child
+        if context.pipeline_state.root_id == context.pipeline_state.id:
+            return
+
+        child_pipeline = ChildPipeline(
+            id = context.pipeline_state.id,
+            address = context.pipeline_state.address,
+            root_id = context.pipeline_state.root_id,
+            root_address = context.pipeline_state.root_address,
+            caller_id = context.pipeline_state.caller_id,
+            caller_address = context.pipeline_state.caller_address
+        )
+        
+        for task in self.yield_tasks(self._pipeline): 
+            child_pipeline.tasks.append(Address(namespace=task.namespace, type=task.worker_name, id=task.task_id))
+
+        # notify back to the root pipeline
+        context.send_message(child_pipeline.root_address, child_pipeline.root_id, child_pipeline)
 
     def defer_tasks(self, context, tasks, task_result_or_exception=None, max_parallelism=None):     
         # unpack task_result into result + state so we can merge in extras later
@@ -122,7 +142,6 @@ class _PipelineBehaviour(object):
         # return task requests for those to call
         return [(task, self._create_task_request(context, task, task.request, task_state, task_result)) for task in tasks_to_call]
 
-
     def release_deferred_tasks(self, context, caller_id, task_result_or_exception):
         if isinstance(task_result_or_exception, TaskException):
             parent_id = self.get_last_task_in_chain(caller_id).id
@@ -139,14 +158,99 @@ class _PipelineBehaviour(object):
 
                 # add task we are submitting to deferral task
                 last_task = self.get_last_task_in_chain(task_request.id)
-
                 context.pipeline_state.task_deferral_ids_by_task_id[last_task.id] = deferral_id
-                context.send_message(deferred_task.destination, task_request.id, task_request)
 
+                # send the task
+                self.send_task(context, deferred_task.destination, task_request)
             else:
                 # clean up
                 del context.pipeline_state.task_deferral_ids_by_task_id[caller_id]
                 del context.pipeline_state.task_deferrals_by_id[deferral_id]
+
+    def save_result_before_finally(self, context, task_result_or_exception):
+        before_finally = context.pipeline_state.exception_before_finally \
+            if isinstance(task_result_or_exception, TaskException) \
+            else context.pipeline_state.result_before_finally
+
+        before_finally.CopyFrom(task_result_or_exception)
+
+    def get_result_before_finally(self, context):
+        if context.pipeline_state.HasField('result_before_finally'):
+            return context.pipeline_state.result_before_finally
+        elif context.pipeline_state.HasField('exception_before_finally'):
+           return context.pipeline_state.exception_before_finally
+
+        return None
+
+    def send_task(self, context, destination, task_request):
+        # if the pipeline is paused we record the tasks to be sent into the pipeline state
+        if  context.pipeline_state.status.value == TaskStatus.Status.PAUSED:
+            paused_task = PausedTask(destination=destination, task_request=task_request)
+            context.pipeline_state.paused_tasks.append(paused_task)
+
+        # else send the tasks to their destinations
+        else:
+            context.send_message(destination, task_request.id, task_request)
+
+    def pause_tasks(self, context):
+        if context.pipeline_state.status.value not in [TaskStatus.PENDING, TaskStatus.RUNNING, TaskStatus.PAUSED]:
+            raise ValueError(f'Pipeline is not in a state that can be paused')
+
+        context.pipeline_state.status.value = TaskStatus.Status.PAUSED
+
+        # tell any child pipelines to pause
+        for child_pipeline in context.pipeline_state.child_pipelines:
+            pause_action = TaskActionRequest(id=child_pipeline.id, action=TaskAction.PAUSE_PIPELINE)
+            context.send_message(child_pipeline.address, pause_action.id, pause_action)
+
+    def resume_paused_tasks(self, context):
+        if context.pipeline_state.status.value not in [TaskStatus.PENDING, TaskStatus.RUNNING, TaskStatus.PAUSED]:
+            raise ValueError(f'Pipeline is not in a state that can be paused')
+        
+        context.pipeline_state.status.value = TaskStatus.Status.RUNNING
+
+        for paused_task in context.pipeline_state.paused_tasks:
+            context.send_message(paused_task.destination, paused_task.task_request.id, paused_task.task_request)
+
+        context.pipeline_state.ClearField('paused_tasks')
+
+        # tell any child pipelines to resume
+        for child_pipeline in context.pipeline_state.child_pipelines:
+            pause_action = TaskActionRequest(id=child_pipeline.id, action=TaskAction.UNPAUSE_PIPELINE)
+            context.send_message(child_pipeline.address, pause_action.id, pause_action)
+
+    def cancel_pipeline(self, context):
+        if context.pipeline_state.status.value not in [TaskStatus.PENDING, TaskStatus.RUNNING, TaskStatus.PAUSED]:
+            raise ValueError(f'Pipeline is not in a state that can be cancelled')
+
+        context.pipeline_state.status.value = TaskStatus.Status.CANCELLING
+
+        # tell any child pipelines to cancel
+        for child_pipeline in context.pipeline_state.child_pipelines:
+            cancel_action = TaskActionRequest(id=child_pipeline.id, action=TaskAction.CANCEL_PIPELINE)
+            context.send_message(child_pipeline.address, cancel_action.id, cancel_action)
+
+        cancellation_ex = _create_task_exception(
+            context.storage.task_request, 
+            TaskCancelledException('Pipeline was cancelled'), 
+            context.pipeline_state.last_task_state)
+
+        finally_task = self.try_get_finally_task(context.get_caller_id())
+
+        # we move from cancelling to cancelled either by sending and/or waiting on the finally task
+        if finally_task is not None:
+            if self.get_result_before_finally(context) is None:
+                tasks = self.defer_tasks(context, [finally_task], cancellation_ex)
+
+                for task, task_request in tasks:
+                    context.send_message(task.get_destination(), task_request.id, task_request)
+
+            # make sure result before finally is set to the task cancellation exception
+            self.save_result_before_finally(context, cancellation_ex)
+
+        else:
+            # or by sending cancellation to ourself if there is no finally task
+            context.send_message(context.pipeline_state.address, context.pipeline_state.id, cancellation_ex)
 
     def mark_task_complete(self, task_id, task_result_or_exception):
         failed = isinstance(task_result_or_exception, TaskException)
@@ -157,7 +261,7 @@ class _PipelineBehaviour(object):
             # mark this task complete and its children
             for task in tasks:
                 task.mark_complete()
-        else:
+        elif any(tasks):
             tasks[0].mark_complete()
                         
     def add_to_task_results(self, task_id, task_result_or_exception, task_results):
@@ -176,6 +280,10 @@ class _PipelineBehaviour(object):
     def try_get_finally_task(self, task_id):
         finally_task = next((task for task in self._pipeline if isinstance(task, Task) and task.is_finally), None)
         return None if finally_task is None or finally_task.task_id == task_id else finally_task
+
+    def is_finally_task(self, task_id):
+        finally_task = next((task for task in self._pipeline if isinstance(task, Task) and task.is_finally), None)
+        return finally_task is not None and finally_task.task_id == task_id
 
     def get_next_step_in_pipeline(self, task_id):
         stack = deque([(self._pipeline, None, None, None, None)])  # FIFO (pipeline, entry after group, group, parent_group, entry after parent group)
@@ -215,7 +323,6 @@ class _PipelineBehaviour(object):
                         return entry, next_entry, group_entry
 
         return None, None, None
-
 
     def aggregate_group_results(self, group: Group, task_results: TaskResults):
         
