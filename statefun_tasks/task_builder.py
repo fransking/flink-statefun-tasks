@@ -237,7 +237,7 @@ class FlinkTasks(object):
         _log.info(f'Started {context}')
 
         pipeline = self._get_pipeline(context)
-        pipeline.resume(context, task_result_or_exception)
+        pipeline.handle_message(context, task_result_or_exception)
         
         _log.info(f'Finished {context}')
 
@@ -253,9 +253,9 @@ class FlinkTasks(object):
         flink_task = self.get_task(task_request.type)
         task_result, task_exception, pipeline, task_state = await flink_task.run(context, task_request)
 
-        # if task returns a pipeline then start it
-        if pipeline is not None and not pipeline.is_empty():
-            pipeline.begin(context, task_request, task_state) 
+        # if task returns a pipeline then start it if we can
+        if pipeline is not None and pipeline.handle_message(context, task_request, task_state):
+            ()
 
         # else if we have a task result return it
         elif task_result is not None:

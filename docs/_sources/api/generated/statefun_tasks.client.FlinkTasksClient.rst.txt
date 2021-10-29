@@ -13,6 +13,8 @@ FlinkTasksClient
    .. autosummary::
    
       ~FlinkTasksClient.__init__
+      ~FlinkTasksClient.cancel_pipeline
+      ~FlinkTasksClient.cancel_pipeline_async
       ~FlinkTasksClient.get_request
       ~FlinkTasksClient.get_request_async
       ~FlinkTasksClient.get_result
@@ -23,6 +25,8 @@ FlinkTasksClient
       ~FlinkTasksClient.pause_pipeline_async
       ~FlinkTasksClient.submit
       ~FlinkTasksClient.submit_async
+      ~FlinkTasksClient.unpause_pipeline
+      ~FlinkTasksClient.unpause_pipeline_async
    
     
    
