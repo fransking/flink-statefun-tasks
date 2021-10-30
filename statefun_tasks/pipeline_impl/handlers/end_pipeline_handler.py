@@ -10,9 +10,7 @@ class EndPipelineHandler(PipelineMessageHandler):
     
     def can_handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException]) -> bool:        
         return context.pipeline_state is not None \
-            and (context.pipeline_state.status.value == TaskStatus.COMPLETED \
-                or context.pipeline_state.status.value == TaskStatus.FAILED \
-                    or context.pipeline_state.status.value == TaskStatus.CANCELLED) \
+            and context.pipeline_state.status.value in [TaskStatus.COMPLETED, TaskStatus.FAILED, TaskStatus.CANCELLED] \
                 and isinstance(message, (TaskResult, TaskException))
 
     def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline, **kwargs):
