@@ -1,5 +1,4 @@
 from statefun_tasks.context import TaskContext
-from statefun_tasks.serialisation import DefaultSerialiser
 from statefun_tasks.task_impl.handlers import MessageHandler
 from statefun_tasks.types import TASK_REQUEST_TYPE, TaskAlreadyExistsException
 from statefun import Message
@@ -7,9 +6,8 @@ from datetime import timedelta
 
 
 class TaskRequestHandler(MessageHandler):
-    def __init__(self, serialiser: DefaultSerialiser):
-        self._serialiser = serialiser
-
+    def __init__(self):
+        pass
 
     def unpack(self, context: TaskContext, message: Message):
         if message.is_type(TASK_REQUEST_TYPE):
@@ -22,7 +20,6 @@ class TaskRequestHandler(MessageHandler):
         
         return None
 
- 
     async def handle_message(self, tasks: 'FlinkTasks', context: TaskContext, task_request):
         if context.storage.task_request is not None:
             # don't allow tasks to be overwritten

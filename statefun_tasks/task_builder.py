@@ -54,7 +54,7 @@ class FlinkTasks(object):
         self.register_builtin('run_pipeline', _run_pipeline)
 
         self._handlers = [
-            TaskRequestHandler(self._serialiser),
+            TaskRequestHandler(),
             TaskResponseHandler(),
             TaskActionHandler(),
             ChildPipelineHandler()
@@ -168,25 +168,27 @@ class FlinkTasks(object):
         """
         with TaskContext(context, self._egress_type_name, self._serialiser) as task_context:
 
-            try:
-                for handler in self._handlers:
-                    task_input = handler.unpack(task_context, message)
-                    if task_input is not None:
-
+            for handler in self._handlers:
+                task_input = handler.unpack(task_context, message)
+                if task_input is not None:
+                    
+                    try:
                         _log.info(f'Starting {task_context}')
 
                         await handler.handle_message(self, task_context, task_input)
 
                         _log.info(f'Finished {task_context}')
+
+                    except Exception as ex:
+                        _log.error(f'Error invoking {task_context} - {ex}')
+                        self.fail(task_context, task_input, ex)
+                        
+                    finally:
                         return
+            
+            _log.error(f'Unsupported message type {message.typed_value.typename}')
 
-                else:
-                    _log.error(f'Unsupported message type {message.typed_value.typename}')
-                    return
 
-            except Exception as ex:
-                _log.error(f'Error invoking {task_context} - {ex}')
-                self.fail(task_context, task_input, ex)
 
     @staticmethod
     def send(func, *args, **kwargs) -> PipelineBuilder:

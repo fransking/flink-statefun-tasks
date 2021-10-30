@@ -16,22 +16,3 @@ def update_state(state, name, value):
 
     if value:
         state_item.state_value.CopyFrom(value)
-    # print(type(state_item.state_value))
-    # print(state)
-    # if value:
-    #     if isinstance(value, bytes):
-    #         state_item.state_value = value
-    #     else:
-    #         any = Any()
-    #         any.Pack(value)
-    #         print(type(state_item))
-    #         state_item.state_value = any.SerializeToString()
-
-
-# def unpack_any(any_: Any, known_types):
-#     for cls in known_types:
-#         if any_.Is(cls.DESCRIPTOR):
-#             instance = cls()
-#             any_.Unpack(instance)
-#             return instance
-#     raise ValueError(f'Any {any_} is not an instance of {", ".join(known_types)}.')
