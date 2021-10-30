@@ -92,14 +92,11 @@ class _Pipeline(object):
 
     def unpause(self, context: TaskContext):
         if context.pipeline_state.status.value not in [TaskStatus.PENDING, TaskStatus.RUNNING, TaskStatus.PAUSED]:
-            raise ValueError(f'Pipeline is not in a state that can be paused')
+            raise ValueError(f'Pipeline is not in a state that can be unpaused')
         
         context.pipeline_state.status.value = TaskStatus.Status.RUNNING
 
-        for paused_task in context.pipeline_state.paused_tasks:
-            context.send_message(paused_task.destination, paused_task.task_request.id, paused_task.task_request)
-
-        context.pipeline_state.ClearField('paused_tasks')
+        self._submitter.unpause_tasks(context)
 
         # tell any child pipelines to resume
         for child_pipeline in context.pipeline_state.child_pipelines:
