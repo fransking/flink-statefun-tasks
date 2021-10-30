@@ -3,9 +3,10 @@ from statefun import StatefulFunctions, RequestReplyHandler
 import logging
 from typing import Union
 import traceback
+import asyncio
 
 # import FlinkTasks
-from statefun_tasks import FlinkTasks, TaskRequest, TaskResult, TaskException, TaskActionRequest, in_parallel
+from statefun_tasks import TaskRequest, TaskResult, TaskException, TaskActionRequest, ChildPipeline
 from .api import tasks
 
 
@@ -20,9 +21,13 @@ functions = StatefulFunctions()
 
 
 @functions.bind("example/worker")
-def worker(context, task_input: Union[TaskRequest, TaskResult, TaskException, TaskActionRequest]):
+def worker(context, task_input: Union[TaskRequest, TaskResult, TaskException, TaskActionRequest, ChildPipeline]):
     try:
-        tasks.run(context, task_input)
+        if tasks.is_async_required(task_input):
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(tasks.run_async(context, task_input))
+        else:
+            tasks.run(context, task_input)
     except Exception as e:
         print(f'Error - {e}')
         traceback.print_exc()

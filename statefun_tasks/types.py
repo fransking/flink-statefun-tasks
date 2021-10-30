@@ -1,9 +1,8 @@
-from typing import NamedTuple
-from datetime import timedelta
-from google.protobuf.message import Message
-from .messages_pb2 import TaskEntry, GroupEntry, PipelineEntry, TaskRetryPolicy, Pipeline
-from ._utils import _type_name
+from statefun_tasks.utils import _type_name
+from statefun_tasks.messages_pb2 import TaskEntry, GroupEntry, PipelineEntry, TaskRetryPolicy, Pipeline
 
+from dataclasses import dataclass, field
+from datetime import timedelta
 
 class Task:
     def __init__(self, proto: TaskEntry, task_args=None, task_kwargs=None):
@@ -37,7 +36,7 @@ class Task:
             worker_name=worker_name,
             is_fruitful=is_fruitful,
             retry_policy=retry_policy,
-            module_name=module_name
+            module_name=module_name,
         )
         return Task(proto, task_args, task_kwargs)
 
@@ -224,8 +223,9 @@ class Group:
         return self._group.__repr__()
 
 
-class RetryPolicy(NamedTuple):
-    retry_for: list = [Exception]
+@dataclass
+class RetryPolicy:
+    retry_for: list = field(default_factory=lambda: [Exception])
     max_retries: int = 1
     delay: timedelta = timedelta()
     exponential_back_off: bool = False
@@ -233,11 +233,16 @@ class RetryPolicy(NamedTuple):
     def to_proto(self):
         return TaskRetryPolicy(
             retry_for=[_type_name(ex) for ex in self.retry_for],
-            max_retries=self.max_retries, 
-            delay_ms=self.delay.total_seconds() * 1000, 
+            max_retries=self.max_retries,
+            delay_ms=self.delay.total_seconds() * 1000,
             exponential_back_off=self.exponential_back_off)
 
 
 class TaskAlreadyExistsException(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
+
+class TaskCancelledException(Exception):
     def __init__(self, message):
         super().__init__(message)

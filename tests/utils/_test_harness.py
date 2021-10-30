@@ -7,7 +7,7 @@ from statefun.kafka_egress_pb2 import KafkaProducerRecord
 from statefun.request_reply_pb2 import FromFunction, ToFunction, Address
 
 from statefun_tasks import TaskRequest, TaskResult, TaskException, TaskActionRequest, TaskActionResult, TaskActionException, TaskAction, \
-    PipelineBuilder, FlinkTasks, DefaultSerialiser
+    PipelineBuilder, FlinkTasks, DefaultSerialiser, ChildPipeline
 from statefun_tasks.client import TaskError
 from ._test_utils import update_address, update_state, unpack_any
 
@@ -23,7 +23,7 @@ functions = StatefulFunctions()
 
 
 @functions.bind('test/worker')
-async def worker(context, task_data: Union[TaskRequest, TaskResult, TaskException, TaskActionRequest]):
+async def worker(context, task_data: Union[TaskRequest, TaskResult, TaskException, TaskActionRequest, ChildPipeline]):
     if tasks.is_async_required(task_data):
         await tasks.run_async(context, task_data)
     else:
@@ -34,7 +34,7 @@ async_handler = AsyncRequestReplyHandler(functions)
 
 
 class _InvocationResult(NamedTuple):
-    egress_message: Optional[Union[TaskResult, TaskException, TaskActionResult, TaskActionException]]
+    egress_message: Optional[Union[TaskResult, TaskException, TaskActionResult, TaskActionException, ChildPipeline]]
     outgoing_messages: List[Any]
 
 
@@ -121,7 +121,7 @@ class TestHarness:
         else:
             raise TaskErrorException(TaskError(result_proto))
 
-    def _run_flink_loop(self, message_arg: Union[TaskRequest, TaskResult, TaskException, TaskActionRequest], target: Address, caller=None):
+    def _run_flink_loop(self, message_arg: Union[TaskRequest, TaskResult, TaskException, TaskActionRequest, ChildPipeline], target: Address, caller=None):
         to_function = ToFunction()
         update_address(to_function.invocation.target, target.namespace, target.type, target.id)
         invocation = to_function.invocation.invocations.add()
@@ -138,7 +138,7 @@ class TestHarness:
         else:
             outgoing_messages = result.outgoing_messages
             for outgoing_message in outgoing_messages:
-                message_arg = unpack_any(outgoing_message.argument, [TaskRequest, TaskResult, TaskException])
+                message_arg = unpack_any(outgoing_message.argument, [TaskRequest, TaskResult, TaskException, ChildPipeline])
                 egress_value = self._run_flink_loop(message_arg=message_arg, target=outgoing_message.target,
                                                     caller=target)
                 if egress_value:

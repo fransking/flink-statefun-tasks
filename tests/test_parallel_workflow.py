@@ -50,8 +50,6 @@ def _join_results3(results):
 
 @tasks.bind()
 def _print_results(results):
-    global join_results_called
-    join_results_called = True
     return str(results)
 
 
@@ -168,7 +166,6 @@ class ParallelWorkflowTests(unittest.TestCase):
         result = self.test_harness.run_pipeline(pipeline)
 
         self.assertEqual(result, [['Hello John Smith. So now I will say see you later!', 'Hello John Smith. So now I will say see you later!']])
-
 
     def test_parallel_workflow_with_error(self):
         global join_results_called

@@ -308,21 +308,13 @@
 <dt class="sig sig-object py" id="statefun_tasks.DefaultSerialiser.merge_args_and_kwargs">
 <em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">merge_args_and_kwargs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_args_and_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.DefaultSerialiser.merge_args_and_kwargs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Merges args &amp; kwargs passed explicity to a task entry in a pipeline with results from the previous task.
-If there are no args &amp; kwargs to merge then the result of the previous task is returned unchanged</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>task_result</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Message</span></code>) – the request payload proto</p></li>
-<li><p><strong>task_args_and_kwargs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ArgsAndKwargs</span></code>) – the args and kwargs from the task entry to merge</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Any</p>
-</dd>
-</dl>
+If there are no args &amp; kwargs to merge then the result of the previous task is returned unchanged
+:type task_result: <code class="xref py py-class docutils literal notranslate"><span class="pre">Message</span></code>
+:param task_result: the request payload proto
+:type task_args_and_kwargs: <code class="xref py py-class docutils literal notranslate"><span class="pre">ArgsAndKwargs</span></code>
+:param task_args_and_kwargs: the args and kwargs from the task entry to merge
+:rtype: <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>
+:return: Any</p>
 </dd></dl>
 
 <dl class="py method">
@@ -330,21 +322,11 @@ If there are no args &amp; kwargs to merge then the result of the previous task 
 <span class="sig-name descname"><span class="pre">serialise_args_and_kwargs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.DefaultSerialiser.serialise_args_and_kwargs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Serialises Python args and kwargs into protobuf</p>
 <p>If there is a single arg and no kwargs and the arg is already a protobuf it returns
-that instance packed inside an Any.  Otherwise it returns an ArgsAndKwargs packed in an Any.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>args</strong> – the Python args</p></li>
-<li><p><strong>kwargs</strong> – the Python kwargs</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>protobuf Any</p>
-</dd>
-</dl>
+that instance packed inside an Any.  Otherwise it returns an ArgsAndKwargs packed in an Any.
+:param args: the Python args
+:param kwargs: the Python kwargs
+:rtype: <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>
+:return: protobuf Any</p>
 </dd></dl>
 
 <dl class="py method">

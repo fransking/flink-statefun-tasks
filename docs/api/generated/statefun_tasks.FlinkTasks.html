@@ -214,26 +214,41 @@ to be exposed as tasks.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.bind" title="statefun_tasks.FlinkTasks.bind"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bind</span></code></a>([namespace, worker_name, retry_policy, …])</p></td>
 <td><p>Binds a function as a Flink Task</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.get_task" title="statefun_tasks.FlinkTasks.get_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_task</span></code></a>(task_type)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">emit_result</span></code>(context, task_input, task_result)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fail</span></code>(context, task_input, ex)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_pipeline</span></code>(context)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.get_task" title="statefun_tasks.FlinkTasks.get_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_task</span></code></a>(task_type)</p></td>
 <td><p>Returns the Flink Task instance for a given task type name</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.is_async_required" title="statefun_tasks.FlinkTasks.is_async_required"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_async_required</span></code></a>(task_input)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.is_async_required" title="statefun_tasks.FlinkTasks.is_async_required"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_async_required</span></code></a>(message)</p></td>
 <td><p>Checks if a task is declared as async or not</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.register" title="statefun_tasks.FlinkTasks.register"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register</span></code></a>(fun[, wrapper, module_name])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.register" title="statefun_tasks.FlinkTasks.register"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register</span></code></a>(fun[, wrapper, module_name])</p></td>
 <td><p>Registers a Python function as a Flink Task.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.register_builtin" title="statefun_tasks.FlinkTasks.register_builtin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_builtin</span></code></a>(type_name, fun, **params)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.register_builtin" title="statefun_tasks.FlinkTasks.register_builtin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_builtin</span></code></a>(type_name, fun, **params)</p></td>
 <td><p>Registers a built in Flink Task e.g.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.run" title="statefun_tasks.FlinkTasks.run"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run</span></code></a>(context, task_input)</p></td>
-<td><p>Runs a non-async Flink Task</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.run" title="statefun_tasks.FlinkTasks.run"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run</span></code></a>(context, message)</p></td>
+<td><p>Runs a Flink Task</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.run_async" title="statefun_tasks.FlinkTasks.run_async"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_async</span></code></a>(context, task_input)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.run_async" title="statefun_tasks.FlinkTasks.run_async"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_async</span></code></a>(context, message)</p></td>
 <td><p>Runs an async Flink Task</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.send" title="statefun_tasks.FlinkTasks.send"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send</span></code></a>(func, *args, **kwargs)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.send" title="statefun_tasks.FlinkTasks.send"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send</span></code></a>(func, *args, **kwargs)</p></td>
 <td><p>Returns a PipelineBuilder with this task as the first item in the pipeline</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">try_get_pipeline</span></code>(context)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">value_specs</span></code>()</p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>
@@ -265,19 +280,22 @@ otherwise the Python module containing the function will be used</p></li>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>task_type</strong> – task type name e.g. examples.multiply</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>the Flink Task</p>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">FlinkTask</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the Flink Task</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.FlinkTasks.is_async_required">
-<span class="sig-name descname"><span class="pre">is_async_required</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_input</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.is_async_required" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">is_async_required</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.is_async_required" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checks if a task is declared as async or not</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>task_input</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TaskRequest</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskResult</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskException</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskActionRequest</span></code>]) – the task input protobuf message</p>
+<dd class="field-odd"><p><strong>message</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TaskRequest</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskResult</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskException</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskActionRequest</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ChildPipeline</span></code>]) – the task input protobuf message</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>true if the task being called is declared as async otherwise false</p>
@@ -320,13 +338,13 @@ This should only be used if you want to provide your own built in (pre-defined) 
 
 <dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.FlinkTasks.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_input</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.run" title="Permalink to this definition">¶</a></dt>
-<dd><p>Runs a non-async Flink Task</p>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs a Flink Task</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>context</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">BatchContext</span></code>) – context object provided by Flink</p></li>
-<li><p><strong>task_input</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TaskRequest</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskResult</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskException</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskActionRequest</span></code>]) – the task input protobuf message</p></li>
+<li><p><strong>message</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TaskRequest</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskResult</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskException</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskActionRequest</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ChildPipeline</span></code>]) – the task input protobuf message</p></li>
 </ul>
 </dd>
 </dl>
@@ -334,13 +352,13 @@ This should only be used if you want to provide your own built in (pre-defined) 
 
 <dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.FlinkTasks.run_async">
-<em class="property"><span class="pre">async</span> </em><span class="sig-name descname"><span class="pre">run_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_input</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.run_async" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">async</span> </em><span class="sig-name descname"><span class="pre">run_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.run_async" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runs an async Flink Task</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>context</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">BatchContext</span></code>) – context object provided by Flink</p></li>
-<li><p><strong>task_input</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TaskRequest</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskResult</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskException</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskActionRequest</span></code>]) – the task input protobuf message</p></li>
+<li><p><strong>message</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TaskRequest</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskResult</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskException</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskActionRequest</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ChildPipeline</span></code>]) – the task input protobuf message</p></li>
 </ul>
 </dd>
 </dl>
@@ -359,7 +377,7 @@ This should only be used if you want to provide your own built in (pre-defined) 
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks._pipeline.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a></p>
+<dd class="field-even"><p><a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a></p>
 </dd>
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>a pipeline builder</p>

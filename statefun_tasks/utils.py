@@ -1,9 +1,10 @@
+from google.protobuf.message import Message
+from google.protobuf.any_pb2 import Any
+
 import inspect
 from uuid import uuid4
 from typing import get_type_hints
 from itertools import chain
-from google.protobuf.message import Message
-from google.protobuf.any_pb2 import Any
 
 
 def _gen_id():

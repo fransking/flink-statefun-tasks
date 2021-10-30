@@ -2,7 +2,6 @@ import asyncio
 import unittest
 
 from statefun_tasks import DefaultSerialiser
-
 from tests.test_messages_pb2 import TestPerson, TestGreetingRequest, TestGreetingResponse
 from tests.utils import TestHarness, tasks, other_tasks_instance, TaskErrorException
 
@@ -99,7 +98,7 @@ class SimplePipelineTests(unittest.TestCase):
         try:
             self.test_harness.run_pipeline(pipeline)
         except KeyError as e:
-            self.assertEqual(str(e.args[0]), "('unknown', 'worker')")
+            self.assertEqual(e.args[0], ('unknown', 'worker'))
         else:
             self.fail('Expected an exception')
 
@@ -109,7 +108,7 @@ class SimplePipelineTests(unittest.TestCase):
         try:
             self.test_harness.run_pipeline(pipeline)
         except KeyError as e:
-            self.assertEqual(str(e.args[0]), "('test', 'unknown')")
+            self.assertEqual(e.args[0], ('test', 'unknown'))
         else:
             self.fail('Expected an exception')
 

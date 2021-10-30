@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 from google.protobuf.message import Message
 
-from statefun_tasks._protobuf import ObjectProtobufConverter
+from statefun_tasks.protobuf import ObjectProtobufConverter
 from tests.test_messages_pb2 import TestHelloWorkflowInputMessage, TestHelloWorkflowResultMessage
 from tests.utils import TestHarness, tasks
 from tests.utils._test_harness import test_harness_serialiser
