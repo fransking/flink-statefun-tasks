@@ -1,6 +1,6 @@
 from statefun_tasks.serialisation import DefaultSerialiser
 from statefun_tasks.type_helpers import flink_value_type_for
-from statefun_tasks.messages_pb2 import TaskState, PipelineState, TaskRequest
+from statefun_tasks.messages_pb2 import TaskState, TaskRequest
 from statefun_tasks.protobuf import pack_any
 
 from statefun import kafka_egress_message, message_builder, Context, SdkAddress
@@ -22,7 +22,7 @@ class TaskContext(object):
 
         self.storage = context.storage
         self.task_state = self.storage.task_state or TaskState()
-        self.pipeline_state = self.storage.pipeline_state #or PipelineState()
+        self.pipeline_state = self.storage.pipeline_state
         self._task_meta = {}
         self._task_name = None
 

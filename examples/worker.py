@@ -1,11 +1,9 @@
 
 from statefun import StatefulFunctions, RequestReplyHandler
 import logging
-from typing import Union
 import traceback
 
 # import FlinkTasks
-from statefun_tasks import FlinkTasks, TaskRequest, TaskResult, TaskException, TaskActionRequest, in_parallel
 from .api import tasks
 
 
