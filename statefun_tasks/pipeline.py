@@ -88,23 +88,20 @@ class _Pipeline(object):
         # tell any child pipelines to pause
         for child_pipeline in context.pipeline_state.child_pipelines:
             pause_action = TaskActionRequest(id=child_pipeline.id, action=TaskAction.PAUSE_PIPELINE)
-            context.send_message(child_pipeline.address, pause_action.id, pause_action)
+            context.pack_and_send(child_pipeline.address, pause_action.id, pause_action)
 
     def unpause(self, context: TaskContext):
         if context.pipeline_state.status.value not in [TaskStatus.PENDING, TaskStatus.RUNNING, TaskStatus.PAUSED]:
-            raise ValueError(f'Pipeline is not in a state that can be paused')
+            raise ValueError(f'Pipeline is not in a state that can be unpaused')
         
         context.pipeline_state.status.value = TaskStatus.Status.RUNNING
 
-        for paused_task in context.pipeline_state.paused_tasks:
-            context.send_message(paused_task.destination, paused_task.task_request.id, paused_task.task_request)
-
-        context.pipeline_state.ClearField('paused_tasks')
+        self._submitter.unpause_tasks(context)
 
         # tell any child pipelines to resume
         for child_pipeline in context.pipeline_state.child_pipelines:
             pause_action = TaskActionRequest(id=child_pipeline.id, action=TaskAction.UNPAUSE_PIPELINE)
-            context.send_message(child_pipeline.address, pause_action.id, pause_action)
+            context.pack_and_send(child_pipeline.address, pause_action.id, pause_action)
 
     def cancel(self, context: TaskContext):
         if context.pipeline_state.status.value not in [TaskStatus.PENDING, TaskStatus.RUNNING, TaskStatus.PAUSED]:
@@ -115,7 +112,7 @@ class _Pipeline(object):
         # tell any child pipelines to cancel
         for child_pipeline in context.pipeline_state.child_pipelines:
             cancel_action = TaskActionRequest(id=child_pipeline.id, action=TaskAction.CANCEL_PIPELINE)
-            context.send_message(child_pipeline.address, cancel_action.id, cancel_action)
+            context.pack_and_send(child_pipeline.address, cancel_action.id, cancel_action)
 
         # construct the cancellation exception to send to caller of this pipeline
         task_request = context.unpack('task_request', TaskRequest) or TaskRequest()
@@ -135,4 +132,4 @@ class _Pipeline(object):
 
         else:
             # ...or by sending cancellation to ourself if there is no finally task
-            context.send_message(context.pipeline_state.address, context.pipeline_state.id, cancellation_ex)
+            context.pack_and_send(context.pipeline_state.address, context.pipeline_state.id, cancellation_ex)

@@ -70,6 +70,12 @@ class DeferredTaskSubmitter(object):
                 del context.pipeline_state.task_deferral_ids_by_task_id[caller_id]
                 del context.pipeline_state.task_deferrals_by_id[deferral_id]
 
+    def unpause_tasks(self, context):
+        for paused_task in context.pipeline_state.paused_tasks:
+            context.pack_and_send(paused_task.destination, paused_task.task_request.id, paused_task.task_request)
+
+        context.pipeline_state.ClearField('paused_tasks')
+
     def _create_task_request(self, context, task, task_request, task_state=None, task_result=None):
         if task_result is not None:
             task_args_and_kwargs = self._serialiser.to_args_and_kwargs(task.request)

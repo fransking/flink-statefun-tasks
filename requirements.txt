@@ -1,4 +1,4 @@
-apache-flink-statefun==2.2.0
+apache-flink-statefun==2.2.2
 flask==1.1.1
 gunicorn==20.0.4
 kafka-python
