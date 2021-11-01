@@ -10,14 +10,14 @@ install_requires = [
 
 setuptools.setup(
     name="statefun-tasks",
-    version="0.9.36",
+    version="0.9.37",
     author="Frans King & Luke Ashworth",
     author_email="frans.king@sbbsystems.com",
     description="Tasks API for Stateful Functions on Flink",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://fransking.github.io/flink-statefun-tasks",
-    packages=['statefun_tasks', 'statefun_tasks.client'],
+    packages=['statefun_tasks', 'statefun_tasks.client', 'statefun_tasks.task_impl', 'statefun_tasks.pipeline_impl'],
     license='https://www.apache.org/licenses/LICENSE-2.0',
     license_files=["LICENSE"],
     install_requires=install_requires,
