@@ -35,7 +35,6 @@ message TaskEntry {
     string worker_name = 7;
     bool is_fruitful = 8;
     TaskRetryPolicy retry_policy = 9;
-    string module_name = 10;
 }
 
 message GroupEntry {
@@ -155,7 +154,14 @@ message ChildPipeline {
     string root_address = 4;
     string caller_id = 5;
     string caller_address = 6;
-    repeated Address tasks = 7;
+    repeated TaskInfo tasks = 7;
+}
+
+message TaskInfo {
+    string task_id = 1;
+    string task_type = 2;
+    string namespace = 3;
+    string worker_name = 4;
 }
 
 message TaskResults {

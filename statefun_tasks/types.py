@@ -26,7 +26,7 @@ class Task:
 
     @staticmethod
     def from_fields(task_id, task_type, task_args, task_kwargs, is_finally=None, namespace=None, worker_name=None,
-                    is_fruitful=None, retry_policy=None, module_name=None, **kwargs):
+                    is_fruitful=None, retry_policy=None, **kwargs):
         proto = TaskEntry(
             task_id=task_id,
             task_type=task_type,
@@ -36,7 +36,6 @@ class Task:
             worker_name=worker_name,
             is_fruitful=is_fruitful,
             retry_policy=retry_policy,
-            module_name=module_name,
         )
         return Task(proto, task_args, task_kwargs)
 
