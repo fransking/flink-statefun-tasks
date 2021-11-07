@@ -1,3 +1,4 @@
+from unittest.case import skip
 from statefun_tasks.context import TaskContext
 from statefun_tasks.pipeline_impl.handlers import PipelineMessageHandler
 from statefun_tasks.types import Task, Group
@@ -25,7 +26,7 @@ class ContinuePipelineHandler(PipelineMessageHandler):
         self.submitter.release_tasks(context, caller_id, task_result_or_exception)
 
         # get the next step of the pipeline to run (if any)
-        _, next_step, group = self.graph.get_next_step_in_pipeline(caller_id)
+        _, next_step, group, empty_group = self.graph.get_next_step_in_pipeline(caller_id)
 
         # if this task is part group then we need to record the results so we can aggregate later
         if group is not None:
@@ -39,6 +40,12 @@ class ContinuePipelineHandler(PipelineMessageHandler):
         if isinstance(task_result_or_exception, TaskException):
             next_step = self.graph.try_get_finally_task(caller_id)
 
+        # else if we came across an empty group between this task and next_entry then our result must be an empty array []
+        # as we cannot call an empty group but can synthesise the result (remembering to pass through state)
+        elif empty_group:
+            _, state = self._serialiser.deserialise_result(task_result_or_exception)
+            self._serialiser.serialise_result(task_result_or_exception, ([]), state)
+
         # turn next step into remainder of tasks to call
         if isinstance(next_step, Task):
             tasks = [next_step]
@@ -49,7 +56,7 @@ class ContinuePipelineHandler(PipelineMessageHandler):
                 pipeline.save_result_before_finally(context, task_result_or_exception)
             
         elif isinstance(next_step, Group):
-            tasks, max_parallelism = self.graph.get_initial_tasks(next_step)
+            tasks, max_parallelism, _ = self.graph.get_initial_tasks(group=next_step)
         else:
             tasks = []
 
