@@ -233,6 +233,25 @@ class ParallelWorkflowTests(unittest.TestCase):
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, "['Hello Jane Doe', ['Hello Bob Smith. So now I will say see you later!', 'Hello Tom Smith']]")
 
+    def test_empty_parallel_pipeline_continuation(self):
+        global join_results_called
+        join_results_called = False
+
+        pipeline = _print_results.send("12").continue_with(in_parallel([])).continue_with(in_parallel([])).continue_with(_join_results)
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertTrue(join_results_called)
+        self.assertEqual(result, None)
+
+
+    def test_empty_parallel_pipeline(self):
+        global join_results_called
+        join_results_called = False
+
+        pipeline = in_parallel([in_parallel([])]).continue_with(in_parallel([])).continue_with(_join_results)        
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertTrue(join_results_called)
+        self.assertEqual(result, None)
+
 
 if __name__ == '__main__':
     unittest.main()
