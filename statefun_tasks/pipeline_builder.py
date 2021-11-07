@@ -74,7 +74,7 @@ class PipelineBuilder(object):
         return self
 
     def set(self, retry_policy: RetryPolicy = None, namespace: str = None,
-            worker_name: str = None, is_fruitful=None) -> 'PipelineBuilder':
+            worker_name: str = None, is_fruitful=None, display_name=None) -> 'PipelineBuilder':
         """
         Sets task properties on the last entry added to the builder
 
@@ -82,6 +82,7 @@ class PipelineBuilder(object):
         :param option namespace: the task namespace
         :param option worker_name: the task worker_name
         :param option is_fruitful: set to false to drop the results of tasks
+        :param option display_name: optional friendly name for this task
         :return: the builder
         """
 
@@ -95,6 +96,8 @@ class PipelineBuilder(object):
                 entry.worker_name = worker_name
             if is_fruitful is not None:
                 entry.is_fruitful = is_fruitful
+            if display_name is not None:
+                entry.display_name = display_name
 
         return self
 

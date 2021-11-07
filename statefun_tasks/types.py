@@ -54,7 +54,7 @@ class Task:
 
     @staticmethod
     def from_fields(task_id, task_type, task_args, task_kwargs, is_finally=None, namespace=None, worker_name=None,
-                    is_fruitful=None, retry_policy=None, **kwargs):
+                    is_fruitful=None, retry_policy=None, display_name=None, **kwargs):
         proto = TaskEntry(
             task_id=task_id,
             task_type=task_type,
@@ -63,7 +63,8 @@ class Task:
             namespace=namespace,
             worker_name=worker_name,
             is_fruitful=is_fruitful,
-            retry_policy=retry_policy
+            retry_policy=retry_policy,
+            display_name=display_name
         )
         return Task(proto, task_args, task_kwargs)
         
@@ -153,6 +154,17 @@ class Task:
     @request.setter
     def request(self, value):
         return self._proto.request.CopyFrom(value)
+
+    @property
+    def display_name(self):
+        return self._proto.display_name if self._proto.HasField('display_name') else None
+
+    @display_name.setter
+    def display_name(self, value):
+        if value is None:
+            self._proto.ClearField('display_name')
+        else:
+            self._proto.display_name = value
 
     def unpack(self, serialiser):
         if self._unpacked or not self._proto_backed:
