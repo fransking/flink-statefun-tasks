@@ -122,6 +122,10 @@ class Task:
     def request(self):
         return self._proto.request
 
+    @request.setter
+    def request(self, value):
+        return self._proto.request.CopyFrom(value)
+
     def unpack(self, serialiser):
         if self._unpacked or not self._proto_backed:
             return self

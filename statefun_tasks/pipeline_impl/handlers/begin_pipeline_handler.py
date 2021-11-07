@@ -43,7 +43,12 @@ class BeginPipelineHandler(PipelineMessageHandler):
         self._notify_pipeline_created(context)
 
         # 2. get initial tasks(s) to call - might be single start of chain task or a group of tasks to call in parallel
-        tasks, max_parallelism = self.graph.get_initial_tasks()
+        tasks, max_parallelism, slice = self.graph.get_initial_tasks()
+
+        # 2a. if we skipped over empty group(s) then make sure we pass empty array to next task (result of in_parallel([]) is intuitively [])
+        if slice > 0:
+            for task in tasks:
+                task.request = self._serialiser.serialise_args_and_kwargs(([]), {})
 
         # 3. split into tasks to call now and those to defer if max parallelism is exceeded
         self.submitter.submit_tasks(context, tasks, max_parallelism=max_parallelism)

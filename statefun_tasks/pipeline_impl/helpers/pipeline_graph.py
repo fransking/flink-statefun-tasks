@@ -58,10 +58,10 @@ class PipelineGraph(object):
 
         return task_chain
 
-    def get_initial_tasks(self, entry=None):
+    def get_initial_tasks(self, group=None, slice=0):
         max_parallelism = 0 # unlimited
 
-        stack = deque([entry or self._pipeline[0]])  # FIFO
+        stack = deque([group or self._pipeline[slice]])  # FIFO
         tasks = []
 
         while len(stack) > 0:
@@ -79,7 +79,12 @@ class PipelineGraph(object):
             else:
                 raise ValueError(f'Expected either a task or a group at the start of each pipeline')
 
-        return tasks, None if max_parallelism < 1 else max_parallelism
+        # deal with empty groups at the start of the pipeline by incrementing the slice
+        if group is None and not any(tasks):
+            if slice < len(self._pipeline) -1:
+                return self.get_initial_tasks(slice=slice+1)
+
+        return tasks, None if max_parallelism < 1 else max_parallelism, slice
 
     def get_last_task_in_chain(self, task_id):
         task_chain = self.get_task_chain(task_id)
@@ -133,13 +138,20 @@ class PipelineGraph(object):
 
                         if next_entry is None and parent_group is not None and parent_group.is_complete():
                             # bubble up to the top most parent
-                            return entry, entry_after_parent_group, parent_group
+                            return entry, entry_after_parent_group, parent_group, None
                         else:
                             # otherwise if there is no next task and the group containing this task is complete 
                             # bubble up to the task after the group
                             if next_entry is None and group_entry is not None and group_entry.is_complete() and next_entry is None:
                                 next_entry = entry_after_group
 
-                        return entry, next_entry, group_entry
+                        # skip over empty groups
+                        empty_group_entry = None
+                        while isinstance(next_entry, Group) and not any(next_entry):
+                            empty_group_entry = next_entry
+                            next_entry = _try_next(iterator)
+                            
+                        return entry, next_entry, group_entry, empty_group_entry
 
-        return None, None, None
+        # entry, next_entry, group entry is part of, next_entry group skipped over because it was empty
+        return None, None, None, None
