@@ -36,6 +36,14 @@ class TaskContext(object):
         """
         self._task_meta = task_request.meta or {}
 
+        """
+        Friendly name of this task or if not set then the task name
+
+        :return: task name
+        """
+    def get_display_name(self):
+        return self._task_meta.get('display_name', self.task_name)
+
     def get_root_pipeline_id(self):
         """
         ID of the top most pipeline if this task is called as part of a pipeline else None.  This will be different from 

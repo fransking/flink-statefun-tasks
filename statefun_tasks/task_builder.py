@@ -89,7 +89,8 @@ class FlinkTasks(object):
         with_state: bool = False, 
         is_fruitful: bool = True, 
         module_name: str = None,
-        with_context: bool = False):
+        with_context: bool = False,
+        display_name: str = None):
         """
         Binds a function as a Flink Task
 
@@ -101,6 +102,7 @@ class FlinkTasks(object):
         :param module_name: if specified then the task type used in addressing will be module_name.function_name
                             otherwise the Python module containing the function will be used
         :param with_context: whether to pass a Flink context object as the first parameter (default false)
+        :param display_name: optional friendly name for this task
         """
         def wrapper(function):
             def defaults():
@@ -111,7 +113,8 @@ class FlinkTasks(object):
                     'with_state': with_state,
                     'is_fruitful': is_fruitful,
                     'module_name': module_name,
-                    'with_context': with_context
+                    'with_context': with_context,
+                    'display_name': display_name
                 }
 
             def send(*args, **kwargs):
