@@ -47,6 +47,11 @@ async def _non_fruitful_task():
     return 1
 
 
+@tasks.bind(with_context=True)
+async def _return_display_name(context):
+    return context.get_display_name()
+
+
 class SimplePipelineTests(unittest.TestCase):
     def setUp(self) -> None:
         self.test_harness = TestHarness()
@@ -123,6 +128,18 @@ class SimplePipelineTests(unittest.TestCase):
 
         result = self.test_harness.run_pipeline(pipeline)
         self.assertIsNone(result)
+
+    def test_pipeline_without_display_name_set(self):
+        pipeline = _return_display_name.send()
+
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, 'test_simple_pipeline._return_display_name')
+
+    def test_pipeline_with_display_name_set(self):
+        pipeline = _return_display_name.send().set(display_name='test pipeline')
+
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, 'test pipeline')
 
 if __name__ == '__main__':
     unittest.main()

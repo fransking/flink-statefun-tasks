@@ -37,6 +37,14 @@ class TaskContext(object):
     def task_name(self, value):
         self._task_name = value
 
+        """
+        Friendly name of this task or if not set then the task name
+
+        :return: task name
+        """
+    def get_display_name(self):
+        return self._task_meta.get('display_name', self.task_name)
+
     def apply_task_meta(self, task_request: TaskRequest):
         """
         Applies the task meta from the given TaskRequest to this context

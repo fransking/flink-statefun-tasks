@@ -91,6 +91,9 @@ class DeferredTaskSubmitter(object):
         request.meta['pipeline_id'] = context.pipeline_state.id
         request.meta['root_pipeline_id'] = context.pipeline_state.root_id
         request.meta['root_pipeline_address'] = context.pipeline_state.root_address
+
+        if task.display_name is not None:
+            request.meta['display_name'] = task.display_name
         
         if context.get_caller_id() is not None:
             request.meta['parent_task_address'] = context.get_caller_address()
