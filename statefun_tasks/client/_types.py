@@ -17,3 +17,6 @@ class TaskStatus(Enum):
     RUNNING = TaskStatusProto.Status.RUNNING
     COMPLETED = TaskStatusProto.Status.COMPLETED
     FAILED = TaskStatusProto.Status.FAILED
+    PAUSED = TaskStatusProto.Status.PAUSED
+    CANCELLING = TaskStatusProto.Status.CANCELLING
+    CANCELLED = TaskStatusProto.Status.CANCELLED

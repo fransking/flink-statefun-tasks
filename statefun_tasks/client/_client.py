@@ -333,7 +333,7 @@ class FlinkTasksClient(object):
             try:
 
                 if proto.action == TaskAction.GET_STATUS:
-                    future.set_result(TaskStatus(self._unpack(proto.result, TaskStatusProto).status))
+                    future.set_result(TaskStatus(self._unpack(proto.result, TaskStatusProto).value))
                 
                 elif proto.action == TaskAction.GET_REQUEST:
                     future.set_result(self._unpack(proto.result, TaskRequest))
