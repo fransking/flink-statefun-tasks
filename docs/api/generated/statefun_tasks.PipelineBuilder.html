@@ -232,7 +232,7 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.set" title="statefun_tasks.PipelineBuilder.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set</span></code></a>([retry_policy, namespace, worker_name, …])</p></td>
 <td><p>Sets task properties on the last entry added to the builder</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.to_pipeline" title="statefun_tasks.PipelineBuilder.to_pipeline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_pipeline</span></code></a>([serialiser, is_fruitful])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.to_pipeline" title="statefun_tasks.PipelineBuilder.to_pipeline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_pipeline</span></code></a>([serialiser, is_fruitful, events])</p></td>
 <td><p>Concretises the builder into a pipeline</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.to_proto" title="statefun_tasks.PipelineBuilder.to_proto"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_proto</span></code></a>([serialiser])</p></td>
@@ -417,7 +417,7 @@
 
 <dl class="py method">
 <dt id="statefun_tasks.PipelineBuilder.set">
-<code class="sig-name descname"><span class="pre">set</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">retry_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">worker_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_fruitful</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.set" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">set</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">retry_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">worker_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_fruitful</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.set" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets task properties on the last entry added to the builder</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -426,6 +426,7 @@
 <li><p><strong>namespace</strong> (<em>option</em>) – the task namespace</p></li>
 <li><p><strong>worker_name</strong> (<em>option</em>) – the task worker_name</p></li>
 <li><p><strong>is_fruitful</strong> (<em>option</em>) – set to false to drop the results of tasks</p></li>
+<li><p><strong>display_name</strong> (<em>option</em>) – optional friendly name for this task</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
@@ -439,13 +440,14 @@
 
 <dl class="py method">
 <dt id="statefun_tasks.PipelineBuilder.to_pipeline">
-<code class="sig-name descname"><span class="pre">to_pipeline</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">serialiser</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_fruitful</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.to_pipeline" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">to_pipeline</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">serialiser</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_fruitful</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">events</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.to_pipeline" title="Permalink to this definition">¶</a></dt>
 <dd><p>Concretises the builder into a pipeline</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>serialiser</strong> (<em>option</em>) – the serialiser to use such as DefaultSerialiser</p></li>
 <li><p><strong>is_fruitful</strong> (<em>option</em>) – whether this pipeline is fruitful (i.e. returns a result). Default is True</p></li>
+<li><p><strong>events</strong> (<em>option</em>) – event handler instance if this pipeline should fire events</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>

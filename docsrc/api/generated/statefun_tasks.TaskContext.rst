@@ -17,6 +17,7 @@ TaskContext
       ~TaskContext.get_address
       ~TaskContext.get_caller_address
       ~TaskContext.get_caller_id
+      ~TaskContext.get_display_name
       ~TaskContext.get_parent_task_address
       ~TaskContext.get_parent_task_id
       ~TaskContext.get_pipeline_id
