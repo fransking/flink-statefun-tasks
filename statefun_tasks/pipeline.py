@@ -5,15 +5,17 @@ from statefun_tasks.types import Task, Group, TaskCancelledException
 from statefun_tasks.type_helpers import _create_task_exception
 from statefun_tasks.pipeline_impl.handlers import BeginPipelineHandler, ContinuePipelineHandler, EndPipelineHandler, CancelPipelineHandler
 from statefun_tasks.pipeline_impl.helpers import PipelineGraph, DeferredTaskSubmitter
+from statefun_tasks.events import EventHandlers
 from google.protobuf.any_pb2 import Any
 from typing import Union
 
 
 class _Pipeline(object):
-    def __init__(self, pipeline: list, serialiser=None, is_fruitful=True):
+    def __init__(self, pipeline: list, serialiser=None, is_fruitful=True, events: EventHandlers=None):
         self._pipeline = pipeline
         self._serialiser = serialiser if serialiser is not None else DefaultSerialiser()
         self._is_fruitful = is_fruitful
+        self._events = events or EventHandlers()
 
         self._handlers = [
             BeginPipelineHandler(self._pipeline, self._serialiser),
@@ -24,6 +26,13 @@ class _Pipeline(object):
 
         self._graph = PipelineGraph(self._pipeline)
         self._submitter = DeferredTaskSubmitter(self._graph, self._serialiser)
+
+    @property
+    def events(self) -> EventHandlers:
+        """
+        EventHandler for this _Pipeline instance
+        """
+        return self._events
 
     @property
     def is_fruitful(self):
@@ -84,6 +93,7 @@ class _Pipeline(object):
             raise ValueError(f'Pipeline is not in a state that can be paused')
 
         context.pipeline_state.status.value = TaskStatus.Status.PAUSED
+        self.events.notify_pipeline_status_changed(context.pipeline_state.pipeline, context.pipeline_state.status.value)
 
         # tell any child pipelines to pause
         for child_pipeline in context.pipeline_state.child_pipelines:
@@ -95,6 +105,7 @@ class _Pipeline(object):
             raise ValueError(f'Pipeline is not in a state that can be unpaused')
         
         context.pipeline_state.status.value = TaskStatus.Status.RUNNING
+        self.events.notify_pipeline_status_changed(context.pipeline_state.pipeline, context.pipeline_state.status.value)
 
         self._submitter.unpause_tasks(context)
 
@@ -108,6 +119,7 @@ class _Pipeline(object):
             raise ValueError(f'Pipeline is not in a state that can be cancelled')
 
         context.pipeline_state.status.value = TaskStatus.Status.CANCELLING
+        self.events.notify_pipeline_status_changed(context.pipeline_state.pipeline, context.pipeline_state.status.value)
 
         # tell any child pipelines to cancel
         for child_pipeline in context.pipeline_state.child_pipelines:

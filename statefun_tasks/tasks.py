@@ -3,19 +3,21 @@ from statefun_tasks.pipeline_builder import PipelineBuilder
 from statefun_tasks.utils import _is_tuple, _type_name, _annotated_protos_for
 from statefun_tasks.messages_pb2 import TaskRequest
 from statefun_tasks.type_helpers import _create_task_result, _create_task_exception
+from statefun_tasks.events import EventHandlers
 
 import inspect
 import asyncio
 
 
 class FlinkTask(object):
-    def __init__(self, fun, serialiser, retry_policy=None, with_state=False, is_fruitful=True, with_context=False, **kwargs):
+    def __init__(self, fun, serialiser, events:EventHandlers, retry_policy=None, with_state=False, is_fruitful=True, with_context=False, **kwargs):
         self._fun = fun
         self._serialiser = serialiser
         self._retry_policy = retry_policy
         self._with_state = with_state
         self._is_fruitful = is_fruitful
         self._with_context = with_context
+        self._events = events
 
         full_arg_spec = inspect.getfullargspec(fun)
         self._args = full_arg_spec.args
@@ -93,7 +95,7 @@ class FlinkTask(object):
         if isinstance(fn_result, PipelineBuilder):
             # this new pipeline which once complete will yield the result of the whole pipeline
             # back to the caller as if it were a simple task
-            pipeline = fn_result.to_pipeline(self._serialiser, is_fruitful=is_fruitful)
+            pipeline = fn_result.to_pipeline(self._serialiser, is_fruitful=is_fruitful, events=self._events)
             fn_result = ()
 
         # drop the result if the task is marked as not fruitful or caller has asked for the result to be dropped

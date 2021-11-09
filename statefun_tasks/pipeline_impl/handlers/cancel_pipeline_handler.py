@@ -13,7 +13,7 @@ class CancelPipelineHandler(PipelineMessageHandler):
             and context.pipeline_state.status.value in [TaskStatus.CANCELLING, TaskStatus.CANCELLED] \
                 and isinstance(message, (TaskResult, TaskException))
 
-    def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], **kwargs):
+    def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline: '_Pipeline', **kwargs):
         task_result_or_exception = message
         caller_id = context.get_caller_id()
 
@@ -23,7 +23,8 @@ class CancelPipelineHandler(PipelineMessageHandler):
         # wait for the finally task or our own task cancellation message to reach us
         if context.pipeline_state.status.value == TaskStatus.CANCELLING:
             if caller_id == context.pipeline_state.id or self.graph.is_finally_task(caller_id):
-                context.pipeline_state.status.value = TaskStatus.CANCELLED
+                context.pipeline_state.status.value = TaskStatus.CANCELLED 
+                pipeline.events.notify_pipeline_status_changed(context, context.pipeline_state.pipeline, context.pipeline_state.status.value)
 
                 # continue (into EndPipelineHandler)
                 return True, task_result_or_exception

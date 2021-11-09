@@ -10,6 +10,7 @@ from statefun_tasks.utils import _task_type_for, _unpack_single_tuple_args, _gen
 from statefun_tasks.pipeline import _Pipeline
 from statefun_tasks.tasks import FlinkTask
 from statefun_tasks.task_impl.handlers import TaskRequestHandler, TaskResponseHandler, TaskActionHandler, ChildPipelineHandler
+from statefun_tasks.events import EventHandlers
 
 from statefun.request_reply import BatchContext
 from typing import Union
@@ -40,6 +41,7 @@ class FlinkTasks(object):
         self._egress_type_name = egress_type_name
         self._serialiser = serialiser if serialiser is not None else DefaultSerialiser()
         self._bindings = {}
+        self._events = EventHandlers()
 
         self.register_builtin('run_pipeline', _run_pipeline)
 
@@ -49,6 +51,13 @@ class FlinkTasks(object):
             TaskActionHandler(),
             ChildPipelineHandler()
         ]
+
+    @property
+    def events(self) -> EventHandlers:
+        """
+        EventHandler for this FlinkTasks instance
+        """
+        return self._events
 
     def value_specs(self):
         return self._value_specs
@@ -62,7 +71,7 @@ class FlinkTasks(object):
         :param fun: a function, partial or lambda representing the built in
         :param params: any additional parameters to the built in
         """
-        self._bindings[f'__builtins.{type_name}'] = FlinkTask(fun, self._serialiser, **params)
+        self._bindings[f'__builtins.{type_name}'] = FlinkTask(fun, self._serialiser, self._events, **params)
 
     def register(self, fun, wrapper=None, module_name=None, **params):
         """
@@ -79,7 +88,7 @@ class FlinkTasks(object):
             raise ValueError("function instance must be provided")
 
         fun.type_name = _task_type_for(fun, module_name)
-        self._bindings[fun.type_name] = FlinkTask(wrapper or fun, self._serialiser, **params)
+        self._bindings[fun.type_name] = FlinkTask(wrapper or fun, self._serialiser, self._events, **params)
 
     def bind(
         self, 

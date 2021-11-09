@@ -164,17 +164,18 @@ class PipelineBuilder(object):
             raise AttributeError(f'Function {finally_action.__module__}.{finally_action.__name__} should be decorated with tasks.bind')
         return self
 
-    def to_pipeline(self, serialiser=None, is_fruitful=True):
+    def to_pipeline(self, serialiser=None, is_fruitful=True, events=None):
         """
         Concretises the builder into a pipeline
 
         :param option serialiser: the serialiser to use such as DefaultSerialiser
         :param option is_fruitful: whether this pipeline is fruitful (i.e. returns a result). Default is True
+        :param option events: event handler instance if this pipeline should fire events
 
         :return: a Flink Tasks pipeline
         """
         self.validate()
-        return _Pipeline(self._pipeline, serialiser=serialiser, is_fruitful=is_fruitful)
+        return _Pipeline(self._pipeline, events=events, serialiser=serialiser, is_fruitful=is_fruitful)
 
     def validate(self) -> 'PipelineBuilder':
         """

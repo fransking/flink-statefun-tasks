@@ -25,7 +25,14 @@ class TaskRequestHandler(MessageHandler):
         context.pack_and_save('task_request', task_request)
 
         flink_task = tasks.get_task(task_request.type)
+
+        # notify started
+        tasks.events.notify_task_started(context, task_request)
+
         task_result, task_exception, pipeline, task_state = await flink_task.run_async(context, task_request)
+
+        # notify finished
+        tasks.events.notify_task_finished(context, task_result, task_exception)
 
         # if task returns a pipeline then start it if we can
         if pipeline is not None and pipeline.handle_message(context, task_request, task_state):
@@ -52,7 +59,14 @@ class TaskRequestHandler(MessageHandler):
         context.pack_and_save('task_request', task_request)
 
         flink_task = tasks.get_task(task_request.type)
+
+        # notify started
+        tasks.events.notify_task_started(context, task_request)
+
         task_result, task_exception, pipeline, task_state = flink_task.run(context, task_request)
+
+        # notify finished
+        tasks.events.notify_task_finished(context, task_result, task_exception)
 
         # if task returns a pipeline then start it if we can
         if pipeline is not None and pipeline.handle_message(context, task_request, task_state):
