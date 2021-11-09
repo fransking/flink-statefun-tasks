@@ -12,6 +12,7 @@ from statefun_tasks.utils import _task_type_for, _unpack_single_tuple_args, _gen
 from statefun_tasks.pipeline import _Pipeline
 from statefun_tasks.tasks import FlinkTask
 from statefun_tasks.task_impl.handlers import TaskRequestHandler, TaskResponseHandler, TaskActionHandler, ChildPipelineHandler
+from statefun_tasks.events import EventHandlers
 
 from statefun import ValueSpec, Context, Message
 import logging
@@ -41,7 +42,8 @@ class FlinkTasks(object):
         self._egress_type_name = egress_type_name
         self._serialiser = serialiser if serialiser is not None else DefaultSerialiser()
         self._bindings = {}
-
+        self._events = EventHandlers()
+        
         # to register in Flink's @functions.bind() attribute
         self._value_specs = [
             ValueSpec(name="task_request", type=TASK_REQUEST_TYPE),
@@ -60,6 +62,13 @@ class FlinkTasks(object):
             ChildPipelineHandler()
         ]
 
+    @property
+    def events(self) -> EventHandlers:
+        """
+        EventHandler for this FlinkTasks instance
+        """
+        return self._events
+
     def value_specs(self):
         return self._value_specs
 
@@ -72,7 +81,7 @@ class FlinkTasks(object):
         :param fun: a function, partial or lambda representing the built in
         :param params: any additional parameters to the built in
         """
-        self._bindings[f'__builtins.{type_name}'] = FlinkTask(fun, self._serialiser, **params)
+        self._bindings[f'__builtins.{type_name}'] = FlinkTask(fun, self._serialiser, self.events, **params)
 
     def register(self, fun, wrapper=None, module_name=None, **params):
         """
@@ -89,7 +98,7 @@ class FlinkTasks(object):
             raise ValueError("function instance must be provided")
 
         fun.type_name = _task_type_for(fun, module_name)
-        self._bindings[fun.type_name] = FlinkTask(wrapper or fun, self._serialiser, **params)
+        self._bindings[fun.type_name] = FlinkTask(wrapper or fun, self._serialiser, self.events, **params)
 
     def bind(
         self, 
@@ -214,7 +223,7 @@ class FlinkTasks(object):
         pipeline_protos = context.pipeline_state.pipeline
 
         if pipeline_protos is not None:
-            return _Pipeline.from_proto(pipeline_protos, self._serialiser)
+            return _Pipeline.from_proto(pipeline_protos, self._serialiser, self.events)
         else:
             raise ValueError(f'Missing pipeline for task_id - {context.get_task_id()}')
 

@@ -27,10 +27,17 @@ FlinkTasks
    
     
    
+      ~FlinkTasks.events
 
    
    
 
    
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~FlinkTasks.events
    
    

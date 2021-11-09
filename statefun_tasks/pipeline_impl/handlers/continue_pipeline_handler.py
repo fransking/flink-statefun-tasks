@@ -70,11 +70,14 @@ class ContinuePipelineHandler(PipelineMessageHandler):
             if last_step.is_complete():
                 # if we are at the last step in the pipeline then we are complete
                 context.pipeline_state.status.value = TaskStatus.COMPLETED if isinstance(task_result_or_exception, TaskResult) else TaskStatus.FAILED
+                pipeline.events.notify_pipeline_status_changed(context, context.pipeline_state.pipeline, context.pipeline_state.status.value)
+
 
             elif isinstance(task_result_or_exception, TaskException):
                 if group is None or group.is_complete():
                     # else if have an exception then we failed but waiting for any parallel tasks in the group to complete first
                     context.pipeline_state.status.value = TaskStatus.FAILED
+                    pipeline.events.notify_pipeline_status_changed(context, context.pipeline_state.pipeline, context.pipeline_state.status.value)
 
         # continue
         return True, task_result_or_exception

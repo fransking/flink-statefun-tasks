@@ -5,15 +5,17 @@ from statefun_tasks.types import Task, Group, TaskCancelledException
 from statefun_tasks.type_helpers import _create_task_exception
 from statefun_tasks.pipeline_impl.handlers import BeginPipelineHandler, ContinuePipelineHandler, EndPipelineHandler, CancelPipelineHandler
 from statefun_tasks.pipeline_impl.helpers import PipelineGraph, DeferredTaskSubmitter
+from statefun_tasks.events import EventHandlers
 from google.protobuf.any_pb2 import Any
 from typing import Union
 
 
 class _Pipeline(object):
-    def __init__(self, pipeline: list, serialiser=None, is_fruitful=True):
+    def __init__(self, pipeline: list, serialiser=None, is_fruitful=True, events: EventHandlers=None):
         self._pipeline = pipeline
-        self._serialiser = serialiser if serialiser is not None else DefaultSerialiser()
+        self._serialiser = serialiser or DefaultSerialiser()
         self._is_fruitful = is_fruitful
+        self._events = events or EventHandlers()
 
         self._handlers = [
             BeginPipelineHandler(self._pipeline, self._serialiser),
@@ -26,6 +28,13 @@ class _Pipeline(object):
         self._submitter = DeferredTaskSubmitter(self._graph, self._serialiser)
 
     @property
+    def events(self) -> EventHandlers:
+        """
+        EventHandler for this _Pipeline instance
+        """
+        return self._events
+
+    @property
     def is_fruitful(self):
         return self._is_fruitful
 
@@ -34,7 +43,7 @@ class _Pipeline(object):
         return pipeline
 
     @staticmethod
-    def from_proto(pipeline_proto: Pipeline, serialiser):
+    def from_proto(pipeline_proto: Pipeline, serialiser, events):
         pipeline = []
 
         for proto in pipeline_proto.entries:
@@ -43,7 +52,7 @@ class _Pipeline(object):
             elif proto.HasField('group_entry'):
                 pipeline.append(Group.from_proto(proto))
 
-        return _Pipeline(pipeline, serialiser)
+        return _Pipeline(pipeline, serialiser=serialiser, events=events)
 
     def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], task_state: Any=None) -> bool:
         handled = False
@@ -84,6 +93,7 @@ class _Pipeline(object):
             raise ValueError(f'Pipeline is not in a state that can be paused')
 
         context.pipeline_state.status.value = TaskStatus.Status.PAUSED
+        self.events.notify_pipeline_status_changed(context.pipeline_state.pipeline, context.pipeline_state.status.value)
 
         # tell any child pipelines to pause
         for child_pipeline in context.pipeline_state.child_pipelines:
@@ -95,19 +105,21 @@ class _Pipeline(object):
             raise ValueError(f'Pipeline is not in a state that can be unpaused')
         
         context.pipeline_state.status.value = TaskStatus.Status.RUNNING
+        self.events.notify_pipeline_status_changed(context, context.pipeline_state.pipeline, context.pipeline_state.status.value)
 
         self._submitter.unpause_tasks(context)
 
         # tell any child pipelines to resume
         for child_pipeline in context.pipeline_state.child_pipelines:
             pause_action = TaskActionRequest(id=child_pipeline.id, action=TaskAction.UNPAUSE_PIPELINE)
-            context.send_message(child_pipeline.address, pause_action.id, pause_action)
+            context.send_message(context, child_pipeline.address, pause_action.id, pause_action)
 
     def cancel(self, context: TaskContext):
         if context.pipeline_state.status.value not in [TaskStatus.PENDING, TaskStatus.RUNNING, TaskStatus.PAUSED]:
             raise ValueError(f'Pipeline is not in a state that can be cancelled')
 
         context.pipeline_state.status.value = TaskStatus.Status.CANCELLING
+        self.events.notify_pipeline_status_changed(context, context.pipeline_state.pipeline, context.pipeline_state.status.value)
 
         # tell any child pipelines to cancel
         for child_pipeline in context.pipeline_state.child_pipelines:
