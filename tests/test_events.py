@@ -14,7 +14,7 @@ def on_task_started(context, task_request):
 
 
 @tasks.events.on_task_finished
-def on_task_finished(context, task_result=None, task_exception=None):
+def on_task_finished(context, task_result=None, task_exception=None, pipeline=None):
     if task_result is not None:
         _finished.append(task_result.id)
     else:

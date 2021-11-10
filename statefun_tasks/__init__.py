@@ -16,7 +16,7 @@ from statefun_tasks.serialisation import DefaultSerialiser
 
 
 # types
-from statefun_tasks.types import Task, Group, RetryPolicy, TaskAlreadyExistsException, TaskCancelledException
+from statefun_tasks.types import Task, Group, RetryPolicy, TaskAlreadyExistsException, TaskCancelledException, TasksException
 from statefun_tasks.type_helpers import flink_value_type_for
 
 
