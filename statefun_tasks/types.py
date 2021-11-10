@@ -253,11 +253,16 @@ class RetryPolicy:
             exponential_back_off=self.exponential_back_off)
 
 
-class TaskAlreadyExistsException(Exception):
+class TasksException(Exception):
     def __init__(self, message):
         super().__init__(message)
 
 
-class TaskCancelledException(Exception):
+class TaskAlreadyExistsException(TasksException):
+    def __init__(self, message):
+        super().__init__(message)
+
+
+class TaskCancelledException(TasksException):
     def __init__(self, message):
         super().__init__(message)

@@ -32,7 +32,7 @@ class TaskRequestHandler(MessageHandler):
         task_result, task_exception, pipeline, task_state = await flink_task.run_async(context, task_request)
 
         # notify finished
-        tasks.events.notify_task_finished(context, task_result, task_exception)
+        tasks.events.notify_task_finished(context, task_result, task_exception, is_pipeline=pipeline is not None)
 
         # if task returns a pipeline then start it if we can
         if pipeline is not None and pipeline.handle_message(context, task_request, task_state):
@@ -66,7 +66,7 @@ class TaskRequestHandler(MessageHandler):
         task_result, task_exception, pipeline, task_state = flink_task.run(context, task_request)
 
         # notify finished
-        tasks.events.notify_task_finished(context, task_result, task_exception)
+        tasks.events.notify_task_finished(context, task_result, task_exception, is_pipeline=pipeline is not None)
 
         # if task returns a pipeline then start it if we can
         if pipeline is not None and pipeline.handle_message(context, task_request, task_state):
