@@ -6,6 +6,7 @@ from tests.utils import TestHarness, tasks
 _started = []
 _finished = []
 _pipelines = []
+_pipeline_tasks_finished = []
 
 
 @tasks.events.on_task_started
@@ -24,6 +25,14 @@ def on_task_finished(context, task_result=None, task_exception=None, is_pipeline
 @tasks.events.on_pipeline_created
 def on_pipeline_created(context, pipeline):
     _pipelines.append(context.get_task_id())
+
+
+@tasks.events.on_pipeline_task_finished
+def on_pipeline_task_finished(context, task_result=None, task_exception=None):
+    if task_result is not None:
+        _pipeline_tasks_finished.append(task_result.id)
+    else:
+        _pipeline_tasks_finished.append(task_result.id)
 
 
 @tasks.bind()
@@ -61,6 +70,8 @@ class EventsTests(unittest.TestCase):
         for _, _, task_id in pipeline.get_tasks():
             self.assertIn(task_id, _started)
             self.assertIn(task_id, _finished)
+            self.assertIn(task_id, _pipeline_tasks_finished)
+
 
     def test_pipelines_are_created(self):
         pipeline = tasks.send(hello_workflow, 'Jane', 'Doe')

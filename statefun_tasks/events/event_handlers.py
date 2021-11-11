@@ -9,6 +9,7 @@ class EventHandlers(object):
         self._on_task_retry_handlers = []
         self._on_pipeline_created_handlers = []
         self._on_pipeline_status_changed = []
+        self._on_pipeline_task_finished_handlers = []
 
     def on_task_started(self, handler):
         self._on_task_started_handlers.append(handler)
@@ -25,6 +26,9 @@ class EventHandlers(object):
     def on_pipeline_status_changed(self, handler):
         self._on_pipeline_status_changed.append(handler)
 
+    def on_pipeline_task_finished(self, handler):
+        self._on_pipeline_task_finished_handlers.append(handler)
+
     def notify_task_started(self, context, task_request: TaskRequest):
         self._notify_all(self._on_task_started_handlers, context, task_request)
 
@@ -39,6 +43,14 @@ class EventHandlers(object):
 
     def notify_pipeline_status_changed(self, context, pipeline: Pipeline, status: TaskStatus):
         self._notify_all(self._on_pipeline_status_changed, context, pipeline, status)
+
+    def notify_pipeline_task_finished(self, context, task_result_or_exception):
+        if isinstance(task_result_or_exception, TaskResult):
+            task_result, task_exception = task_result_or_exception, None
+        else:
+            task_result, task_exception = None, task_result_or_exception
+
+        self._notify_all(self._on_pipeline_task_finished_handlers, context, task_result=task_result, task_exception=task_exception)
 
     @staticmethod
     def _notify_all(handlers, *args, **kwargs):
