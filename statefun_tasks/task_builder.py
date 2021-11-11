@@ -256,7 +256,7 @@ class FlinkTasks(object):
         pipeline_protos = context.pipeline_state.pipeline
 
         if pipeline_protos is not None:
-            return _Pipeline.from_proto(pipeline_protos, self._serialiser)
+            return _Pipeline.from_proto(pipeline_protos, self._serialiser, self._events)
         else:
             raise ValueError(f'Missing pipeline for task_id - {context.get_task_id()}')
 

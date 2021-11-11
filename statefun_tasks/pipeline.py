@@ -43,7 +43,7 @@ class _Pipeline(object):
         return pipeline
 
     @staticmethod
-    def from_proto(pipeline_proto: Pipeline, serialiser):
+    def from_proto(pipeline_proto: Pipeline, serialiser, events):
         pipeline = []
 
         for proto in pipeline_proto.entries:
@@ -52,7 +52,7 @@ class _Pipeline(object):
             elif proto.HasField('group_entry'):
                 pipeline.append(Group.from_proto(proto))
 
-        return _Pipeline(pipeline, serialiser)
+        return _Pipeline(pipeline, serialiser=serialiser, events=events)
 
     def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], task_state: Any=None) -> bool:
         handled = False
