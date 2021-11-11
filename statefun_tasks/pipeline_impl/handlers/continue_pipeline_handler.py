@@ -21,6 +21,9 @@ class ContinuePipelineHandler(PipelineMessageHandler):
         # mark pipeline step as complete
         self.graph.mark_task_complete(caller_id, task_result_or_exception)
 
+        # notify event handler
+        pipeline.events.notify_pipeline_task_finished(context, task_result_or_exception)
+
         # release deferred tasks if they can now run
         self.submitter.release_tasks(context, caller_id, task_result_or_exception)
 
