@@ -27,6 +27,7 @@ PipelineBuilder
       ~PipelineBuilder.to_proto
       ~PipelineBuilder.to_task_request
       ~PipelineBuilder.validate
+      ~PipelineBuilder.wait
    
     
    

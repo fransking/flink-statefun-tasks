@@ -86,7 +86,7 @@ class PipelineBuilder(object):
         :return: the builder
         """
 
-        if any(self._pipeline):
+        if any(self._pipeline) and isinstance(self._pipeline[-1], Task):
             entry = self._pipeline[-1]
             if retry_policy is not None:
                 entry.retry_policy.CopyFrom(retry_policy.to_proto())
@@ -98,7 +98,9 @@ class PipelineBuilder(object):
                 entry.is_fruitful = is_fruitful
             if display_name is not None:
                 entry.display_name = display_name
-                
+        else:
+            raise ValueError(f'set() must be applied to a task')
+
         return self
 
     def continue_with(self, continuation, *args, **kwargs) -> 'PipelineBuilder':
@@ -118,6 +120,20 @@ class PipelineBuilder(object):
                 self._pipeline.append(task)
             except AttributeError:
                 raise AttributeError(f'Function {continuation.__module__}.{continuation.__name__} should be decorated with tasks.bind')
+        return self
+
+    def wait(self) -> 'PipelineBuilder':
+        """
+        Causes the pipeline to automatically pause at this point
+
+        :return: the builder
+        """
+        if any(self._pipeline):
+            entry = self._pipeline[-1]
+            entry.is_wait = True
+        else:
+            raise ValueError('wait() must be applied to a task or group not an empty pipeline')
+
         return self
 
     def get_destination(self):
