@@ -54,7 +54,7 @@ class Task:
 
     @staticmethod
     def from_fields(task_id, task_type, task_args, task_kwargs, is_finally=None, namespace=None, worker_name=None,
-                    is_fruitful=None, retry_policy=None, display_name=None, **kwargs):
+                    is_fruitful=None, retry_policy=None, display_name=None, is_wait=None, **kwargs):
         proto = TaskEntry(
             task_id=task_id,
             task_type=task_type,
@@ -64,7 +64,8 @@ class Task:
             worker_name=worker_name,
             is_fruitful=is_fruitful,
             retry_policy=retry_policy,
-            display_name=display_name
+            display_name=display_name,
+            is_wait=is_wait
         )
         return Task(proto, task_args, task_kwargs)
         
@@ -166,6 +167,14 @@ class Task:
         else:
             self._proto.display_name = value
 
+    @property
+    def is_wait(self):
+        return self._proto.is_wait
+
+    @is_wait.setter
+    def is_wait(self, value):
+        self._proto.is_wait = value
+
     def unpack(self, serialiser):
         if self._unpacked or not self._proto_backed:
             return self
@@ -209,9 +218,10 @@ class Task:
 
 
 class Group:
-    def __init__(self, group_id, max_parallelism=None):
+    def __init__(self, group_id, max_parallelism=None, is_wait=None):
         self.group_id = group_id
         self.max_parallelism = max_parallelism
+        self.is_wait = is_wait
         self._group = []
 
     def add_to_group(self, tasks):
@@ -230,7 +240,7 @@ class Group:
         return None  # _GroupEntries don't have a single destination
 
     def to_proto(self, serialiser) -> PipelineEntry:
-        proto = GroupEntry(group_id=self.group_id, max_parallelism=self.max_parallelism)
+        proto = GroupEntry(group_id=self.group_id, max_parallelism=self.max_parallelism, is_wait=self.is_wait)
 
         for entries in self._group:
             pipeline = Pipeline()
@@ -245,7 +255,7 @@ class Group:
 
     @staticmethod
     def from_proto(proto: PipelineEntry):
-        entry = Group(group_id=proto.group_entry.group_id, max_parallelism=proto.group_entry.max_parallelism)
+        entry = Group(group_id=proto.group_entry.group_id, max_parallelism=proto.group_entry.max_parallelism, is_wait=proto.group_entry.is_wait)
 
         group = []
         for pipeline in proto.group_entry.group:

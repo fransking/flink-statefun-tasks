@@ -36,12 +36,14 @@ message TaskEntry {
     bool is_fruitful = 8;
     TaskRetryPolicy retry_policy = 9;
     optional string display_name = 10;
+    bool is_wait = 11;
 }
 
 message GroupEntry {
     string group_id = 1;
     repeated Pipeline group = 2;
     int32 max_parallelism = 3;
+    bool is_wait = 4;
 }
 
 message PipelineEntry {

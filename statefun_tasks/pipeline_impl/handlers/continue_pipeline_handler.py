@@ -29,7 +29,7 @@ class ContinuePipelineHandler(PipelineMessageHandler):
         self.submitter.release_tasks(context, caller_id, task_result_or_exception)
 
         # get the next step of the pipeline to run (if any)
-        _, next_step, group, empty_group = self.graph.get_next_step_in_pipeline(caller_id)
+        current_step, next_step, group, empty_group = self.graph.get_next_step_in_pipeline(caller_id)
 
         # if this task is part group then we need to record the results so we can aggregate later
         if group is not None:
@@ -38,6 +38,14 @@ class ContinuePipelineHandler(PipelineMessageHandler):
             # once the group is complete aggregate the results
             if group.is_complete():
                 task_result_or_exception = self.result_aggregator.aggregate(context, group)
+
+                # pause the pipeline if this completed group is a wait
+                if group.is_wait:
+                    pipeline.pause(context)
+        else:
+            # pause the pipeline if this task is a wait
+            if current_step.is_wait:  
+                pipeline.pause(context)
 
         # if we got an exception then the next step is the finally_task if there is one (or none otherwise)
         if isinstance(task_result_or_exception, TaskException):
