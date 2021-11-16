@@ -4,11 +4,11 @@ import unittest
 from statefun_tasks import in_parallel
 from tests.utils import TestHarness, tasks, TaskErrorException
 
-
 join_results_called = False
 join_results2_called = False
 join_results3_called = False
 say_goodbye_called = False
+
 
 @tasks.bind()
 def _say_hello(first_name, last_name):
@@ -67,6 +67,16 @@ def _say_goodbye_with_state(greeting, goodbye_message):
 @tasks.bind(with_state=True)
 def _join_results_with_state(state, results):
     return state, '; '.join(results) + f' {state}'
+
+
+@tasks.bind()
+def _generate_name():
+    return 'John', 'Smith'
+
+
+@tasks.bind()
+def _add_greeting(first_name, last_name, greeting):
+    return f'{greeting} {first_name} {last_name}'
 
 
 class ParallelWorkflowTests(unittest.TestCase):
@@ -170,7 +180,7 @@ class ParallelWorkflowTests(unittest.TestCase):
     def test_parallel_workflow_with_error(self):
         global join_results_called
         join_results_called = False
-        
+
         pipeline = in_parallel([
             _say_hello.send("John", "Smith"),
             _fail.send(),
@@ -186,7 +196,7 @@ class ParallelWorkflowTests(unittest.TestCase):
     def test_parallel_workflow_with_error_and_continuations(self):
         global join_results_called
         join_results_called = False
-        
+
         pipeline = in_parallel([
             _fail.send().continue_with(in_parallel([_say_hello.send("John", "Smith").continue_with(_join_results)])),  # this chain will fail at first step
             _say_goodbye.send("John", "Bye") # this chain will proceed
@@ -247,10 +257,22 @@ class ParallelWorkflowTests(unittest.TestCase):
         global join_results_called
         join_results_called = False
 
-        pipeline = in_parallel([in_parallel([])]).continue_with(in_parallel([])).continue_with(_join_results)        
+        pipeline = in_parallel([in_parallel([])]).continue_with(in_parallel([])).continue_with(_join_results)
         result = self.test_harness.run_pipeline(pipeline)
         self.assertTrue(join_results_called)
         self.assertEqual(result, None)
+
+    def test_passing_arg_into_parallel_pipeline(self):
+        pipeline = _print_results.send('John').continue_with(
+            in_parallel([_say_hello.send(last_name='Smith'), _say_hello.send(last_name='Doe')]))
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, ['Hello John Smith', 'Hello John Doe'])
+
+    def test_passing_multiple_args_into_parallel_pipeline(self):
+        pipeline = _generate_name.send().continue_with(
+            in_parallel([_add_greeting.send('Hello'), _add_greeting.send('Goodbye')]))
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, ['Hello John Smith', 'Goodbye John Smith'])
 
 
 if __name__ == '__main__':
