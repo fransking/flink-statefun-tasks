@@ -124,17 +124,17 @@ class DefaultSerialiser(object):
 
         if not any(args_to_merge.items) and not any(kwargs.items):
             return pack_any(task_result)
-        
+
+        merged_args = TupleOfAny()
         # task result may be a single proto in which case we have to wrap into TupleOfAny to be able to extend
         if not isinstance(task_result, TupleOfAny):
-            args = TupleOfAny()
-            args.items.append(pack_any(task_result))
+            merged_args.items.append(pack_any(task_result))
         else:
-            args = task_result
+            merged_args.items.extend(task_result.items)
 
-        args.items.extend(args_to_merge.items)
+        merged_args.items.extend(args_to_merge.items)
 
-        return pack_any(ArgsAndKwargs(args=args, kwargs=kwargs))
+        return pack_any(ArgsAndKwargs(args=merged_args, kwargs=kwargs))
 
     def serialise_request(self, task_request: TaskRequest, request: Any, state=None, retry_policy=None):
         """
