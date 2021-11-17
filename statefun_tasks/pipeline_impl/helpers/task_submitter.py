@@ -1,5 +1,5 @@
 from statefun_tasks.context import TaskContext
-from statefun_tasks.messages_pb2 import DeferredTask, TaskRequest, TupleOfAny, TaskException, PausedTask, TaskStatus
+from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TupleOfAny, TaskException, PausedTask, TaskStatus
 from statefun_tasks.types import Task
 from statefun_tasks.utils import _gen_id
 from typing import List
@@ -25,15 +25,7 @@ class DeferredTaskSubmitter(object):
         if any(tasks_to_defer):
 
             # create task deferral to hold these deferred tasks
-            deferral_id = _gen_id()
-            task_deferral = context.pipeline_state.task_deferrals_by_id[deferral_id]
-
-            for task in reversed(tasks_to_defer):
-                # add in state, extra task args & kwargs if we have them
-                request = self._create_task_request(context, task, task.request, task_state, task_result)
-
-                # add each task to deferral
-                task_deferral.deferred_tasks.append(DeferredTask(destination=task.get_destination(), task_request=request))
+            deferral_id = self._create_task_deferral(context, tasks_to_defer, task_result_or_exception)
 
             # parent tasks for the deferrals are the final tasks in each chain beginning with the tasks we are going to call
             # when a parent task completes, a task from the deferral will be called keep the overall parallism at max_parallelism
@@ -42,7 +34,7 @@ class DeferredTaskSubmitter(object):
                 context.pipeline_state.task_deferral_ids_by_task_id[last_task.task_id] = deferral_id
 
         for task in tasks_to_call:
-            task_request = self._create_task_request(context, task, task.request, task_state, task_result)
+            task_request = self._create_task_request(context, task, task.request, task_state, task_result, deferral=None)
             self._send_task(context, task.get_destination(), task_request)
 
     def release_tasks(self, context, caller_id, task_result_or_exception):
@@ -55,16 +47,18 @@ class DeferredTaskSubmitter(object):
             deferral_id = context.pipeline_state.task_deferral_ids_by_task_id[parent_id]
             task_deferral = context.pipeline_state.task_deferrals_by_id[deferral_id]
 
-            if any(task_deferral.deferred_tasks):
-                deferred_task = task_deferral.deferred_tasks.pop()
-                task_request = deferred_task.task_request
+            if any(task_deferral.task_ids):
+                task_id = task_deferral.task_ids.pop()
+                task = self._graph.get_task(task_id) 
 
+                task_request = self._create_deferred_task_request(context, task, task_deferral)
+                
                 # add task we are submitting to deferral task
-                last_task = self._graph.get_last_task_in_chain(task_request.id)
+                last_task = self._graph.get_last_task_in_chain(task_id)
                 context.pipeline_state.task_deferral_ids_by_task_id[last_task.id] = deferral_id
 
                 # send the task
-                self._send_task(context, deferred_task.destination, task_request)
+                self._send_task(context, task.get_destination(), task_request)
             else:
                 # clean up
                 del context.pipeline_state.task_deferral_ids_by_task_id[caller_id]
@@ -76,7 +70,40 @@ class DeferredTaskSubmitter(object):
 
         context.pipeline_state.ClearField('paused_tasks')
 
-    def _create_task_request(self, context, task, task_request, task_state=None, task_result=None):
+    def _create_task_deferral(self, context, tasks_to_defer, task_result_or_exception):
+        # create task deferral to hold these deferred tasks
+        deferral_id = _gen_id()
+        task_deferral = context.pipeline_state.task_deferrals_by_id[deferral_id]
+
+        if context.get_caller_id() is not None:
+            task_deferral.parent_task_address = context.get_caller_address()
+            task_deferral.parent_task_id = context.get_caller_id()
+
+        if task_result_or_exception is not None:
+            if isinstance(task_result_or_exception, TaskResult):
+                task_deferral.task_result_or_exception.task_result.CopyFrom(task_result_or_exception)
+            elif isinstance(task_result_or_exception, TaskException):
+                task_deferral.task_result_or_exception.task_exception.CopyFrom(task_result_or_exception)
+
+        for task in reversed(tasks_to_defer):
+            task_deferral.task_ids.append(task.id)
+
+        return deferral_id
+
+    def _create_deferred_task_request(self, context, task, task_deferral):
+        task_state, task_result = None, None
+        if task_deferral.HasField('task_result_or_exception'):
+            
+            if task_deferral.task_result_or_exception.HasField('task_result'):
+                task_result_or_exception = task_deferral.task_result_or_exception.task_result
+            else:
+                task_result_or_exception = task_deferral.task_result_or_exception.task_exception
+
+            task_result, task_state = self._serialiser.unpack_response(task_result_or_exception)
+
+        return self._create_task_request(context, task, task.request, task_state, task_result, deferral=task_deferral)
+
+    def _create_task_request(self, context, task, task_request, task_state=None, task_result=None, deferral=None):
         if task_result is not None:
             task_args_and_kwargs = self._serialiser.to_args_and_kwargs(task.request)
             task_request = self._serialiser.merge_args_and_kwargs(task_result if not task.is_finally else TupleOfAny(), task_args_and_kwargs)
@@ -95,9 +122,17 @@ class DeferredTaskSubmitter(object):
         if task.display_name is not None:
             request.meta['display_name'] = task.display_name
         
-        if context.get_caller_id() is not None:
-            request.meta['parent_task_address'] = context.get_caller_address()
-            request.meta['parent_task_id'] = context.get_caller_id()
+        if deferral is not None:  # copy parent task details from the deferral
+            if deferral.HasField('parent_task_address'):
+                request.meta['parent_task_address'] = deferral.parent_task_address
+
+            if deferral.HasField('parent_task_id'):
+                request.meta['parent_task_id'] = deferral.parent_task_address
+        else: 
+            # otherwise grab from the context
+            if context.get_caller_id() is not None:
+                request.meta['parent_task_address'] = context.get_caller_address()
+                request.meta['parent_task_id'] = context.get_caller_id()
 
         self._serialiser.serialise_request(request, task_request, state=task_state, retry_policy=task.retry_policy)
         return request

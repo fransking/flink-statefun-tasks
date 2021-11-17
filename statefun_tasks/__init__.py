@@ -22,4 +22,4 @@ from statefun_tasks.type_helpers import flink_value_type_for
 
 # protobuf message types
 from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, TaskActionRequest, TaskActionResult, \
-    TaskActionException, TaskAction, TaskStatus, TaskDeferral, DeferredTask, PausedTask, ChildPipeline, Address, TaskInfo
+    TaskActionException, TaskAction, TaskStatus, TaskDeferral, PausedTask, ChildPipeline, Address, TaskInfo
