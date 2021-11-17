@@ -33,6 +33,13 @@ class PipelineGraph(object):
             else:
                 yield task_or_group
 
+    def get_task(self, task_id):
+        for task in self.yield_tasks():
+            if task_id == task.task_id:
+                return task
+
+        raise ValueError(f'Task {task_id} not found')
+
     def is_empty(self):
         return not any(self.get_initial_tasks())
         

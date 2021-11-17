@@ -101,6 +101,13 @@ message TaskException {
     TaskRetryPolicy retry_policy = 8;
 }
 
+message TaskResultOrException {
+    oneof task_result_or_exception {
+        TaskResult task_result = 1;
+        TaskException task_exception = 2;
+    }
+}
+
 message TaskState {
     int32 retry_count = 1;
     string original_caller_address = 2;
@@ -108,12 +115,10 @@ message TaskState {
 }
 
 message TaskDeferral {
-    repeated DeferredTask deferred_tasks = 1;
-}
-
-message DeferredTask {
-    string destination = 1;
-    TaskRequest task_request = 2;
+    repeated string task_ids = 1;
+    optional string parent_task_address = 2;
+    optional string parent_task_id = 3;
+    optional TaskResultOrException task_result_or_exception = 4;
 }
 
 message PausedTask {
