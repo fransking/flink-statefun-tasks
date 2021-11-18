@@ -69,7 +69,7 @@ class FlinkTasks(object):
 
         :param function: the function to wrap
         :param retry_policy: retry policy to use should the task throw an exception
-        :param display_name: optional friendly name for this task
+        :param params: any additional parameters to the Flink Task (such as a retry policy)
         """
         def defaults():
             return {

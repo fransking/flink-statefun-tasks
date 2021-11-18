@@ -19,7 +19,7 @@ def enable_inline_tasks(tasks: FlinkTasks):
     checks - e.g. you might want to only accept signed code or restrict what what global functions and 
     imports are available.  This extension is included as an example of what is possible.
 
-    :param tasks: FlinkTasks to enable @inline_tasks() for
+    :param tasks: FlinkTasks to enable @inline_task() for
     """
     @tasks.bind(module_name='__builtins', with_context=True, with_state=True)
     async def run_code(context, state, __with_context, __with_state, __code, *args, **kwargs):
@@ -69,7 +69,7 @@ def enable_inline_tasks(tasks: FlinkTasks):
 
 def inline_task(include=None, with_context=False, with_state=False, **params):
     """
-    Declares and inline Flink task
+    Declares an inline Flink task
     :param include: list of modules to include with the pickled code
     :param with_context: If set the first parameter to the function is exepcted to be the task context
     :param with_state: If set the next parameter is expected to be the task state
