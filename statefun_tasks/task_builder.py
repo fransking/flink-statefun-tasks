@@ -59,7 +59,7 @@ class FlinkTasks(object):
 
         :param function: the function to wrap
         :param retry_policy: retry policy to use should the task throw an exception
-        :param display_name: optional friendly name for this task
+        :param params: any additional parameters to the Flink Task (such as a retry policy)
         """
         def defaults():
             return {
@@ -147,7 +147,7 @@ class FlinkTasks(object):
 
         :param type_name: task type to expose the built in as
         :param fun: a function, partial or lambda representing the built in
-        :param params: any additional parameters to the built in
+        :param params: any additional parameters to the Flink Task (such as a retry policy)
         """
         self._bindings[f'__builtins.{type_name}'] = FlinkTask(fun, self._serialiser, self._events, **params)
 

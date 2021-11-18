@@ -311,7 +311,7 @@ otherwise the Python module containing the function will be used</p></li>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>function</strong> – the function to wrap</p></li>
 <li><p><strong>retry_policy</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">RetryPolicy</span></code>]) – retry policy to use should the task throw an exception</p></li>
-<li><p><strong>display_name</strong> – optional friendly name for this task</p></li>
+<li><p><strong>params</strong> – any additional parameters to the Flink Task (such as a retry policy)</p></li>
 </ul>
 </dd>
 </dl>
@@ -375,7 +375,7 @@ This should only be used if you want to provide your own built in (pre-defined) 
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>type_name</strong> – task type to expose the built in as</p></li>
 <li><p><strong>fun</strong> – a function, partial or lambda representing the built in</p></li>
-<li><p><strong>params</strong> – any additional parameters to the built in</p></li>
+<li><p><strong>params</strong> – any additional parameters to the Flink Task (such as a retry policy)</p></li>
 </ul>
 </dd>
 </dl>
