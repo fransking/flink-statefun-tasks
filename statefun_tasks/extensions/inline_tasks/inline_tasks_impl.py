@@ -107,6 +107,9 @@ def inline_task(include=None, with_context=False, with_state=False, **params):
 
         def to_task(args, kwargs, is_finally=False, parameters=None):
 
+            if __defaults is None:
+                raise ValueError('Inline tasks should be enabled with enable_inline_tasks() first')
+
             code = pickle(fn)
 
             def run_code():
