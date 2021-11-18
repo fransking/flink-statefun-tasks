@@ -127,7 +127,7 @@ class DeferredTaskSubmitter(object):
                 request.meta['parent_task_address'] = deferral.parent_task_address
 
             if deferral.HasField('parent_task_id'):
-                request.meta['parent_task_id'] = deferral.parent_task_address
+                request.meta['parent_task_id'] = deferral.parent_task_id
         else: 
             # otherwise grab from the context
             if context.get_caller_id() is not None:

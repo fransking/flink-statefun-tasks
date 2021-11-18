@@ -122,6 +122,21 @@ class PipelineBuilder(object):
                 raise AttributeError(f'Function {continuation.__module__}.{continuation.__name__} should be decorated with tasks.bind')
         return self
 
+    def continue_if(self, condition: bool, continuation, *args, **kwargs) -> 'PipelineBuilder':
+        """
+        Conditionally adds continuation to the pipeline
+
+        :param condition: the condition
+        :param continuation: the python function which should be decorated with @tasks.bind()
+        :param args: the task args
+        :param kwargs: the task kwargs
+        :return: the builder
+        """
+        if condition:
+            self.continue_with(continuation, *args, **kwargs)
+        
+        return self
+
     def wait(self) -> 'PipelineBuilder':
         """
         Causes the pipeline to automatically pause at this point
