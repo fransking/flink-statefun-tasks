@@ -210,46 +210,49 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.append_to" title="statefun_tasks.PipelineBuilder.append_to"><code class="xref py py-obj docutils literal notranslate"><span class="pre">append_to</span></code></a>(other)</p></td>
 <td><p>Appends tasks from another pipeline builder into this one</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.continue_with" title="statefun_tasks.PipelineBuilder.continue_with"><code class="xref py py-obj docutils literal notranslate"><span class="pre">continue_with</span></code></a>(continuation, *args, **kwargs)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.continue_if" title="statefun_tasks.PipelineBuilder.continue_if"><code class="xref py py-obj docutils literal notranslate"><span class="pre">continue_if</span></code></a>(condition, continuation, *args, …)</p></td>
+<td><p>Conditionally adds continuation to the pipeline</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.continue_with" title="statefun_tasks.PipelineBuilder.continue_with"><code class="xref py py-obj docutils literal notranslate"><span class="pre">continue_with</span></code></a>(continuation, *args, **kwargs)</p></td>
 <td><p>Adds continuation to the pipeline</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.finally_do" title="statefun_tasks.PipelineBuilder.finally_do"><code class="xref py py-obj docutils literal notranslate"><span class="pre">finally_do</span></code></a>(finally_action, *args, **kwargs)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.finally_do" title="statefun_tasks.PipelineBuilder.finally_do"><code class="xref py py-obj docutils literal notranslate"><span class="pre">finally_do</span></code></a>(finally_action, *args, **kwargs)</p></td>
 <td><p>Adds finally to the pipeline</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.from_proto" title="statefun_tasks.PipelineBuilder.from_proto"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_proto</span></code></a>(pipeline_proto)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.from_proto" title="statefun_tasks.PipelineBuilder.from_proto"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_proto</span></code></a>(pipeline_proto)</p></td>
 <td><p>Deserialises the pipeline from protobuf</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.get_destination" title="statefun_tasks.PipelineBuilder.get_destination"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_destination</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.get_destination" title="statefun_tasks.PipelineBuilder.get_destination"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_destination</span></code></a>()</p></td>
 <td><p>Returns the initial destination of the pipeline as None - i.e. use the default ingress.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.get_tasks" title="statefun_tasks.PipelineBuilder.get_tasks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_tasks</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.get_tasks" title="statefun_tasks.PipelineBuilder.get_tasks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_tasks</span></code></a>()</p></td>
 <td><p>Returns a list of all tasks identifiers (namespace, worker name, id) that make up this pipeline</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.is_empty" title="statefun_tasks.PipelineBuilder.is_empty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_empty</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.is_empty" title="statefun_tasks.PipelineBuilder.is_empty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_empty</span></code></a>()</p></td>
 <td><p>Tests if the pipeline contains any tasks</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.send" title="statefun_tasks.PipelineBuilder.send"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send</span></code></a>(fun, *args, **kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.send" title="statefun_tasks.PipelineBuilder.send"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send</span></code></a>(fun, *args, **kwargs)</p></td>
 <td><p>Adds a task entry for the given Flink Task and arguments</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.set" title="statefun_tasks.PipelineBuilder.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set</span></code></a>([retry_policy, namespace, worker_name, …])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.set" title="statefun_tasks.PipelineBuilder.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set</span></code></a>([retry_policy, namespace, worker_name, …])</p></td>
 <td><p>Sets task properties on the last entry added to the builder</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.to_pipeline" title="statefun_tasks.PipelineBuilder.to_pipeline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_pipeline</span></code></a>([serialiser, is_fruitful, events])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.to_pipeline" title="statefun_tasks.PipelineBuilder.to_pipeline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_pipeline</span></code></a>([serialiser, is_fruitful, events])</p></td>
 <td><p>Concretises the builder into a pipeline</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.to_proto" title="statefun_tasks.PipelineBuilder.to_proto"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_proto</span></code></a>([serialiser])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.to_proto" title="statefun_tasks.PipelineBuilder.to_proto"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_proto</span></code></a>([serialiser])</p></td>
 <td><p>Serialises the pipeline to protobuf</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.to_task_request" title="statefun_tasks.PipelineBuilder.to_task_request"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_task_request</span></code></a>(serialiser)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.to_task_request" title="statefun_tasks.PipelineBuilder.to_task_request"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_task_request</span></code></a>(serialiser)</p></td>
 <td><p>Serialises the pipeline as a TaskRequest with a task type of ‘__builtins.run_pipeline’</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.validate" title="statefun_tasks.PipelineBuilder.validate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.validate" title="statefun_tasks.PipelineBuilder.validate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate</span></code></a>()</p></td>
 <td><p>Validates the pipeline</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.wait" title="statefun_tasks.PipelineBuilder.wait"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wait</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.wait" title="statefun_tasks.PipelineBuilder.wait"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wait</span></code></a>()</p></td>
 <td><p>Causes the pipeline to automatically pause at this point</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.id" title="statefun_tasks.PipelineBuilder.id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">id</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.id" title="statefun_tasks.PipelineBuilder.id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">id</span></code></a></p></td>
 <td><p>The ID of this pipeline</p></td>
 </tr>
 </tbody>
@@ -293,6 +296,28 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>other</strong> (<a class="reference internal" href="#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>) – the other pipeline builder</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the builder</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="statefun_tasks.PipelineBuilder.continue_if">
+<span class="sig-name descname"><span class="pre">continue_if</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">condition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">continuation</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.continue_if" title="Permalink to this definition">¶</a></dt>
+<dd><p>Conditionally adds continuation to the pipeline</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>condition</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – the condition</p></li>
+<li><p><strong>continuation</strong> – the python function which should be decorated with &#64;tasks.bind()</p></li>
+<li><p><strong>args</strong> – the task args</p></li>
+<li><p><strong>kwargs</strong> – the task kwargs</p></li>
+</ul>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a></p>

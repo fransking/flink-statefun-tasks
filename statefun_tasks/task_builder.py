@@ -52,6 +52,84 @@ class FlinkTasks(object):
             ChildPipelineHandler()
         ]
 
+    @staticmethod
+    def extend(function, retry_policy: RetryPolicy = None, **params):
+        """
+        Adds the extensions to make a function unsable by a PipelineBuilder -> fn.send(), fn.to_task() and fn.defaults()
+
+        :param function: the function to wrap
+        :param retry_policy: retry policy to use should the task throw an exception
+        :param display_name: optional friendly name for this task
+        """
+        def defaults():
+            return {
+                'retry_policy': None if retry_policy is None else retry_policy.to_proto(),
+                **params
+            }
+
+        def send(*args, **kwargs):
+            return PipelineBuilder().send(function, *args, **kwargs)
+
+        def to_task(args, kwargs, is_finally=False, parameters={}):
+            parameters = {**defaults(), **parameters}
+
+            if is_finally:
+                parameters['is_fruitful'] = False
+            
+            module_name = parameters.get('module_name', None)
+            task_type = _task_type_for(function, module_name)
+
+            args = _unpack_single_tuple_args(args)
+            return Task.from_fields(_gen_id(), task_type, args, kwargs, is_finally=is_finally, **parameters)
+
+        function.send = send
+        function.to_task = to_task
+        function.defaults = defaults
+
+        return function
+
+    def bind(
+        self, 
+        namespace: str = None, 
+        worker_name: str = None, 
+        retry_policy: RetryPolicy = None, 
+        with_state: bool = False, 
+        is_fruitful: bool = True, 
+        module_name: str = None,
+        with_context: bool = False,
+        display_name: str = None):
+        """
+        Decorator to bind a function as a Flink Task
+
+        :param namespace: namespace to use in place of the default
+        :param worker_name: worker name to use in place of the default
+        :param retry_policy: retry policy to use should the task throw an exception
+        :param with_state: whether to pass a state object as the first (second if with_context is also set) parameter.  The return value should be a tuple of state, result (default False)
+        :param is_fruitful: whether the function produces a fruitful result or simply returns None (default True)
+        :param module_name: if specified then the task type used in addressing will be module_name.function_name
+                            otherwise the Python module containing the function will be used
+        :param with_context: whether to pass a Flink context object as the first parameter (default false)
+        :param display_name: optional friendly name for this task
+        """
+        
+        def wrapper(function):
+
+            function = FlinkTasks.extend(function, 
+                    namespace = self._default_namespace if namespace is None else namespace,
+                    worker_name = self._default_worker_name if worker_name is None else worker_name,
+                    retry_policy = retry_policy,
+                    with_state = with_state,
+                    is_fruitful = is_fruitful,
+                    module_name = module_name,
+                    with_context = with_context,
+                    display_name = display_name
+            )
+
+            self.register(function, wrapper=None, **function.defaults())
+            return function
+
+        return wrapper
+
     @property
     def events(self) -> EventHandlers:
         """
@@ -89,65 +167,6 @@ class FlinkTasks(object):
 
         fun.type_name = _task_type_for(fun, module_name)
         self._bindings[fun.type_name] = FlinkTask(wrapper or fun, self._serialiser, self._events, **params)
-
-    def bind(
-        self, 
-        namespace: str = None, 
-        worker_name: str = None, 
-        retry_policy: RetryPolicy = None, 
-        with_state: bool = False, 
-        is_fruitful: bool = True, 
-        module_name: str = None,
-        with_context: bool = False,
-        display_name: str = None):
-        """
-        Binds a function as a Flink Task
-
-        :param namespace: namespace to use in place of the default
-        :param worker_name: worker name to use in place of the default
-        :param retry_policy: retry policy to use should the task throw an exception
-        :param with_state: whether to pass a state object as the first (second if with_context is also set) parameter.  The return value should be a tuple of state, result (default False)
-        :param is_fruitful: whether the function produces a fruitful result or simply returns None (default True)
-        :param module_name: if specified then the task type used in addressing will be module_name.function_name
-                            otherwise the Python module containing the function will be used
-        :param with_context: whether to pass a Flink context object as the first parameter (default false)
-        :param display_name: optional friendly name for this task
-        """
-        def wrapper(function):
-            def defaults():
-                return {
-                    'namespace': self._default_namespace if namespace is None else namespace,
-                    'worker_name': self._default_worker_name if worker_name is None else worker_name,
-                    'retry_policy': None if retry_policy is None else retry_policy.to_proto(),
-                    'with_state': with_state,
-                    'is_fruitful': is_fruitful,
-                    'module_name': module_name,
-                    'with_context': with_context,
-                    'display_name': display_name
-                }
-
-            def send(*args, **kwargs):
-                return PipelineBuilder().send(function, *args, **kwargs)
-
-            def to_task(args, kwargs, is_finally=False, parameters={}):
-                parameters = {**defaults(), **parameters}
-
-                if is_finally:
-                    parameters['is_fruitful'] = False
-                
-                module_name = parameters.get('module_name', None)
-                task_type = _task_type_for(function, module_name)
-
-                args = _unpack_single_tuple_args(args)
-                return Task.from_fields(_gen_id(), task_type, args, kwargs, is_finally=is_finally, **parameters)
-
-            function.send = send
-            function.to_task = to_task
-
-            self.register(function, **defaults())
-            return function
-
-        return wrapper
 
     def get_task(self, task_type) -> FlinkTask:
         """
