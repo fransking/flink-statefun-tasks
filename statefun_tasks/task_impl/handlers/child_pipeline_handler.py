@@ -14,10 +14,7 @@ class ChildPipelineHandler(MessageHandler):
 
         return False
 
-    async def handle_message_async(self, tasks: 'FlinkTasks', context: TaskContext, child_pipeline):
-        return self.handle_message(tasks, context, child_pipeline)
-
-    def handle_message(self, tasks: 'FlinkTasks', context: TaskContext, child_pipeline):
+    async def handle_message(self, tasks: 'FlinkTasks', context: TaskContext, child_pipeline):
         pipeline = tasks.try_get_pipeline(context)
         
         if pipeline is not None:

@@ -12,9 +12,5 @@ class MessageHandler(ABC):
         pass
 
     @abstractmethod
-    def handle_message(self, tasks: 'FlinkTasks', context: TaskContext, message):
-        pass
-
-    @abstractmethod
-    async def handle_message_async(self, tasks: 'FlinkTasks', context: TaskContext, message):
+    async def handle_message(self, tasks: 'FlinkTasks', context: TaskContext, message):
         pass

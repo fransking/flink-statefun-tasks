@@ -14,7 +14,7 @@ class PipelineMessageHandler(ABC):
         self._serialiser = serialiser
         self._storage = storage
         self._graph = PipelineGraph(pipeline)
-        self._submitter = DeferredTaskSubmitter(self._graph, serialiser)
+        self._submitter = DeferredTaskSubmitter(self._graph, serialiser, storage)
         self._result_aggregator = ResultAggregator(self._graph, serialiser, storage)
         self._result_emitter = ResultEmitter()
         
@@ -23,11 +23,7 @@ class PipelineMessageHandler(ABC):
         pass
 
     @abstractmethod
-    def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline: '_Pipeline', task_state: Any = None) -> Tuple[bool, Union[TaskRequest, TaskResult, TaskException]]:
-        pass
-
-    @abstractmethod
-    async def handle_message_async(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline: '_Pipeline', task_state: Any = None) -> Tuple[bool, Union[TaskRequest, TaskResult, TaskException]]:
+    async def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline: '_Pipeline', task_state: Any = None) -> Tuple[bool, Union[TaskRequest, TaskResult, TaskException]]:
         pass
     
     @property

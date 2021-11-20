@@ -1,13 +1,20 @@
 from statefun_tasks.context import TaskContext
 from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TupleOfAny, TaskException, PausedTask, TaskStatus
+from statefun_tasks.storage import StorageBackend
 from statefun_tasks.types import Task
 from statefun_tasks.utils import _gen_id
 from typing import List
+import logging
+
+
+_log = logging.getLogger('FlinkTasks')
+
 
 class DeferredTaskSubmitter(object):
-    def __init__(self, graph, serialiser):
+    def __init__(self, graph, serialiser, storage: StorageBackend):
         self._graph = graph
         self._serialiser = serialiser
+        self._storage = storage
 
     def submit_tasks(self, context: TaskContext, tasks: List[Task], task_result_or_exception=None, max_parallelism=None):     
         # unpack task_result into result + state so we can merge in extras later
@@ -136,7 +143,6 @@ class DeferredTaskSubmitter(object):
 
         self._serialiser.serialise_request(request, task_request, state=task_state, retry_policy=task.retry_policy)
         return request
-
 
     def _send_task(self, context, destination, task_request):
         # if the pipeline is paused we record the tasks to be sent into the pipeline state

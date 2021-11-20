@@ -15,6 +15,8 @@ class TaskContext(object):
 
         self.task_state = self.unpack('task_state', TaskState) or TaskState()
         self.pipeline_state = self.unpack('pipeline_state', PipelineState)
+        self.pipeline_state_size = self.pipeline_state.ByteSize() if self.pipeline_state is not None else 0
+
         self._task_meta = {}
         self._task_name = None
 

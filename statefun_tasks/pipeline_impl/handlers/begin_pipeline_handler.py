@@ -16,7 +16,7 @@ class BeginPipelineHandler(PipelineMessageHandler):
             and isinstance(message, TaskRequest) \
                 and not self.graph.is_empty()
 
-    def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline: '_Pipeline', task_state: Any):
+    async def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline: '_Pipeline', task_state: Any):
         invoking_task = message  # type: TaskRequest
 
         # ensure we pick up the correct caller id when task producing this pipeline is a retry
@@ -58,9 +58,6 @@ class BeginPipelineHandler(PipelineMessageHandler):
 
         # 4. break
         return False, message
-
-    async def handle_message_async(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline: '_Pipeline', task_state: Any):
-        return self.handle_message(context, message, pipeline, task_state)
 
     def _notify_pipeline_created(self, context):
         # if this pipeline is the already root do nothing as it's not a child

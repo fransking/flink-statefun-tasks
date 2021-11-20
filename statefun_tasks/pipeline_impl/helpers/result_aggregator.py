@@ -21,7 +21,6 @@ class ResultAggregator(object):
 
     async def add_result(self, context: TaskContext, group: Group, task_id, task_result_or_exception):
         task_results = context.pipeline_state.task_results  # type: TaskResults
-        size_of_state = context.pipeline_state.ByteSize()
 
         failed = isinstance(task_result_or_exception, TaskException)
         last_task = self._graph.get_last_task_in_chain(task_id)
@@ -29,11 +28,11 @@ class ResultAggregator(object):
         
         if task_id == last_task.task_id:
             # if we are the last task in this chain in the group then record this result so we can aggregate laster
-            await self._save_result(group, task_id, packed, task_results, size_of_state)
+            await self._save_result(group, task_id, packed, task_results, context.pipeline_state_size)
 
         elif failed:
-            # additionally propogate the error onto the last stage of this chain
-            await self._save_result(group, last_task.task_id, packed, task_results, size_of_state)
+            # additionally propagate the error onto the last stage of this chain
+            await self._save_result(group, last_task.task_id, packed, task_results, context.pipeline_state_size)
 
     async def aggregate(self, context: TaskContext, group: Group):
         task_results = context.pipeline_state.task_results  # type: TaskResults
@@ -108,12 +107,12 @@ class ResultAggregator(object):
             # record data to state
             task_results.by_id[task_id].CopyFrom(proto)
 
-    async def _try_save_to_store(self, task_id, proto):
+    async def _try_save_to_store(self, keys, proto):
         try:
-            await self._storage.store(task_id, proto.SerializeToString())
+            await self._storage.store(keys, proto.SerializeToString())
             return True
         except Exception as ex:
-            _log.warning(f'Error saving {task_id} to backend storage - {ex}')
+            _log.warning(f'Error saving {keys} to backend storage - {ex}')
             return False
 
     async def _load_result(self, group, proto):

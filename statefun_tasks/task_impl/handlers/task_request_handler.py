@@ -17,7 +17,7 @@ class TaskRequestHandler(MessageHandler):
 
         return False
 
-    async def handle_message_async(self, tasks: 'FlinkTasks', context: TaskContext, task_request: TaskRequest):
+    async def handle_message(self, tasks: 'FlinkTasks', context: TaskContext, task_request: TaskRequest):
         if context.unpack('task_request', TaskRequest) is not None:
             # don't allow tasks to be overwritten
             raise TaskAlreadyExistsException(f'Task already exists: {task_request.id}')
@@ -29,47 +29,13 @@ class TaskRequestHandler(MessageHandler):
         # notify started
         tasks.events.notify_task_started(context, task_request)
 
-        task_result, task_exception, pipeline, task_state = await flink_task.run_async(context, task_request)
+        task_result, task_exception, pipeline, task_state = await flink_task.run(context, task_request)
 
         # notify finished
         tasks.events.notify_task_finished(context, task_result, task_exception, is_pipeline=pipeline is not None)
 
         # if task returns a pipeline then start it if we can
-        if pipeline is not None and pipeline.handle_message(context, task_request, task_state):
-            ()
-
-        # else if we have a task result return it
-        elif task_result is not None:
-            context.pack_and_save('task_result', task_result)
-            tasks.emit_result(context, task_request, task_result)
-
-        # else if we have an task exception, attempt retry or return the error
-        elif task_exception is not None:
-            if self._attempt_retry(context, task_request, task_exception):
-                return  # we have triggered a retry so ignore the result of this invocation
-
-            context.pack_and_save('task_exception', task_exception)
-            tasks.emit_result(context, task_request, task_exception)
-
-    def handle_message(self, tasks: 'FlinkTasks', context: TaskContext, task_request: TaskRequest):
-        if context.unpack('task_request', TaskRequest) is not None:
-            # don't allow tasks to be overwritten
-            raise TaskAlreadyExistsException(f'Task already exists: {task_request.id}')
-
-        context.pack_and_save('task_request', task_request)
-
-        flink_task = tasks.get_task(task_request.type)
-
-        # notify started
-        tasks.events.notify_task_started(context, task_request)
-
-        task_result, task_exception, pipeline, task_state = flink_task.run(context, task_request)
-
-        # notify finished
-        tasks.events.notify_task_finished(context, task_result, task_exception, is_pipeline=pipeline is not None)
-
-        # if task returns a pipeline then start it if we can
-        if pipeline is not None and pipeline.handle_message(context, task_request, task_state):
+        if pipeline is not None and await pipeline.handle_message(context, task_request, task_state):
             ()
 
         # else if we have a task result return it

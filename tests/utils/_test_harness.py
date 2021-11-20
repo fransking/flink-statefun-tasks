@@ -24,10 +24,7 @@ functions = StatefulFunctions()
 
 @functions.bind('test/worker')
 async def worker(context, task_data: Union[TaskRequest, TaskResult, TaskException, TaskActionRequest, ChildPipeline]):
-    if tasks.is_async_required(task_data):
-        await tasks.run_async(context, task_data)
-    else:
-        tasks.run(context, task_data)
+    await tasks.run(context, task_data)
 
 
 async_handler = AsyncRequestReplyHandler(functions)

@@ -13,7 +13,7 @@ class CancelPipelineHandler(PipelineMessageHandler):
             and context.pipeline_state.status.value in [TaskStatus.CANCELLING, TaskStatus.CANCELLED] \
                 and isinstance(message, (TaskResult, TaskException))
 
-    def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline: '_Pipeline', **kwargs):
+    async def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline: '_Pipeline', **kwargs):
         task_result_or_exception = message
         caller_id = context.get_caller_id()
 
@@ -31,6 +31,3 @@ class CancelPipelineHandler(PipelineMessageHandler):
 
         # break otherwise
         return False, message
-
-    async def handle_message_async(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline: '_Pipeline', **kwargs):
-        return self.handle_message(context, message, pipeline)

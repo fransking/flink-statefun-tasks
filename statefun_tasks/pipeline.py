@@ -27,7 +27,7 @@ class _Pipeline(object):
         ]
 
         self._graph = PipelineGraph(self._pipeline)
-        self._submitter = DeferredTaskSubmitter(self._graph, self._serialiser)
+        self._submitter = DeferredTaskSubmitter(self._graph, self._serialiser, self._storage)
 
     @property
     def events(self) -> EventHandlers:
@@ -56,25 +56,12 @@ class _Pipeline(object):
 
         return _Pipeline(pipeline, serialiser=serialiser, events=events, storage=storage)
 
-    def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], task_state: Any=None) -> bool:
+    async def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], task_state: Any=None) -> bool:
         handled = False
 
         for handler in self._handlers:
             if handler.can_handle_message(context, message):
-                should_continue, message = handler.handle_message(context, message, pipeline=self, task_state=task_state)
-                handled = True
-
-                if not should_continue:
-                    break
-
-        return handled
-
-    async def handle_message_async(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], task_state: Any=None) -> bool:
-        handled = False
-
-        for handler in self._handlers:
-            if handler.can_handle_message(context, message):
-                should_continue, message = await handler.handle_message_async(context, message, pipeline=self, task_state=task_state)
+                should_continue, message = await handler.handle_message(context, message, pipeline=self, task_state=task_state)
                 handled = True
 
                 if not should_continue:

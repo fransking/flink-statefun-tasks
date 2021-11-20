@@ -15,10 +15,7 @@ class TaskActionHandler(MessageHandler):
 
         return False
 
-    async def handle_message_async(self, tasks: 'FlinkTasks', context: TaskContext, action_request):
-        return self.handle_message(tasks, context, action_request)
-
-    def handle_message(self, tasks: 'FlinkTasks', context: TaskContext, action_request):
+    async def handle_message(self, tasks: 'FlinkTasks', context: TaskContext, action_request):
         try:
             
             result = self._handle(context, tasks, action_request)

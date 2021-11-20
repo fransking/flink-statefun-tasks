@@ -13,7 +13,7 @@ class EndPipelineHandler(PipelineMessageHandler):
             and context.pipeline_state.status.value in [TaskStatus.COMPLETED, TaskStatus.FAILED, TaskStatus.CANCELLED] \
                 and isinstance(message, (TaskResult, TaskException))
 
-    def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline, **kwargs):
+    async def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline, **kwargs):
         task_result_or_exception = message
                 
         task_request = context.unpack('task_request', TaskRequest) or TaskRequest()
@@ -38,6 +38,3 @@ class EndPipelineHandler(PipelineMessageHandler):
         
         # break
         return False, message
-
-    async def handle_message_async(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline: '_Pipeline', **kwargs):
-        return self.handle_message(context, message, pipeline)

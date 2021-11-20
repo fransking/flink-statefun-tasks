@@ -191,21 +191,7 @@ class FlinkTasks(object):
         else:
             raise RuntimeError(f'{task_type} is not a registered FlinkTask')
 
-    def is_async_required(self, message: Union[TaskRequest, TaskResult, TaskException, TaskActionRequest, ChildPipeline]):
-        """
-        Checks if a task input requires async or not.  
-        TaskRequests can either be sync or async while TaskResults and TaskException are always handled async by the pipeline
-
-        :param message: the task input protobuf message
-        :return: true if the task task input requires async else false
-        """
-
-        try:
-            return isinstance(message, (TaskResult, TaskException)) or (isinstance(message, TaskRequest) and self.get_task(message.type).is_async)
-        except:
-            return False
-
-    async def run_async(self, context: BatchContext, message: Union[TaskRequest, TaskResult, TaskException, TaskActionRequest, ChildPipeline]):
+    async def run(self, context: BatchContext, message: Union[TaskRequest, TaskResult, TaskException, TaskActionRequest, ChildPipeline]):
         """
         Runs an async Flink Task
 
@@ -220,10 +206,7 @@ class FlinkTasks(object):
                     try:
                         _log.info(f'Starting {task_context}')
 
-                        if self.is_async_required(message):
-                            await handler.handle_message_async(self, task_context, message)
-                        else:
-                            handler.handle_message(self, task_context, message)
+                        await handler.handle_message(self, task_context, message)
 
                         _log.info(f'Finished {task_context}')
 
@@ -232,36 +215,6 @@ class FlinkTasks(object):
                         self.fail(task_context, message, ex)
                         
                     finally:
-                        return
-            
-            _log.error(f'Unsupported message type {message.typed_value.typename}')
-
-
-    def run(self, context: BatchContext, message: Union[TaskRequest, TaskResult, TaskException, TaskActionRequest, ChildPipeline]):
-        """
-        Runs a Flink Task
-
-        :param context: context object provided by Flink
-        :param message: the task input protobuf message
-        """
-        with TaskContext(context, self._egress_type_name, self._serialiser) as task_context:
-            
-            for handler in self._handlers:
-                if handler.can_handle(task_context, message):
-                    
-                    try:
-                        _log.info(f'Starting {task_context}')
-
-                        handler.handle_message(self, task_context, message)
-
-                        _log.info(f'Finished {task_context}')
-                        
-                    except Exception as ex:
-                        _log.error(f'Error invoking {task_context} - {ex}')
-                        self.fail(task_context, message, ex)
-                        
-                    finally:
-                        
                         return
             
             _log.error(f'Unsupported message type {message.typed_value.typename}')

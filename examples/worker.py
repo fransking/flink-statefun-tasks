@@ -23,11 +23,7 @@ functions = StatefulFunctions()
 @functions.bind("example/worker")
 def worker(context, task_input: Union[TaskRequest, TaskResult, TaskException, TaskActionRequest, ChildPipeline]):
     try:
-        if tasks.is_async_required(task_input):
-            loop = asyncio.get_event_loop()
-            loop.run_until_complete(tasks.run_async(context, task_input))
-        else:
-            tasks.run(context, task_input)
+        asyncio.run(tasks.run(context, task_input))
     except Exception as e:
         print(f'Error - {e}')
         traceback.print_exc()
