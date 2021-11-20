@@ -1,3 +1,4 @@
+from os import pipe
 from statefun_tasks.context import TaskContext
 from statefun_tasks.pipeline_impl.handlers import PipelineMessageHandler
 from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, TaskStatus, PipelineState, ChildPipeline, TaskInfo
@@ -57,6 +58,9 @@ class BeginPipelineHandler(PipelineMessageHandler):
 
         # 4. break
         return False, message
+
+    async def handle_message_async(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline: '_Pipeline', task_state: Any):
+        return self.handle_message(context, message, pipeline, task_state)
 
     def _notify_pipeline_created(self, context):
         # if this pipeline is the already root do nothing as it's not a child

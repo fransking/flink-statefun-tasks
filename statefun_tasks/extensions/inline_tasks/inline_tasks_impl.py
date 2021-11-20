@@ -16,7 +16,7 @@ def enable_inline_tasks(tasks: FlinkTasks):
 
     N.B. there are security considerations whenever using pickled code.  Only accept code from 
     trusted sources and consider implementing your own implementation of this extension with suitable
-    checks - e.g. you might want to only accept signed code or restrict what what global functions and 
+    checks - e.g. you might want to only accept signed code or restrict what global functions and 
     imports are available.  This extension is included as an example of what is possible.
 
     :param tasks: FlinkTasks to enable @inline_task() for

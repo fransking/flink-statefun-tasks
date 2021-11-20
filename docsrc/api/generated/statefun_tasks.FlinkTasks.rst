@@ -15,6 +15,7 @@ FlinkTasks
       ~FlinkTasks.__init__
       ~FlinkTasks.bind
       ~FlinkTasks.emit_result
+      ~FlinkTasks.extend
       ~FlinkTasks.fail
       ~FlinkTasks.get_pipeline
       ~FlinkTasks.get_task
@@ -24,6 +25,7 @@ FlinkTasks
       ~FlinkTasks.run
       ~FlinkTasks.run_async
       ~FlinkTasks.send
+      ~FlinkTasks.set_storage_backend
       ~FlinkTasks.try_get_pipeline
       ~FlinkTasks.value_specs
    

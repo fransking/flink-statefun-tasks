@@ -1,8 +1,10 @@
+from google.protobuf import message
 from statefun_tasks.context import TaskContext
 from statefun_tasks.pipeline_impl.handlers import PipelineMessageHandler
-from statefun_tasks.types import Task, Group
+from statefun_tasks.types import Task, Group, TasksException
 from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, TaskStatus
 from typing import Union
+import asyncio
 
 
 class ContinuePipelineHandler(PipelineMessageHandler):
@@ -14,7 +16,11 @@ class ContinuePipelineHandler(PipelineMessageHandler):
             and context.pipeline_state.status.value in [TaskStatus.RUNNING, TaskStatus.PAUSED] \
                 and isinstance(message, (TaskResult, TaskException))
 
-    def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline, **kwargs):
+    def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline: '_Pipeline', **kwargs):
+        # this is annoying but goes away in versions >= 0.9 as the underlying Flink RequestReplyHandler is already always async
+        raise TasksException('Pipeline continuations must be run async. See tasks.is_async_required(TaskResult | TaskException)')
+
+    async def handle_message_async(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline: '_Pipeline', **kwargs):
         task_result_or_exception = message
         caller_id = context.get_caller_id()
 
@@ -32,11 +38,11 @@ class ContinuePipelineHandler(PipelineMessageHandler):
 
         # if this task is part group then we need to record the results so we can aggregate later
         if group is not None:
-            self.result_aggregator.add_result(context, caller_id, task_result_or_exception)
+            await self.result_aggregator.add_result(context, group, caller_id, task_result_or_exception)
 
             # once the group is complete aggregate the results
             if group.is_complete():
-                task_result_or_exception = self.result_aggregator.aggregate(context, group)
+                task_result_or_exception = await self.result_aggregator.aggregate(context, group)
 
                 # pause the pipeline if this completed group is a wait
                 if group.is_wait:
@@ -90,3 +96,4 @@ class ContinuePipelineHandler(PipelineMessageHandler):
 
         # continue
         return True, task_result_or_exception
+    

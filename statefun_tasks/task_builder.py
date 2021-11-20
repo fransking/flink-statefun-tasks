@@ -1,3 +1,4 @@
+from statefun_tasks.storage import StorageBackend
 from statefun_tasks.serialisation import DefaultSerialiser
 from statefun_tasks.pipeline_builder import PipelineBuilder
 
@@ -42,6 +43,7 @@ class FlinkTasks(object):
         self._serialiser = serialiser if serialiser is not None else DefaultSerialiser()
         self._bindings = {}
         self._events = EventHandlers()
+        self._storage = None
 
         self.register_builtin('run_pipeline', _run_pipeline)
 
@@ -137,6 +139,15 @@ class FlinkTasks(object):
         """
         return self._events
 
+    def set_storage_backend(self, storage: StorageBackend):
+        """
+        Sets the storage backend to use if required. The default is to use Flink state exclusively but temporary results from large parallelisms 
+        may cause memory issues in which case they can be saved outside in e.g. an S3 bucket or Redis
+
+        :param storage: results storage backend to use
+        """
+        self._storage = storage
+
     def value_specs(self):
         return self._value_specs
 
@@ -182,14 +193,15 @@ class FlinkTasks(object):
 
     def is_async_required(self, message: Union[TaskRequest, TaskResult, TaskException, TaskActionRequest, ChildPipeline]):
         """
-        Checks if a task is declared as async or not
+        Checks if a task input requires async or not.  
+        TaskRequests can either be sync or async while TaskResults and TaskException are always handled async by the pipeline
 
         :param message: the task input protobuf message
-        :return: true if the task being called is declared as async otherwise false
+        :return: true if the task task input requires async else false
         """
 
         try:
-            return isinstance(message, TaskRequest) and self.get_task(message.type).is_async
+            return isinstance(message, (TaskResult, TaskException)) or (isinstance(message, TaskRequest) and self.get_task(message.type).is_async)
         except:
             return False
 
@@ -275,7 +287,7 @@ class FlinkTasks(object):
         pipeline_protos = context.pipeline_state.pipeline
 
         if pipeline_protos is not None:
-            return _Pipeline.from_proto(pipeline_protos, self._serialiser, self._events)
+            return _Pipeline.from_proto(pipeline_protos, self._serialiser, self._events, self._storage)
         else:
             raise ValueError(f'Missing pipeline for task_id - {context.get_task_id()}')
 
