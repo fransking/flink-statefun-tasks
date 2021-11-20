@@ -24,4 +24,4 @@ class TaskResponseHandler(MessageHandler):
 
     async def handle_message(self, tasks: 'FlinkTasks', context: TaskContext, task_result_or_exception):
         pipeline = tasks.get_pipeline(context)
-        pipeline.handle_message(context, task_result_or_exception)
+        await pipeline.handle_message(context, task_result_or_exception)

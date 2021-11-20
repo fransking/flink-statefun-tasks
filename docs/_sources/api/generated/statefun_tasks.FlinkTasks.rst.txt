@@ -23,6 +23,7 @@ FlinkTasks
       ~FlinkTasks.register_builtin
       ~FlinkTasks.run_async
       ~FlinkTasks.send
+      ~FlinkTasks.set_storage_backend
       ~FlinkTasks.try_get_pipeline
       ~FlinkTasks.value_specs
    

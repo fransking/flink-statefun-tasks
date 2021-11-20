@@ -1,6 +1,7 @@
 from statefun_tasks.context import TaskContext
 from statefun_tasks.messages_pb2 import ChildPipeline, TaskRequest, TaskResult, TaskException, Pipeline, TaskActionRequest, TaskAction, TaskStatus
 from statefun_tasks.serialisation import DefaultSerialiser
+from statefun_tasks.storage import StorageBackend
 from statefun_tasks.types import Task, Group, TaskCancelledException
 from statefun_tasks.type_helpers import _create_task_exception
 from statefun_tasks.pipeline_impl.handlers import BeginPipelineHandler, ContinuePipelineHandler, EndPipelineHandler, CancelPipelineHandler
@@ -11,17 +12,18 @@ from typing import Union
 
 
 class _Pipeline(object):
-    def __init__(self, pipeline: list, serialiser=None, is_fruitful=True, events: EventHandlers=None):
+    def __init__(self, pipeline: list, serialiser=None, is_fruitful=True, events: EventHandlers=None, storage: StorageBackend=None):
         self._pipeline = pipeline
         self._serialiser = serialiser or DefaultSerialiser()
         self._is_fruitful = is_fruitful
         self._events = events or EventHandlers()
+        self._storage = storage
 
         self._handlers = [
-            BeginPipelineHandler(self._pipeline, self._serialiser),
-            ContinuePipelineHandler(self._pipeline, self._serialiser),
-            CancelPipelineHandler(self._pipeline, self._serialiser),
-            EndPipelineHandler(self._pipeline, self._serialiser)
+            BeginPipelineHandler(self._pipeline, self._serialiser, self._storage),
+            ContinuePipelineHandler(self._pipeline, self._serialiser, self._storage),
+            CancelPipelineHandler(self._pipeline, self._serialiser, self._storage),
+            EndPipelineHandler(self._pipeline, self._serialiser, self._storage)
         ]
 
         self._graph = PipelineGraph(self._pipeline)
@@ -43,7 +45,7 @@ class _Pipeline(object):
         return pipeline
 
     @staticmethod
-    def from_proto(pipeline_proto: Pipeline, serialiser, events):
+    def from_proto(pipeline_proto: Pipeline, serialiser, events, storage):
         pipeline = []
 
         for proto in pipeline_proto.entries:
@@ -52,14 +54,14 @@ class _Pipeline(object):
             elif proto.HasField('group_entry'):
                 pipeline.append(Group.from_proto(proto))
 
-        return _Pipeline(pipeline, serialiser=serialiser, events=events)
+        return _Pipeline(pipeline, serialiser=serialiser, events=events, storage=storage)
 
-    def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], task_state: Any=None) -> bool:
+    async def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], task_state: Any=None) -> bool:
         handled = False
 
         for handler in self._handlers:
             if handler.can_handle_message(context, message):
-                should_continue, message = handler.handle_message(context, message, pipeline=self, task_state=task_state)
+                should_continue, message = await handler.handle_message(context, message, pipeline=self, task_state=task_state)
                 handled = True
 
                 if not should_continue:
