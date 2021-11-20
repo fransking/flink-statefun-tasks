@@ -18,13 +18,13 @@ class TaskActionHandler(MessageHandler):
     async def handle_message(self, tasks: 'FlinkTasks', context: TaskContext, action_request):
         try:
             
-            result = self._handle(context, tasks, action_request)
+            result = await self._handle(context, tasks, action_request)
             tasks.emit_result(context, action_request, _create_task_result(action_request, result))
 
         except Exception as ex:
             tasks.emit_result(context, action_request, _create_task_exception(action_request, ex))
 
-    def _handle(self, context, tasks, action_request):
+    async def _handle(self, context, tasks, action_request):
 
         if action_request.action == TaskAction.GET_STATUS:
             return self._get_task_status(context, tasks)
@@ -36,13 +36,13 @@ class TaskActionHandler(MessageHandler):
             return self._get_task_result(context)
 
         elif action_request.action == TaskAction.PAUSE_PIPELINE:
-            return self._pause_pipeline(context, tasks)
+            return await self._pause_pipeline(context, tasks)
 
         elif action_request.action == TaskAction.UNPAUSE_PIPELINE:
-            return self._unpause_pipeline(context, tasks)
+            return await self._unpause_pipeline(context, tasks)
 
         elif action_request.action == TaskAction.CANCEL_PIPELINE:
-            return self._cancel_pipeline(context, tasks)
+            return await self._cancel_pipeline(context, tasks)
 
         else:    
             raise ValueError(f'Unsupported task action {TaskAction.Name(action_request.action)}')
@@ -81,26 +81,26 @@ class TaskActionHandler(MessageHandler):
 
         raise ValueError(f'Task result not found')
 
-    def _pause_pipeline(self, context, tasks):
+    async def _pause_pipeline(self, context, tasks):
         pipeline = tasks.try_get_pipeline(context)
 
         if pipeline is None:
             raise ValueError('Task is not a pipeline')
        
-        pipeline.pause(context)
+        await pipeline.pause(context)
 
-    def _unpause_pipeline(self, context, tasks):
+    async def _unpause_pipeline(self, context, tasks):
         pipeline = tasks.try_get_pipeline(context)
 
         if pipeline is None:
             raise ValueError('Task is not a pipeline')
        
-        pipeline.unpause(context)
+        await pipeline.unpause(context)
 
-    def _cancel_pipeline(self, context, tasks):
+    async def _cancel_pipeline(self, context, tasks):
         pipeline = tasks.try_get_pipeline(context)
 
         if pipeline is None:
             raise ValueError('Task is not a pipeline')
        
-        pipeline.cancel(context)
+        await pipeline.cancel(context)

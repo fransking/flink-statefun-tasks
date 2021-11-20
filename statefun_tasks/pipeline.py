@@ -90,7 +90,7 @@ class _Pipeline(object):
     def status(self, context: TaskContext):
         return context.pipeline_state.status
 
-    def pause(self, context: TaskContext):
+    async def pause(self, context: TaskContext):
         if context.pipeline_state.status.value not in [TaskStatus.PENDING, TaskStatus.RUNNING, TaskStatus.PAUSED]:
             raise ValueError(f'Pipeline is not in a state that can be paused')
 
@@ -102,21 +102,26 @@ class _Pipeline(object):
             pause_action = TaskActionRequest(id=child_pipeline.id, action=TaskAction.PAUSE_PIPELINE)
             context.pack_and_send(child_pipeline.address, pause_action.id, pause_action)
 
-    def unpause(self, context: TaskContext):
+    async def unpause(self, context: TaskContext):
         if context.pipeline_state.status.value not in [TaskStatus.PENDING, TaskStatus.RUNNING, TaskStatus.PAUSED]:
             raise ValueError(f'Pipeline is not in a state that can be unpaused')
         
         context.pipeline_state.status.value = TaskStatus.Status.RUNNING
         self.events.notify_pipeline_status_changed(context, context.pipeline_state.pipeline, context.pipeline_state.status.value)
 
-        self._submitter.unpause_tasks(context)
+        try:
+            await self._submitter.unpause_tasks(context)
 
-        # tell any child pipelines to resume
-        for child_pipeline in context.pipeline_state.child_pipelines:
-            pause_action = TaskActionRequest(id=child_pipeline.id, action=TaskAction.UNPAUSE_PIPELINE)
-            context.pack_and_send(child_pipeline.address, pause_action.id, pause_action)
+            # tell any child pipelines to resume
+            for child_pipeline in context.pipeline_state.child_pipelines:
+                pause_action = TaskActionRequest(id=child_pipeline.id, action=TaskAction.UNPAUSE_PIPELINE)
+                context.pack_and_send(child_pipeline.address, pause_action.id, pause_action)
+        
+        except Exception as ex:
+            # abort the pipeline if we could not resume the tasks
+            await self.cancel(context, ex)
 
-    def cancel(self, context: TaskContext):
+    async def cancel(self, context: TaskContext, ex=None):
         if context.pipeline_state.status.value not in [TaskStatus.PENDING, TaskStatus.RUNNING, TaskStatus.PAUSED]:
             raise ValueError(f'Pipeline is not in a state that can be cancelled')
 
@@ -130,7 +135,8 @@ class _Pipeline(object):
 
         # construct the cancellation exception to send to caller of this pipeline
         task_request = context.unpack('task_request', TaskRequest) or TaskRequest()
-        cancellation_ex = _create_task_exception(task_request, TaskCancelledException('Pipeline was cancelled'), context.pipeline_state.last_task_state)
+        ex = ex or TaskCancelledException('Pipeline was cancelled')
+        cancellation_ex = _create_task_exception(task_request, ex, context.pipeline_state.last_task_state)
 
         # we move from cancelling to cancelled either by submitting and/or waiting on the finally task...
         finally_task = self._graph.try_get_finally_task(context.get_caller_id())
@@ -139,7 +145,7 @@ class _Pipeline(object):
             if self.get_result_before_finally(context) is None:
 
                 # then we still need to submit the finally task
-                self._submitter.submit_tasks(context, [finally_task], cancellation_ex)
+                await self._submitter.submit_tasks(context, [finally_task], cancellation_ex)
 
             # set result before finally to our task cancellation exception
             self.save_result_before_finally(context, cancellation_ex)

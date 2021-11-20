@@ -68,4 +68,4 @@ class S3StorageBackend(StorageBackend):
         deletes = [asyncio.ensure_future(self._client.delete_object(Bucket=self._bucket, Key=key)) for key in keys_to_delete]
 
         if any(deletes):
-            await asyncio.gather(**deletes, return_exceptions=True)
+            await asyncio.gather(*deletes, return_exceptions=True)
