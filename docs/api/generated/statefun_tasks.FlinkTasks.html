@@ -210,31 +210,37 @@ to be exposed as tasks.</p>
 <td><p>Initialize self.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.bind" title="statefun_tasks.FlinkTasks.bind"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bind</span></code></a>([namespace, worker_name, retry_policy, …])</p></td>
-<td><p>Binds a function as a Flink Task</p></td>
+<td><p>Decorator to bind a function as a Flink Task</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">emit_result</span></code>(context, task_input, task_result)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fail</span></code>(context, task_input, ex)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.extend" title="statefun_tasks.FlinkTasks.extend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extend</span></code></a>(function[, retry_policy])</p></td>
+<td><p>Adds the extensions to make a function unsable by a PipelineBuilder -&gt; fn.send(), fn.to_task() and fn.defaults()</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fail</span></code>(context, task_input, ex)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_pipeline</span></code>(context)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_pipeline</span></code>(context)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.get_task" title="statefun_tasks.FlinkTasks.get_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_task</span></code></a>(task_type)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.get_task" title="statefun_tasks.FlinkTasks.get_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_task</span></code></a>(task_type)</p></td>
 <td><p>Returns the Flink Task instance for a given task type name</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.register" title="statefun_tasks.FlinkTasks.register"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register</span></code></a>(fun[, wrapper, module_name])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.register" title="statefun_tasks.FlinkTasks.register"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register</span></code></a>(fun[, wrapper, module_name])</p></td>
 <td><p>Registers a Python function as a Flink Task.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.register_builtin" title="statefun_tasks.FlinkTasks.register_builtin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_builtin</span></code></a>(type_name, fun, **params)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.register_builtin" title="statefun_tasks.FlinkTasks.register_builtin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_builtin</span></code></a>(type_name, fun, **params)</p></td>
 <td><p>Registers a built in Flink Task e.g.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.run_async" title="statefun_tasks.FlinkTasks.run_async"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_async</span></code></a>(context, message)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.run_async" title="statefun_tasks.FlinkTasks.run_async"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_async</span></code></a>(context, message)</p></td>
 <td><p>Runs an async Flink Task</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.send" title="statefun_tasks.FlinkTasks.send"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send</span></code></a>(func, *args, **kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.send" title="statefun_tasks.FlinkTasks.send"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send</span></code></a>(func, *args, **kwargs)</p></td>
 <td><p>Returns a PipelineBuilder with this task as the first item in the pipeline</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.set_storage_backend" title="statefun_tasks.FlinkTasks.set_storage_backend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_storage_backend</span></code></a>(storage)</p></td>
+<td><p>Sets the storage backend to use if required.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">try_get_pipeline</span></code>(context)</p></td>
 <td><p></p></td>
@@ -262,7 +268,7 @@ to be exposed as tasks.</p>
 <dl class="py method">
 <dt id="statefun_tasks.FlinkTasks.bind">
 <code class="sig-name descname"><span class="pre">bind</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">worker_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retry_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_fruitful</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.bind" title="Permalink to this definition">¶</a></dt>
-<dd><p>Binds a function as a Flink Task</p>
+<dd><p>Decorator to bind a function as a Flink Task</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -287,6 +293,21 @@ otherwise the Python module containing the function will be used</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">EventHandlers</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.FlinkTasks.extend">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">extend</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retry_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.extend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds the extensions to make a function unsable by a PipelineBuilder -&gt; fn.send(), fn.to_task() and fn.defaults()</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>function</strong> – the function to wrap</p></li>
+<li><p><strong>retry_policy</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">RetryPolicy</span></code>]) – retry policy to use should the task throw an exception</p></li>
+<li><p><strong>params</strong> – any additional parameters to the Flink Task (such as a retry policy)</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -335,7 +356,7 @@ This should only be used if you want to provide your own built in (pre-defined) 
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>type_name</strong> – task type to expose the built in as</p></li>
 <li><p><strong>fun</strong> – a function, partial or lambda representing the built in</p></li>
-<li><p><strong>params</strong> – any additional parameters to the built in</p></li>
+<li><p><strong>params</strong> – any additional parameters to the Flink Task (such as a retry policy)</p></li>
 </ul>
 </dd>
 </dl>
@@ -372,6 +393,18 @@ This should only be used if you want to provide your own built in (pre-defined) 
 </dd>
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>a pipeline builder</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.FlinkTasks.set_storage_backend">
+<code class="sig-name descname"><span class="pre">set_storage_backend</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">storage</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.set_storage_backend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the storage backend to use if required. The default is to use Flink state exclusively but temporary results from large parallelisms
+may cause memory issues in which case they can be saved outside in e.g. an S3 bucket or Redis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>storage</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">StorageBackend</span></code>) – results storage backend to use</p>
 </dd>
 </dl>
 </dd></dl>

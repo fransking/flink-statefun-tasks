@@ -141,5 +141,10 @@ class SimplePipelineTests(unittest.TestCase):
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, 'test pipeline')
 
+    def test_pipeline_with_conditional_continuation(self):
+        pipeline = tasks.send(_say_hello, 'Jane', 'Doe').continue_if(False, _say_goodbye, goodbye_message="see you later!")
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, 'Hello Jane Doe')
+
 if __name__ == '__main__':
     unittest.main()

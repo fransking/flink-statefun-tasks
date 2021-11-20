@@ -67,7 +67,12 @@ class TestHarness:
         target.type = initial_target_type
         target.id = task_request.id
 
-        return self._run_flink_loop(task_request, target)
+        result = self._run_flink_loop(task_request, target)
+
+        if isinstance(result, TaskErrorException):
+            raise result
+
+        return result
 
 
     def run_action(self, pipeline: PipelineBuilder, action: TaskAction, initial_target_type='worker'):
@@ -78,7 +83,12 @@ class TestHarness:
         target.type = initial_target_type
         target.id = pipeline.id
 
-        return self._run_flink_loop(task_action, target)
+        result = self._run_flink_loop(task_action, target)
+
+        if isinstance(result, TaskErrorException):
+            raise result
+
+        return result
 
     def _update_state(self, namespace, target_type, target_id, state_mutations):
         item_id = (namespace, target_type, target_id)
@@ -122,13 +132,14 @@ class TestHarness:
         if isinstance(result_proto, TaskResult):
             result, _ = test_harness_serialiser.deserialise_result(result_proto)
             return result
+        elif isinstance(result_proto, TaskException):
+            return TaskErrorException(TaskError(result_proto))
+        elif isinstance(result_proto, TaskActionException):
+            return TaskErrorException(TaskError(result_proto))
         elif isinstance(result_proto, TaskActionResult):
             return result_proto
-        else:
-            raise TaskErrorException(TaskError(result_proto))
-
-
-    def _run_flink_loop(self, message_arg, target: Address, caller=None):
+            
+    def _run_flink_loop(self, message_arg, target: Address, caller=None, egress_result=None):
         to_function = ToFunction()
         update_address(to_function.invocation.target, target.namespace, target.type, target.id)
         invocation = to_function.invocation.invocations.add()
@@ -143,17 +154,21 @@ class TestHarness:
 
         self._copy_state_to_invocation(target.namespace, target.type, target.id, to_function)
         result_bytes = asyncio.get_event_loop().run_until_complete(handler.handle_async(to_function.SerializeToString()))
-
         result = self._process_result(to_function, result_bytes)
-        if result.egress_message is not None:
-            return result.egress_message
-        else:
-            outgoing_messages = result.outgoing_messages
-            for outgoing_message in outgoing_messages:
-                egress_value = self._run_flink_loop(message_arg=outgoing_message.argument, target=outgoing_message.target,
-                                                    caller=target)
-                if egress_value:
-                    return egress_value
+
+        # remember first egress result
+        if result.egress_message is not None and egress_result is None:
+            egress_result = result.egress_message
+
+        # recurse while we have outgoing messages
+        outgoing_messages = result.outgoing_messages
+        for outgoing_message in outgoing_messages:
+            egress_value = self._run_flink_loop(message_arg=outgoing_message.argument, target=outgoing_message.target,
+                                                caller=target, egress_result=egress_result)
+            if egress_value:
+                return egress_value
+
+        return egress_result
 
     def _process_result(self, to_function: ToFunction, result_bytes) -> _InvocationResult:
         result = self._parse_result_bytes(result_bytes)

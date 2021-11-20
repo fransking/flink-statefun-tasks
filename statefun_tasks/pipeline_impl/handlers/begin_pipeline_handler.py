@@ -15,7 +15,7 @@ class BeginPipelineHandler(PipelineMessageHandler):
             and isinstance(message, TaskRequest) \
                 and not self.graph.is_empty()
 
-    def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline: '_Pipeline', task_state):
+    async def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline: '_Pipeline', task_state):
         invoking_task = message  # type: TaskRequest
 
         # ensure we pick up the correct caller id when task producing this pipeline is a retry
@@ -53,7 +53,7 @@ class BeginPipelineHandler(PipelineMessageHandler):
                 task.request = self._serialiser.serialise_args_and_kwargs(([]), {})
 
         # 3. split into tasks to call now and those to defer if max parallelism is exceeded
-        self.submitter.submit_tasks(context, tasks, max_parallelism=max_parallelism)
+        await self.submitter.submit_tasks(context, tasks, max_parallelism=max_parallelism)
 
         # 4. break
         return False, message

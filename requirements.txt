@@ -8,3 +8,5 @@ sphinx_autodoc_typehints
 sphinx_rtd_theme
 twine
 keyrings.alt
+cloudpickle
+aiobotocore

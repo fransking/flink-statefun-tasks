@@ -15,6 +15,7 @@ PipelineBuilder
       ~PipelineBuilder.__init__
       ~PipelineBuilder.append_group
       ~PipelineBuilder.append_to
+      ~PipelineBuilder.continue_if
       ~PipelineBuilder.continue_with
       ~PipelineBuilder.finally_do
       ~PipelineBuilder.from_proto

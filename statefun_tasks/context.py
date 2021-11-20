@@ -23,6 +23,8 @@ class TaskContext(object):
         self.storage = context.storage
         self.task_state = self.storage.task_state or TaskState()
         self.pipeline_state = self.storage.pipeline_state
+        self.pipeline_state_size = self.pipeline_state.ByteSize() if self.pipeline_state is not None else 0
+
         self._task_meta = {}
         self._task_name = None
 
