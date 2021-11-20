@@ -1,15 +1,23 @@
 from statefun_tasks.context import TaskContext
 from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TupleOfAny, TaskException, PausedTask, TaskStatus
+from statefun_tasks.storage import StorageBackend
 from statefun_tasks.types import Task
 from statefun_tasks.utils import _gen_id
 from typing import List
+import asyncio
+import logging
+
+
+_log = logging.getLogger('FlinkTasks')
+
 
 class DeferredTaskSubmitter(object):
-    def __init__(self, graph, serialiser):
+    def __init__(self, graph, serialiser, storage: StorageBackend):
         self._graph = graph
         self._serialiser = serialiser
+        self._storage = storage
 
-    def submit_tasks(self, context: TaskContext, tasks: List[Task], task_result_or_exception=None, max_parallelism=None):     
+    async def submit_tasks(self, context: TaskContext, tasks: List[Task], task_result_or_exception=None, max_parallelism=None):     
         # unpack task_result into result + state so we can merge in extras later
         if task_result_or_exception is not None:
             task_result, task_state = self._serialiser.unpack_response(task_result_or_exception)
@@ -32,12 +40,16 @@ class DeferredTaskSubmitter(object):
             for task in tasks_to_call:
                 last_task = self._graph.get_last_task_in_chain(task.task_id)
                 context.pipeline_state.task_deferral_ids_by_task_id[last_task.task_id] = deferral_id
-
+            
+        sent_tasks = []
         for task in tasks_to_call:
             task_request = self._create_task_request(context, task, task.request, task_state, task_result, deferral=None)
-            self._send_task(context, task.get_destination(), task_request)
+            sent_tasks.append(asyncio.ensure_future(self._send_task(context, task.get_destination(), task_request)))
 
-    def release_tasks(self, context, caller_id, task_result_or_exception):
+        if any(sent_tasks):
+            await asyncio.gather(*sent_tasks)
+
+    async def release_tasks(self, context, caller_id, task_result_or_exception):
         if isinstance(task_result_or_exception, TaskException):
             parent_id = self._graph.get_last_task_in_chain(caller_id).id
         else:
@@ -58,17 +70,23 @@ class DeferredTaskSubmitter(object):
                 context.pipeline_state.task_deferral_ids_by_task_id[last_task.id] = deferral_id
 
                 # send the task
-                self._send_task(context, task.get_destination(), task_request)
+                await self._send_task(context, task.get_destination(), task_request)
             else:
                 # clean up
                 del context.pipeline_state.task_deferral_ids_by_task_id[caller_id]
                 del context.pipeline_state.task_deferrals_by_id[deferral_id]
 
-    def unpause_tasks(self, context):
+    async def unpause_tasks(self, context):
         for paused_task in context.pipeline_state.paused_tasks:
-            context.send_message(paused_task.destination, paused_task.task_request.id, paused_task.task_request)
+
+            if paused_task.HasField('task_request'):
+                context.send_message(paused_task.destination, paused_task.task_request.id, paused_task.task_request)
+            else:
+                paused_task = await self._load_from_store(context, paused_task)
+                context.send_message(paused_task.destination, paused_task.task_request.id, paused_task.task_request)
 
         context.pipeline_state.ClearField('paused_tasks')
+        await self._cleanup_storage(context)
 
     def _create_task_deferral(self, context, tasks_to_defer, task_result_or_exception):
         # create task deferral to hold these deferred tasks
@@ -137,12 +155,49 @@ class DeferredTaskSubmitter(object):
         self._serialiser.serialise_request(request, task_request, state=task_state, retry_policy=task.retry_policy)
         return request
 
-    def _send_task(self, context, destination, task_request):
+    async def _send_task(self, context, destination, task_request):
         # if the pipeline is paused we record the tasks to be sent into the pipeline state
         if  context.pipeline_state.status.value == TaskStatus.PAUSED:
-            paused_task = PausedTask(destination=destination, task_request=task_request)
+            
+            saved_to_store = False
+
+            if self._storage is not None and context.pipeline_state_size >= self._storage.threshold:
+                proto = PausedTask(destination=destination, task_request=task_request)
+                saved_to_store = await self._try_save_to_store(context, proto, task_request.id)
+                            
+            if not saved_to_store:
+                paused_task = PausedTask(destination=destination, task_request=task_request)
+            else:
+                paused_task = PausedTask(destination=destination, task_id=task_request.id)
+            
             context.pipeline_state.paused_tasks.append(paused_task)
 
         # else send the tasks to their destinations
         else:
             context.send_message(destination, task_request.id, task_request)
+
+    async def _try_save_to_store(self, context, paused_task, task_id):
+        try:
+            keys = [context.pipeline_state.id, task_id]
+            await self._storage.store(keys, paused_task.SerializeToString())
+            return True
+        except Exception as ex:
+            _log.warning(f'Error saving {keys} to backend storage - {ex}')
+            return False
+
+    async def _load_from_store(self, context, paused_task):
+        keys = [context.pipeline_state.id, paused_task.task_id]
+
+        proto_bytes = await self._storage.fetch(keys)
+        paused_task = PausedTask()
+        paused_task.ParseFromString(proto_bytes)
+        return paused_task
+
+    async def _cleanup_storage(self, context):
+        if self._storage is None:
+            return
+
+        try:
+            await self._storage.delete([context.pipeline_state.id])
+        except Exception as ex:
+            _log.warning(f'Error cleaning up paused tasks for {context.pipeline_state.id} from backend storage - {ex}')

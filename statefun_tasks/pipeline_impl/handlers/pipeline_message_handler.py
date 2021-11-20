@@ -14,7 +14,7 @@ class PipelineMessageHandler(ABC):
         self._serialiser = serialiser
         self._storage = storage
         self._graph = PipelineGraph(pipeline)
-        self._submitter = DeferredTaskSubmitter(self._graph, serialiser)
+        self._submitter = DeferredTaskSubmitter(self._graph, serialiser, storage)
         self._result_aggregator = ResultAggregator(self._graph, serialiser, storage)
         self._result_emitter = ResultEmitter()
 
