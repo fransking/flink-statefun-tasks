@@ -1,3 +1,4 @@
+from typing import OrderedDict
 from statefun_tasks.messages_pb2 import Pipeline
 import unittest
 
@@ -59,6 +60,11 @@ def _say_hello_with_state(initial_state, first_name, last_name):
     return state, f'Hello {first_name} {last_name}'
 
 
+@tasks.bind(with_state=True)
+def _say_hello_with_initial_state(_, first_name, last_name, initial_state):
+    return initial_state, f'Hello {first_name} {last_name}'
+
+
 @tasks.bind()
 def _say_goodbye_with_state(greeting, goodbye_message):
     return f'{greeting}. So now I will say {goodbye_message}'
@@ -67,6 +73,18 @@ def _say_goodbye_with_state(greeting, goodbye_message):
 @tasks.bind(with_state=True)
 def _join_results_with_state(state, results):
     return state, '; '.join(results) + f' {state}'
+
+
+@tasks.bind(with_state=True)
+def _join_results_with_dictionary_state(state, results):
+    keys = sorted(state.keys())
+
+    ordered = OrderedDict()
+    for key in keys:
+        ordered[key] = state[key]
+
+    return state, '; '.join(results) + f' {ordered}'
+
 
 
 @tasks.bind()
@@ -101,6 +119,15 @@ class ParallelWorkflowTests(unittest.TestCase):
         result = self.test_harness.run_pipeline(pipeline)
 
         self.assertEqual(result, 'Hello John Smith; Hello Jane Doe. So now I will say see you later! 9')
+
+    def test_parallel_workflow_with_aggregated_dictionary_state(self):
+        pipeline = in_parallel([
+            _say_hello_with_initial_state.send("Jane", "Doe", {'A': 2 , 'B': 2}).continue_with(_say_goodbye, goodbye_message="see you later!"),
+            _say_hello_with_initial_state.send("John", "Smith", {'A': 1}),
+        ]).continue_with(_join_results_with_dictionary_state)
+        result = self.test_harness.run_pipeline(pipeline)
+
+        self.assertEqual(result, "Hello Jane Doe. So now I will say see you later!; Hello John Smith OrderedDict([('A', 2), ('B', 2)])")
 
 
     def test_nested_parallel_workflow(self):

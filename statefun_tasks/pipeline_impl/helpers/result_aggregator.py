@@ -2,10 +2,10 @@ from statefun_tasks.storage import StorageBackend
 from statefun_tasks.types import Group, _type_name
 from statefun_tasks.context import TaskContext
 from statefun_tasks.protobuf import pack_any
-from statefun_tasks.messages_pb2 import TaskResults, TaskResult, TaskException
+from statefun_tasks.messages_pb2 import TaskResults, TaskResult, TaskException, MapOfStringToAny
 from google.protobuf.wrappers_pb2 import StringValue
 from google.protobuf.any_pb2 import Any
-from collections import ChainMap, deque
+from collections import deque
 import traceback as tb
 import logging
 
@@ -81,10 +81,14 @@ class ResultAggregator(object):
             return task_exception
             
         else:
-
-            # if the group tasks all return dictionaries then attempt to flatten the state into a single dictionary
-            if all([isinstance(state, dict) for state in aggregated_states]):
-                aggregated_state = dict(ChainMap(*aggregated_states))
+            # if the group tasks all return maps then attempt to flatten the state into a single map
+            # symantically equivalent to aggregated_state = dict(ChainMap(*aggregated_states)) if we were using python dicts
+            if all([isinstance(state, MapOfStringToAny) for state in aggregated_states]):
+                aggregated_state = MapOfStringToAny()
+                for key, value in aggregated_states:
+                    if key not in aggregated_state.items:
+                        aggregated_state.items[key] = value
+    
             else: 
                 # otherwise return state of the first task in group as we only support state mutation in groups if the state is a mergable dictionary
                 aggregated_state = aggregated_states[0]
@@ -142,7 +146,7 @@ class ResultAggregator(object):
 
         # now split into result, state and error tuple
         if isinstance(unpacked, TaskResult):
-            result, state = self._serialiser.deserialise_result(unpacked)
+            result, state = unpacked.result, unpacked.state
         elif isinstance(unpacked, TaskException):
             error = unpacked
 
