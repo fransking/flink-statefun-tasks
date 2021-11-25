@@ -128,6 +128,15 @@ class TaskContext(object):
         """
         return None if self._context.caller.id == "" else self._context.caller.id
 
+    def set_state(self, obj):
+        self.task_state.internal_state.CopyFrom(pack_any(self._serialiser.to_proto(obj)))
+
+    def get_state(self, default=None):
+        if self.task_state.HasField('internal_state'):
+            return self._serialiser.from_proto(self.task_state.internal_state, default)
+        
+        return default
+
     @staticmethod
     def to_address_and_id(address: SdkAddress):
         """
