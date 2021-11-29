@@ -23,10 +23,12 @@ TaskContext
       ~TaskContext.get_pipeline_id
       ~TaskContext.get_root_pipeline_address
       ~TaskContext.get_root_pipeline_id
+      ~TaskContext.get_state
       ~TaskContext.get_task_id
       ~TaskContext.send_egress_message
       ~TaskContext.send_message
       ~TaskContext.send_message_after
+      ~TaskContext.set_state
       ~TaskContext.to_address_and_id
    
     
