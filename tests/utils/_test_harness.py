@@ -165,6 +165,14 @@ class TestHarness:
 
         egress_message = self._try_extract_egress(invocation_result)
         outgoing_messages = invocation_result.outgoing_messages
+
+        for message in invocation_result.delayed_invocations:
+            outgoing = outgoing_messages.add()
+            outgoing.target.namespace = message.target.namespace
+            outgoing.target.type = message.target.type
+            outgoing.target.id = message.target.id
+            outgoing.argument.CopyFrom(message.argument)
+
         return _InvocationResult(egress_message, outgoing_messages)
 
     @staticmethod
