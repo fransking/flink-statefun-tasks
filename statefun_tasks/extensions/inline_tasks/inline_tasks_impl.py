@@ -103,7 +103,8 @@ def inline_task(include=None, with_context=False, with_state=False, **params):
                 pass
 
             fn_kwargs = {**kwargs, '__with_context': with_context, '__with_state': with_state, '__code': code}
-            return FlinkTasks.extend(run_code, **__defaults).send(*args, **fn_kwargs).set(display_name=fn.__name__)
+            display_name = params.setdefault(f'{fn.__module__}.{fn.__name__}')
+            return FlinkTasks.extend(run_code, **__defaults).send(*args, **fn_kwargs).set(display_name=display_name)
 
         def to_task(args, kwargs, is_finally=False, parameters=None):
 
@@ -116,6 +117,7 @@ def inline_task(include=None, with_context=False, with_state=False, **params):
                 pass
 
             fn_kwargs = {**kwargs, '__with_context': with_context, '__with_state': with_state, '__code': code}
+            params.setdefault(f'{fn.__module__}.{fn.__name__}')
             return FlinkTasks.extend(run_code, **__defaults).to_task(args, fn_kwargs, is_finally, params)
 
         fn.send = send
