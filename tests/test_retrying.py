@@ -1,3 +1,4 @@
+from datetime import timedelta
 import unittest
 
 from statefun_tasks import RetryPolicy
@@ -67,7 +68,7 @@ class RetryTests(unittest.TestCase):
             self.fail('Expected an exception')
 
     def test_failing_pipeline_with_retry_policy_override(self):
-        pipeline = tasks.send(_fail, 4).set(retry_policy=RetryPolicy(retry_for=[Exception], max_retries=4))
+        pipeline = tasks.send(_fail, 4).set(retry_policy=RetryPolicy(retry_for=[Exception], max_retries=4, delay=timedelta(seconds=1)))
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, 'Succeeded after 4 failures')
 
