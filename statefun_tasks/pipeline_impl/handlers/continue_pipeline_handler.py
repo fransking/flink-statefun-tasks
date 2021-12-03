@@ -1,7 +1,7 @@
 from unittest.case import skip
 from statefun_tasks.context import TaskContext
 from statefun_tasks.pipeline_impl.handlers import PipelineMessageHandler
-from statefun_tasks.types import Task, Group
+from statefun_tasks.types import Task, Group, TasksException
 from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, TaskStatus
 from typing import Union
 
@@ -22,8 +22,12 @@ class ContinuePipelineHandler(PipelineMessageHandler):
         # mark pipeline step as complete
         self.graph.mark_task_complete(caller_id, task_result_or_exception)
 
-        # notify event handler
-        pipeline.events.notify_pipeline_task_finished(context, task_result_or_exception)
+        # notify event handler (with option to cancel)
+        try:
+            pipeline.events.notify_pipeline_task_finished(context, task_result_or_exception)
+        except TasksException as ex:
+            await pipeline.cancel(context, ex)
+            return False, task_result_or_exception
 
         # release deferred tasks if they can now run
         await self.submitter.release_tasks(context, caller_id, task_result_or_exception)
