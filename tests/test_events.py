@@ -7,6 +7,7 @@ _started = []
 _finished = []
 _pipelines = []
 _pipeline_tasks_finished = []
+_pipelines_finished = []
 
 
 @tasks.events.on_task_started
@@ -19,7 +20,7 @@ def on_task_finished(context, task_result=None, task_exception=None, is_pipeline
     if task_result is not None:
         _finished.append(task_result.id)
     else:
-        _finished.append(task_result.id)
+        _finished.append(task_exception.id)
 
 
 @tasks.events.on_pipeline_created
@@ -32,7 +33,15 @@ def on_pipeline_task_finished(context, task_result=None, task_exception=None):
     if task_result is not None:
         _pipeline_tasks_finished.append(task_result.id)
     else:
-        _pipeline_tasks_finished.append(task_result.id)
+        _pipeline_tasks_finished.append(task_exception.id)
+
+
+@tasks.events.on_pipeline_finished
+def on_pipeline_finished(context, pipeline, task_result=None, task_exception=None):
+    if task_result is not None:
+        _pipelines_finished.append(context.get_task_id())
+    else:
+        _pipelines_finished.append(context.get_task_id())
 
 
 @tasks.bind()
@@ -72,12 +81,19 @@ class EventsTests(unittest.TestCase):
             self.assertIn(task_id, _finished)
             self.assertIn(task_id, _pipeline_tasks_finished)
 
-
     def test_pipelines_are_created(self):
         pipeline = tasks.send(hello_workflow, 'Jane', 'Doe')
         self.test_harness.run_pipeline(pipeline)
 
         self.assertIn(pipeline.id, _pipelines)
+
+    def test_pipelines_finish(self):
+        pipeline = tasks.send(hello_workflow, 'Jane', 'Doe')
+        self.test_harness.run_pipeline(pipeline)
+
+        self.assertIn(pipeline.id, _pipelines_finished)
+
+
 
 
 if __name__ == '__main__':
