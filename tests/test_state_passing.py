@@ -23,6 +23,15 @@ def state_passing_workflow_with_exception():
         .finally_do(_destroy_workflow_state)
 
 
+@tasks.bind()
+def state_passing_workflow_with_exception_in_parallel():
+    return _create_workflow_state.send(initial_state=456) \
+        .continue_with(_add_two_numbers, 3, 5) \
+        .continue_with(_update_workflow_state) \
+        .continue_with(in_parallel([_raise_exception.send()])) \
+        .finally_do(_destroy_workflow_state)
+
+
 @tasks.bind(with_state=True)
 def _create_workflow_state(state, initial_state):
     return initial_state
@@ -115,6 +124,13 @@ class StatePassingTests(unittest.TestCase):
         pipeline = tasks.send(a_parallel_pipeline)
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual({'Some': 'State'}, result)
+
+    def test_passing_state_through_tasks_in_parallel_that_throws_exception(self):
+        pipeline = tasks.send(state_passing_workflow_with_exception_in_parallel)
+        with self.assertRaises(Exception):
+            self.test_harness.run_pipeline(pipeline)
+
+        self.assertEqual(_final_state, 4560)
 
 
 if __name__ == '__main__':
