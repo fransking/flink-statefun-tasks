@@ -38,21 +38,18 @@ class ResultAggregator(object):
         task_results = context.pipeline_state.task_results  # type: TaskResults
 
         aggregated_results, aggregated_states, aggregated_errors = [], [], []
-        stack = deque([(group, aggregated_results, aggregated_states)])  # FIFO, errors are flat not nested so don't get stacked
+        stack = deque([(group, aggregated_results)])  # FIFO, errors are flat not nested so don't get stacked
 
         while len(stack) > 0:
-            group, results, states = stack.popleft()
+            group, results = stack.popleft()
             
             for pipeline in group:
                 last_entry = pipeline[-1]
 
                 if isinstance(last_entry, Group):
-                    stack_results, stack_states = [], []
-
+                    stack_results = []
                     results.append(stack_results)
-                    states.append(stack_states)
-
-                    stack.append((last_entry, stack_results, stack_states))
+                    stack.append((last_entry, stack_results))
                 else:
                     proto = task_results.by_id[pipeline[-1].task_id]  # Any
                     result, state, error = await self._load_result(group, proto)
@@ -61,42 +58,52 @@ class ResultAggregator(object):
                     del task_results.by_id[pipeline[-1].task_id] 
 
                     results.append(result)
-                    states.append(state)
+                    
+                    aggregated_states.append(state)  # states are flat not nested so don't get stacked
                     aggregated_errors.append(error)  # errors are flat not nested so don't get stacked
 
         # cleanup storage
         await self._cleanup_storage(group)
 
         aggregated_errors = [error for error in aggregated_errors if error is not None]
+        aggregated_state = self._aggregate_state(aggregated_states)
 
         if any(aggregated_errors):
+
+            serialised_state = self._serialiser.to_proto(aggregated_state)
 
             task_exception = TaskException(            
                 id=group.group_id,
                 type=f'__aggregate.error',
                 exception_type='statefun_tasks.AggregatedError',
                 exception_message='|'.join([f'{e.id}, {e.type}, {e.exception_message}' for e in aggregated_errors]),
-                stacktrace='|'.join([f'{e.id}, {e.stacktrace}' for e in aggregated_errors]))
+                stacktrace='|'.join([f'{e.id}, {e.stacktrace}' for e in aggregated_errors]),
+                state=pack_any(serialised_state))
             
             return task_exception
             
         else:
-            # if the group tasks all return maps then attempt to flatten the state into a single map
-            # symantically equivalent to aggregated_state = dict(ChainMap(*aggregated_states)) if we were using python dicts
-            if all([isinstance(state, MapOfStringToAny) for state in aggregated_states]):
-                aggregated_state = MapOfStringToAny()
-                for key, value in aggregated_states:
-                    if key not in aggregated_state.items:
-                        aggregated_state.items[key] = value
-    
-            else: 
-                # otherwise return state of the first task in group as we only support state mutation in groups if the state is a mergable dictionary
-                aggregated_state = aggregated_states[0]
-
+        
             task_result = TaskResult(id=group.group_id)
             self._serialiser.serialise_result(task_result, aggregated_results, aggregated_state)
 
             return task_result
+    
+    @staticmethod
+    def _aggregate_state(aggregated_states):
+        # if the group tasks all return maps then attempt to flatten the state into a single map
+        # symantically equivalent to aggregated_state = dict(ChainMap(*aggregated_states)) if we were using python dicts
+        if all([isinstance(state, MapOfStringToAny) for state in aggregated_states]):
+            aggregated_state = MapOfStringToAny()
+            for key, value in aggregated_states:
+                if key not in aggregated_state.items:
+                    aggregated_state.items[key] = value
+
+        else: 
+            # otherwise return state of the first task in group as we only support state mutation in groups if the state is a mergable dictionary
+            aggregated_state = aggregated_states[0]
+
+        return aggregated_state
     
     async def _save_result(self, group, task_id, proto, task_results, size_of_state):
         saved_to_storage = False
@@ -120,7 +127,7 @@ class ResultAggregator(object):
             return False
 
     async def _load_result(self, group, proto):
-        result, state, error = None, {}, None
+        result, state, error = None, None, None
         unpacked = self._serialiser.from_proto(proto)
  
         if isinstance(unpacked, str):  # load from store
@@ -148,7 +155,7 @@ class ResultAggregator(object):
         if isinstance(unpacked, TaskResult):
             result, state = unpacked.result, unpacked.state
         elif isinstance(unpacked, TaskException):
-            error = unpacked
+            error, state = unpacked, unpacked.state
 
         return result, state, error
 
