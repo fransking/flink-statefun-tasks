@@ -92,6 +92,8 @@ def inline_task(include=None, with_context=False, with_state=False, **params):
 
     def decorator(fn):
 
+        display_name = params.setdefault('display_name', f'{fn.__module__}.{fn.__name__}')
+
         def send(*args, **kwargs):
 
             if __defaults is None:
@@ -103,8 +105,8 @@ def inline_task(include=None, with_context=False, with_state=False, **params):
                 pass
 
             fn_kwargs = {**kwargs, '__with_context': with_context, '__with_state': with_state, '__code': code}
-            display_name = params.setdefault(f'{fn.__module__}.{fn.__name__}')
-            return FlinkTasks.extend(run_code, **__defaults).send(*args, **fn_kwargs).set(display_name=display_name)
+            task_params = {**__defaults, **params}
+            return FlinkTasks.extend(run_code, **task_params).send(*args, **fn_kwargs)
 
         def to_task(args, kwargs, is_finally=False, parameters=None):
 
@@ -117,8 +119,8 @@ def inline_task(include=None, with_context=False, with_state=False, **params):
                 pass
 
             fn_kwargs = {**kwargs, '__with_context': with_context, '__with_state': with_state, '__code': code}
-            params.setdefault(f'{fn.__module__}.{fn.__name__}')
-            return FlinkTasks.extend(run_code, **__defaults).to_task(args, fn_kwargs, is_finally, params)
+            task_params = {**__defaults, **params}
+            return FlinkTasks.extend(run_code, **task_params).to_task(args, fn_kwargs, is_finally, {})
 
         fn.send = send
         fn.to_task = to_task
