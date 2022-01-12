@@ -67,10 +67,11 @@ def enable_inline_tasks(tasks: FlinkTasks):
     _log.warning('Inline tasks enabled. This is a potential security risk')
 
 
-def inline_task(include=None, with_context=False, with_state=False, **params):
+def inline_task(include=None, depends=None, with_context=False, with_state=False, **params):
     """
     Declares an inline Flink task
     :param include: list of modules to include with the pickled code
+    :param depends: list of tasks this tasks depends on (i.e. will invoke as a pipeline).  Includes from these tasks will be added automatically
     :param with_context: If set the first parameter to the function is exepcted to be the task context
     :param with_state: If set the next parameter is expected to be the task state
     :param params: any additional parameters to the Flink Task (such as a retry policy)
@@ -78,15 +79,30 @@ def inline_task(include=None, with_context=False, with_state=False, **params):
     """
     
     includes = include or []
+    depends = depends or []
+
+    def _includes():
+        dependency_includes = [dependency.includes() for dependency in depends]
+        return list(set(includes + dependency_includes))
 
     def pickle(fn):
-        for module in includes:
-            cloudpickle.register_pickle_by_value(module)
+        modules = _includes()
+
+        for module in modules:
+            try:
+                cloudpickle.register_pickle_by_value(module)
+            except ValueError:
+                # ignore cloudpickle errors about modules not yet being imported
+                pass
 
         code = cloudpickle.dumps(fn)
 
-        for module in includes:
-            cloudpickle.unregister_pickle_by_value(module)
+        for module in modules:
+            try:
+                cloudpickle.unregister_pickle_by_value(module)
+            except ValueError:
+                # ignore cloudpickle errors about modules not yet being imported
+                pass
 
         return code
 
@@ -122,6 +138,7 @@ def inline_task(include=None, with_context=False, with_state=False, **params):
             task_params = {**__defaults, **params}
             return FlinkTasks.extend(run_code, **task_params).to_task(args, fn_kwargs, is_finally, {})
 
+        fn.includes = _includes
         fn.send = send
         fn.to_task = to_task
 
