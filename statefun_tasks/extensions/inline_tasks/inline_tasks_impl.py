@@ -108,7 +108,7 @@ def inline_task(include=None, depends=None, with_context=False, with_state=False
 
     def decorator(fn):
 
-        display_name = params.setdefault('display_name', f'{fn.__module__}.{fn.__name__}')
+        params.setdefault('display_name', f'{fn.__module__}.{fn.__name__}')
 
         def send(*args, **kwargs):
 
