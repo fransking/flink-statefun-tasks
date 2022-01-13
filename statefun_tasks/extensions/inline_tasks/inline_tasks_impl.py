@@ -82,8 +82,13 @@ def inline_task(include=None, depends=None, with_context=False, with_state=False
     depends = depends or []
 
     def _includes():
-        dependency_includes = [dependency.includes() for dependency in depends]
-        return list(set(includes + dependency_includes))
+        all_includes = set(includes)
+
+        for dependency in depends:
+            all_includes.update(dependency.includes())
+
+        return list(all_includes)
+
 
     def pickle(fn):
         modules = _includes()
