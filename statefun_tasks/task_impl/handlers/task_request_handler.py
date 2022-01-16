@@ -18,10 +18,6 @@ class TaskRequestHandler(MessageHandler):
         return False
 
     async def handle_message(self, tasks: 'FlinkTasks', context: TaskContext, task_request: TaskRequest):
-        if context.unpack('task_request', TaskRequest) is not None:
-            # don't allow tasks to be overwritten
-            raise TaskAlreadyExistsException(f'Task already exists: {task_request.id}')
-
         context.pack_and_save('task_request', task_request)
 
         flink_task = tasks.get_task(task_request.type)
