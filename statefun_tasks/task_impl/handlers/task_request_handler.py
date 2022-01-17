@@ -1,6 +1,7 @@
 from statefun_tasks.context import TaskContext
 from statefun_tasks.task_impl.handlers import MessageHandler
-from statefun_tasks.types import TaskAlreadyExistsException
+from statefun_tasks.types import PipelineInProgress
+from statefun_tasks.type_helpers import _create_task_exception
 from statefun_tasks.messages_pb2 import TaskRequest
 from datetime import timedelta
 
@@ -25,7 +26,15 @@ class TaskRequestHandler(MessageHandler):
         # notify started
         tasks.events.notify_task_started(context, task_request)
 
+        # run task code
         task_result, task_exception, pipeline, task_state = await flink_task.run(context, task_request)
+
+        # if a pipeline is retured then try to reset its state in case it already exists
+        if pipeline is not None:
+            try:
+                pipeline.reset(context)
+            except PipelineInProgress as ex:  # can't re-run a running pipeline.  Must wait for it to finish
+                task_exception, pipeline = _create_task_exception(task_request, ex), None
 
         # notify finished
         tasks.events.notify_task_finished(context, task_result, task_exception, is_pipeline=pipeline is not None)
@@ -34,11 +43,6 @@ class TaskRequestHandler(MessageHandler):
         if pipeline is not None and await pipeline.handle_message(context, task_request, task_state):
             ()
 
-        # else if we have a task result return it
-        elif task_result is not None:
-            context.pack_and_save('task_result', task_result)
-            tasks.emit_result(context, task_request, task_result)
-
         # else if we have an task exception, attempt retry or return the error
         elif task_exception is not None:
             if self._attempt_retry(context, task_request, task_exception):
@@ -46,6 +50,11 @@ class TaskRequestHandler(MessageHandler):
 
             context.pack_and_save('task_exception', task_exception)
             tasks.emit_result(context, task_request, task_exception)
+
+        # else if we have a task result return it
+        elif task_result is not None:
+            context.pack_and_save('task_result', task_result)
+            tasks.emit_result(context, task_request, task_result)
 
     def _attempt_retry(self, context, task_request, task_exception):
         if task_exception.maybe_retry and task_exception.retry_policy is not None:           

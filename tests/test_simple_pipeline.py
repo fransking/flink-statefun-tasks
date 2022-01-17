@@ -146,6 +146,26 @@ class SimplePipelineTests(unittest.TestCase):
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, 'Hello Jane Doe')
 
+    def test_pipeline_re_run(self):
+        pipeline = tasks.send(hello_workflow, 'Jane', 'Doe')
+        
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, 'Hello Jane Doe')
+
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, 'Hello Jane Doe')
+
+    def test_pipeline_re_run_when_not_complete(self):
+        pipeline = tasks.send(_say_hello, 'Jane', 'Doe').wait().continue_with(_say_goodbye, goodbye_message="see you later!")
+
+        self.test_harness.run_pipeline(pipeline)
+        
+        try:
+            self.test_harness.run_pipeline(pipeline)
+        except TaskErrorException as e:
+            self.assertEqual(str(e.task_error.message), 'Pipelines must have finished before they can be re-run')
+        else:
+            self.fail('Expected a TaskErrorException')
 
 if __name__ == '__main__':
     unittest.main()

@@ -5,7 +5,7 @@ from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, 
 import traceback as tb
 
 
-def _create_task_exception(task_input, ex, state=None):
+def _create_task_exception(task_input, ex, state=None, invocation_id=None):
     if isinstance(task_input, TaskActionRequest):
         return TaskActionException(
             id=task_input.id,

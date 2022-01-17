@@ -8,6 +8,9 @@ class ResultEmitter(object):
         pass
 
     def emit_result(self, context: TaskContext, task_request, task_result_or_exception):
+        # set invocation id
+        task_result_or_exception.invocation_id = task_request.invocation_id
+
         # the result of this task is the result of the pipeline
         if isinstance(task_result_or_exception, TaskResult):
 

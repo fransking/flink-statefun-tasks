@@ -78,13 +78,14 @@ class ResultAggregator(object):
                 exception_type='statefun_tasks.AggregatedError',
                 exception_message='|'.join([f'{e.id}, {e.type}, {e.exception_message}' for e in aggregated_errors]),
                 stacktrace='|'.join([f'{e.id}, {e.stacktrace}' for e in aggregated_errors]),
-                state=pack_any(serialised_state))
+                state=pack_any(serialised_state),
+                invocation_id=context.pipeline_state.invocation_id)
             
             return task_exception
             
         else:
         
-            task_result = TaskResult(id=group.group_id)
+            task_result = TaskResult(id=group.group_id, invocation_id=context.pipeline_state.invocation_id)
             self._serialiser.serialise_result(task_result, aggregated_results, aggregated_state)
 
             return task_result

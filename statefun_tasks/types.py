@@ -276,3 +276,8 @@ class TaskAlreadyExistsException(TasksException):
 class TaskCancelledException(TasksException):
     def __init__(self, message):
         super().__init__(message)
+
+
+class PipelineInProgress(TasksException):
+    def __init__(self, message):
+        super().__init__(message)
