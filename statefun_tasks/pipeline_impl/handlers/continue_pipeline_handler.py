@@ -12,8 +12,9 @@ class ContinuePipelineHandler(PipelineMessageHandler):
     
     def can_handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException]) -> bool:
         return context.pipeline_state is not None \
-            and context.pipeline_state.status.value in [TaskStatus.RUNNING, TaskStatus.PAUSED] \
-                and isinstance(message, (TaskResult, TaskException))
+            and context.pipeline_state.invocation_id == message.invocation_id \
+                and context.pipeline_state.status.value in [TaskStatus.RUNNING, TaskStatus.PAUSED] \
+                    and isinstance(message, (TaskResult, TaskException))
 
     async def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline, **kwargs):
         task_result_or_exception = message

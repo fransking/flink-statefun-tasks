@@ -81,6 +81,7 @@ message TaskRequest {
     TaskRetryPolicy retry_policy = 7;
     map<string, string> meta = 8;
     optional bool is_fruitful = 9;
+    optional string invocation_id = 10;
 }
 
 message TaskResult {
@@ -88,6 +89,7 @@ message TaskResult {
     string type = 2;
     google.protobuf.Any result = 3;
     google.protobuf.Any state = 4;
+    optional string invocation_id = 5;
 }
 
 message TaskException {
@@ -99,6 +101,7 @@ message TaskException {
     google.protobuf.Any state = 6;
     bool maybe_retry = 7;
     TaskRetryPolicy retry_policy = 8;
+    optional string invocation_id = 9;
 }
 
 message TaskResultOrException {
@@ -157,6 +160,7 @@ message PipelineState {
     repeated ChildPipeline child_pipelines = 17;
 
     google.protobuf.Any last_task_state = 18;
+    string invocation_id = 19;
 }
 
 message ChildPipeline {

@@ -28,6 +28,10 @@ class PipelineBuilder(object):
         """
         return self._builder_id
 
+    @id.setter
+    def id(self, value):
+        self._builder_id = value
+
     def append_to(self, other: 'PipelineBuilder') -> 'PipelineBuilder':
         """
         Appends tasks from another pipeline builder into this one

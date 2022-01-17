@@ -131,6 +131,9 @@ class DeferredTaskSubmitter(object):
         # allow callers to drop the results of fruitful tasks in their pipelines if they wish
         request.is_fruitful = task.is_fruitful
 
+        # set invocation id to pipeline invocation id
+        request.invocation_id = context.pipeline_state.invocation_id
+
         # set extra pipeline related parameters
         request.meta['pipeline_address'] = context.pipeline_state.address
         request.meta['pipeline_id'] = context.pipeline_state.id

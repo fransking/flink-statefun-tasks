@@ -2,7 +2,7 @@ from statefun_tasks.context import TaskContext
 from statefun_tasks.messages_pb2 import ChildPipeline, TaskRequest, TaskResult, TaskException, Pipeline, TaskActionRequest, TaskAction, TaskStatus
 from statefun_tasks.serialisation import DefaultSerialiser
 from statefun_tasks.storage import StorageBackend
-from statefun_tasks.types import Task, Group, TaskCancelledException
+from statefun_tasks.types import Task, Group, TaskCancelledException, PipelineInProgress
 from statefun_tasks.type_helpers import _create_task_exception
 from statefun_tasks.pipeline_impl.handlers import BeginPipelineHandler, ContinuePipelineHandler, EndPipelineHandler, CancelPipelineHandler
 from statefun_tasks.pipeline_impl.helpers import PipelineGraph, DeferredTaskSubmitter
@@ -151,4 +151,12 @@ class _Pipeline(object):
 
         else:
             # ...or by sending cancellation to ourself if there is no finally task
+            cancellation_ex.invocation_id = context.pipeline_state.invocation_id
             context.send_message(context.pipeline_state.address, context.pipeline_state.id, cancellation_ex)
+
+    def reset(self, context: TaskContext):
+        if context.pipeline_state is not None:
+            if not context.pipeline_state.status.value in [TaskStatus.COMPLETED, TaskStatus.FAILED, TaskStatus.CANCELLED]:
+                raise PipelineInProgress('Pipelines must have finished before they can be re-run')
+            else:
+                context.pipeline_state = None

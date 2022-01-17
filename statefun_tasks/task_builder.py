@@ -6,7 +6,7 @@ from statefun_tasks.types import Task, RetryPolicy, \
     TASK_STATE_TYPE, TASK_REQUEST_TYPE, TASK_RESULT_TYPE, TASK_EXCEPTION_TYPE, TASK_ACTION_REQUEST_TYPE, PIPELINE_STATE_TYPE, \
         CHILD_PIPELINE_TYPE
 
-from statefun_tasks.messages_pb2 import TaskRequest
+from statefun_tasks.messages_pb2 import TaskResult, TaskException, TaskRequest
 from statefun_tasks.type_helpers import _create_task_exception
 from statefun_tasks.context import TaskContext
 from statefun_tasks.utils import _task_type_for, _unpack_single_tuple_args, _gen_id
@@ -265,6 +265,10 @@ class FlinkTasks(object):
             return None
 
     def emit_result(self, context, task_input, task_result):
+        # set invocation id
+        if isinstance(task_result, (TaskResult, TaskException)):
+            task_result.invocation_id = task_input.invocation_id
+            
         # either send a message to egress if reply_topic was specified
         if task_input.HasField('reply_topic'):
             context.send_egress_message(topic=task_input.reply_topic, value=task_result)
