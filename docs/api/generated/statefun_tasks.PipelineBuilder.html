@@ -245,7 +245,7 @@
 <td><p>Serialises the pipeline as a TaskRequest with a task type of ‘__builtins.run_pipeline’</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.validate" title="statefun_tasks.PipelineBuilder.validate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate</span></code></a>()</p></td>
-<td><p>Validates the pipeline</p></td>
+<td><p>Validates the pipeline raising a ValueError if the pipeline is invalid</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.wait" title="statefun_tasks.PipelineBuilder.wait"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wait</span></code></a>()</p></td>
 <td><p>Causes the pipeline to automatically pause at this point</p></td>
@@ -445,7 +445,7 @@
 
 <dl class="py method">
 <dt id="statefun_tasks.PipelineBuilder.set">
-<code class="sig-name descname"><span class="pre">set</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">retry_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">worker_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_fruitful</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.set" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">set</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">retry_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">worker_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_fruitful</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.set" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets task properties on the last entry added to the builder</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -455,6 +455,7 @@
 <li><p><strong>worker_name</strong> (<em>option</em>) – the task worker_name</p></li>
 <li><p><strong>is_fruitful</strong> (<em>option</em>) – set to false to drop the results of tasks</p></li>
 <li><p><strong>display_name</strong> (<em>option</em>) – optional friendly name for this task</p></li>
+<li><p><strong>task_id</strong> (<em>option</em>) – optional task id for this task</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
@@ -521,7 +522,7 @@
 <dl class="py method">
 <dt id="statefun_tasks.PipelineBuilder.validate">
 <code class="sig-name descname"><span class="pre">validate</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.validate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Validates the pipeline</p>
+<dd><p>Validates the pipeline raising a ValueError if the pipeline is invalid</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></p>

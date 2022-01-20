@@ -38,8 +38,8 @@ class DeferredTaskSubmitter(object):
             # parent tasks for the deferrals are the final tasks in each chain beginning with the tasks we are going to call
             # when a parent task completes, a task from the deferral will be called keep the overall parallism at max_parallelism
             for task in tasks_to_call:
-                last_task = self._graph.get_last_task_in_chain(task.task_id)
-                context.pipeline_state.task_deferral_ids_by_task_id[last_task.task_id] = deferral_id
+                last_task = self._graph.get_last_task_in_chain(task.uid)
+                context.pipeline_state.task_deferral_ids_by_task_uid[last_task.uid] = deferral_id
             
         sent_tasks = []
         for task in tasks_to_call:
@@ -49,31 +49,31 @@ class DeferredTaskSubmitter(object):
         if any(sent_tasks):
             await asyncio.gather(*sent_tasks)
 
-    async def release_tasks(self, context, caller_id, task_result_or_exception):
+    async def release_tasks(self, context, caller_uid, task_result_or_exception):
         if isinstance(task_result_or_exception, TaskException):
-            parent_id = self._graph.get_last_task_in_chain(caller_id).id
+            parent_id = self._graph.get_last_task_in_chain(caller_uid).uid
         else:
-            parent_id = caller_id
+            parent_id = caller_uid
          
-        if parent_id in context.pipeline_state.task_deferral_ids_by_task_id:
-            deferral_id = context.pipeline_state.task_deferral_ids_by_task_id[parent_id]
+        if parent_id in context.pipeline_state.task_deferral_ids_by_task_uid:
+            deferral_id = context.pipeline_state.task_deferral_ids_by_task_uid[parent_id]
             task_deferral = context.pipeline_state.task_deferrals_by_id[deferral_id]
 
-            if any(task_deferral.task_ids):
-                task_id = task_deferral.task_ids.pop()
-                task = self._graph.get_task(task_id) 
+            if any(task_deferral.task_uids):
+                task_uid = task_deferral.task_uids.pop()
+                task = self._graph.get_task(task_uid) 
 
                 task_request = self._create_deferred_task_request(context, task, task_deferral)
                 
                 # add task we are submitting to deferral task
-                last_task = self._graph.get_last_task_in_chain(task_id)
-                context.pipeline_state.task_deferral_ids_by_task_id[last_task.id] = deferral_id
+                last_task = self._graph.get_last_task_in_chain(task_uid)
+                context.pipeline_state.task_deferral_ids_by_task_uid[last_task.uid] = deferral_id
 
                 # send the task
                 await self._send_task(context, task.get_destination(), task_request)
             else:
                 # clean up
-                del context.pipeline_state.task_deferral_ids_by_task_id[caller_id]
+                del context.pipeline_state.task_deferral_ids_by_task_uid[caller_uid]
                 del context.pipeline_state.task_deferrals_by_id[deferral_id]
 
     async def unpause_tasks(self, context):
@@ -104,7 +104,7 @@ class DeferredTaskSubmitter(object):
                 task_deferral.task_result_or_exception.task_exception.CopyFrom(task_result_or_exception)
 
         for task in reversed(tasks_to_defer):
-            task_deferral.task_ids.append(task.id)
+            task_deferral.task_uids.append(task.uid)
 
         return deferral_id
 
@@ -126,7 +126,7 @@ class DeferredTaskSubmitter(object):
             task_args_and_kwargs = self._serialiser.to_args_and_kwargs(task.request)
             task_request = self._serialiser.merge_args_and_kwargs(task_result if not task.is_finally else TupleOfAny(), task_args_and_kwargs)
 
-        request = TaskRequest(id=task.task_id, type=task.task_type)
+        request = TaskRequest(id=task.task_id, type=task.task_type, uid=task.uid)
 
         # allow callers to drop the results of fruitful tasks in their pipelines if they wish
         request.is_fruitful = task.is_fruitful
@@ -166,12 +166,12 @@ class DeferredTaskSubmitter(object):
 
             if self._storage is not None and context.pipeline_state_size >= self._storage.threshold:
                 proto = PausedTask(destination=destination, task_request=task_request)
-                saved_to_store = await self._try_save_to_store(context, proto, task_request.id)
+                saved_to_store = await self._try_save_to_store(context, proto, task_request.uid)
                             
             if not saved_to_store:
                 paused_task = PausedTask(destination=destination, task_request=task_request)
             else:
-                paused_task = PausedTask(destination=destination, task_id=task_request.id)
+                paused_task = PausedTask(destination=destination, task_uid=task_request.uid)
             
             context.pipeline_state.paused_tasks.append(paused_task)
 
@@ -179,9 +179,9 @@ class DeferredTaskSubmitter(object):
         else:
             context.send_message(destination, task_request.id, task_request)
 
-    async def _try_save_to_store(self, context, paused_task, task_id):
+    async def _try_save_to_store(self, context, paused_task, task_uid):
         try:
-            keys = [context.pipeline_state.id, task_id]
+            keys = [context.pipeline_state.invocation_id, task_uid]
             await self._storage.store(keys, paused_task.SerializeToString())
             return True
         except Exception as ex:
@@ -189,7 +189,7 @@ class DeferredTaskSubmitter(object):
             return False
 
     async def _load_from_store(self, context, paused_task):
-        keys = [context.pipeline_state.id, paused_task.task_id]
+        keys = [context.pipeline_state.invocation_id, paused_task.task_uid]
 
         proto_bytes = await self._storage.fetch(keys)
         paused_task = PausedTask()
@@ -201,6 +201,6 @@ class DeferredTaskSubmitter(object):
             return
 
         try:
-            await self._storage.delete([context.pipeline_state.id])
+            await self._storage.delete([context.pipeline_state.invocation_id])
         except Exception as ex:
-            _log.warning(f'Error cleaning up paused tasks for {context.pipeline_state.id} from backend storage - {ex}')
+            _log.warning(f'Error cleaning up paused tasks for {context.pipeline_state.invocation_id} from backend storage - {ex}')

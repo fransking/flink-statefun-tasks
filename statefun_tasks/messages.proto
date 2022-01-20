@@ -37,6 +37,7 @@ message TaskEntry {
     TaskRetryPolicy retry_policy = 9;
     optional string display_name = 10;
     bool is_wait = 11;
+    string uid = 12;
 }
 
 message GroupEntry {
@@ -82,6 +83,7 @@ message TaskRequest {
     map<string, string> meta = 8;
     optional bool is_fruitful = 9;
     optional string invocation_id = 10;
+    string uid = 11;
 }
 
 message TaskResult {
@@ -90,6 +92,7 @@ message TaskResult {
     google.protobuf.Any result = 3;
     google.protobuf.Any state = 4;
     optional string invocation_id = 5;
+    string uid = 6;
 }
 
 message TaskException {
@@ -102,6 +105,7 @@ message TaskException {
     bool maybe_retry = 7;
     TaskRetryPolicy retry_policy = 8;
     optional string invocation_id = 9;
+    string uid = 10;
 }
 
 message TaskResultOrException {
@@ -119,7 +123,7 @@ message TaskState {
 }
 
 message TaskDeferral {
-    repeated string task_ids = 1;
+    repeated string task_uids = 1;
     optional string parent_task_address = 2;
     optional string parent_task_id = 3;
     optional TaskResultOrException task_result_or_exception = 4;
@@ -127,9 +131,9 @@ message TaskDeferral {
 
 message PausedTask {
     string destination = 1;
-    oneof task_request_or_task_id {
+    oneof task_request_or_task_uid {
         TaskRequest task_request = 2;
-        string task_id = 3;
+        string task_uid = 3;
     }
 }
 
@@ -149,9 +153,9 @@ message PipelineState {
     bool is_fruitful = 11;
     google.protobuf.Any task_state = 12;
 
-    // optimised so we only store deferral data once not multiple times per task id
+    // optimised so we only store deferral data once not multiple times per task uid
     map<string, TaskDeferral> task_deferrals_by_id = 13;
-    map<string, string> task_deferral_ids_by_task_id = 14;
+    map<string, string> task_deferral_ids_by_task_uid = 14;
     // end
 
     TaskStatus status = 15;
@@ -171,6 +175,7 @@ message ChildPipeline {
     string caller_id = 5;
     string caller_address = 6;
     repeated TaskInfo tasks = 7;
+    string invocation_id = 8;
 }
 
 message TaskInfo {
@@ -178,10 +183,11 @@ message TaskInfo {
     string task_type = 2;
     string namespace = 3;
     string worker_name = 4;
+    string task_uid = 5;
 }
 
 message TaskResults {
-    map<string, google.protobuf.Any> by_id = 1;
+    map<string, google.protobuf.Any> by_uid = 1;
 }
 
 enum TaskAction {
@@ -200,12 +206,14 @@ message TaskActionRequest {
         Address reply_address = 3;
     }
     TaskAction action = 4;
+    string uid = 5;
 }
 
 message TaskActionResult {
     string id = 1;
     TaskAction action = 2;
     google.protobuf.Any result = 3;
+    string uid = 4;
 }
 
 message TaskActionException {
@@ -214,6 +222,7 @@ message TaskActionException {
     string exception_type = 3;
     string exception_message = 4;
     string stacktrace = 5;
+    string uid = 6;
 }
 
 message TaskStatus {

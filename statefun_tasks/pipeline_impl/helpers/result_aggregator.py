@@ -19,20 +19,20 @@ class ResultAggregator(object):
         self._serialiser = serialiser
         self._storage = storage
 
-    async def add_result(self, context: TaskContext, group: Group, task_id, task_result_or_exception):
+    async def add_result(self, context: TaskContext, group: Group, task_uid, task_result_or_exception):
         task_results = context.pipeline_state.task_results  # type: TaskResults
 
         failed = isinstance(task_result_or_exception, TaskException)
-        last_task = self._graph.get_last_task_in_chain(task_id)
+        last_task = self._graph.get_last_task_in_chain(task_uid)
         packed = pack_any(task_result_or_exception)
         
-        if task_id == last_task.task_id:
+        if task_uid == last_task.uid:
             # if we are the last task in this chain in the group then record this result so we can aggregate laster
-            await self._save_result(group, task_id, packed, task_results, context.pipeline_state_size)
+            await self._save_result(group, task_uid, packed, task_results, context.pipeline_state_size)
 
         elif failed:
             # additionally propagate the error onto the last stage of this chain
-            await self._save_result(group, last_task.task_id, packed, task_results, context.pipeline_state_size)
+            await self._save_result(group, last_task.uid, packed, task_results, context.pipeline_state_size)
 
     async def aggregate(self, context: TaskContext, group: Group):
         task_results = context.pipeline_state.task_results  # type: TaskResults
@@ -51,11 +51,11 @@ class ResultAggregator(object):
                     results.append(stack_results)
                     stack.append((last_entry, stack_results))
                 else:
-                    proto = task_results.by_id[pipeline[-1].task_id]  # Any
+                    proto = task_results.by_uid[pipeline[-1].uid]  # Any
                     result, state, error = await self._load_result(group, proto)
 
                     # We don't need the individual task results anymore so remove to save space / reduce message size
-                    del task_results.by_id[pipeline[-1].task_id] 
+                    del task_results.by_uid[pipeline[-1].uid] 
 
                     results.append(result)
                     
@@ -114,10 +114,10 @@ class ResultAggregator(object):
 
         if saved_to_storage: 
             # record ptr to state
-            task_results.by_id[task_id].CopyFrom(pack_any(StringValue(value=task_id)))
+            task_results.by_uid[task_id].CopyFrom(pack_any(StringValue(value=task_id)))
         else:
             # record data to state
-            task_results.by_id[task_id].CopyFrom(proto)
+            task_results.by_uid[task_id].CopyFrom(proto)
 
     async def _try_save_to_store(self, keys, proto):
         try:
@@ -132,21 +132,20 @@ class ResultAggregator(object):
         unpacked = self._serialiser.from_proto(proto)
  
         if isinstance(unpacked, str):  # load from store
-            task_id = unpacked
+            task_uid = unpacked
             try:
                 if self._storage is None:
                     raise ValueError('Missing storage backend')
 
-                packed_bytes = await self._storage.fetch([group.group_id, task_id])
+                packed_bytes = await self._storage.fetch([group.group_id, task_uid])
                 packed = Any()
                 packed.ParseFromString(packed_bytes)
                 unpacked = self._serialiser.from_proto(packed)
 
             except Exception as ex:
-                _log.error(f'Error loading {task_id} from backend storage - {ex}')
+                _log.error(f'Error loading {task_uid} from backend storage - {ex}')
 
                 unpacked = TaskException(            
-                    id=task_id,
                     type=f'__storage_backend.error',
                     exception_type=_type_name(ex),
                     exception_message=str(ex),

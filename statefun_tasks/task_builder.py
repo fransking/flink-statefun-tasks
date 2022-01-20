@@ -22,7 +22,7 @@ _log = logging.getLogger('FlinkTasks')
 
 
 def _run_pipeline(pipeline_proto):
-    return PipelineBuilder.from_proto(pipeline_proto)
+    return PipelineBuilder.from_proto(pipeline_proto).validate()
 
 
 class FlinkTasks(object):

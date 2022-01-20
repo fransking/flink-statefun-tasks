@@ -166,6 +166,6 @@ class SimplePipelineTests(unittest.TestCase):
             self.assertEqual(str(e.task_error.message), 'Pipelines must have finished before they can be re-run')
         else:
             self.fail('Expected a TaskErrorException')
-            
+
 if __name__ == '__main__':
     unittest.main()

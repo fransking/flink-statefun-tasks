@@ -37,6 +37,9 @@ class EndPipelineHandler(PipelineMessageHandler):
 
         # set basic message properties
         task_result_or_exception.id = task_request.id
+        task_result_or_exception.uid = task_request.uid
+        task_result_or_exception.invocation_id = task_request.invocation_id
+        
         task_result_or_exception.type = f'{task_request.type}.' + (
             'result' if isinstance(task_result_or_exception, TaskResult) else 'error')
 

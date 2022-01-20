@@ -1,3 +1,4 @@
+from ast import If
 from statefun_tasks.types import Task, Group, RetryPolicy
 from statefun_tasks.utils import _gen_id, _is_tuple
 from statefun_tasks.pipeline import _Pipeline
@@ -78,7 +79,7 @@ class PipelineBuilder(object):
         return self
 
     def set(self, retry_policy: RetryPolicy = None, namespace: str = None,
-            worker_name: str = None, is_fruitful=None, display_name=None) -> 'PipelineBuilder':
+            worker_name: str = None, is_fruitful=None, display_name=None, task_id=None) -> 'PipelineBuilder':
         """
         Sets task properties on the last entry added to the builder
 
@@ -87,6 +88,7 @@ class PipelineBuilder(object):
         :param option worker_name: the task worker_name
         :param option is_fruitful: set to false to drop the results of tasks
         :param option display_name: optional friendly name for this task
+        :param option task_id: optional task id for this task
         :return: the builder
         """
 
@@ -102,6 +104,8 @@ class PipelineBuilder(object):
                 entry.is_fruitful = is_fruitful
             if display_name is not None:
                 entry.display_name = display_name
+            if task_id is not None:
+                entry.task_id = task_id
         else:
             raise ValueError(f'set() must be applied to a task')
 
@@ -177,7 +181,7 @@ class PipelineBuilder(object):
         if _is_tuple(args) and len(args) == 1:
             args = args[0]
 
-        task_request = TaskRequest(id=task_id, type=task_type)
+        task_request = TaskRequest(id=task_id, type=task_type, uid=_gen_id())
         args_and_kwargs = serialiser.serialise_args_and_kwargs(args, kwargs)
         serialiser.serialise_request(task_request, args_and_kwargs)
 
@@ -214,13 +218,24 @@ class PipelineBuilder(object):
 
     def validate(self) -> 'PipelineBuilder':
         """
-        Validates the pipeline
+        Validates the pipeline raising a ValueError if the pipeline is invalid
 
         :return: the builder
         """
         errors = []
 
-        finally_tasks = [task for task in self._pipeline if isinstance(task, Task) and task.is_finally]
+        all_tasks = [task for task in self._pipeline if isinstance(task, Task)]
+        all_groups = [group for group in self._pipeline if isinstance(group, Group)]
+
+        task_uids = [task.uid for task in all_tasks]
+        if len(task_uids) != len(set(task_uids)):
+            errors.append('Task uids must be unique')
+
+        group_ids = [group.group_id for group in all_groups]
+        if len(group_ids) != len(set(group_ids)):
+            errors.append('Group ids must be unique')
+
+        finally_tasks = [task for task in all_tasks if task.is_finally]
         if len(finally_tasks) > 1:
             errors.append('Cannot have more than one "finally_do" method')
         if len(finally_tasks) == 1 and finally_tasks[0] != self._pipeline[-1]:
