@@ -81,8 +81,10 @@ class FlinkTasks(object):
             module_name = parameters.get('module_name', None)
             task_type = _task_type_for(function, module_name)
 
+            task_id = parameters.pop('task_id') or _gen_id()
             args = _unpack_single_tuple_args(args)
-            return Task.from_fields(_gen_id(), task_type, args, kwargs, is_finally=is_finally, **parameters)
+
+            return Task.from_fields(task_id, task_type, args, kwargs, is_finally=is_finally, **parameters)
 
         function.send = send
         function.to_task = to_task
@@ -99,7 +101,8 @@ class FlinkTasks(object):
         is_fruitful: bool = True, 
         module_name: str = None,
         with_context: bool = False,
-        display_name: str = None):
+        display_name: str = None,
+        task_id: str = None):
         """
         Decorator to bind a function as a Flink Task
 
@@ -112,6 +115,7 @@ class FlinkTasks(object):
                             otherwise the Python module containing the function will be used
         :param with_context: whether to pass a Flink context object as the first parameter (default false)
         :param display_name: optional friendly name for this task
+        :param task_id: optional set the fixed id for this task in order to make it stateful
         """
         
         def wrapper(function):
@@ -124,7 +128,8 @@ class FlinkTasks(object):
                     is_fruitful = is_fruitful,
                     module_name = module_name,
                     with_context = with_context,
-                    display_name = display_name
+                    display_name = display_name,
+                    task_id = task_id
             )
 
             self.register(function, wrapper=None, **function.defaults())
