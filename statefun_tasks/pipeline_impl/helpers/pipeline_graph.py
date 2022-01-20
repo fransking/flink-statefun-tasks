@@ -35,7 +35,7 @@ class PipelineGraph(object):
 
     def get_task(self, task_id):
         for task in self.yield_tasks():
-            if task_id == task.task_id:
+            if task_id == task.uid:
                 return task
 
         raise ValueError(f'Task {task_id} not found')
@@ -48,11 +48,11 @@ class PipelineGraph(object):
         def extract_task_chain(state, pipeline, entry):
             tasks = state
 
-            if entry.task_id == task_id:
+            if entry.uid == task_id:
                 matched = False
 
                 for task in self.yield_tasks(pipeline):
-                    if matched or task.task_id == task_id:
+                    if matched or task.uid == task_id:
                         matched = True
                         tasks.append(task)
 
@@ -109,13 +109,13 @@ class PipelineGraph(object):
         elif any(tasks):
             tasks[0].mark_complete()
          
-    def try_get_finally_task(self, task_id):
+    def try_get_finally_task(self, task_id=None):
         finally_task = next((task for task in self._pipeline if isinstance(task, Task) and task.is_finally), None)
-        return None if finally_task is None or finally_task.task_id == task_id else finally_task
+        return None if finally_task is None or finally_task.uid == task_id else finally_task
 
     def is_finally_task(self, task_id):
         finally_task = next((task for task in self._pipeline if isinstance(task, Task) and task.is_finally), None)
-        return finally_task is not None and finally_task.task_id == task_id
+        return finally_task is not None and finally_task.uid == task_id
 
     def get_next_step_in_pipeline(self, task_id):
         stack = deque([(self._pipeline, None, None, None, None)])  # FIFO (pipeline, entry after group, group, parent_group, entry after parent group)
@@ -140,7 +140,7 @@ class PipelineGraph(object):
                         stack.append((pipeline_in_group, stack_entry_after_group, stack_group_entry, stack_parent_group, stack_entry_after_parent_group))
 
                 else:
-                    if entry.task_id == task_id:
+                    if entry.uid == task_id:
                         next_entry = _try_next(iterator)
 
                         if next_entry is None and parent_group is not None and parent_group.is_complete():

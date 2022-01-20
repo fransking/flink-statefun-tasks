@@ -167,5 +167,6 @@ class SimplePipelineTests(unittest.TestCase):
         else:
             self.fail('Expected a TaskErrorException')
 
+
 if __name__ == '__main__':
     unittest.main()

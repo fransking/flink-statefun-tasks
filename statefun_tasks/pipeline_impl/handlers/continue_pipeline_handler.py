@@ -17,10 +17,10 @@ class ContinuePipelineHandler(PipelineMessageHandler):
 
     async def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline: '_Pipeline', **kwargs):
         task_result_or_exception = message
-        caller_id = context.get_caller_id()
+        caller_uid = message.uid
 
         # mark pipeline step as complete
-        self.graph.mark_task_complete(caller_id, task_result_or_exception)
+        self.graph.mark_task_complete(caller_uid, task_result_or_exception)
 
         # notify event handler (with option to cancel)
         try:
@@ -30,14 +30,14 @@ class ContinuePipelineHandler(PipelineMessageHandler):
             return False, task_result_or_exception
 
         # release deferred tasks if they can now run
-        await self.submitter.release_tasks(context, caller_id, task_result_or_exception)
+        await self.submitter.release_tasks(context, caller_uid, task_result_or_exception)
 
         # get the next step of the pipeline to run (if any)
-        current_step, next_step, group, empty_group = self.graph.get_next_step_in_pipeline(caller_id)
+        current_step, next_step, group, empty_group = self.graph.get_next_step_in_pipeline(caller_uid)
 
         # if this task is part group then we need to record the results so we can aggregate later
         if group is not None:
-            await self.result_aggregator.add_result(context, group, caller_id, task_result_or_exception)
+            await self.result_aggregator.add_result(context, group, caller_uid, task_result_or_exception)
 
             # once the group is complete aggregate the results
             if group.is_complete():
@@ -53,7 +53,7 @@ class ContinuePipelineHandler(PipelineMessageHandler):
 
         # if we got an exception then the next step is the finally_task if there is one (or none otherwise)
         if isinstance(task_result_or_exception, TaskException):
-            next_step = self.graph.try_get_finally_task(caller_id)
+            next_step = self.graph.try_get_finally_task(caller_uid)
 
         # else if we came across an empty group between this task and next_entry then our result must be an empty array []
         # as we cannot call an empty group but can synthesise the result (remembering to pass through state)

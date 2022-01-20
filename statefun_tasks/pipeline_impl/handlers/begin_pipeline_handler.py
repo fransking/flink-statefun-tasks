@@ -75,7 +75,7 @@ class BeginPipelineHandler(PipelineMessageHandler):
         )
         
         for task in self.graph.yield_tasks(): 
-            child_pipeline.tasks.append(TaskInfo(task_id=task.task_id, task_type=task.task_type, namespace=task.namespace, worker_name=task.worker_name))
+            child_pipeline.tasks.append(TaskInfo(task_id=task.task_id, task_uid=task.uid, task_type=task.task_type, namespace=task.namespace, worker_name=task.worker_name))
 
         # notify back to the root pipeline
         context.pack_and_send(child_pipeline.root_address, child_pipeline.root_id, child_pipeline)

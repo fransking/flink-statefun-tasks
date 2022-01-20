@@ -9,6 +9,7 @@ def _create_task_exception(task_input, ex, state=None, invocation_id=None):
     if isinstance(task_input, TaskActionRequest):
         return TaskActionException(
             id=task_input.id,
+            uid=task_input.uid,
             action = task_input.action,
             exception_type=_type_name(ex),
             exception_message=str(ex),
@@ -16,6 +17,7 @@ def _create_task_exception(task_input, ex, state=None, invocation_id=None):
     else:
         task_exception = TaskException(
             id=task_input.id,
+            uid=task_input.uid,
             type=f'{task_input.type}.error',
             exception_type=_type_name(ex),
             exception_message=str(ex),
@@ -34,10 +36,12 @@ def _create_task_result(task_input, result=None):
     if isinstance(task_input, TaskActionRequest):
         task_result = TaskActionResult(
             id=task_input.id,
+            uid=task_input.uid,
             action = task_input.action)
     else:
         task_result = TaskResult(
             id=task_input.id,
+            uid=task_input.uid,
             type=f'{task_input.type}.result')
 
     if result is not None:

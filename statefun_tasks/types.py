@@ -1,4 +1,4 @@
-from statefun_tasks.utils import _type_name
+from statefun_tasks.utils import _type_name, _gen_id
 from statefun_tasks.messages_pb2 import TaskEntry, GroupEntry, PipelineEntry, TaskRetryPolicy, Pipeline
 
 from dataclasses import dataclass, field
@@ -26,7 +26,7 @@ class Task:
 
     @staticmethod
     def from_fields(task_id, task_type, task_args, task_kwargs, is_finally=None, namespace=None, worker_name=None,
-                    is_fruitful=None, retry_policy=None, display_name=None, is_wait=None, **kwargs):
+                    is_fruitful=None, retry_policy=None, display_name=None, is_wait=None, uid=None, **kwargs):
         proto = TaskEntry(
             task_id=task_id,
             task_type=task_type,
@@ -37,10 +37,18 @@ class Task:
             is_fruitful=is_fruitful,
             retry_policy=retry_policy,
             display_name=display_name,
-            is_wait=is_wait
+            is_wait=is_wait,
+            uid=uid if uid is not None else _gen_id()
         )
         return Task(proto, task_args, task_kwargs)
-        
+
+    @property
+    def uid(self):
+        """
+        The unique ID of this task
+        """
+        return self._proto.uid
+
     @property
     def id(self):
         """
@@ -54,6 +62,10 @@ class Task:
         The ID of this task
         """
         return self._proto.task_id
+
+    @task_id.setter
+    def task_id(self, value):
+        self._proto.task_id = value
 
     @property
     def task_type(self):
