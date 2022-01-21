@@ -84,7 +84,7 @@ Let's revisit our stocks example and try to implement it as Flink Stateful Funct
     def compute_average(context, message):
         context.storage.std_devs.append(message.as_type(STD_DEV))
 
-        if len(context.storage.std_devs) > NUMBER_OF_STOCKS:
+        if len(context.storage.std_devs) == NUMBER_OF_STOCKS:
             avg = np.mean(context.storage.std_devs)
             context.send_egress('avg -> egress topic')
 
