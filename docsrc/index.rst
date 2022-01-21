@@ -15,6 +15,7 @@ Check out the source code on `GitHub <https://github.com/fransking/flink-statefu
    tasks
    pipelines
    actions
+   stateful_tasks
 
 
 .. toctree::
