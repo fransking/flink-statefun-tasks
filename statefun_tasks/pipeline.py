@@ -2,11 +2,12 @@ from statefun_tasks.context import TaskContext
 from statefun_tasks.messages_pb2 import ChildPipeline, TaskRequest, TaskResult, TaskException, Pipeline, TaskActionRequest, TaskAction, TaskStatus
 from statefun_tasks.serialisation import DefaultSerialiser
 from statefun_tasks.storage import StorageBackend
-from statefun_tasks.types import Task, Group, TaskCancelledException
+from statefun_tasks.types import Task, Group, TaskCancelledException, PipelineInProgress
 from statefun_tasks.type_helpers import _create_task_exception
 from statefun_tasks.pipeline_impl.handlers import BeginPipelineHandler, ContinuePipelineHandler, EndPipelineHandler, CancelPipelineHandler
 from statefun_tasks.pipeline_impl.helpers import PipelineGraph, DeferredTaskSubmitter
 from statefun_tasks.events import EventHandlers
+from statefun_tasks.utils import _gen_id
 from google.protobuf.any_pb2 import Any
 from typing import Union
 
@@ -99,7 +100,7 @@ class _Pipeline(object):
 
         # tell any child pipelines to pause
         for child_pipeline in context.pipeline_state.child_pipelines:
-            pause_action = TaskActionRequest(id=child_pipeline.id, action=TaskAction.PAUSE_PIPELINE)
+            pause_action = TaskActionRequest(id=child_pipeline.id, uid=_gen_id(), action=TaskAction.PAUSE_PIPELINE)
             context.send_message(child_pipeline.address, pause_action.id, pause_action)
 
     async def unpause(self, context: TaskContext):
@@ -114,7 +115,7 @@ class _Pipeline(object):
 
             # tell any child pipelines to resume
             for child_pipeline in context.pipeline_state.child_pipelines:
-                pause_action = TaskActionRequest(id=child_pipeline.id, action=TaskAction.UNPAUSE_PIPELINE)
+                pause_action = TaskActionRequest(id=child_pipeline.id, uid=_gen_id(), action=TaskAction.UNPAUSE_PIPELINE)
                 context.send_message(child_pipeline.address, pause_action.id, pause_action)
 
         except Exception as ex:
@@ -130,7 +131,7 @@ class _Pipeline(object):
 
         # tell any child pipelines to cancel
         for child_pipeline in context.pipeline_state.child_pipelines:
-            cancel_action = TaskActionRequest(id=child_pipeline.id, action=TaskAction.CANCEL_PIPELINE)
+            cancel_action = TaskActionRequest(id=child_pipeline.id, uid=_gen_id(), action=TaskAction.CANCEL_PIPELINE)
             context.send_message(child_pipeline.address, cancel_action.id, cancel_action)
 
         # construct the cancellation exception to send to caller of this pipeline
@@ -138,7 +139,7 @@ class _Pipeline(object):
         cancellation_ex = _create_task_exception(context.storage.task_request, ex, context.pipeline_state.last_task_state)
 
         # we move from cancelling to cancelled either by submitting and/or waiting on the finally task...
-        finally_task = self._graph.try_get_finally_task(context.get_caller_id())
+        finally_task = self._graph.try_get_finally_task()
 
         if finally_task is not None:
             if self.get_result_before_finally(context) is None:
@@ -151,4 +152,13 @@ class _Pipeline(object):
 
         else:
             # ...or by sending cancellation to ourself if there is no finally task
+            cancellation_ex.invocation_id = context.pipeline_state.invocation_id
+            cancellation_ex.uid = _gen_id()
             context.send_message(context.pipeline_state.address, context.pipeline_state.id, cancellation_ex)
+
+    def reset(self, context: TaskContext):
+        if context.pipeline_state is not None:
+            if not context.pipeline_state.status.value in [TaskStatus.COMPLETED, TaskStatus.FAILED, TaskStatus.CANCELLED]:
+                raise PipelineInProgress('Pipelines must have finished before they can be re-run')
+            else:
+                context.pipeline_state = None

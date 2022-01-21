@@ -68,9 +68,9 @@ class FlinkTasksClient(object):
     @staticmethod
     def _get_request_key(item):
         if isinstance(item, (TaskRequest, TaskResult, TaskException)):
-            return f'request.{item.id}'
+            return f'request.{item.uid}'
         elif isinstance(item, (TaskActionRequest, TaskActionResult, TaskActionException)):
-            return f'action.{item.action}.{item.id}'
+            return f'action.{item.action}.{item.uid}'
         else:
             raise ValueError(f'Unsupported request type {type(item)}')
 
@@ -127,7 +127,7 @@ class FlinkTasksClient(object):
         return future
 
     def _submit_action(self, task_id, action, topic):
-        task_action = TaskActionRequest(id=task_id, action=action, reply_topic=self._reply_topic)
+        task_action = TaskActionRequest(id=task_id, uid=str(uuid4()), action=action, reply_topic=self._reply_topic)
         return self._submit_request(task_action, topic)
 
     @property

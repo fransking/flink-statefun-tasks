@@ -38,7 +38,7 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Getting Started" href="getting_started.html" />
+    <link rel="next" title="Stateful Tasks" href="stateful_tasks.html" />
     <link rel="prev" title="Pipelines" href="pipelines.html" /> 
 </head>
 
@@ -91,14 +91,21 @@
 <li class="toctree-l1"><a class="reference internal" href="tasks.html">Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pipelines.html">Pipelines</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Actions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#querying">Querying</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pipeline-status">Pipeline Status</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pipeline-request">Pipeline Request</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pipeline-result">Pipeline Result</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#flow-control">Flow Control</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pausing-resuming-pipelines">Pausing &amp; Resuming Pipelines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cancelling-a-pipeline">Cancelling a Pipeline</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="stateful_tasks.html">Stateful Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extensions.html">Extensions</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Developer Guide</span></p>
 <ul>
@@ -171,13 +178,13 @@
             
   <div class="section" id="actions">
 <h1>Actions<a class="headerlink" href="#actions" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="overview">
-<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
-<p>Actions are out of band operations on existing pipelines enabling clients to query the status of a pipeline and recall the original request and result.</p>
+<p>Actions are out of band operations on existing pipelines enabling clients ‘fire and forget’ a pipeline and later perform some operation on it.</p>
+<div class="section" id="querying">
+<h2>Querying<a class="headerlink" href="#querying" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="pipeline-status">
 <h3>Pipeline Status<a class="headerlink" href="#pipeline-status" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">divide</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-<span class="n">client</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>                                     <span class="c1"># non-blocking returns Future</span>
+<span class="n">client</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>                                     <span class="c1"># non-blocking &#39;fire and forget&#39;</span>
 
 <span class="n">status</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get_status_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>            <span class="c1"># type: TaskStatus</span>
 </pre></div>
@@ -186,7 +193,7 @@
 <div class="section" id="pipeline-request">
 <h3>Pipeline Request<a class="headerlink" href="#pipeline-request" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">divide</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-<span class="n">client</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>                                     <span class="c1"># non-blocking returns Future</span>
+<span class="n">client</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>                                     <span class="c1"># non-blocking &#39;fire and forget&#39;</span>
 
 <span class="n">request</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get_request_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>          <span class="c1"># type: TaskRequest</span>
 </pre></div>
@@ -195,9 +202,36 @@
 <div class="section" id="pipeline-result">
 <h3>Pipeline Result<a class="headerlink" href="#pipeline-result" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">divide</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-<span class="n">client</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>                                     <span class="c1"># non-blocking returns Future</span>
+<span class="n">client</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>                                     <span class="c1"># non-blocking &#39;fire and forget&#39;</span>
 
 <span class="n">request</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get_result_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>           <span class="c1"># type: TaskResult</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="flow-control">
+<h2>Flow Control<a class="headerlink" href="#flow-control" title="Permalink to this headline">¶</a></h2>
+<p>Pipelines may be paused, unpaused and cancelled</p>
+<div class="section" id="pausing-resuming-pipelines">
+<h3>Pausing &amp; Resuming Pipelines<a class="headerlink" href="#pausing-resuming-pipelines" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">a_long_running_task</span><span class="o">.</span><span class="n">send</span><span class="p">()</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">save</span><span class="p">)</span>
+<span class="n">client</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>                                     <span class="c1"># non-blocking &#39;fire and forget&#39;</span>
+
+<span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">pause_pipeline_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>                 <span class="c1"># pipline will be likely paused before the save task runs</span>
+<span class="n">status</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get_status_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>            <span class="c1"># TaskStatus.PAUSED</span>
+
+<span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">unpause_pipeline_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>               <span class="c1"># pipline will be unpaused and save task will be scheduled</span>
+<span class="n">status</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get_status_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>            <span class="c1"># TaskStatus.RUNNING or TaskStatus.COMPLETED</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="cancelling-a-pipeline">
+<h3>Cancelling a Pipeline<a class="headerlink" href="#cancelling-a-pipeline" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">a_long_running_task</span><span class="o">.</span><span class="n">send</span><span class="p">()</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">save</span><span class="p">)</span>
+<span class="n">client</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>                                     <span class="c1"># non-blocking &#39;fire and forget&#39;</span>
+
+<span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">cancel_pipeline_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>                <span class="c1"># pipline will be likely cancelled before the save task runs</span>
+<span class="n">status</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get_status_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>            <span class="c1"># TaskStatus.CANCELLED</span>
 </pre></div>
 </div>
 </div>
@@ -210,7 +244,7 @@
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="getting_started.html" class="btn btn-neutral float-right" title="Getting Started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="stateful_tasks.html" class="btn btn-neutral float-right" title="Stateful Tasks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="pipelines.html" class="btn btn-neutral float-left" title="Pipelines" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
@@ -218,7 +252,7 @@
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2020-2021, Frans King.
+        &#169; Copyright 2020-2022, Frans King &amp; Luke Ashworth.
 
     </p>
   </div>

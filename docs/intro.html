@@ -97,6 +97,8 @@
 <li class="toctree-l1"><a class="reference internal" href="tasks.html">Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pipelines.html">Pipelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="actions.html">Actions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stateful_tasks.html">Stateful Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extensions.html">Extensions</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Developer Guide</span></p>
 <ul>
@@ -239,7 +241,7 @@ The Pipeline becomes the Flink state.</p>
 <span class="k">def</span> <span class="nf">compute_average</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
     <span class="n">context</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">std_devs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">as_type</span><span class="p">(</span><span class="n">STD_DEV</span><span class="p">))</span>
 
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">std_devs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">NUMBER_OF_STOCKS</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">std_devs</span><span class="p">)</span> <span class="o">==</span> <span class="n">NUMBER_OF_STOCKS</span><span class="p">:</span>
         <span class="n">avg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">std_devs</span><span class="p">)</span>
         <span class="n">context</span><span class="o">.</span><span class="n">send_egress</span><span class="p">(</span><span class="s1">&#39;avg -&gt; egress topic&#39;</span><span class="p">)</span>
 </pre></div>
@@ -350,7 +352,7 @@ combined into workflows using an intuitive API based around ordinary Python func
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2020-2021, Frans King.
+        &#169; Copyright 2020-2022, Frans King &amp; Luke Ashworth.
 
     </p>
   </div>

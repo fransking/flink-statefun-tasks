@@ -17,8 +17,8 @@ sys.path.insert(0, os.path.abspath('..'))
 
 # -- Project information -----------------------------------------------------
 project = 'Flink Tasks'
-copyright = '2020-2021, Frans King'
-author = 'Frans King'
+copyright = '2020-2022, Frans King & Luke Ashworth'
+author = 'Frans King & Luke Ashworth'
 
 
 # -- General configuration ---------------------------------------------------

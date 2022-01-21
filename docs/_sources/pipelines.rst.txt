@@ -55,6 +55,18 @@ Nesting is also permitted:
     ]).continue_with(average)
 
 
+Parallel pipelines can have their concurrency limited using a semphore like max_parallelism parameter:
+
+.. code-block:: python
+
+    pipeline = in_parallel([
+        multiply.send(3, 2),
+        multiply.send(4, 5),
+        ...
+    ], max_parallelism=10)
+    
+    result = await client.submit_async(pipeline)
+
 Passing State
 -------------
 
