@@ -1,0 +1,383 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>EventHandlers &mdash; Flink Tasks  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Client API" href="../flink_tasks_client.html" />
+    <link rel="prev" title="DefaultSerialiser" href="statefun_tasks.DefaultSerialiser.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Flink Tasks
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">About</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tasks_vs_functions.html">Tasks vs Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tasks.html">Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pipelines.html">Pipelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../actions.html">Actions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stateful_tasks.html">Stateful Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../events.html">Events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../extensions.html">Extensions</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Developer Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../flink_tasks.html">Worker API</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="statefun_tasks.FlinkTasks.html">FlinkTasks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="statefun_tasks.TaskContext.html">TaskContext</a></li>
+<li class="toctree-l3"><a class="reference internal" href="statefun_tasks.PipelineBuilder.html">PipelineBuilder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="statefun_tasks.DefaultSerialiser.html">DefaultSerialiser</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">EventHandlers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../flink_tasks_client.html">Client API</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Flink Tasks</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../api.html">API Reference</a> &raquo;</li>
+        
+          <li><a href="../flink_tasks.html">Worker API</a> &raquo;</li>
+        
+      <li>EventHandlers</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="eventhandlers">
+<h1>EventHandlers<a class="headerlink" href="#eventhandlers" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="statefun_tasks.events.EventHandlers">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">statefun_tasks.events.</span></code><code class="sig-name descname"><span class="pre">EventHandlers</span></code><a class="headerlink" href="#statefun_tasks.events.EventHandlers" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="statefun_tasks.events.EventHandlers.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.events.EventHandlers.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.events.EventHandlers.__init__" title="statefun_tasks.events.EventHandlers.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>()</p></td>
+<td><p>Initialize self.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.events.EventHandlers.notify_pipeline_created" title="statefun_tasks.events.EventHandlers.notify_pipeline_created"><code class="xref py py-obj docutils literal notranslate"><span class="pre">notify_pipeline_created</span></code></a>(context, pipeline)</p></td>
+<td><p>Calls all notify_pipeline_created event handlers</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.events.EventHandlers.notify_pipeline_finished" title="statefun_tasks.events.EventHandlers.notify_pipeline_finished"><code class="xref py py-obj docutils literal notranslate"><span class="pre">notify_pipeline_finished</span></code></a>(context, pipeline, …)</p></td>
+<td><p>Calls all notify_pipeline_finished event handlers</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.events.EventHandlers.notify_pipeline_status_changed" title="statefun_tasks.events.EventHandlers.notify_pipeline_status_changed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">notify_pipeline_status_changed</span></code></a>(context, …)</p></td>
+<td><p>Calls all notify_pipeline_status_changed event handlers</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.events.EventHandlers.notify_pipeline_task_finished" title="statefun_tasks.events.EventHandlers.notify_pipeline_task_finished"><code class="xref py py-obj docutils literal notranslate"><span class="pre">notify_pipeline_task_finished</span></code></a>(context, …)</p></td>
+<td><p>Calls all notify_pipeline_task_finished event handlers</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.events.EventHandlers.notify_task_finished" title="statefun_tasks.events.EventHandlers.notify_task_finished"><code class="xref py py-obj docutils literal notranslate"><span class="pre">notify_task_finished</span></code></a>(context, task_result, …)</p></td>
+<td><p>Calls all notify_task_finished event handlers</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.events.EventHandlers.notify_task_retry" title="statefun_tasks.events.EventHandlers.notify_task_retry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">notify_task_retry</span></code></a>(context, task_request, …)</p></td>
+<td><p>Calls all notify_task_retry event handlers</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.events.EventHandlers.notify_task_started" title="statefun_tasks.events.EventHandlers.notify_task_started"><code class="xref py py-obj docutils literal notranslate"><span class="pre">notify_task_started</span></code></a>(context, task_request)</p></td>
+<td><p>Calls all on_task_started event handlers</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.events.EventHandlers.on_pipeline_created" title="statefun_tasks.events.EventHandlers.on_pipeline_created"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_pipeline_created</span></code></a>(handler)</p></td>
+<td><p>&#64;tasks.events.on_pipeline_created decorator</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.events.EventHandlers.on_pipeline_finished" title="statefun_tasks.events.EventHandlers.on_pipeline_finished"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_pipeline_finished</span></code></a>(handler)</p></td>
+<td><p>&#64;tasks.events.on_pipeline_finished decorator</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.events.EventHandlers.on_pipeline_status_changed" title="statefun_tasks.events.EventHandlers.on_pipeline_status_changed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_pipeline_status_changed</span></code></a>(handler)</p></td>
+<td><p>&#64;tasks.events.on_pipeline_status_changed decorator</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.events.EventHandlers.on_pipeline_task_finished" title="statefun_tasks.events.EventHandlers.on_pipeline_task_finished"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_pipeline_task_finished</span></code></a>(handler)</p></td>
+<td><p>&#64;tasks.events.on_pipeline_task_finished decorator</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.events.EventHandlers.on_task_finished" title="statefun_tasks.events.EventHandlers.on_task_finished"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_task_finished</span></code></a>(handler)</p></td>
+<td><p>&#64;tasks.events.on_task_finished decorator</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.events.EventHandlers.on_task_retry" title="statefun_tasks.events.EventHandlers.on_task_retry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_task_retry</span></code></a>(handler)</p></td>
+<td><p>&#64;tasks.events.on_task_retry decorator</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.events.EventHandlers.on_task_started" title="statefun_tasks.events.EventHandlers.on_task_started"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_task_started</span></code></a>(handler)</p></td>
+<td><p>&#64;tasks.events.on_task_started decorator</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt id="statefun_tasks.events.EventHandlers.notify_pipeline_created">
+<code class="sig-name descname"><span class="pre">notify_pipeline_created</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.events.EventHandlers.notify_pipeline_created" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calls all notify_pipeline_created event handlers</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.events.EventHandlers.notify_pipeline_finished">
+<code class="sig-name descname"><span class="pre">notify_pipeline_finished</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_result_or_exception</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.events.EventHandlers.notify_pipeline_finished" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calls all notify_pipeline_finished event handlers</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.events.EventHandlers.notify_pipeline_status_changed">
+<code class="sig-name descname"><span class="pre">notify_pipeline_status_changed</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.events.EventHandlers.notify_pipeline_status_changed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calls all notify_pipeline_status_changed event handlers</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.events.EventHandlers.notify_pipeline_task_finished">
+<code class="sig-name descname"><span class="pre">notify_pipeline_task_finished</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_result_or_exception</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.events.EventHandlers.notify_pipeline_task_finished" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calls all notify_pipeline_task_finished event handlers</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.events.EventHandlers.notify_task_finished">
+<code class="sig-name descname"><span class="pre">notify_task_finished</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_exception</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_pipeline</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.events.EventHandlers.notify_task_finished" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calls all notify_task_finished event handlers</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.events.EventHandlers.notify_task_retry">
+<code class="sig-name descname"><span class="pre">notify_task_retry</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retry_count</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.events.EventHandlers.notify_task_retry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calls all notify_task_retry event handlers</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.events.EventHandlers.notify_task_started">
+<code class="sig-name descname"><span class="pre">notify_task_started</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_request</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.events.EventHandlers.notify_task_started" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calls all on_task_started event handlers</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.events.EventHandlers.on_pipeline_created">
+<code class="sig-name descname"><span class="pre">on_pipeline_created</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">handler</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.events.EventHandlers.on_pipeline_created" title="Permalink to this definition">¶</a></dt>
+<dd><p>&#64;tasks.events.on_pipeline_created decorator</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.events.EventHandlers.on_pipeline_finished">
+<code class="sig-name descname"><span class="pre">on_pipeline_finished</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">handler</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.events.EventHandlers.on_pipeline_finished" title="Permalink to this definition">¶</a></dt>
+<dd><p>&#64;tasks.events.on_pipeline_finished decorator</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.events.EventHandlers.on_pipeline_status_changed">
+<code class="sig-name descname"><span class="pre">on_pipeline_status_changed</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">handler</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.events.EventHandlers.on_pipeline_status_changed" title="Permalink to this definition">¶</a></dt>
+<dd><p>&#64;tasks.events.on_pipeline_status_changed decorator</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.events.EventHandlers.on_pipeline_task_finished">
+<code class="sig-name descname"><span class="pre">on_pipeline_task_finished</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">handler</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.events.EventHandlers.on_pipeline_task_finished" title="Permalink to this definition">¶</a></dt>
+<dd><p>&#64;tasks.events.on_pipeline_task_finished decorator</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.events.EventHandlers.on_task_finished">
+<code class="sig-name descname"><span class="pre">on_task_finished</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">handler</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.events.EventHandlers.on_task_finished" title="Permalink to this definition">¶</a></dt>
+<dd><p>&#64;tasks.events.on_task_finished decorator</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.events.EventHandlers.on_task_retry">
+<code class="sig-name descname"><span class="pre">on_task_retry</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">handler</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.events.EventHandlers.on_task_retry" title="Permalink to this definition">¶</a></dt>
+<dd><p>&#64;tasks.events.on_task_retry decorator</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.events.EventHandlers.on_task_started">
+<code class="sig-name descname"><span class="pre">on_task_started</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">handler</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.events.EventHandlers.on_task_started" title="Permalink to this definition">¶</a></dt>
+<dd><p>&#64;tasks.events.on_task_started decorator</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="../flink_tasks_client.html" class="btn btn-neutral float-right" title="Client API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="statefun_tasks.DefaultSerialiser.html" class="btn btn-neutral float-left" title="DefaultSerialiser" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020-2022, Frans King &amp; Luke Ashworth.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

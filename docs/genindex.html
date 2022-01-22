@@ -90,6 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="pipelines.html">Pipelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="actions.html">Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stateful_tasks.html">Stateful Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="events.html">Events</a></li>
 <li class="toctree-l1"><a class="reference internal" href="extensions.html">Extensions</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Developer Guide</span></p>
@@ -175,6 +176,8 @@
  | <a href="#G"><strong>G</strong></a>
  | <a href="#I"><strong>I</strong></a>
  | <a href="#M"><strong>M</strong></a>
+ | <a href="#N"><strong>N</strong></a>
+ | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
@@ -195,6 +198,8 @@
         <li><a href="api/generated/statefun_tasks.client.TaskStatus.html#statefun_tasks.client.TaskStatus.__init__">(statefun_tasks.client.TaskStatus method)</a>
 </li>
         <li><a href="api/generated/statefun_tasks.DefaultSerialiser.html#statefun_tasks.DefaultSerialiser.__init__">(statefun_tasks.DefaultSerialiser method)</a>
+</li>
+        <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.__init__">(statefun_tasks.events.EventHandlers method)</a>
 </li>
         <li><a href="api/generated/statefun_tasks.FlinkTasks.html#statefun_tasks.FlinkTasks.__init__">(statefun_tasks.FlinkTasks method)</a>
 </li>
@@ -263,10 +268,12 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/generated/statefun_tasks.FlinkTasks.html#statefun_tasks.FlinkTasks.events">events() (statefun_tasks.FlinkTasks property)</a>
+      <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers">EventHandlers (class in statefun_tasks.events)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/generated/statefun_tasks.FlinkTasks.html#statefun_tasks.FlinkTasks.events">events() (statefun_tasks.FlinkTasks property)</a>
+</li>
       <li><a href="api/generated/statefun_tasks.FlinkTasks.html#statefun_tasks.FlinkTasks.extend">extend() (statefun_tasks.FlinkTasks static method)</a>
 </li>
   </ul></td>
@@ -356,6 +363,50 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/generated/statefun_tasks.DefaultSerialiser.html#statefun_tasks.DefaultSerialiser.merge_args_and_kwargs">merge_args_and_kwargs() (statefun_tasks.DefaultSerialiser static method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="N">N</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.notify_pipeline_created">notify_pipeline_created() (statefun_tasks.events.EventHandlers method)</a>
+</li>
+      <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.notify_pipeline_finished">notify_pipeline_finished() (statefun_tasks.events.EventHandlers method)</a>
+</li>
+      <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.notify_pipeline_status_changed">notify_pipeline_status_changed() (statefun_tasks.events.EventHandlers method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.notify_pipeline_task_finished">notify_pipeline_task_finished() (statefun_tasks.events.EventHandlers method)</a>
+</li>
+      <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.notify_task_finished">notify_task_finished() (statefun_tasks.events.EventHandlers method)</a>
+</li>
+      <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.notify_task_retry">notify_task_retry() (statefun_tasks.events.EventHandlers method)</a>
+</li>
+      <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.notify_task_started">notify_task_started() (statefun_tasks.events.EventHandlers method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="O">O</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.on_pipeline_created">on_pipeline_created() (statefun_tasks.events.EventHandlers method)</a>
+</li>
+      <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.on_pipeline_finished">on_pipeline_finished() (statefun_tasks.events.EventHandlers method)</a>
+</li>
+      <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.on_pipeline_status_changed">on_pipeline_status_changed() (statefun_tasks.events.EventHandlers method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.on_pipeline_task_finished">on_pipeline_task_finished() (statefun_tasks.events.EventHandlers method)</a>
+</li>
+      <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.on_task_finished">on_task_finished() (statefun_tasks.events.EventHandlers method)</a>
+</li>
+      <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.on_task_retry">on_task_retry() (statefun_tasks.events.EventHandlers method)</a>
+</li>
+      <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.on_task_started">on_task_started() (statefun_tasks.events.EventHandlers method)</a>
 </li>
   </ul></td>
 </tr></table>
