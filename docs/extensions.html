@@ -39,7 +39,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Getting Started" href="getting_started.html" />
-    <link rel="prev" title="Stateful Tasks" href="stateful_tasks.html" /> 
+    <link rel="prev" title="Events" href="events.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -92,6 +92,7 @@
 <li class="toctree-l1"><a class="reference internal" href="pipelines.html">Pipelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="actions.html">Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stateful_tasks.html">Stateful Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="events.html">Events</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Extensions</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#inline-tasks">Inline Tasks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#state-offloading">State offloading</a></li>
@@ -199,8 +200,8 @@ but in test environments or when working with interactive notebooks it may be us
 <h2>State offloading<a class="headerlink" href="#state-offloading" title="Permalink to this headline">¶</a></h2>
 <p>When running a large number of parallel tasks via in_parallel(), the pipeline must store and then aggregate each result before passing to the next task or
 returning the result to the egress or caller.  Depending on what the tasks return this could cause the state to grow beyond the memory constraints of a single worker.
-If that is the case, offloading this state to external storage may be a solution.  If enabled, once state size exceeds a configured threshold, further items are offloaded
-to a storage backend and the state then holds a pointer to this data.</p>
+If that is the case, offloading this state to external storage may be a solution.  Once enabled and the state size exceeds a configured threshold, further items are offloaded
+to the storage backend and the state then holds a pointer to this data.</p>
 <p>The same can apply when a large number of parallel requests are deferred due to a max_parallelism setting or the pipeline being paused.</p>
 <p>Generally the recommendation is to pass pointers to large data sets with offloading provided as a best effort convenience.</p>
 <p>There is an example S3 based backend in the extensions/s3_storage folder.</p>
@@ -223,7 +224,7 @@ to a storage backend and the state then holds a pointer to this data.</p>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="getting_started.html" class="btn btn-neutral float-right" title="Getting Started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="stateful_tasks.html" class="btn btn-neutral float-left" title="Stateful Tasks" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="events.html" class="btn btn-neutral float-left" title="Events" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

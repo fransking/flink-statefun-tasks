@@ -1,6 +1,6 @@
 
-Tasks API
-=========
+Worker API
+==========
 
 .. autosummary::
    :toctree: generated/
@@ -9,3 +9,4 @@ Tasks API
    ~statefun_tasks.TaskContext
    ~statefun_tasks.PipelineBuilder
    ~statefun_tasks.DefaultSerialiser
+   ~statefun_tasks.events.EventHandlers

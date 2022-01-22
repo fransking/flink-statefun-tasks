@@ -5,7 +5,7 @@ Since functions on Flink are inherently stateful, tasks may also be written stat
 has a namespace, worker_name and task_id corresponding to the namespace, address and id of a Flink Stateful Function.
 
 By default, when composing pipelines using the PipelineBuilder, each entry is given a unique task id and therefore its own isolated state.  By either 
-entering a fixed task_id in the tasks.bind() decorator using the .set() function when constructing a pipeline, task entries can be added to a pipeline
+entering a fixed task_id in the tasks.bind() decorator or using the .set() function when constructing a pipeline, task entries can be added to a pipeline
 that share the same task_id and therefore state. 
 
 

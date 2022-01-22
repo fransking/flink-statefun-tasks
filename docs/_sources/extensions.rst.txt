@@ -42,8 +42,8 @@ State offloading
 
 When running a large number of parallel tasks via in_parallel(), the pipeline must store and then aggregate each result before passing to the next task or 
 returning the result to the egress or caller.  Depending on what the tasks return this could cause the state to grow beyond the memory constraints of a single worker.
-If that is the case, offloading this state to external storage may be a solution.  If enabled, once state size exceeds a configured threshold, further items are offloaded 
-to a storage backend and the state then holds a pointer to this data.
+If that is the case, offloading this state to external storage may be a solution.  Once enabled and the state size exceeds a configured threshold, further items are offloaded 
+to the storage backend and the state then holds a pointer to this data.
 
 The same can apply when a large number of parallel requests are deferred due to a max_parallelism setting or the pipeline being paused.
 
