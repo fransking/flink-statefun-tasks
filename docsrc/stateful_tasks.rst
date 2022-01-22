@@ -25,9 +25,9 @@ that share the same task_id and therefore state.
 
 
     pipeline = in_parallel([
-        multiply.send(3, 2).continue_with(divide, 2),                           # calculates and memoises result
-        multiply.send(3, 2).continue_with(divide, 2)                            # returns memoised result
-        multiply.send(3, 2).set(task_id=str(uuid4())).continue_with(divide, 2)  # has a different task id and therefore different state
+        memoised_multiply.send(3, 2),                           # calculates and memoises result
+        memoised_multiply.send(3, 2)                            # returns memoised result
+        memoised_multiply.send(3, 2).set(task_id=str(uuid4()))  # has a different task id and therefore independent state
     }
     
     result = await client.submit_async(pipeline) 
