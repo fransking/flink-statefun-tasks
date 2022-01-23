@@ -26,4 +26,5 @@ Check out the source code on `GitHub <https://github.com/fransking/flink-statefu
    :caption: Developer Guide
 
    getting_started
+   deployment_topologies
    api
