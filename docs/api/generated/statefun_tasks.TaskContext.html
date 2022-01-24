@@ -211,8 +211,8 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.__init__" title="statefun_tasks.TaskContext.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(context, egress_type_name[, serialiser])</p></td>
 <td><p>Initialize self.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.apply_task_meta" title="statefun_tasks.TaskContext.apply_task_meta"><code class="xref py py-obj docutils literal notranslate"><span class="pre">apply_task_meta</span></code></a>(task_request)</p></td>
-<td><p>Applies the task meta from the given TaskRequest to this context</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.contextualise_from" title="statefun_tasks.TaskContext.contextualise_from"><code class="xref py py-obj docutils literal notranslate"><span class="pre">contextualise_from</span></code></a>(task_request)</p></td>
+<td><p>Sets additional context properties from the supplied task request</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_address" title="statefun_tasks.TaskContext.get_address"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_address</span></code></a>()</p></td>
 <td><p>Own address in the form of context.address.typename</p></td>
@@ -265,6 +265,9 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.task_name" title="statefun_tasks.TaskContext.task_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_name</span></code></a></p></td>
 <td><p>The name of this task</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.task_uid" title="statefun_tasks.TaskContext.task_uid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_uid</span></code></a></p></td>
+<td><p>The unique ID of this task.</p></td>
+</tr>
 </tbody>
 </table>
 <p class="rubric">Attributes</p>
@@ -277,12 +280,15 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.task_name" title="statefun_tasks.TaskContext.task_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_name</span></code></a></p></td>
 <td><p>The name of this task</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.task_uid" title="statefun_tasks.TaskContext.task_uid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_uid</span></code></a></p></td>
+<td><p>The unique ID of this task.</p></td>
+</tr>
 </tbody>
 </table>
 <dl class="py method">
-<dt id="statefun_tasks.TaskContext.apply_task_meta">
-<code class="sig-name descname"><span class="pre">apply_task_meta</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_request</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.apply_task_meta" title="Permalink to this definition">¶</a></dt>
-<dd><p>Applies the task meta from the given TaskRequest to this context</p>
+<dt id="statefun_tasks.TaskContext.contextualise_from">
+<code class="sig-name descname"><span class="pre">contextualise_from</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_request</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.contextualise_from" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets additional context properties from the supplied task request</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>task_request</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TaskRequest</span></code>) – the task request</p>
@@ -439,6 +445,13 @@ get_pipeline_id() if the pipeline is nested</p>
 <dt id="statefun_tasks.TaskContext.task_name">
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">task_name</span></code><a class="headerlink" href="#statefun_tasks.TaskContext.task_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>The name of this task</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.TaskContext.task_uid">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">task_uid</span></code><a class="headerlink" href="#statefun_tasks.TaskContext.task_uid" title="Permalink to this definition">¶</a></dt>
+<dd><p>The unique ID of this task.  Not to be confused with context.get_task_id() which returns the Flink
+stateful identity of this task</p>
 </dd></dl>
 
 <dl class="py method">
