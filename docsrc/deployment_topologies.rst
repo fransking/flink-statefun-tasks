@@ -2,7 +2,7 @@ Deployment Topologies
 =====================
 
 Each task has an associated namespace and worker name corresponding to the namespace and type of a Flink function registered in the Statefun module.yaml.  The simplist deployment
-topology involves registering a single function (call it example/worker) and connecting ingress topic (call it task.requests) to that function.
+topology involves registering a single function (call it example/worker) and connecting a single ingress topic (call it task.requests) to that function.
 
 This may not be the optimal topology where pipelines are concerned.  When a pipeline is sent to ingress by the client and picked up by a worker, or similarly another task 
 returns its own pipeline, these tasks become orchestrators for all sub-tasks in the pipeline.  Logically we depict a pipeline as:
