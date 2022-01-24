@@ -18,7 +18,15 @@ class TaskContext(object):
         self.pipeline_state_size = self.pipeline_state.ByteSize() if self.pipeline_state is not None else 0
 
         self._task_meta = {}
-        self._task_name = None
+        self._task_uid = None
+
+    @property
+    def task_uid(self):
+        """
+        The unique ID of this task.  Not to be confused with context.get_task_id() which returns the Flink
+        stateful identity of this task
+        """
+        return self._task_uid
 
     @property
     def task_name(self):
@@ -31,12 +39,14 @@ class TaskContext(object):
     def task_name(self, value):
         self._task_name = value
 
-    def apply_task_meta(self, task_request: TaskRequest):
+    def contextualise_from(self, task_request: TaskRequest):
         """
-        Applies the task meta from the given TaskRequest to this context
+        Sets additional context properties from the supplied task request
+
         :param task_request: the task request
         """
         self._task_meta = task_request.meta or {}
+        self._task_uid = task_request.uid
 
         """
         Friendly name of this task or if not set then the task name

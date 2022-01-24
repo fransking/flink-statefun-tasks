@@ -13,7 +13,7 @@ class TaskRequestHandler(MessageHandler):
     def can_handle(self, context: TaskContext, message):
         if isinstance(message, TaskRequest):
             context.task_name = message.type
-            context.apply_task_meta(message)
+            context.contextualise_from(message)
             return True
 
         return False
