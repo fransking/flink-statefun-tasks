@@ -16,7 +16,7 @@ class TaskRequestHandler(MessageHandler):
             task_input = message.as_type(TASK_REQUEST_TYPE)
             
             context.task_name = task_input.type
-            context.apply_task_meta(task_input)
+            context.contextualise_from(task_input)
 
             return task_input
         

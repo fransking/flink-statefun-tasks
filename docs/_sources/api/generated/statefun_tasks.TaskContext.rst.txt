@@ -13,7 +13,7 @@ TaskContext
    .. autosummary::
    
       ~TaskContext.__init__
-      ~TaskContext.apply_task_meta
+      ~TaskContext.contextualise_from
       ~TaskContext.get_address
       ~TaskContext.get_caller_address
       ~TaskContext.get_caller_id
@@ -34,6 +34,7 @@ TaskContext
     
    
       ~TaskContext.task_name
+      ~TaskContext.task_uid
 
    
    
@@ -45,5 +46,6 @@ TaskContext
    .. autosummary::
    
       ~TaskContext.task_name
+      ~TaskContext.task_uid
    
    
