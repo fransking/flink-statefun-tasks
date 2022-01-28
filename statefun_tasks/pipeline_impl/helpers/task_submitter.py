@@ -50,16 +50,18 @@ class DeferredTaskSubmitter(object):
             await asyncio.gather(*sent_tasks)
 
     async def release_tasks(self, context, caller_uid, task_result_or_exception):
+        
         if isinstance(task_result_or_exception, TaskException):
             parent_id = self._graph.get_last_task_in_chain(caller_uid).uid
         else:
             parent_id = caller_uid
-         
+        
         if parent_id in context.pipeline_state.task_deferral_ids_by_task_uid:
             deferral_id = context.pipeline_state.task_deferral_ids_by_task_uid[parent_id]
             task_deferral = context.pipeline_state.task_deferrals_by_id[deferral_id]
 
             if any(task_deferral.task_uids):
+                
                 task_uid = task_deferral.task_uids.pop()
                 task = self._graph.get_task(task_uid) 
 
@@ -67,13 +69,14 @@ class DeferredTaskSubmitter(object):
                 
                 # add task we are submitting to deferral task
                 last_task = self._graph.get_last_task_in_chain(task_uid)
+
                 context.pipeline_state.task_deferral_ids_by_task_uid[last_task.uid] = deferral_id
 
                 # send the task
                 await self._send_task(context, task.get_destination(), task_request)
             else:
                 # clean up
-                del context.pipeline_state.task_deferral_ids_by_task_uid[caller_uid]
+                del context.pipeline_state.task_deferral_ids_by_task_uid[parent_id]
                 del context.pipeline_state.task_deferrals_by_id[deferral_id]
 
     async def unpause_tasks(self, context):
