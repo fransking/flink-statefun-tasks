@@ -73,7 +73,7 @@ class DeferredTaskSubmitter(object):
                 await self._send_task(context, task.get_destination(), task_request)
             else:
                 # clean up
-                del context.pipeline_state.task_deferral_ids_by_task_uid[caller_uid]
+                del context.pipeline_state.task_deferral_ids_by_task_uid[parent_id]
                 del context.pipeline_state.task_deferrals_by_id[deferral_id]
 
     async def unpause_tasks(self, context):
