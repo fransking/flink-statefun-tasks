@@ -1,6 +1,6 @@
 from statefun_tasks.context import TaskContext
 from statefun_tasks.task_impl.handlers import MessageHandler
-from statefun_tasks.messages_pb2 import TaskResult, TaskException
+from statefun_tasks.messages_pb2 import TaskResult, TaskException, TaskRequest
 
 
 class TaskResponseHandler(MessageHandler):
@@ -10,6 +10,11 @@ class TaskResponseHandler(MessageHandler):
     def can_handle(self, context: TaskContext, message):
         if isinstance(message, (TaskResult, TaskException)):
             context.task_name = message.type
+
+            task_request = context.unpack('task_request', TaskRequest)
+            if task_request is not None:
+                context.contextualise_from(task_request)
+
             return True
 
         return False
