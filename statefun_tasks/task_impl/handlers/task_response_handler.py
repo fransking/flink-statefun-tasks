@@ -20,6 +20,10 @@ class TaskResponseHandler(MessageHandler):
         if task_input is not None:
             context.task_name = task_input.type
 
+        task_request = context.storage.task_request
+        if task_request is not None:
+            context.contextualise_from(task_request)
+
         return task_input
 
     async def handle_message(self, tasks: 'FlinkTasks', context: TaskContext, task_result_or_exception):
