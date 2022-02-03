@@ -20,7 +20,7 @@ but in reality there is a pipeline function p() acting as the orchestrator:
 
 Running p() on resource constrained workers may impact performance and it may make sense to hive these off into their own Flink function type.  Our deployments expose only
 the pipeline workers to ingress.  Other worker functions are then registered seperately in the module.yaml such as example/cpu_worker, example/gpu_worker, example/aio_worker for different
-classifictions of work. 
+classifications of work. 
 
 
 .. code-block:: python
