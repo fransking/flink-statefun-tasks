@@ -180,7 +180,7 @@ returns its own pipeline, these tasks become orchestrators for all sub-tasks in 
 </div>
 <p>Running p() on resource constrained workers may impact performance and it may make sense to hive these off into their own Flink function type.  Our deployments expose only
 the pipeline workers to ingress.  Other worker functions are then registered seperately in the module.yaml such as example/cpu_worker, example/gpu_worker, example/aio_worker for different
-classifictions of work.</p>
+classifications of work.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">worker_name</span><span class="o">=</span><span class="s1">&#39;cpu_worker&#39;</span><span class="p">):</span>
 <span class="k">def</span> <span class="nf">a</span><span class="p">():</span>
     <span class="c1"># do CPU bound work</span>
