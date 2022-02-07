@@ -23,7 +23,7 @@ class PipelineMessageHandler(ABC):
         pass
 
     @abstractmethod
-    async def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline: '_Pipeline', task_state: Any = None) -> Tuple[bool, Union[TaskRequest, TaskResult, TaskException]]:
+    async def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline: '_Pipeline', state: Any = None) -> Tuple[bool, Union[TaskRequest, TaskResult, TaskException]]:
         pass
     
     @property
