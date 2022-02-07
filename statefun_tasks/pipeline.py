@@ -57,12 +57,12 @@ class _Pipeline(object):
 
         return _Pipeline(pipeline, serialiser=serialiser, events=events, storage=storage)
 
-    async def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], task_state: Any=None) -> bool:
+    async def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], state: Any=None) -> bool:
         handled = False
 
         for handler in self._handlers:
             if handler.can_handle_message(context, message):
-                should_continue, message = await handler.handle_message(context, message, pipeline=self, task_state=task_state)
+                should_continue, message = await handler.handle_message(context, message, pipeline=self, state=state)
                 handled = True
 
                 if not should_continue:

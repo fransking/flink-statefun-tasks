@@ -115,11 +115,15 @@ message TaskResultOrException {
     }
 }
 
-message TaskState {
+message TaskSpecificState {
     int32 retry_count = 1;
     string original_caller_address = 2;
     string original_caller_id = 3;
-    optional google.protobuf.Any internal_state = 4;
+}
+
+message TaskState {
+    map<string, TaskSpecificState> by_uid = 1;
+    optional google.protobuf.Any internal_state = 2;
 }
 
 message TaskDeferral {
