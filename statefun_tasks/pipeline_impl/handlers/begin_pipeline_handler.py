@@ -16,21 +16,22 @@ class BeginPipelineHandler(PipelineMessageHandler):
             and isinstance(message, TaskRequest) \
                 and not self.graph.is_empty()
 
-    async def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline: '_Pipeline', task_state: Any):
+    async def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline: '_Pipeline', state: Any):
         invoking_task = message  # type: TaskRequest
 
         # ensure we pick up the correct caller id when task producing this pipeline is a retry
-        if context.task_state.original_caller_id == '':
+        task_state = context.task_state.by_uid[invoking_task.uid]
+        if task_state.original_caller_id == '':
             caller_id = context.get_caller_id()
         else:
-            caller_id = context.task_state.original_caller_id
+            caller_id = task_state.original_caller_id
 
         # 1. record all the continuations into a pipeline and save into state with caller id and address
         context.pipeline_state = PipelineState(id = context.get_task_id(), address = context.get_address())
         context.pipeline_state.status.value = TaskStatus.RUNNING
         context.pipeline_state.pipeline.CopyFrom(pipeline.to_proto())
         context.pipeline_state.is_fruitful = pipeline.is_fruitful
-        context.pipeline_state.task_state.CopyFrom(pack_any(self.serialiser.to_proto(task_state)))
+        context.pipeline_state.task_state.CopyFrom(pack_any(self.serialiser.to_proto(state)))
         context.pipeline_state.invocation_id = _gen_id()
 
         if caller_id is not None:

@@ -27,7 +27,7 @@ class TaskRequestHandler(MessageHandler):
         tasks.events.notify_task_started(context, task_request)
 
         # run task code
-        task_result, task_exception, pipeline, task_state = await flink_task.run(context, task_request)
+        task_result, task_exception, pipeline, state = await flink_task.run(context, task_request)
 
         # if a pipeline is retured then try to reset its state in case it already exists
         if pipeline is not None:
@@ -40,7 +40,7 @@ class TaskRequestHandler(MessageHandler):
         tasks.events.notify_task_finished(context, task_result, task_exception, is_pipeline=pipeline is not None)
 
         # if task returns a pipeline then start it if we can
-        if pipeline is not None and await pipeline.handle_message(context, task_request, task_state):
+        if pipeline is not None and await pipeline.handle_message(context, task_request, state):
             ()
 
         # else if we have an task exception, attempt retry or return the error
@@ -57,18 +57,22 @@ class TaskRequestHandler(MessageHandler):
             tasks.emit_result(context, task_request, task_result)
 
     def _attempt_retry(self, context, task_request, task_exception):
+        task_state = context.task_state.by_uid[task_request.uid]
+
         if task_exception.maybe_retry and task_exception.retry_policy is not None:           
-            if context.task_state.retry_count >= task_exception.retry_policy.max_retries:
+            if task_state.retry_count >= task_exception.retry_policy.max_retries:
                 return False
 
-            # save the original caller address and id for this task_request prior to calling back to ourselves which would overwrite
-            if context.task_state.original_caller_id == '':
-                context.task_state.original_caller_id = context.get_caller_id()
-                context.task_state.original_caller_address = context.get_caller_address()
+            # increment retry count
+            task_state.retry_count += 1
 
-            # remove previous task_request from state, increment retry count
+            # save the original caller address and id for this task_request prior to calling back to ourselves which would overwrite
+            if task_state.original_caller_id == '':
+                task_state.original_caller_id = context.get_caller_id()
+                task_state.original_caller_address = context.get_caller_address()
+
+            # remove previous task_request from state
             context.delete('task_request')
-            context.task_state.retry_count += 1
 
             # send retry
             delay = timedelta(milliseconds=task_exception.retry_policy.delay_ms)

@@ -272,12 +272,16 @@ class FlinkTasks(object):
         elif isinstance(task_input, TaskRequest):
             # if this was a task request it could be part of a pipeline - i.e. called from another tasks so
             # either call back to original caller (e.g. if this is a result of a retry)
-            if context.task_state.original_caller_id != '':
-                context.pack_and_send(context.task_state.original_caller_address, context.task_state.original_caller_id, task_result)
+            task_state = context.task_state.by_uid[task_input.uid]
+            if task_state.original_caller_id != '':
+                context.pack_and_send(task_state.original_caller_address, task_state.original_caller_id, task_result)
 
             # or call back to our caller (if there is one)
             elif context.get_caller_id() is not None:
                 context.pack_and_reply(task_result)
+
+            # clean up
+            del context.task_state.by_uid[task_input.uid]
 
     def fail(self, context, task_input, ex):
         task_exception = _create_task_exception(task_input, ex)
