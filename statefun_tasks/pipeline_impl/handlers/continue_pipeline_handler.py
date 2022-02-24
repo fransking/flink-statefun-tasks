@@ -37,7 +37,7 @@ class ContinuePipelineHandler(PipelineMessageHandler):
 
         # if this task is part group then we need to record the results so we can aggregate later
         if group is not None:
-            await self.result_aggregator.add_result(context, group, caller_uid, task_result_or_exception)
+            await self.result_aggregator.add_result(context, caller_uid, task_result_or_exception)
 
             # once the group is complete aggregate the results
             if group.is_complete():
