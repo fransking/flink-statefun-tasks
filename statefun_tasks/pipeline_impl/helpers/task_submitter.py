@@ -89,7 +89,6 @@ class DeferredTaskSubmitter(object):
                 context.send_message(paused_task.destination, paused_task.task_request.id, paused_task.task_request)
 
         context.pipeline_state.ClearField('paused_tasks')
-        await self._cleanup_storage(context)
 
     def _create_task_deferral(self, context, tasks_to_defer, task_result_or_exception):
         # create task deferral to hold these deferred tasks
@@ -192,18 +191,9 @@ class DeferredTaskSubmitter(object):
             return False
 
     async def _load_from_store(self, context, paused_task):
-        keys = [context.pipeline_state.invocation_id, paused_task.task_uid]
+        keys = ['paused_tasks', context.pipeline_state.invocation_id, paused_task.task_uid]
 
         proto_bytes = await self._storage.fetch(keys)
         paused_task = PausedTask()
         paused_task.ParseFromString(proto_bytes)
         return paused_task
-
-    async def _cleanup_storage(self, context):
-        if self._storage is None:
-            return
-
-        try:
-            await self._storage.delete([context.pipeline_state.invocation_id])
-        except Exception as ex:
-            _log.warning(f'Error cleaning up paused tasks for {context.pipeline_state.invocation_id} from backend storage - {ex}')
