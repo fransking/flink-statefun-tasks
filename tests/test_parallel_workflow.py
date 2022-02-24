@@ -266,6 +266,17 @@ class ParallelWorkflowTests(unittest.TestCase):
         self.assertEqual(result, "['Hello Jane Doe', ['Hello Bob Smith. So now I will say see you later!', 'Hello Tom Smith']]")
 
 
+    def test_parallel_workflow_composition(self):
+        p1 = in_parallel([_say_hello.send("A", "B"), _say_hello.send("C", "D")])
+        p2 = in_parallel([_say_hello.send("E", "F"), _say_hello.send("G", "H")])
+        p3 = in_parallel([_say_hello.send("I", "J")])
+
+        pipeline = in_parallel([p1, p2, p3])
+
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, [['Hello A B', 'Hello C D'], ['Hello E F', 'Hello G H'], ['Hello I J']])
+
+
     def test_parallel_workflow_with_max_parallelism_as_continuation(self):
         pipeline = _say_hello.send("Jane", "Doe").continue_with(in_parallel([
             _print_results.send(),

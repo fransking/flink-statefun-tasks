@@ -54,18 +54,3 @@ class S3StorageBackend(StorageBackend):
         response = await self._client.get_object(Bucket=self._bucket, Key='/'.join(keys))
         async with response['Body'] as stream:
             return await stream.read()
-
-    async def delete(self, keys: List[str]) -> bytes:
-        if self._client is None:
-            raise TasksException('S3StorageBackend should be used with async with')
-
-        keys_to_delete = []
-
-        paginator = self._client.get_paginator('list_objects')
-        async for result in paginator.paginate(Bucket=self._bucket, Prefix='/'.join(keys)):
-            keys_to_delete.extend([obj['Key'] for obj in result.get('Contents', [])])
-
-        deletes = [asyncio.ensure_future(self._client.delete_object(Bucket=self._bucket, Key=key)) for key in keys_to_delete]
-
-        if any(deletes):
-            await asyncio.gather(*deletes, return_exceptions=True)
