@@ -33,9 +33,8 @@ class FlinkTask(object):
         proto_types = _annotated_protos_for(fun)
         self._serialiser.register_proto_types(proto_types)
 
-    async def run(self, task_context: TaskContext):
+    async def run(self, task_context: TaskContext, task_request: TaskRequest):
         task_result, task_exception, pipeline = None, None, None
-        task_request = task_context.storage.task_request
 
         task_args, kwargs, fn_state = self._to_task_args_and_kwargs(task_context, task_request)
 
@@ -65,7 +64,7 @@ class FlinkTask(object):
             # we errored so return a task_exception instead
             task_exception = self._to_task_exception(task_request, e)
 
-        return task_request, task_result, task_exception, pipeline, fn_state
+        return task_result, task_exception, pipeline, fn_state
 
     def _to_pipeline_or_task_result(self, task_request, fn_result, fn_state):
         pipeline, task_result, is_fruitful = None, None, self._is_fruitful
