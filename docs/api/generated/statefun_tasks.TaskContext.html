@@ -217,55 +217,58 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_address" title="statefun_tasks.TaskContext.get_address"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_address</span></code></a>()</p></td>
 <td><p>Own address in the form of context.address.typename</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_caller_address" title="statefun_tasks.TaskContext.get_caller_address"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_caller_address</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_caller" title="statefun_tasks.TaskContext.get_caller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_caller</span></code></a>()</p></td>
+<td><p>Returns the caller of the task if there is one or None otherwise</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_caller_address" title="statefun_tasks.TaskContext.get_caller_address"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_caller_address</span></code></a>()</p></td>
 <td><p>Caller address in the form of context.caller.typename</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_caller_id" title="statefun_tasks.TaskContext.get_caller_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_caller_id</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_caller_id" title="statefun_tasks.TaskContext.get_caller_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_caller_id</span></code></a>()</p></td>
 <td><p>Caller task Id in the form of context.caller.id</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_display_name</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_display_name</span></code>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_parent_task_address" title="statefun_tasks.TaskContext.get_parent_task_address"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_parent_task_address</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_parent_task_address" title="statefun_tasks.TaskContext.get_parent_task_address"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_parent_task_address</span></code></a>()</p></td>
 <td><p>ID of the parent task address if this task has one else None</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_parent_task_id" title="statefun_tasks.TaskContext.get_parent_task_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_parent_task_id</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_parent_task_id" title="statefun_tasks.TaskContext.get_parent_task_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_parent_task_id</span></code></a>()</p></td>
 <td><p>ID of the parent task if this task has one else None</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_pipeline_id" title="statefun_tasks.TaskContext.get_pipeline_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_pipeline_id</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_pipeline_id" title="statefun_tasks.TaskContext.get_pipeline_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_pipeline_id</span></code></a>()</p></td>
 <td><p>ID of the pipeline if this task is called as part of a pipeline else None</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_root_pipeline_address" title="statefun_tasks.TaskContext.get_root_pipeline_address"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_root_pipeline_address</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_root_pipeline_address" title="statefun_tasks.TaskContext.get_root_pipeline_address"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_root_pipeline_address</span></code></a>()</p></td>
 <td><p>Address of the top most pipeline if this task is called as part of a pipeline else None.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_root_pipeline_id" title="statefun_tasks.TaskContext.get_root_pipeline_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_root_pipeline_id</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_root_pipeline_id" title="statefun_tasks.TaskContext.get_root_pipeline_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_root_pipeline_id</span></code></a>()</p></td>
 <td><p>ID of the top most pipeline if this task is called as part of a pipeline else None.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_state</span></code>([default])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_state</span></code>([default])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_task_id" title="statefun_tasks.TaskContext.get_task_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_task_id</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_task_id" title="statefun_tasks.TaskContext.get_task_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_task_id</span></code></a>()</p></td>
 <td><p>Own task Id in the form of context.address.id</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.send_egress_message" title="statefun_tasks.TaskContext.send_egress_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_egress_message</span></code></a>(topic, value)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.send_egress_message" title="statefun_tasks.TaskContext.send_egress_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_egress_message</span></code></a>(topic, value)</p></td>
 <td><p>Sends a message to an egress topic</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.send_message" title="statefun_tasks.TaskContext.send_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_message</span></code></a>(destination, target_id, value)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.send_message" title="statefun_tasks.TaskContext.send_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_message</span></code></a>(destination, target_id, value)</p></td>
 <td><p>Sends a message to another Flink Task worker</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.send_message_after" title="statefun_tasks.TaskContext.send_message_after"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_message_after</span></code></a>(delay, destination, …)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.send_message_after" title="statefun_tasks.TaskContext.send_message_after"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_message_after</span></code></a>(delay, destination, …)</p></td>
 <td><p>Sends a message to another Flink Task worker after some delay</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_state</span></code>(obj)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_state</span></code>(obj)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.to_address_and_id" title="statefun_tasks.TaskContext.to_address_and_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_address_and_id</span></code></a>(address)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.to_address_and_id" title="statefun_tasks.TaskContext.to_address_and_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_address_and_id</span></code></a>(address)</p></td>
 <td><p>Converts SdkAddress into a string representation</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.task_name" title="statefun_tasks.TaskContext.task_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_name</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.task_name" title="statefun_tasks.TaskContext.task_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_name</span></code></a></p></td>
 <td><p>The name of this task</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.task_uid" title="statefun_tasks.TaskContext.task_uid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_uid</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.task_uid" title="statefun_tasks.TaskContext.task_uid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_uid</span></code></a></p></td>
 <td><p>The unique ID of this task.</p></td>
 </tr>
 </tbody>
@@ -303,6 +306,20 @@
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>address</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.TaskContext.get_caller">
+<code class="sig-name descname"><span class="pre">get_caller</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_caller" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the caller of the task if there is one or None otherwise</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Address</span></code></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Address</p>
 </dd>
 </dl>
 </dd></dl>

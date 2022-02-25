@@ -43,7 +43,7 @@ def _create_task_exception(task_input, ex, state=None):
         return task_exception
 
 
-def _create_task_result(task_input, result=None):
+def _create_task_result(task_input, result=None, state=None):
     if isinstance(task_input, TaskActionRequest):
         task_result = TaskActionResult(
             id=task_input.id,

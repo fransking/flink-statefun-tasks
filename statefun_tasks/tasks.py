@@ -4,9 +4,12 @@ from statefun_tasks.pipeline_builder import PipelineBuilder
 from statefun_tasks.utils import _is_tuple, _type_name, _annotated_protos_for
 from statefun_tasks.messages_pb2 import TaskRequest
 from statefun_tasks.type_helpers import _create_task_result, _create_task_exception
+from statefun_tasks.types import YieldTaskInvocation
 
+from typing import AsyncGenerator, Generator
 import inspect
 import asyncio
+
 
 
 class FlinkTask(object):
@@ -30,26 +33,39 @@ class FlinkTask(object):
         proto_types = _annotated_protos_for(fun)
         self._serialiser.register_proto_types(proto_types)
 
-    async def run(self, task_context: TaskContext, task_request: TaskRequest):
+    async def run(self, task_context: TaskContext):
         task_result, task_exception, pipeline = None, None, None
+        task_request = task_context.storage.task_request
 
         task_args, kwargs, fn_state = self._to_task_args_and_kwargs(task_context, task_request)
 
         # run the flink task
         try:
             fn_result = self._fun(*task_args, **kwargs)
+            
+            # convert generators to lists
+            if isinstance(fn_result, AsyncGenerator):
+                fn_result = list([x async for x in fn_result])
 
-            # await coro
-            if asyncio.iscoroutine(fn_result):
+            elif isinstance(fn_result, Generator):
+                fn_result = list([x for x in fn_result])
+
+            # await coros
+            elif asyncio.iscoroutine(fn_result):
                 fn_result = await fn_result
 
             pipeline, task_result, fn_state = self._to_pipeline_or_task_result(task_request, fn_result, fn_state)
 
-        # we errored so return a task_exception instead
+        
+        except YieldTaskInvocation:
+            # task yielded so we don't output anything
+            ()
+
         except Exception as e:
+            # we errored so return a task_exception instead
             task_exception = self._to_task_exception(task_request, e)
 
-        return task_result, task_exception, pipeline, fn_state
+        return task_request, task_result, task_exception, pipeline, fn_state
 
     def _to_pipeline_or_task_result(self, task_request, fn_result, fn_state):
         pipeline, task_result, is_fruitful = None, None, self._is_fruitful
@@ -87,6 +103,7 @@ class FlinkTask(object):
             fn_result = ()
             
         task_result = _create_task_result(task_request)
+
         self._serialiser.serialise_result(task_result, fn_result, fn_state)
 
         return pipeline, task_result, fn_state

@@ -1,6 +1,6 @@
 from statefun_tasks.serialisation import DefaultSerialiser
 from statefun_tasks.type_helpers import flink_value_type_for
-from statefun_tasks.messages_pb2 import TaskState, TaskRequest
+from statefun_tasks.messages_pb2 import TaskState, TaskRequest, Address
 from statefun_tasks.protobuf import pack_any
 
 from statefun import kafka_egress_message, message_builder, Context, SdkAddress
@@ -137,6 +137,17 @@ class TaskContext(object):
         :return: task Id
         """
         return None if self._context.caller.id == "" else self._context.caller.id
+
+    def get_caller(self) -> Address:
+        """
+        Returns the caller of the task if there is one or None otherwise
+
+        :return: Address
+        """
+        if self._context.caller.id == "":
+            return None
+        else:
+            return Address(namespace=self._context.caller.namespace, type=self._context.caller.name, id=self._context.caller.id)
 
     def set_state(self, obj):
         self.task_state.internal_state.CopyFrom(pack_any(self._serialiser.to_proto(obj)))
