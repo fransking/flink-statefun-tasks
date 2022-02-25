@@ -14,6 +14,7 @@ FlinkTasks
    
       ~FlinkTasks.__init__
       ~FlinkTasks.bind
+      ~FlinkTasks.clone_task_request
       ~FlinkTasks.emit_result
       ~FlinkTasks.extend
       ~FlinkTasks.fail
@@ -23,6 +24,7 @@ FlinkTasks
       ~FlinkTasks.register_builtin
       ~FlinkTasks.run
       ~FlinkTasks.send
+      ~FlinkTasks.send_result
       ~FlinkTasks.set_storage_backend
       ~FlinkTasks.try_get_pipeline
       ~FlinkTasks.value_specs

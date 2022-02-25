@@ -4,7 +4,9 @@ from statefun_tasks.utils import _is_tuple, _type_name, _annotated_protos_for
 from statefun_tasks.messages_pb2 import TaskRequest
 from statefun_tasks.type_helpers import _create_task_result, _create_task_exception
 from statefun_tasks.events import EventHandlers
+from statefun_tasks.types import YieldTaskInvocation
 
+from typing import AsyncGenerator, Generator
 import inspect
 import asyncio
 
@@ -38,12 +40,24 @@ class FlinkTask(object):
         # run the flink task
         try:
             fn_result = self._fun(*task_args, **kwargs)
+            
+            # convert generators to lists
+            if isinstance(fn_result, AsyncGenerator):
+                fn_result = list([x async for x in fn_result])
 
-            # await coro
-            if asyncio.iscoroutine(fn_result):
+            elif isinstance(fn_result, Generator):
+                fn_result = list([x for x in fn_result])
+
+            # await coros
+            elif asyncio.iscoroutine(fn_result):
                 fn_result = await fn_result
 
             pipeline, task_result, fn_state = self._to_pipeline_or_task_result(task_request, fn_result, fn_state)
+
+        
+        except YieldTaskInvocation:
+            # task yielded so we don't output anything
+            ()
 
         # we errored so return a task_exception instead
         except Exception as e:

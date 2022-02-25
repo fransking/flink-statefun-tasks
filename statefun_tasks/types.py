@@ -293,3 +293,9 @@ class TaskCancelledException(TasksException):
 class PipelineInProgress(TasksException):
     def __init__(self, message):
         super().__init__(message)
+
+
+class YieldTaskInvocation(Exception):
+    def __init__(self):
+        super().__init__()
+

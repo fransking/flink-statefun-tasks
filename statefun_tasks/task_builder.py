@@ -5,7 +5,7 @@ from statefun_tasks.pipeline_builder import PipelineBuilder
 from statefun_tasks.types import Task, RetryPolicy
 
 from statefun_tasks.messages_pb2 import ChildPipeline, TaskRequest, TaskResult, TaskException, TaskActionRequest
-from statefun_tasks.type_helpers import _create_task_exception
+from statefun_tasks.type_helpers import _create_task_result, _create_task_exception
 from statefun_tasks.context import TaskContext
 from statefun_tasks.utils import _task_type_for, _unpack_single_tuple_args, _gen_id
 from statefun_tasks.pipeline import _Pipeline
@@ -241,6 +241,56 @@ class FlinkTasks(object):
                 'Expected function to have a send attribute. Make sure it is decorated with @tasks.bind()')
         return send_func(*args, **kwargs)
 
+    def clone_task_request(self, context: TaskContext) -> TaskRequest:
+        """
+        Returns a complete copy of the TaskRequest associated with this TaskContext with the 
+        caller address details extracted as necessary from the context
+
+        :param context: TaskContext
+        :return: a TaskRequest
+        """
+        task_request = context.unpack('task_request', TaskRequest)
+
+        # copy caller details from context unless explictly set already
+        if not task_request.HasField('reply_address') and not task_request.HasField('reply_topic'):
+            caller = context.get_caller()
+
+            if caller is not None:
+                task_request.reply_address.CopyFrom(caller)
+
+        return task_request
+
+    def send_result(self, context: TaskContext, task_request: TaskRequest, result, state=Ellipsis):
+        """
+        Sends a result
+        :param context: TaskContext
+        :param task_request: the incoming TaskRequest
+        :param result: the result(s) to return
+        :param state: the state to include in the result.  If not specified it will be copied from the TaskRequest
+        """
+        task_result = _create_task_result(task_request)
+
+        if state == Ellipsis:  # default value since None is perfectly valid state
+            state = task_request.state
+
+        self._serialiser.serialise_result(task_result, result, state)
+
+        self.emit_result(context, task_request, task_result)
+
+    def fail(self, context, task_input, ex):
+        """
+        Sends a failure
+        :param context: TaskContext
+        :param task_input: the incoming TaskRequest or TaskActionRequest
+        :param ex: the exception to return
+        """
+        task_exception = _create_task_exception(task_input, ex)
+
+        context.delete('task_result')
+        context.pack_and_save('task_exception', task_exception)
+
+        self.emit_result(context, task_input, task_exception)
+
     def get_pipeline(self, context):
         pipeline_protos = context.pipeline_state.pipeline
 
@@ -283,10 +333,3 @@ class FlinkTasks(object):
             # clean up
             del context.task_state.by_uid[task_input.uid]
 
-    def fail(self, context, task_input, ex):
-        task_exception = _create_task_exception(task_input, ex)
-
-        context.delete('task_result')
-        context.pack_and_save('task_exception', task_exception)
-
-        self.emit_result(context, task_input, task_exception)

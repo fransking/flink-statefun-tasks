@@ -20,7 +20,7 @@ from statefun_tasks.storage import StorageBackend
 
 
 # types
-from statefun_tasks.types import Task, Group, RetryPolicy, TaskAlreadyExistsException, TaskCancelledException, TasksException, PipelineInProgress
+from statefun_tasks.types import Task, Group, RetryPolicy, TaskAlreadyExistsException, TaskCancelledException, TasksException, PipelineInProgress, YieldTaskInvocation
 
 
 # protobuf message types
