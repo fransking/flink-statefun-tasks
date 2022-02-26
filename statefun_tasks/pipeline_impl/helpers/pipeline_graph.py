@@ -33,6 +33,12 @@ class PipelineGraph(object):
             else:
                 yield task_or_group
 
+    def is_top_level_group(self, group):
+        for task_or_group in self._pipeline:
+            if isinstance(task_or_group, Group) and task_or_group.group_id == group.group_id:
+                return True
+        return False
+
     def get_task(self, task_id):
         for task in self.yield_tasks():
             if task_id == task.uid:

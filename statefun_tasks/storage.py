@@ -21,7 +21,3 @@ class StorageBackend(ABC):
     @abstractmethod
     async def fetch(self, keys: List[str]) -> bytes:
         pass
-
-    @abstractmethod
-    async def delete(self, keys: List[str]):
-        pass
