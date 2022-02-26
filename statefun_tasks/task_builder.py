@@ -260,6 +260,16 @@ class FlinkTasks(object):
 
         return task_request
 
+    def unpack_task_request(self, task_request: TaskRequest) -> tuple:
+        """
+        Unpacks a TaskRequest into args, kwargs and state
+
+        :param task_request: TaskRequest
+        :return: args, kwargs and state from this task_request
+        """
+        args, kwargs, state = self._serialiser.deserialise_request(task_request)
+        return args, kwargs, state
+
     def send_result(self, context: TaskContext, task_request: TaskRequest, result, state=Ellipsis):
         """
         Sends a result
