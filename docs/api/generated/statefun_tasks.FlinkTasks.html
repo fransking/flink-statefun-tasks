@@ -256,10 +256,13 @@ to be exposed as tasks.</p>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">try_get_pipeline</span></code>(context)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">value_specs</span></code>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.unpack_task_request" title="statefun_tasks.FlinkTasks.unpack_task_request"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unpack_task_request</span></code></a>(task_request)</p></td>
+<td><p>Unpacks a TaskRequest into args, kwargs and state</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">value_specs</span></code>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.events" title="statefun_tasks.FlinkTasks.events"><code class="xref py py-obj docutils literal notranslate"><span class="pre">events</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.events" title="statefun_tasks.FlinkTasks.events"><code class="xref py py-obj docutils literal notranslate"><span class="pre">events</span></code></a></p></td>
 <td><p>EventHandler for this FlinkTasks instance</p></td>
 </tr>
 </tbody>
@@ -456,6 +459,23 @@ may cause memory issues in which case they can be saved outside in e.g. an S3 bu
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>storage</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">StorageBackend</span></code>) – results storage backend to use</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="statefun_tasks.FlinkTasks.unpack_task_request">
+<code class="sig-name descname"><span class="pre">unpack_task_request</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_request</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.unpack_task_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unpacks a TaskRequest into args, kwargs and state</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>task_request</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TaskRequest</span></code>) – TaskRequest</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>args, kwargs and state from this task_request</p>
 </dd>
 </dl>
 </dd></dl>

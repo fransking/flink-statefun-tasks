@@ -56,7 +56,7 @@ class FlinkTask(object):
             pipeline, task_result, fn_state = self._to_pipeline_or_task_result(task_request, fn_result, fn_state)
 
         
-        except YieldTaskInvocation:
+        except YieldTaskInvocation as e:
             # task yielded so we don't output anything
             ()
 
