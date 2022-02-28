@@ -52,12 +52,10 @@ class TaskRequestHandler(MessageHandler):
             if self._attempt_retry(context, tasks, task_request, task_exception):
                 return  # we have triggered a retry so ignore the result of this invocation
 
-            context.storage.task_exception = task_exception
             tasks.emit_result(context, task_request, task_exception)
 
         # else if we have a task result return it
         elif task_result is not None:
-            context.storage.task_result = task_result
             tasks.emit_result(context, task_request, task_result)
 
     def _attempt_retry(self, context, tasks, task_request, task_exception):

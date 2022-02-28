@@ -1,3 +1,4 @@
+from re import L
 from statefun_tasks.storage import StorageBackend
 from statefun_tasks.serialisation import DefaultSerialiser
 from statefun_tasks.pipeline_builder import PipelineBuilder
@@ -309,10 +310,6 @@ class FlinkTasks(object):
         :param ex: the exception to return
         """
         task_exception = _create_task_exception(task_input, ex)
-
-        del context.storage.task_result
-        context.storage.task_exception = task_exception
-
         self.emit_result(context, task_input, task_exception)
 
     def get_pipeline(self, context):
@@ -330,9 +327,14 @@ class FlinkTasks(object):
             return None
 
     def emit_result(self, context, task_input, task_result):
-        # set invocation id
-        if isinstance(task_result, (TaskResult, TaskException)):
+        # record task result / task exception
+        if isinstance(task_result, TaskResult):
             task_result.invocation_id = task_input.invocation_id
+            context.storage.task_result = task_result
+        
+        elif isinstance(task_result, TaskException):
+            task_result.invocation_id = task_input.invocation_id
+            context.storage.task_exception = task_result
             
         # either send a message to egress if reply_topic was specified
         if task_input.HasField('reply_topic'):
