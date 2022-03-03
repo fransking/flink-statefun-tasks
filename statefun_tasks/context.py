@@ -103,17 +103,6 @@ class TaskContext(object):
     def get_caller_id(self):
         return None if self._context.caller.identity == "" else self._context.caller.identity
 
-    def get_caller(self) -> Address:
-        """
-        Returns the caller of the task if there is one or None otherwise
-
-        :return: Address
-        """
-        if self._context.caller.identity == "":
-            return None
-        else:
-            return Address(namespace=self._context.caller.namespace, type=self._context.caller.type, id=self._context.caller.identity)
-
     def set_state(self, obj):
         self.task_state.internal_state.CopyFrom(pack_any(self._serialiser.to_proto(obj)))
 

@@ -1,6 +1,6 @@
 import unittest
 
-from statefun_tasks import YieldTaskInvocation, TaskContext, TaskAction, TaskResult, TaskStatus
+from statefun_tasks import YieldTaskInvocation, TaskContext, TaskAction, TaskResult, TaskStatus, RetryPolicy
 from google.protobuf.any_pb2 import Any
 from tests.utils import TestHarness, tasks
 
@@ -11,12 +11,22 @@ def setup(_):
     return state
 
 
-@tasks.bind(with_context=True, task_id='123')
-def yield_invocation(context: TaskContext):
+@tasks.bind(with_context=True, task_id='123', retry_policy=RetryPolicy([ValueError]))
+def yield_invocation(context: TaskContext, fail_once=False):
     pipeline_id = context.get_pipeline_id()
 
+    state = context.get_state() or {}
+    if fail_once:
+        if not 'failed' in state:
+            state['failed'] = True
+            context.set_state(state)
+            raise ValueError()
+        else:
+            del state['failed']
+
     # record this task_request in the task state
-    context.set_state({pipeline_id: tasks.clone_task_request(context)})
+    state[pipeline_id] = tasks.clone_task_request(context)
+    context.set_state(state)
 
     # but don't do anything with it by giving up execution
     raise YieldTaskInvocation()
@@ -70,6 +80,24 @@ class YieldingTasksTests(unittest.TestCase):
         task_result = self._unpack(action_result.result, TaskResult)
         self.assertTrue('A continuation was called with state [1, 2, 3, 4]' in str(task_result))
 
+    def test_task_that_yields_with_retry_to_stop_the_pipeline(self):
+        pipeline = setup.send().continue_with(yield_invocation, fail_once=True).continue_with(a_continuation)  # a_continuation should not run 
+        self.test_harness.run_pipeline(pipeline)
+
+        # pipeline should have yielded and not run the continuation
+        action_result = self.test_harness.run_action(pipeline, TaskAction.GET_STATUS)
+        self.assertEqual(self._unpack(action_result.result, TaskStatus).value, TaskStatus.RUNNING)
+
+        # call another pipeline that calls back to the first pipeline 
+        pipeline2 = resume_invocation.send(pipeline.id)
+        self.test_harness.run_pipeline(pipeline2)
+
+        action_result = self.test_harness.run_action(pipeline, TaskAction.GET_STATUS)
+        self.assertEqual(self._unpack(action_result.result, TaskStatus).value, TaskStatus.COMPLETED)
+
+        action_result = self.test_harness.run_action(pipeline, TaskAction.GET_RESULT)
+        task_result = self._unpack(action_result.result, TaskResult)
+        self.assertTrue('A continuation was called with state [1, 2, 3, 4]' in str(task_result))
 
 if __name__ == '__main__':
     unittest.main()

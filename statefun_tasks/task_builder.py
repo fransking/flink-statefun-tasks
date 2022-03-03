@@ -4,7 +4,7 @@ from statefun_tasks.pipeline_builder import PipelineBuilder
 
 from statefun_tasks.types import Task, RetryPolicy
 
-from statefun_tasks.messages_pb2 import ChildPipeline, TaskRequest, TaskResult, TaskException, TaskActionRequest
+from statefun_tasks.messages_pb2 import ChildPipeline, TaskRequest, TaskResult, TaskException, TaskActionRequest, Address
 from statefun_tasks.type_helpers import _create_task_result, _create_task_exception
 from statefun_tasks.context import TaskContext
 from statefun_tasks.utils import _task_type_for, _unpack_single_tuple_args, _gen_id
@@ -253,10 +253,12 @@ class FlinkTasks(object):
 
         # copy caller details from context unless explictly set already
         if not task_request.HasField('reply_address') and not task_request.HasField('reply_topic'):
-            caller = context.get_caller()
 
-            if caller is not None:
-                task_request.reply_address.CopyFrom(caller)
+            address, caller_id = self._get_caller_address_and_id(context, task_request)
+            
+            if address is not None and caller_id is not None:
+                namespace, function_type = address.split('/')
+                task_request.reply_address.CopyFrom(Address(namespace=namespace, type=function_type, id=caller_id))
 
         return task_request
 
@@ -313,15 +315,10 @@ class FlinkTasks(object):
             return None
 
     def emit_result(self, context, task_input, task_result):
-        # record task result / task exception
-        if isinstance(task_result, TaskResult):
+        # copy over invocation id
+        if isinstance(task_result, (TaskResult, TaskException)):
             task_result.invocation_id = task_input.invocation_id
-            context.pack_and_save('task_result', task_result)
-        
-        elif isinstance(task_result, TaskException):
-            task_result.invocation_id = task_input.invocation_id
-            context.pack_and_save('task_exception', task_result)
-        
+
         # either send a message to egress if reply_topic was specified
         if task_input.HasField('reply_topic'):
             context.pack_and_send_egress(topic=task_input.reply_topic, value=task_result)
@@ -332,16 +329,19 @@ class FlinkTasks(object):
             context.pack_and_send(address, identifer, task_result)
 
         elif isinstance(task_input, TaskRequest):
-            # if this was a task request it could be part of a pipeline - i.e. called from another tasks so
-            # either call back to original caller (e.g. if this is a result of a retry)
-            task_state = context.task_state.by_uid[task_input.uid]
-            if task_state.original_caller_id != '':
-                context.pack_and_send(task_state.original_caller_address, task_state.original_caller_id, task_result)
+            address, caller_id = self._get_caller_address_and_id(context, task_input)
+            if address is not None and caller_id is not None:
+                context.pack_and_send(address, caller_id, task_result)
 
-            # or call back to our caller (if there is one)
-            elif context.get_caller_id() is not None:
-                context.pack_and_reply(task_result)
-
-            # clean up
+        # clean up
+        if task_input.uid in context.task_state.by_uid:
             del context.task_state.by_uid[task_input.uid]
 
+    def _get_caller_address_and_id(self, context, task_request):
+        task_state = context.task_state.by_uid[task_request.uid]
+        
+        # either as original caller (e.g. if this is a result of a retry) or context.get_caller_...() otherwise
+        address = task_state.original_caller_address if task_state.original_caller_address != '' else context.get_caller_address()
+        caller_id = task_state.original_caller_id if task_state.original_caller_id != '' else context.get_caller_id()
+
+        return address, caller_id
