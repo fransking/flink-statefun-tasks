@@ -4,6 +4,7 @@ from statefun_tasks.protobuf import pack_any
 
 from statefun import kafka_egress_record
 from statefun.request_reply import BatchContext
+from datetime import timedelta
 
 
 class TaskContext(object):
@@ -125,7 +126,10 @@ class TaskContext(object):
     def pack_and_save(self, key:str, value):
         self._context.state(key).pack(value)
 
-    def pack_and_send(self, destination, task_id, request):
+    def pack_and_send(self, destination, task_id, request, delay :timedelta=None):
+        if delay:
+            return self.pack_and_send_after(delay, destination, task_id, request)
+            
         self._context.pack_and_send(destination, task_id, request)
 
     def pack_and_send_after(self, delay, destination, task_id, request):

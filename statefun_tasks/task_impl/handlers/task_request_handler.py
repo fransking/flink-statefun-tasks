@@ -78,16 +78,14 @@ class TaskRequestHandler(MessageHandler):
             # remove previous task_request from state
             context.delete('task_request')
 
-            # send retry
-            delay = timedelta(milliseconds=task_exception.retry_policy.delay_ms)
-
+            # calculate delay
             if task_exception.retry_policy.exponential_back_off:
                 delay = timedelta(milliseconds=task_exception.retry_policy.delay_ms * (2 ** task_state.retry_count))
-
-            if delay:
-                context.pack_and_send_after(delay, context.get_address(), context.get_task_id(), task_request)
             else:
-                context.pack_and_send(context.get_address(), context.get_task_id(), task_request)
+                delay = timedelta(milliseconds=task_exception.retry_policy.delay_ms)
+      
+            # send retry
+            context.pack_and_send(context.get_address(), context.get_task_id(), task_request, delay)
 
             return True
 
