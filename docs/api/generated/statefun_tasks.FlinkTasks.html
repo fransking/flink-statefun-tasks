@@ -226,7 +226,7 @@ to be exposed as tasks.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.extend" title="statefun_tasks.FlinkTasks.extend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extend</span></code></a>(function[, retry_policy])</p></td>
 <td><p>Adds the extensions to make a function unsable by a PipelineBuilder -&gt; fn.send(), fn.to_task() and fn.defaults()</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.fail" title="statefun_tasks.FlinkTasks.fail"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fail</span></code></a>(context, task_input, ex)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.fail" title="statefun_tasks.FlinkTasks.fail"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fail</span></code></a>(context, task_input, ex[, delay])</p></td>
 <td><p>Sends a failure :param context: TaskContext :param task_input: the incoming TaskRequest or TaskActionRequest :param ex: the exception to return</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_pipeline</span></code>(context)</p></td>
@@ -347,7 +347,7 @@ caller address details extracted as necessary from the context</p>
 
 <dl class="py method">
 <dt id="statefun_tasks.FlinkTasks.fail">
-<code class="sig-name descname"><span class="pre">fail</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ex</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.fail" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">fail</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.fail" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sends a failure
 :param context: TaskContext
 :param task_input: the incoming TaskRequest or TaskActionRequest
@@ -441,7 +441,7 @@ This should only be used if you want to provide your own built in (pre-defined) 
 
 <dl class="py method">
 <dt id="statefun_tasks.FlinkTasks.send_result">
-<code class="sig-name descname"><span class="pre">send_result</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Ellipsis</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.send_result" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">send_result</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Ellipsis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.send_result" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sends a result
 :type context: <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskContext</span></code>
 :param context: TaskContext

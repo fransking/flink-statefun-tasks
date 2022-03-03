@@ -25,7 +25,8 @@ def yield_invocation(context: TaskContext, fail_once=False):
             del state['failed']
 
     # record this task_request in the task state
-    state[pipeline_id] = tasks.clone_task_request(context)
+    task_request = tasks.clone_task_request(context)
+    state[pipeline_id] = task_request
     context.set_state(state)
 
     # but don't do anything with it by giving up execution

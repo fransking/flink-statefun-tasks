@@ -15,6 +15,7 @@ from statefun_tasks.task_impl.handlers import TaskRequestHandler, TaskResponseHa
 from statefun_tasks.events import EventHandlers
 
 from statefun import ValueSpec, Context, Message
+from datetime import timedelta
 import logging
 
 _log = logging.getLogger('FlinkTasks')
@@ -286,7 +287,7 @@ class FlinkTasks(object):
         args, kwargs, state = self._serialiser.deserialise_request(task_request)
         return args, kwargs, state
 
-    def send_result(self, context: TaskContext, task_request: TaskRequest, result, state=Ellipsis):
+    def send_result(self, context: TaskContext, task_request: TaskRequest, result, state=Ellipsis, delay: timedelta=None):
         """
         Sends a result
         :param context: TaskContext
@@ -301,9 +302,9 @@ class FlinkTasks(object):
 
         self._serialiser.serialise_result(task_result, result, state)
 
-        self.emit_result(context, task_request, task_result)
+        self.emit_result(context, task_request, task_result, delay)
 
-    def fail(self, context, task_input, ex):
+    def fail(self, context, task_input, ex, delay: timedelta=None):
         """
         Sends a failure
         :param context: TaskContext
@@ -311,7 +312,7 @@ class FlinkTasks(object):
         :param ex: the exception to return
         """
         task_exception = _create_task_exception(task_input, ex)
-        self.emit_result(context, task_input, task_exception)
+        self.emit_result(context, task_input, task_exception, delay)
 
     def get_pipeline(self, context):
         pipeline_protos = context.pipeline_state.pipeline
@@ -327,7 +328,7 @@ class FlinkTasks(object):
         except:
             return None
 
-    def emit_result(self, context, task_input, task_result):
+    def emit_result(self, context, task_input, task_result, delay: timedelta=None):
         # copy over invocation id
         if isinstance(task_result, (TaskResult, TaskException)):
             task_result.invocation_id = task_input.invocation_id
@@ -339,12 +340,12 @@ class FlinkTasks(object):
         # or call back to a particular flink function if reply_address was specified
         elif task_input.HasField('reply_address'):
             address, identifer = context.to_address_and_id(task_input.reply_address)
-            context.send_message(address, identifer, task_result)
+            context.send_message(address, identifer, task_result, delay)
 
         elif isinstance(task_input, TaskRequest):
             address, caller_id = self._get_caller_address_and_id(context, task_input)
             if address is not None and caller_id is not None:
-                context.send_message(address, caller_id, task_result)
+                context.send_message(address, caller_id, task_result, delay)
 
         # clean up
         if task_input.uid in context.task_state.by_uid:
