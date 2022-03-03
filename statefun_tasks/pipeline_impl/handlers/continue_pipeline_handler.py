@@ -20,7 +20,8 @@ class ContinuePipelineHandler(PipelineMessageHandler):
         caller_uid = message.uid
 
         # mark pipeline step as complete
-        self.graph.mark_task_complete(caller_uid, task_result_or_exception)
+        if not self.graph.mark_task_complete(caller_uid, task_result_or_exception):
+            return False, task_result_or_exception
 
         # notify event handler (with option to cancel)
         try:
