@@ -15,7 +15,6 @@ TaskContext
       ~TaskContext.__init__
       ~TaskContext.contextualise_from
       ~TaskContext.get_address
-      ~TaskContext.get_caller
       ~TaskContext.get_caller_address
       ~TaskContext.get_caller_id
       ~TaskContext.get_display_name

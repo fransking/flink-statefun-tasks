@@ -138,17 +138,6 @@ class TaskContext(object):
         """
         return None if self._context.caller.id == "" else self._context.caller.id
 
-    def get_caller(self) -> Address:
-        """
-        Returns the caller of the task if there is one or None otherwise
-
-        :return: Address
-        """
-        if self._context.caller.id == "":
-            return None
-        else:
-            return Address(namespace=self._context.caller.namespace, type=self._context.caller.name, id=self._context.caller.id)
-
     def set_state(self, obj):
         self.task_state.internal_state.CopyFrom(pack_any(self._serialiser.to_proto(obj)))
 
@@ -181,14 +170,19 @@ class TaskContext(object):
         message = message_builder(target_typename=destination, target_id=target_id, value=value, value_type=value_type)
         self._context.send_after(delay, message)
 
-    def send_message(self, destination, target_id, value):
+    def send_message(self, destination, target_id, value, delay: timedelta=None):
         """
         Sends a message to another Flink Task worker
 
         :param destination: the destination to send the message to (e.g. example/worker)
         :param target_id: the target Id
         :param value: the message to send
+        :param optional delay: the delay (if any then same behaviour send_message_after())
         """
+
+        if delay:
+            return self.send_message_after(delay, destination, target_id, value)
+
         value_type = flink_value_type_for(value)
         message = message_builder(target_typename=destination, target_id=target_id, value=value, value_type=value_type)
         self._context.send(message)

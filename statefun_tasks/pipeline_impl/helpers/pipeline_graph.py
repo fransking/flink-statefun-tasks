@@ -108,12 +108,19 @@ class PipelineGraph(object):
 
         tasks = self.get_task_chain(task_id)
 
-        if failed:
-            # mark this task complete and its children
-            for task in tasks:
-                task.mark_complete()
-        elif any(tasks):
-            tasks[0].mark_complete()
+        if any(tasks):
+            if tasks[0].is_complete():
+                return False  # task already complete - ignore
+
+            if failed:
+                # mark this task complete and its children
+                for task in tasks:
+                    if not task.is_finally:
+                        task.mark_complete()
+            else:
+                tasks[0].mark_complete()
+
+        return True
          
     def try_get_finally_task(self, task_id=None):
         finally_task = next((task for task in self._pipeline if isinstance(task, Task) and task.is_finally), None)

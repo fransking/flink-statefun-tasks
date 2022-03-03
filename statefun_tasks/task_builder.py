@@ -1,4 +1,3 @@
-from re import L
 from statefun_tasks.storage import StorageBackend
 from statefun_tasks.serialisation import DefaultSerialiser
 from statefun_tasks.pipeline_builder import PipelineBuilder
@@ -16,6 +15,7 @@ from statefun_tasks.task_impl.handlers import TaskRequestHandler, TaskResponseHa
 from statefun_tasks.events import EventHandlers
 
 from statefun import ValueSpec, Context, Message
+from datetime import timedelta
 import logging
 
 _log = logging.getLogger('FlinkTasks')
@@ -268,10 +268,12 @@ class FlinkTasks(object):
 
         # copy caller details from context unless explictly set already
         if not task_request.HasField('reply_address') and not task_request.HasField('reply_topic'):
-            caller = context.get_caller()
 
-            if caller is not None:
-                task_request.reply_address.CopyFrom(caller)
+            address, caller_id = self._get_caller_address_and_id(context, task_request)
+            
+            if address is not None and caller_id is not None:
+                namespace, function_type = address.split('/')
+                task_request.reply_address.CopyFrom(Address(namespace=namespace, type=function_type, id=caller_id))
 
         return task_request
 
@@ -285,7 +287,7 @@ class FlinkTasks(object):
         args, kwargs, state = self._serialiser.deserialise_request(task_request)
         return args, kwargs, state
 
-    def send_result(self, context: TaskContext, task_request: TaskRequest, result, state=Ellipsis):
+    def send_result(self, context: TaskContext, task_request: TaskRequest, result, state=Ellipsis, delay: timedelta=None):
         """
         Sends a result
         :param context: TaskContext
@@ -300,9 +302,9 @@ class FlinkTasks(object):
 
         self._serialiser.serialise_result(task_result, result, state)
 
-        self.emit_result(context, task_request, task_result)
+        self.emit_result(context, task_request, task_result, delay)
 
-    def fail(self, context, task_input, ex):
+    def fail(self, context, task_input, ex, delay: timedelta=None):
         """
         Sends a failure
         :param context: TaskContext
@@ -310,7 +312,7 @@ class FlinkTasks(object):
         :param ex: the exception to return
         """
         task_exception = _create_task_exception(task_input, ex)
-        self.emit_result(context, task_input, task_exception)
+        self.emit_result(context, task_input, task_exception, delay)
 
     def get_pipeline(self, context):
         pipeline_protos = context.pipeline_state.pipeline
@@ -326,15 +328,10 @@ class FlinkTasks(object):
         except:
             return None
 
-    def emit_result(self, context, task_input, task_result):
-        # record task result / task exception
-        if isinstance(task_result, TaskResult):
+    def emit_result(self, context, task_input, task_result, delay: timedelta=None):
+        # copy over invocation id
+        if isinstance(task_result, (TaskResult, TaskException)):
             task_result.invocation_id = task_input.invocation_id
-            context.storage.task_result = task_result
-        
-        elif isinstance(task_result, TaskException):
-            task_result.invocation_id = task_input.invocation_id
-            context.storage.task_exception = task_result
             
         # either send a message to egress if reply_topic was specified
         if task_input.HasField('reply_topic'):
@@ -343,18 +340,22 @@ class FlinkTasks(object):
         # or call back to a particular flink function if reply_address was specified
         elif task_input.HasField('reply_address'):
             address, identifer = context.to_address_and_id(task_input.reply_address)
-            context.send_message(address, identifer, task_result)
+            context.send_message(address, identifer, task_result, delay)
 
         elif isinstance(task_input, TaskRequest):
-            # if this was a task request it could be part of a pipeline - i.e. called from another tasks so
-            # either call back to original caller (e.g. if this is a result of a retry)
-            task_state = context.task_state.by_uid[task_input.uid]
-            if task_state.original_caller_id != '':
-                context.send_message(task_state.original_caller_address, task_state.original_caller_id, task_result)
+            address, caller_id = self._get_caller_address_and_id(context, task_input)
+            if address is not None and caller_id is not None:
+                context.send_message(address, caller_id, task_result, delay)
 
-            # or call back to our caller (if there is one)
-            elif context.get_caller_id() is not None:
-                context.send_message(context.get_caller_address(), context.get_caller_id(), task_result)
-
-            # clean up
+        # clean up
+        if task_input.uid in context.task_state.by_uid:
             del context.task_state.by_uid[task_input.uid]
+
+    def _get_caller_address_and_id(self, context, task_request):
+        task_state = context.task_state.by_uid[task_request.uid]
+        
+        # either as original caller (e.g. if this is a result of a retry) or context.get_caller_...() otherwise
+        address = task_state.original_caller_address if task_state.original_caller_address != '' else context.get_caller_address()
+        caller_id = task_state.original_caller_id if task_state.original_caller_id != '' else context.get_caller_id()
+
+        return address, caller_id
