@@ -20,6 +20,7 @@ TaskContext
       ~TaskContext.get_display_name
       ~TaskContext.get_parent_task_address
       ~TaskContext.get_parent_task_id
+      ~TaskContext.get_pipeline_address
       ~TaskContext.get_pipeline_id
       ~TaskContext.get_root_pipeline_address
       ~TaskContext.get_root_pipeline_id
