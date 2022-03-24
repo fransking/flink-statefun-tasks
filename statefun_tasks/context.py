@@ -78,6 +78,14 @@ class TaskContext(object):
         """
         return self._task_meta.get('pipeline_id', None)
 
+    def get_pipeline_address(self):
+        """
+        Address of the pipeline if this task is called as part of a pipeline else None
+
+        :return: pipeline ID
+        """
+        return self._task_meta.get('pipeline_address', None)
+
     def get_parent_task_id(self):
         """
         ID of the parent task if this task has one else None
