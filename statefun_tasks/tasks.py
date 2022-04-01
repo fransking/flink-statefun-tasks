@@ -33,6 +33,13 @@ class FlinkTask(object):
         proto_types = _annotated_protos_for(fun)
         self._serialiser.register_proto_types(proto_types)
 
+    @property
+    def function(self):
+        """
+        The Python function that this FlinkTask wraps
+        """
+        return self._fun
+
     async def run(self, task_context: TaskContext, task_request: TaskRequest):
         task_result, task_exception, pipeline = None, None, None
 
