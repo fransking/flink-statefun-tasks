@@ -3,6 +3,7 @@ from statefun_tasks.pipeline_impl.handlers import PipelineMessageHandler
 from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, TaskStatus, PipelineState, ChildPipeline, TaskInfo
 from statefun_tasks.serialisation import pack_any
 from statefun_tasks.utils import _gen_id
+from statefun_tasks.type_helpers import _create_task_result
 from google.protobuf.any_pb2 import Any
 from typing import Union
 
@@ -13,8 +14,7 @@ class BeginPipelineHandler(PipelineMessageHandler):
     
     def can_handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException]) -> bool:
         return (context.pipeline_state is None or context.pipeline_state.status.value == TaskStatus.PENDING) \
-            and isinstance(message, TaskRequest) \
-                and not self.graph.is_empty()
+            and isinstance(message, TaskRequest)
 
     async def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline: '_Pipeline', state: Any):
         invoking_task = message  # type: TaskRequest
@@ -47,19 +47,33 @@ class BeginPipelineHandler(PipelineMessageHandler):
         # and notify root pipeline of a new child pipeline
         self._notify_pipeline_created(context)
 
-        # 2. get initial tasks(s) to call - might be single start of chain task or a group of tasks to call in parallel
-        tasks, max_parallelism, slice = self.graph.get_initial_tasks()
+        # if we got an empty pipeline then complete immediately
+        if self._graph.is_empty():
+            task_result = _create_task_result(message)
+            task_result.invocation_id = context.pipeline_state.invocation_id
+            self._serialiser.serialise_result(task_result, ([]), state)
 
-        # 2a. if we skipped over empty group(s) then make sure we pass empty array to next task (result of in_parallel([]) is intuitively [])
-        if slice > 0:
-            for task in tasks:
-                task.request = self._serialiser.serialise_args_and_kwargs(([]), {})
+            context.pipeline_state.status.value = TaskStatus.COMPLETED
+            pipeline.events.notify_pipeline_status_changed(context, context.pipeline_state.pipeline, context.pipeline_state.status.value)
+            
+            # continue
+            return True, task_result
 
-        # 3. split into tasks to call now and those to defer if max parallelism is exceeded
-        await self.submitter.submit_tasks(context, tasks, max_parallelism=max_parallelism)
+        else:
+            # else get initial tasks(s) to call - might be single start of chain task or a group of tasks to call in parallel
+            tasks, max_parallelism, slice = self.graph.get_initial_tasks()
 
-        # 4. break
-        return False, message
+            # if we skipped over empty group(s) then make sure we pass empty array to next task (result of in_parallel([]) is intuitively [])
+            if slice > 0:
+                for task in tasks:
+                    _, kwargs = self._serialiser.deserialise_args_and_kwargs(task.request)
+                    task.request = self._serialiser.serialise_args_and_kwargs(([]), kwargs)
+
+            # split into tasks to call now and those to defer if max parallelism is exceeded
+            await self.submitter.submit_tasks(context, tasks, max_parallelism=max_parallelism)
+
+            # break
+            return False, message
 
     def _notify_pipeline_created(self, context):
         # if this pipeline is the already root do nothing as it's not a child

@@ -1,9 +1,13 @@
-from statefun_tasks.messages_pb2 import Pipeline
 from typing import OrderedDict
 import unittest
 
 from statefun_tasks import in_parallel
 from tests.utils import TestHarness, tasks, TaskErrorException
+
+join_results_called = False
+join_results2_called = False
+join_results3_called = False
+say_goodbye_called = False
 
 
 @tasks.bind()
@@ -48,6 +52,11 @@ def _join_results3(results):
 def _print_results(results):
     return str(results)
 
+
+@tasks.bind()
+def _print_results2(results, abc):
+    return str(results) + str(abc)
+    
 
 @tasks.bind(with_state=True)
 def _say_hello_with_state(initial_state, first_name, last_name):
@@ -235,8 +244,13 @@ class ParallelWorkflowTests(unittest.TestCase):
         pipeline = in_parallel([])
 
         result = self.test_harness.run_pipeline(pipeline)
-        self.assertEqual(result, ())
+        self.assertEqual(result, [])
 
+    def test_empty_parallel_workflow_with_a_continuation(self):
+        pipeline = in_parallel([]).continue_with(_print_results2, abc=12)
+
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, '[]12')
 
     def test_parallel_workflow_with_last_task_in_group_being_a_group(self):
         pipeline = in_parallel([

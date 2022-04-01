@@ -160,6 +160,8 @@ class FlinkTask(object):
                     raise ValueError('Not enough args supplied')
                 resolved_args.append(self._default_args[default_arg_index])
             else:
+                if len(args) == 0:
+                    raise ValueError('Not enough args supplied')
                 resolved_args.append(args.pop(0))
         if self._accepts_varargs:
             resolved_args.extend(args)
