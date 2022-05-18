@@ -287,13 +287,15 @@ class FlinkTasks(object):
         args, kwargs, state = self._serialiser.deserialise_request(task_request)
         return args, kwargs, state
 
-    def send_result(self, context: TaskContext, task_request: TaskRequest, result, state=Ellipsis, delay: timedelta=None):
+    def send_result(self, context: TaskContext, task_request: TaskRequest, result, state=Ellipsis, delay: timedelta=None, cancellation_token: str = ""):
         """
         Sends a result
         :param context: TaskContext
         :param task_request: the incoming TaskRequest
         :param result: the result(s) to return
         :param state: the state to include in the result.  If not specified it will be copied from the TaskRequest
+        :param optional delay: the delay before Flink sends the result
+        :param optional cancellation_token: a cancellation token to associate with this message
         """
         task_result = _create_task_result(task_request)
 
@@ -302,17 +304,19 @@ class FlinkTasks(object):
 
         self._serialiser.serialise_result(task_result, result, state)
 
-        self.emit_result(context, task_request, task_result, delay)
+        self.emit_result(context, task_request, task_result, delay,  cancellation_token)
 
-    def fail(self, context, task_input, ex, delay: timedelta=None):
+    def fail(self, context, task_input, ex, delay: timedelta=None, cancellation_token: str = ""):
         """
         Sends a failure
         :param context: TaskContext
         :param task_input: the incoming TaskRequest or TaskActionRequest
         :param ex: the exception to return
+        :param optional delay: the delay before Flink sends the result
+        :param optional cancellation_token: a cancellation token to associate with this message
         """
         task_exception = _create_task_exception(task_input, ex)
-        self.emit_result(context, task_input, task_exception, delay)
+        self.emit_result(context, task_input, task_exception, delay,  cancellation_token)
 
     def get_pipeline(self, context):
         pipeline_protos = context.pipeline_state.pipeline
@@ -328,7 +332,7 @@ class FlinkTasks(object):
         except:
             return None
 
-    def emit_result(self, context, task_input, task_result, delay: timedelta=None):
+    def emit_result(self, context, task_input, task_result, delay: timedelta=None, cancellation_token: str = None):
         # copy over invocation id
         if isinstance(task_result, (TaskResult, TaskException)):
             task_result.invocation_id = task_input.invocation_id
@@ -340,12 +344,12 @@ class FlinkTasks(object):
         # or call back to a particular flink function if reply_address was specified
         elif task_input.HasField('reply_address'):
             address, identifer = context.to_address_and_id(task_input.reply_address)
-            context.send_message(address, identifer, task_result, delay)
+            context.send_message(address, identifer, task_result, delay, cancellation_token)
 
         elif isinstance(task_input, TaskRequest):
             address, caller_id = self._get_caller_address_and_id(context, task_input)
             if address is not None and caller_id is not None:
-                context.send_message(address, caller_id, task_result, delay)
+                context.send_message(address, caller_id, task_result, delay, cancellation_token)
 
         # clean up
         if task_input.uid in context.task_state.by_uid:

@@ -13,6 +13,7 @@ TaskContext
    .. autosummary::
    
       ~TaskContext.__init__
+      ~TaskContext.cancel_message
       ~TaskContext.contextualise_from
       ~TaskContext.get_address
       ~TaskContext.get_caller_address

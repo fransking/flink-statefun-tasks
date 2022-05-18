@@ -165,7 +165,7 @@ class TaskContext(object):
         """
         return f'{address.namespace}/{address.type}', address.id
 
-    def send_message_after(self, delay: timedelta, destination, target_id, value):
+    def send_message_after(self, delay: timedelta, destination, target_id, value, cancellation_token: str = ""):
         """
         Sends a message to another Flink Task worker after some delay
 
@@ -173,12 +173,13 @@ class TaskContext(object):
         :param destination: the destination to send the message to (e.g. example/worker)
         :param target_id: the target Id
         :param value: the message to send
+        :param optional cancellation_token: a cancellation token to associate with this message
         """
         value_type = flink_value_type_for(value)
         message = message_builder(target_typename=destination, target_id=target_id, value=value, value_type=value_type)
-        self._context.send_after(delay, message)
+        self._context.send_after(delay, message, cancellation_token)
 
-    def send_message(self, destination, target_id, value, delay: timedelta=None):
+    def send_message(self, destination, target_id, value, delay: timedelta=None, cancellation_token: str = ""):
         """
         Sends a message to another Flink Task worker
 
@@ -186,14 +187,23 @@ class TaskContext(object):
         :param target_id: the target Id
         :param value: the message to send
         :param optional delay: the delay (if any then same behaviour send_message_after())
+        :param optional cancellation_token: a cancellation token to associate with this message
         """
 
         if delay:
-            return self.send_message_after(delay, destination, target_id, value)
+            return self.send_message_after(delay, destination, target_id, value, cancellation_token)
 
         value_type = flink_value_type_for(value)
         message = message_builder(target_typename=destination, target_id=target_id, value=value, value_type=value_type)
         self._context.send(message)
+
+    def cancel_message(self, cancellation_token: str):
+        """
+        Attempts to cancel a message associated with this cancellation token
+
+        :param cancellation_token: the cancellation token
+        """
+        self._context.cancel_delayed_message(cancellation_token)
 
     def send_egress_message(self, topic, value):
         """

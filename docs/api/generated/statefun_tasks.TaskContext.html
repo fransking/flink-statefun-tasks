@@ -211,64 +211,67 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.__init__" title="statefun_tasks.TaskContext.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(context, egress_type_name[, serialiser])</p></td>
 <td><p>Initialize self.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.contextualise_from" title="statefun_tasks.TaskContext.contextualise_from"><code class="xref py py-obj docutils literal notranslate"><span class="pre">contextualise_from</span></code></a>(task_request)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.cancel_message" title="statefun_tasks.TaskContext.cancel_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cancel_message</span></code></a>(cancellation_token)</p></td>
+<td><p>Attempts to cancel a message associated with this cancellation token</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.contextualise_from" title="statefun_tasks.TaskContext.contextualise_from"><code class="xref py py-obj docutils literal notranslate"><span class="pre">contextualise_from</span></code></a>(task_request)</p></td>
 <td><p>Sets additional context properties from the supplied task request</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_address" title="statefun_tasks.TaskContext.get_address"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_address</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_address" title="statefun_tasks.TaskContext.get_address"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_address</span></code></a>()</p></td>
 <td><p>Own address in the form of context.address.typename</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_caller_address" title="statefun_tasks.TaskContext.get_caller_address"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_caller_address</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_caller_address" title="statefun_tasks.TaskContext.get_caller_address"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_caller_address</span></code></a>()</p></td>
 <td><p>Caller address in the form of context.caller.typename</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_caller_id" title="statefun_tasks.TaskContext.get_caller_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_caller_id</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_caller_id" title="statefun_tasks.TaskContext.get_caller_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_caller_id</span></code></a>()</p></td>
 <td><p>Caller task Id in the form of context.caller.id</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_display_name</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_display_name</span></code>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_parent_task_address" title="statefun_tasks.TaskContext.get_parent_task_address"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_parent_task_address</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_parent_task_address" title="statefun_tasks.TaskContext.get_parent_task_address"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_parent_task_address</span></code></a>()</p></td>
 <td><p>ID of the parent task address if this task has one else None</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_parent_task_id" title="statefun_tasks.TaskContext.get_parent_task_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_parent_task_id</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_parent_task_id" title="statefun_tasks.TaskContext.get_parent_task_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_parent_task_id</span></code></a>()</p></td>
 <td><p>ID of the parent task if this task has one else None</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_pipeline_address" title="statefun_tasks.TaskContext.get_pipeline_address"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_pipeline_address</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_pipeline_address" title="statefun_tasks.TaskContext.get_pipeline_address"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_pipeline_address</span></code></a>()</p></td>
 <td><p>Address of the pipeline if this task is called as part of a pipeline else None</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_pipeline_id" title="statefun_tasks.TaskContext.get_pipeline_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_pipeline_id</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_pipeline_id" title="statefun_tasks.TaskContext.get_pipeline_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_pipeline_id</span></code></a>()</p></td>
 <td><p>ID of the pipeline if this task is called as part of a pipeline else None</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_root_pipeline_address" title="statefun_tasks.TaskContext.get_root_pipeline_address"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_root_pipeline_address</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_root_pipeline_address" title="statefun_tasks.TaskContext.get_root_pipeline_address"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_root_pipeline_address</span></code></a>()</p></td>
 <td><p>Address of the top most pipeline if this task is called as part of a pipeline else None.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_root_pipeline_id" title="statefun_tasks.TaskContext.get_root_pipeline_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_root_pipeline_id</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_root_pipeline_id" title="statefun_tasks.TaskContext.get_root_pipeline_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_root_pipeline_id</span></code></a>()</p></td>
 <td><p>ID of the top most pipeline if this task is called as part of a pipeline else None.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_state</span></code>([default])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_state</span></code>([default])</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_task_id" title="statefun_tasks.TaskContext.get_task_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_task_id</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_task_id" title="statefun_tasks.TaskContext.get_task_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_task_id</span></code></a>()</p></td>
 <td><p>Own task Id in the form of context.address.id</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.send_egress_message" title="statefun_tasks.TaskContext.send_egress_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_egress_message</span></code></a>(topic, value)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.send_egress_message" title="statefun_tasks.TaskContext.send_egress_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_egress_message</span></code></a>(topic, value)</p></td>
 <td><p>Sends a message to an egress topic</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.send_message" title="statefun_tasks.TaskContext.send_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_message</span></code></a>(destination, target_id, value)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.send_message" title="statefun_tasks.TaskContext.send_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_message</span></code></a>(destination, target_id, value)</p></td>
 <td><p>Sends a message to another Flink Task worker</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.send_message_after" title="statefun_tasks.TaskContext.send_message_after"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_message_after</span></code></a>(delay, destination, …)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.send_message_after" title="statefun_tasks.TaskContext.send_message_after"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_message_after</span></code></a>(delay, destination, …)</p></td>
 <td><p>Sends a message to another Flink Task worker after some delay</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_state</span></code>(obj)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_state</span></code>(obj)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.to_address_and_id" title="statefun_tasks.TaskContext.to_address_and_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_address_and_id</span></code></a>(address)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.to_address_and_id" title="statefun_tasks.TaskContext.to_address_and_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_address_and_id</span></code></a>(address)</p></td>
 <td><p>Converts SdkAddress into a string representation</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.task_name" title="statefun_tasks.TaskContext.task_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_name</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.task_name" title="statefun_tasks.TaskContext.task_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_name</span></code></a></p></td>
 <td><p>The name of this task</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.task_uid" title="statefun_tasks.TaskContext.task_uid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_uid</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.task_uid" title="statefun_tasks.TaskContext.task_uid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_uid</span></code></a></p></td>
 <td><p>The unique ID of this task.</p></td>
 </tr>
 </tbody>
@@ -288,6 +291,17 @@
 </tr>
 </tbody>
 </table>
+<dl class="py method">
+<dt id="statefun_tasks.TaskContext.cancel_message">
+<code class="sig-name descname"><span class="pre">cancel_message</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cancellation_token</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.cancel_message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempts to cancel a message associated with this cancellation token</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>cancellation_token</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the cancellation token</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt id="statefun_tasks.TaskContext.contextualise_from">
 <code class="sig-name descname"><span class="pre">contextualise_from</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_request</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.contextualise_from" title="Permalink to this definition">¶</a></dt>
@@ -426,7 +440,7 @@ get_pipeline_id() if the pipeline is nested</p>
 
 <dl class="py method">
 <dt id="statefun_tasks.TaskContext.send_message">
-<code class="sig-name descname"><span class="pre">send_message</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">destination</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.send_message" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">send_message</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">destination</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cancellation_token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.send_message" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sends a message to another Flink Task worker</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -435,6 +449,7 @@ get_pipeline_id() if the pipeline is nested</p>
 <li><p><strong>target_id</strong> – the target Id</p></li>
 <li><p><strong>value</strong> – the message to send</p></li>
 <li><p><strong>delay</strong> (<em>optional</em>) – the delay (if any then same behaviour send_message_after())</p></li>
+<li><p><strong>cancellation_token</strong> (<em>optional</em>) – a cancellation token to associate with this message</p></li>
 </ul>
 </dd>
 </dl>
@@ -442,7 +457,7 @@ get_pipeline_id() if the pipeline is nested</p>
 
 <dl class="py method">
 <dt id="statefun_tasks.TaskContext.send_message_after">
-<code class="sig-name descname"><span class="pre">send_message_after</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">destination</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.send_message_after" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">send_message_after</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">destination</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cancellation_token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.send_message_after" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sends a message to another Flink Task worker after some delay</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -451,6 +466,7 @@ get_pipeline_id() if the pipeline is nested</p>
 <li><p><strong>destination</strong> – the destination to send the message to (e.g. example/worker)</p></li>
 <li><p><strong>target_id</strong> – the target Id</p></li>
 <li><p><strong>value</strong> – the message to send</p></li>
+<li><p><strong>cancellation_token</strong> (<em>optional</em>) – a cancellation token to associate with this message</p></li>
 </ul>
 </dd>
 </dl>
