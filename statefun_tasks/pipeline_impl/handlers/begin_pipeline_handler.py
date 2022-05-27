@@ -42,7 +42,7 @@ class BeginPipelineHandler(PipelineMessageHandler):
         context.pipeline_state.root_id = invoking_task.meta['root_pipeline_id'] or context.pipeline_state.id
         context.pipeline_state.root_address = invoking_task.meta['root_pipeline_address'] or context.pipeline_state.address
 
-        pipeline.events.notify_pipeline_created(context, context.pipeline_state.pipeline)
+        await pipeline.events.notify_pipeline_created(context, context.pipeline_state.pipeline)
 
         # and notify root pipeline of a new child pipeline
         self._notify_pipeline_created(context)
@@ -54,7 +54,7 @@ class BeginPipelineHandler(PipelineMessageHandler):
             self._serialiser.serialise_result(task_result, ([]), state)
 
             context.pipeline_state.status.value = TaskStatus.COMPLETED
-            pipeline.events.notify_pipeline_status_changed(context, context.pipeline_state.pipeline, context.pipeline_state.status.value)
+            await pipeline.events.notify_pipeline_status_changed(context, context.pipeline_state.pipeline, context.pipeline_state.status.value)
             
             # continue
             return True, task_result
