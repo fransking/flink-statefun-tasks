@@ -26,7 +26,7 @@ class CancelPipelineHandler(PipelineMessageHandler):
             if context.pipeline_state.status.value == TaskStatus.CANCELLING:
                 if caller_id == context.pipeline_state.id or self.graph.is_finally_task(task_uid):
                     context.pipeline_state.status.value = TaskStatus.CANCELLED
-                    pipeline.events.notify_pipeline_status_changed(context, context.pipeline_state.pipeline, context.pipeline_state.status.value)
+                    await pipeline.events.notify_pipeline_status_changed(context, context.pipeline_state.pipeline, context.pipeline_state.status.value)
 
                     # continue (into EndPipelineHandler)
                     return True, task_result_or_exception

@@ -29,7 +29,7 @@ class EndPipelineHandler(PipelineMessageHandler):
 
         # notify event handler (with option to cancel)
         try:
-            pipeline.events.notify_pipeline_finished(context, context.pipeline_state.pipeline, task_result_or_exception)
+            await pipeline.events.notify_pipeline_finished(context, context.pipeline_state.pipeline, task_result_or_exception)
         except TasksException as ex:
             context.pipeline_state.status.value = TaskStatus.Status.RUNNING  # reset to running so we can cancel
             await pipeline.cancel(context, ex)
