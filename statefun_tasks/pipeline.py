@@ -96,7 +96,7 @@ class _Pipeline(object):
             raise ValueError(f'Pipeline is not in a state that can be paused')
 
         context.pipeline_state.status.value = TaskStatus.Status.PAUSED
-        self.events.notify_pipeline_status_changed(context, context.pipeline_state.pipeline, context.pipeline_state.status.value)
+        await self.events.notify_pipeline_status_changed(context, context.pipeline_state.pipeline, context.pipeline_state.status.value)
 
         # tell any child pipelines to pause
         for child_pipeline in context.pipeline_state.child_pipelines:
@@ -108,7 +108,7 @@ class _Pipeline(object):
             raise ValueError(f'Pipeline is not in a state that can be unpaused')
         
         context.pipeline_state.status.value = TaskStatus.Status.RUNNING
-        self.events.notify_pipeline_status_changed(context, context.pipeline_state.pipeline, context.pipeline_state.status.value)
+        await self.events.notify_pipeline_status_changed(context, context.pipeline_state.pipeline, context.pipeline_state.status.value)
 
         try:
             await self._submitter.unpause_tasks(context)
@@ -127,7 +127,7 @@ class _Pipeline(object):
             raise ValueError(f'Pipeline is not in a state that can be cancelled')
 
         context.pipeline_state.status.value = TaskStatus.Status.CANCELLING
-        self.events.notify_pipeline_status_changed(context, context.pipeline_state.pipeline, context.pipeline_state.status.value)
+        await self.events.notify_pipeline_status_changed(context, context.pipeline_state.pipeline, context.pipeline_state.status.value)
 
         # tell any child pipelines to cancel
         for child_pipeline in context.pipeline_state.child_pipelines:

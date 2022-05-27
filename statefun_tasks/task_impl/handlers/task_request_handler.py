@@ -32,7 +32,7 @@ class TaskRequestHandler(MessageHandler):
         flink_task = tasks.get_task(task_request.type)
 
         # notify started
-        tasks.events.notify_task_started(context, task_request)
+        await tasks.events.notify_task_started(context, task_request)
         
         # run task code
         task_result, task_exception, pipeline, state = await flink_task.run(context, task_request)
@@ -45,7 +45,7 @@ class TaskRequestHandler(MessageHandler):
                 task_exception, pipeline = _create_task_exception(task_request, ex), None
 
         # notify finished
-        tasks.events.notify_task_finished(context, task_result, task_exception, is_pipeline=pipeline is not None)
+        await tasks.events.notify_task_finished(context, task_result, task_exception, is_pipeline=pipeline is not None)
 
         # if task returns a pipeline then start it if we can
         if pipeline is not None and await pipeline.handle_message(context, task_request, state):
@@ -53,7 +53,7 @@ class TaskRequestHandler(MessageHandler):
 
         # else if we have an task exception, attempt retry or return the error
         elif task_exception is not None:
-            if self._attempt_retry(context, tasks, task_request, task_exception):
+            if await self._attempt_retry(context, tasks, task_request, task_exception):
                 return  # we have triggered a retry so ignore the result of this invocation
 
             context.storage.task_result = task_exception
@@ -64,7 +64,7 @@ class TaskRequestHandler(MessageHandler):
             context.storage.task_exception = task_result
             tasks.emit_result(context, task_request, task_result)
 
-    def _attempt_retry(self, context, tasks, task_request, task_exception):
+    async def _attempt_retry(self, context, tasks, task_request, task_exception):
         task_state = context.task_state.by_uid[task_request.uid]
 
         if task_exception.maybe_retry and task_exception.retry_policy is not None:           
@@ -92,7 +92,7 @@ class TaskRequestHandler(MessageHandler):
             context.send_message(context.get_address(), context.get_task_id(), task_request, delay)
 
             # notify retry
-            tasks.events.notify_task_retry(context, task_request, task_state.retry_count)
+            await tasks.events.notify_task_retry(context, task_request, task_state.retry_count)
 
             return True
 
