@@ -3,6 +3,7 @@ from statefun_tasks.messages_pb2 import TaskEntry, GroupEntry, PipelineEntry, Ta
 
 from dataclasses import dataclass, field
 from datetime import timedelta
+from collections import deque
 
 class Task:
     __slots__ = ('_proto_backed', '_unpacked', '_args', '_kwargs', '_proto')
@@ -233,16 +234,28 @@ class Group:
 
         return PipelineEntry(group_entry=proto)
 
-
     @staticmethod
     def from_proto(proto: PipelineEntry):
-        entry = Group(group_id=proto.group_entry.group_id, max_parallelism=proto.group_entry.max_parallelism, is_wait=proto.group_entry.is_wait)
+        group = Group(group_id=proto.group_entry.group_id, max_parallelism=proto.group_entry.max_parallelism, is_wait=proto.group_entry.is_wait)
+        stack = deque([(proto.group_entry.group, group)])  
 
-        def _from_proto(entry):
-            return Task.from_proto(entry) if entry.HasField('task_entry') else Group.from_proto(entry)
+        while len(stack) > 0:
+            group_proto, grp = stack.popleft()
+            
+            for pipeline in group_proto:
+                entries = []
 
-        entry._group = [[_from_proto(entry) for entry in pipeline.entries] for pipeline in proto.group_entry.group]
-        return entry
+                for proto in pipeline.entries:
+                    if proto.HasField('group_entry'):
+                        stack_group = Group(group_id=proto.group_entry.group_id, max_parallelism=proto.group_entry.max_parallelism, is_wait=proto.group_entry.is_wait)
+                        entries.append(stack_group)
+                        stack.append((proto.group_entry.group, stack_group))
+                    else:
+                        entries.append(Task.from_proto(proto))
+
+                grp._group.append(entries)
+
+        return group
 
     def __repr__(self):
         return self._group.__repr__()
