@@ -5,6 +5,8 @@ from collections import deque
 
 
 class PipelineGraph(object):
+    __slots__ = ('_pipeline')
+
     def __init__(self, pipeline: list):
         self._pipeline = pipeline
 

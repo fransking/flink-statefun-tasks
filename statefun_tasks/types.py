@@ -7,6 +7,7 @@ from statefun import make_protobuf_type
 
 from dataclasses import dataclass, field
 from datetime import timedelta
+from collections import deque
 
 # Protobuf type registrations required by Flink Statefun API
 PIPELINE_STATE_TYPE = make_protobuf_type(PipelineState, namespace='io.statefun_tasks.types')
@@ -33,6 +34,8 @@ _VALUE_TYPE_MAP = {
 
 
 class Task:
+    __slots__ = ('_proto_backed', '_unpacked', '_args', '_kwargs', '_proto')
+
     def __init__(self, proto: TaskEntry, task_args=None, task_kwargs=None):
 
         if task_args is None and task_kwargs is None:
@@ -230,6 +233,8 @@ class Task:
 
 
 class Group:
+    __slots__ = ('group_id', 'max_parallelism', 'is_wait', '_group')
+
     def __init__(self, group_id, max_parallelism=None, is_wait=None):
         self.group_id = group_id
         self.max_parallelism = max_parallelism
@@ -252,37 +257,33 @@ class Group:
         return None  # _GroupEntries don't have a single destination
 
     def to_proto(self, serialiser) -> PipelineEntry:
-        proto = GroupEntry(group_id=self.group_id, max_parallelism=self.max_parallelism, is_wait=self.is_wait)
-
-        for entries in self._group:
-            pipeline = Pipeline()
-
-            for entry in entries:
-                entry_proto = entry.to_proto(serialiser)
-                pipeline.entries.append(entry_proto)
-
-            proto.group.append(pipeline)
+        group = [Pipeline(entries=[entry.to_proto(serialiser) for entry in entries]) for entries in self._group]
+        proto = GroupEntry(group_id=self.group_id, group=group, max_parallelism=self.max_parallelism, is_wait=self.is_wait)
 
         return PipelineEntry(group_entry=proto)
 
     @staticmethod
     def from_proto(proto: PipelineEntry):
-        entry = Group(group_id=proto.group_entry.group_id, max_parallelism=proto.group_entry.max_parallelism, is_wait=proto.group_entry.is_wait)
+        group = Group(group_id=proto.group_entry.group_id, max_parallelism=proto.group_entry.max_parallelism, is_wait=proto.group_entry.is_wait)
+        stack = deque([(proto.group_entry.group, group)])  
 
-        group = []
-        for pipeline in proto.group_entry.group:
-            entries = []
+        while len(stack) > 0:
+            group_proto, grp = stack.popleft()
+            
+            for pipeline in group_proto:
+                entries = []
 
-            for proto in pipeline.entries:
-                if proto.HasField('task_entry'):
-                    entries.append(Task.from_proto(proto))
-                elif proto.HasField('group_entry'):
-                    entries.append(Group.from_proto(proto))
+                for proto in pipeline.entries:
+                    if proto.HasField('group_entry'):
+                        stack_group = Group(group_id=proto.group_entry.group_id, max_parallelism=proto.group_entry.max_parallelism, is_wait=proto.group_entry.is_wait)
+                        entries.append(stack_group)
+                        stack.append((proto.group_entry.group, stack_group))
+                    else:
+                        entries.append(Task.from_proto(proto))
 
-            group.append(entries)
+                grp._group.append(entries)
 
-        entry._group = group
-        return entry
+        return group
 
     def __repr__(self):
         return self._group.__repr__()

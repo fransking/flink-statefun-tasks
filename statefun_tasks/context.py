@@ -15,6 +15,8 @@ class TaskContext(object):
     :param egress_type_name: egress type name to use when calling send_egress_message()
     :param optional serialiser: serialiser to use (will use DefaultSerialiser if not set)
     """
+    __slots__ = ('_context', '_egress_type_name', '_serialiser', 'storage', 'task_state', 'pipeline_state', 'pipeline_state_size', '_task_meta', '_task_name', '_task_uid')
+
     def __init__(self, context: Context, egress_type_name: str, serialiser=None):
         self._context = context
         self._egress_type_name = egress_type_name

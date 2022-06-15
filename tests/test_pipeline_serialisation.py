@@ -60,7 +60,7 @@ class PipelineSerialisationTests(unittest.TestCase):
         ])
 
         entry.add_to_group([
-            Task.from_fields('grouped_task_chain_2_1', 'task_type', args, kwargs)
+            Task.from_fields('grouped_task_chain_2_1', 'task_type', args, kwargs),
         ])
 
         proto = entry.to_proto(serialiser)
