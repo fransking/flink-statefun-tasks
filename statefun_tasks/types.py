@@ -5,6 +5,8 @@ from dataclasses import dataclass, field
 from datetime import timedelta
 
 class Task:
+    __slots__ = ('_proto_backed', '_unpacked', '_args', '_kwargs', '_proto')
+
     def __init__(self, proto: TaskEntry, task_args=None, task_kwargs=None):
 
         if task_args is None and task_kwargs is None:
@@ -202,6 +204,8 @@ class Task:
 
 
 class Group:
+    __slots__ = ('group_id', 'max_parallelism', 'is_wait', '_group')
+
     def __init__(self, group_id, max_parallelism=None, is_wait=None):
         self.group_id = group_id
         self.max_parallelism = max_parallelism
@@ -224,36 +228,20 @@ class Group:
         return None  # _GroupEntries don't have a single destination
 
     def to_proto(self, serialiser) -> PipelineEntry:
-        proto = GroupEntry(group_id=self.group_id, max_parallelism=self.max_parallelism, is_wait=self.is_wait)
-
-        for entries in self._group:
-            pipeline = Pipeline()
-
-            for entry in entries:
-                entry_proto = entry.to_proto(serialiser)
-                pipeline.entries.append(entry_proto)
-
-            proto.group.append(pipeline)
+        group = [Pipeline(entries=[entry.to_proto(serialiser) for entry in entries]) for entries in self._group]
+        proto = GroupEntry(group_id=self.group_id, group=group, max_parallelism=self.max_parallelism, is_wait=self.is_wait)
 
         return PipelineEntry(group_entry=proto)
+
 
     @staticmethod
     def from_proto(proto: PipelineEntry):
         entry = Group(group_id=proto.group_entry.group_id, max_parallelism=proto.group_entry.max_parallelism, is_wait=proto.group_entry.is_wait)
 
-        group = []
-        for pipeline in proto.group_entry.group:
-            entries = []
+        def _from_proto(entry):
+            return Task.from_proto(entry) if entry.HasField('task_entry') else Group.from_proto(entry)
 
-            for proto in pipeline.entries:
-                if proto.HasField('task_entry'):
-                    entries.append(Task.from_proto(proto))
-                elif proto.HasField('group_entry'):
-                    entries.append(Group.from_proto(proto))
-
-            group.append(entries)
-
-        entry._group = group
+        entry._group = [[_from_proto(entry) for entry in pipeline.entries] for pipeline in proto.group_entry.group]
         return entry
 
     def __repr__(self):

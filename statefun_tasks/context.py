@@ -8,6 +8,9 @@ from datetime import timedelta
 
 
 class TaskContext(object):
+    __slots__ = ('_context', '_egress_type_name', '_serialiser', 'storage', 'task_state', 'pipeline_state', 'pipeline_state_size', '_task_meta', '_task_name', '_task_uid')
+
+
     def __init__(self, context: BatchContext, egress_type_name: str, serialiser=None):
         self._context = context
         self._egress_type_name = egress_type_name
@@ -18,6 +21,7 @@ class TaskContext(object):
         self.pipeline_state_size = self.pipeline_state.ByteSize() if self.pipeline_state is not None else 0
 
         self._task_meta = {}
+        self._task_name = None
         self._task_uid = None
 
     @property
