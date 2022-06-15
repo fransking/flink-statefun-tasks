@@ -4,6 +4,8 @@ from statefun_tasks.serialisation import pack_any
 
 
 class ResultEmitter(object):
+    __slots__ = ()
+
     def __init__(self):
         pass
 

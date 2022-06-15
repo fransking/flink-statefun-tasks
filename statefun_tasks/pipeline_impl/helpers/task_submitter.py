@@ -12,6 +12,8 @@ _log = logging.getLogger('FlinkTasks')
 
 
 class DeferredTaskSubmitter(object):
+    __slots__ = ('_graph', '_serialiser', '_storage')
+
     def __init__(self, graph, serialiser, storage: StorageBackend):
         self._graph = graph
         self._serialiser = serialiser

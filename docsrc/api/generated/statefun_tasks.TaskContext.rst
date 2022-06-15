@@ -35,7 +35,11 @@ TaskContext
    
     
    
+      ~TaskContext.pipeline_state
+      ~TaskContext.pipeline_state_size
+      ~TaskContext.storage
       ~TaskContext.task_name
+      ~TaskContext.task_state
       ~TaskContext.task_uid
 
    
@@ -47,7 +51,11 @@ TaskContext
 
    .. autosummary::
    
+      ~TaskContext.pipeline_state
+      ~TaskContext.pipeline_state_size
+      ~TaskContext.storage
       ~TaskContext.task_name
+      ~TaskContext.task_state
       ~TaskContext.task_uid
    
    

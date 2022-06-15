@@ -13,6 +13,8 @@ from typing import Union
 
 
 class _Pipeline(object):
+    __slots__ = ('_pipeline', '_serialiser', '_is_fruitful', '_events', '_storage', '_handlers', '_graph', '_submitter')
+
     def __init__(self, pipeline: list, serialiser=None, is_fruitful=True, events: EventHandlers=None, storage: StorageBackend=None):
         self._pipeline = pipeline
         self._serialiser = serialiser or DefaultSerialiser()
@@ -47,13 +49,10 @@ class _Pipeline(object):
 
     @staticmethod
     def from_proto(pipeline_proto: Pipeline, serialiser, events, storage):
-        pipeline = []
+        def _from_proto(entry):
+            return Task.from_proto(entry) if entry.HasField('task_entry') else Group.from_proto(entry)
 
-        for proto in pipeline_proto.entries:
-            if proto.HasField('task_entry'):
-                pipeline.append(Task.from_proto(proto))
-            elif proto.HasField('group_entry'):
-                pipeline.append(Group.from_proto(proto))
+        pipeline = [_from_proto(proto) for proto in pipeline_proto.entries]
 
         return _Pipeline(pipeline, serialiser=serialiser, events=events, storage=storage)
 
