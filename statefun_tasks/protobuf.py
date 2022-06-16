@@ -11,6 +11,7 @@ from google.protobuf.message import Message
 
 from typing import Union, TypeVar, Generic, Iterable, List
 
+
 _FRAMEWORK_KNOWN_PROTO_TYPES = [
     # wrappers
     DoubleValue,

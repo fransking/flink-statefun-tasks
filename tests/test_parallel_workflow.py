@@ -133,7 +133,6 @@ class ParallelWorkflowTests(unittest.TestCase):
 
         self.assertEqual(result, "Hello Jane Doe. So now I will say see you later!; Hello John Smith OrderedDict([('A', 2), ('B', 2)])")
 
-
     def test_nested_parallel_workflow(self):
         pipeline = in_parallel([
             in_parallel([
@@ -166,7 +165,6 @@ class ParallelWorkflowTests(unittest.TestCase):
         self.assertEqual(join_results_called, True)
         self.assertEqual(join_results2_called, True)
         self.assertEqual(join_results3_called, True)
-
 
     def test_continuation_into_parallel_workflow(self):
         pipeline = _say_hello.send("John", "Smith").continue_with(in_parallel([
@@ -223,7 +221,6 @@ class ParallelWorkflowTests(unittest.TestCase):
         self.assertEqual(join_results_called, False)
         self.assertEqual(say_goodbye_called, True)
 
-
     def test_parallel_workflow_with_error_and_continuations(self):
         global join_results_called
         join_results_called = False
@@ -266,7 +263,6 @@ class ParallelWorkflowTests(unittest.TestCase):
 
         self.assertEqual(result, "['Hello John Smith', 'Hello Jane Doe. So now I will say see you later!', ['Hello Bob Smith', 'Hello Tom Smith']]")
 
-
     def test_parallel_workflow_with_max_parallelism(self):
         pipeline = in_parallel([
             _say_hello.send("Jane", "Doe"),
@@ -279,7 +275,6 @@ class ParallelWorkflowTests(unittest.TestCase):
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, "['Hello Jane Doe', ['Hello Bob Smith. So now I will say see you later!', 'Hello Tom Smith']]")
 
-
     def test_parallel_workflow_composition(self):
         p1 = in_parallel([_say_hello.send("A", "B"), _say_hello.send("C", "D")])
         p2 = in_parallel([_say_hello.send("E", "F"), _say_hello.send("G", "H")])
@@ -290,7 +285,6 @@ class ParallelWorkflowTests(unittest.TestCase):
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, [['Hello A B', 'Hello C D'], ['Hello E F', 'Hello G H'], ['Hello I J']])
 
-
     def test_parallel_workflow_with_max_parallelism_as_continuation(self):
         pipeline = _say_hello.send("Jane", "Doe").continue_with(in_parallel([
             _print_results.send(),
@@ -300,7 +294,6 @@ class ParallelWorkflowTests(unittest.TestCase):
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, ['Hello Jane Doe', 'Hello Jane Doe'])
 
-
     def test_empty_parallel_pipeline_continuation(self):
         global join_results_called
         join_results_called = False
@@ -309,7 +302,6 @@ class ParallelWorkflowTests(unittest.TestCase):
         result = self.test_harness.run_pipeline(pipeline)
         self.assertTrue(join_results_called)
         self.assertEqual(result, None)
-
 
     def test_empty_parallel_pipeline(self):
         global join_results_called
@@ -332,6 +324,19 @@ class ParallelWorkflowTests(unittest.TestCase):
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, ['Hello John Smith', 'Goodbye John Smith'])
 
+    def test_parallel_pipeline_wtih_stages(self):
+        entries = [
+            _add_greeting.send('John','Smith', 'Hello'), 
+            _add_greeting.send('John','Smith', 'Goodbye'),
+            _add_greeting.send('John','Smith', 'Hello to you'), 
+            _add_greeting.send('John','Smith', 'Goodbye to you'),
+             _add_greeting.send('Jane','Doe', 'Hello')
+        ]
+
+        # this will spint the 4 tasks into 3 stages (2 + 2 + 1 tasks in each) followed by a flatten
+        pipeline = in_parallel(entries, num_stages=3, max_parallelism=2)
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, ['Hello John Smith', 'Goodbye John Smith', 'Hello to you John Smith', 'Goodbye to you John Smith', 'Hello Jane Doe'])
 
 if __name__ == '__main__':
     unittest.main()

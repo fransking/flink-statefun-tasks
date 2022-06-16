@@ -13,16 +13,13 @@ from statefun_tasks.pipeline import _Pipeline
 from statefun_tasks.tasks import FlinkTask
 from statefun_tasks.task_impl.handlers import TaskRequestHandler, TaskResponseHandler, TaskActionHandler, ChildPipelineHandler
 from statefun_tasks.events import EventHandlers
+from statefun_tasks.builtin_tasks import run_pipeline, flatten_results
 
 from statefun import ValueSpec, Context, Message
 from datetime import timedelta
 import logging
 
 _log = logging.getLogger('FlinkTasks')
-
-
-def _run_pipeline(pipeline_proto):
-    return PipelineBuilder.from_proto(pipeline_proto).validate()
 
 
 class FlinkTasks(object):
@@ -55,7 +52,8 @@ class FlinkTasks(object):
             ValueSpec(name="pipeline_state", type=PIPELINE_STATE_TYPE),
         ]
 
-        self.register_builtin('run_pipeline', _run_pipeline)
+        self.register_builtin('run_pipeline', run_pipeline, with_context=True)
+        self.register_builtin('flatten_results', flatten_results)
 
         self._handlers = [
             TaskRequestHandler(),

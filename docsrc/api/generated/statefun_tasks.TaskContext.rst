@@ -19,6 +19,7 @@ TaskContext
       ~TaskContext.get_caller_address
       ~TaskContext.get_caller_id
       ~TaskContext.get_display_name
+      ~TaskContext.get_namespace
       ~TaskContext.get_parent_task_address
       ~TaskContext.get_parent_task_id
       ~TaskContext.get_pipeline_address
@@ -27,6 +28,7 @@ TaskContext
       ~TaskContext.get_root_pipeline_id
       ~TaskContext.get_state
       ~TaskContext.get_task_id
+      ~TaskContext.get_worker_name
       ~TaskContext.send_egress_message
       ~TaskContext.send_message
       ~TaskContext.send_message_after
