@@ -1,4 +1,4 @@
-from statefun_tasks.types import Task, Group, RetryPolicy
+from statefun_tasks.types import Task, Group, RetryPolicy, ProtobufSerialisable
 from statefun_tasks.utils import _gen_id, _is_tuple
 from statefun_tasks.pipeline import _Pipeline
 from statefun_tasks.messages_pb2 import TaskRequest, Pipeline
@@ -6,11 +6,24 @@ from statefun_tasks.messages_pb2 import TaskRequest, Pipeline
 from typing import Iterable
 
 
-def in_parallel(entries: list, max_parallelism=None):
-    return PipelineBuilder().append_group(entries, max_parallelism)
+def in_parallel(entries: list, max_parallelism=None, num_stages:int = 1):
+
+    if num_stages > 1:
+        max_parallelism = None if max_parallelism is None else int(max_parallelism / num_stages)
+
+        stages = [entries[i:i + num_stages] for i in range(0, len(entries), num_stages)]
+        pipelines = [PipelineBuilder().append_group(stage, max_parallelism=max_parallelism) for stage in stages]
+        tasks = [Task.from_fields(_gen_id(), '__builtins.run_pipeline', pipeline, {}, is_fruitful=True) for pipeline in pipelines]
+        group = [PipelineBuilder().append(task) for task in tasks]
+        continuation = Task.from_fields(_gen_id(), '__builtins.flatten_results', (), {}, is_fruitful=True)
+        
+        return PipelineBuilder().append_group(group, max_parallelism).append(continuation)
+
+    else:
+        return PipelineBuilder().append_group(entries, max_parallelism)
 
 
-class PipelineBuilder(object):
+class PipelineBuilder(ProtobufSerialisable):
     """
     Builder class for creating pipelines of Flink Tasks
 
@@ -31,6 +44,16 @@ class PipelineBuilder(object):
     @id.setter
     def id(self, value):
         self._builder_id = value
+
+    def append(self, task: Task) -> 'PipelineBuilder':
+        """
+        Appends a single task onto this pipeline
+
+        :param task: the task to append
+        :return: the builder
+        """
+        self._pipeline.append(task)
+        return self
 
     def append_to(self, other: 'PipelineBuilder') -> 'PipelineBuilder':
         """
@@ -215,6 +238,20 @@ class PipelineBuilder(object):
         self.validate()
         return _Pipeline(self._pipeline, events=events, serialiser=serialiser, is_fruitful=is_fruitful)
 
+    def set_task_defaults(self, default_namespace, default_worker_name) ->  'PipelineBuilder':
+        """
+        Sets defaults on task entries if they are not set
+
+        :return: the builder
+        """
+        for task in self._get_tasks():
+            if task.namespace == '':
+                task.namespace = default_namespace
+            if task.worker_name == '':
+                task.worker_name = default_worker_name
+
+        return self
+
     def validate(self) -> 'PipelineBuilder':
         """
         Validates the pipeline raising a ValueError if the pipeline is invalid
@@ -223,8 +260,8 @@ class PipelineBuilder(object):
         """
         errors = []
 
-        all_tasks = [task for task in self._pipeline if isinstance(task, Task)]
-        all_groups = [group for group in self._pipeline if isinstance(group, Group)]
+        all_tasks = self._get_tasks()
+        all_groups = self._get_groups()
 
         task_uids = [task.uid for task in all_tasks]
         if len(task_uids) != len(set(task_uids)):
@@ -296,6 +333,27 @@ class PipelineBuilder(object):
         :return: true if empty, false otherwise
         """
         return not any(self.get_tasks())
+
+    def _get_tasks(self) -> list:
+        def yield_tasks(entry):
+            for task_or_group in entry:
+                if isinstance(task_or_group, Group):
+                    for group_entry in task_or_group:
+                        yield from yield_tasks(group_entry)
+                else:
+                    yield task_or_group
+        
+        return list(yield_tasks(self))
+
+    def _get_groups(self) -> list:
+        def yield_groups(entry):
+            for task_or_group in entry:
+                if isinstance(task_or_group, Group):
+                    yield task_or_group
+                    for group_entry in task_or_group:
+                        yield from yield_groups(group_entry)
+        
+        return list(yield_groups(self))
 
     def __iter__(self):
         return self._pipeline.__iter__()
