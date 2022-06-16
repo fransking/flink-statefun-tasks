@@ -4,7 +4,7 @@ from statefun_tasks.messages_pb2 import PipelineState, TaskState, TaskRequest, T
     Pipeline, ChildPipeline
 
 from statefun import make_protobuf_type
-
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import timedelta
 from collections import deque
@@ -219,7 +219,10 @@ class Task:
 
     def to_proto(self, serialiser) -> PipelineEntry:
         if not self._proto_backed:
-            request = serialiser.serialise_args_and_kwargs(self._args, self._kwargs)
+
+            args = self._args.to_proto(serialiser) if isinstance(self._args, ProtobufSerialisable) else self._args
+            request = serialiser.serialise_args_and_kwargs(args, self._kwargs)
+            
             self._proto.request.CopyFrom(request)
 
         return PipelineEntry(task_entry=self._proto)
@@ -327,3 +330,9 @@ class PipelineInProgress(TasksException):
 class YieldTaskInvocation(Exception):
     def __init__(self):
         super().__init__()
+
+
+class ProtobufSerialisable(ABC):
+    @abstractmethod
+    def to_proto(serialiser):
+        pass

@@ -124,6 +124,23 @@ class TaskContext(object):
         """
         return f'{self._context.address.typename}'
 
+    def get_namespace(self):
+        """
+        Own namespace in the form of context.address.typename
+
+        :return: address
+        """
+        return f'{self._context.address.namespace}'
+
+    def get_worker_name(self):
+        """
+        Own worker_name in the form of context.address.typename
+
+        :return: address
+        """
+        return f'{self._context.address.name}'
+
+
     def get_task_id(self):
         """
         Own task Id in the form of context.address.id

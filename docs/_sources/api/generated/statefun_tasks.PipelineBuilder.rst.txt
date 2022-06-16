@@ -13,6 +13,7 @@ PipelineBuilder
    .. autosummary::
    
       ~PipelineBuilder.__init__
+      ~PipelineBuilder.append
       ~PipelineBuilder.append_group
       ~PipelineBuilder.append_to
       ~PipelineBuilder.continue_if
@@ -24,6 +25,7 @@ PipelineBuilder
       ~PipelineBuilder.is_empty
       ~PipelineBuilder.send
       ~PipelineBuilder.set
+      ~PipelineBuilder.set_task_defaults
       ~PipelineBuilder.to_pipeline
       ~PipelineBuilder.to_proto
       ~PipelineBuilder.to_task_request

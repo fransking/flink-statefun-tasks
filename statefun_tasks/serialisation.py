@@ -19,9 +19,11 @@ class DefaultSerialiser(object):
             self,
             known_proto_types: Iterable[Type[Message]] = None,
             protobuf_converters: Iterable[ObjectProtobufConverter] = None):
+
         known_proto_types = known_proto_types or []
-        # prepend default converters and
+        # prepend default converters
         protobuf_converters = [*_generate_default_converters(), *(protobuf_converters or [])]
+        
         self._known_proto_types = set(known_proto_types)
         self._protobuf_converters = set(protobuf_converters)
 
