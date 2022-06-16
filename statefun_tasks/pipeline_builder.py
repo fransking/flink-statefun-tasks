@@ -6,16 +6,18 @@ from statefun_tasks.messages_pb2 import TaskRequest, Pipeline
 from typing import Iterable
 
 
-def in_parallel(entries: list, max_parallelism=None, num_stages:int = 1):
+def in_parallel(entries: list, max_parallelism=None, num_stages:int = 1, stage_display_name=None):
 
     if num_stages > 1:
+        stage_display_name = stage_display_name if stage_display_name is not None else 'In parallel'
+        chunk_size = int(len(entries) / num_stages) + 1
         max_parallelism = None if max_parallelism is None else int(max_parallelism / num_stages)
 
-        stages = [entries[i:i + num_stages] for i in range(0, len(entries), num_stages)]
+        stages = [entries[i:i + chunk_size] for i in range(0, len(entries), chunk_size)]
         pipelines = [PipelineBuilder().append_group(stage, max_parallelism=max_parallelism) for stage in stages]
-        tasks = [Task.from_fields(_gen_id(), '__builtins.run_pipeline', pipeline, {}, is_fruitful=True) for pipeline in pipelines]
+        tasks = [Task.from_fields(_gen_id(), '__builtins.run_pipeline', pipeline, {}, is_fruitful=True, display_name=f'{stage_display_name} stage {i+1} of {len(stages)}') for i, pipeline in enumerate(pipelines)]
         group = [PipelineBuilder().append(task) for task in tasks]
-        continuation = Task.from_fields(_gen_id(), '__builtins.flatten_results', (), {}, is_fruitful=True)
+        continuation = Task.from_fields(_gen_id(), '__builtins.flatten_results', (), {}, is_fruitful=True, display_name=f'{stage_display_name} join results')
         
         return PipelineBuilder().append_group(group, max_parallelism).append(continuation)
 
