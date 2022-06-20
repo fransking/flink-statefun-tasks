@@ -225,20 +225,6 @@ class PipelineBuilder(ProtobufSerialisable):
         self.validate()
         return _Pipeline(self._pipeline, events=events, serialiser=serialiser, is_fruitful=is_fruitful)
 
-    def set_task_defaults(self, default_namespace, default_worker_name) ->  'PipelineBuilder':
-        """
-        Sets defaults on task entries if they are not set
-
-        :return: the builder
-        """
-        for task in self._get_tasks():
-            if task.namespace == '':
-                task.namespace = default_namespace
-            if task.worker_name == '':
-                task.worker_name = default_worker_name
-
-        return self
-
     def validate(self) -> 'PipelineBuilder':
         """
         Validates the pipeline raising a ValueError if the pipeline is invalid

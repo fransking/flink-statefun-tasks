@@ -12,7 +12,7 @@ from statefun_tasks.pipeline import _Pipeline
 from statefun_tasks.tasks import FlinkTask
 from statefun_tasks.task_impl.handlers import TaskRequestHandler, TaskResponseHandler, TaskActionHandler, ChildPipelineHandler
 from statefun_tasks.events import EventHandlers
-from statefun_tasks.builtin_tasks import run_pipeline, flatten_results
+from statefun_tasks.builtin_tasks import run_pipeline
 
 from statefun.request_reply import BatchContext
 from typing import Union
@@ -43,8 +43,7 @@ class FlinkTasks(object):
         self._events = EventHandlers()
         self._storage = None
 
-        self.register_builtin('run_pipeline', run_pipeline, with_context=True)
-        self.register_builtin('flatten_results', flatten_results)
+        self.register_builtin('run_pipeline', run_pipeline)
 
         self._handlers = [
             TaskRequestHandler(),
