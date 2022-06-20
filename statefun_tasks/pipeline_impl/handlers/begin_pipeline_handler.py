@@ -14,8 +14,7 @@ class BeginPipelineHandler(PipelineMessageHandler):
     
     def can_handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException]) -> bool:
         return (context.pipeline_state is None or context.pipeline_state.status.value == TaskStatus.PENDING) \
-            and isinstance(message, TaskRequest) 
-                #and not self.graph.is_empty()
+            and isinstance(message, TaskRequest)
 
     async def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], pipeline: '_Pipeline', state: Any):
         invoking_task = message  # type: TaskRequest

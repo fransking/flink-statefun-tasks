@@ -324,19 +324,6 @@ class ParallelWorkflowTests(unittest.TestCase):
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, ['Hello John Smith', 'Goodbye John Smith'])
 
-    def test_parallel_pipeline_wtih_stages(self):
-        entries = [
-            _add_greeting.send('John','Smith', 'Hello'), 
-            _add_greeting.send('John','Smith', 'Goodbye'),
-            _add_greeting.send('John','Smith', 'Hello to you'), 
-            _add_greeting.send('John','Smith', 'Goodbye to you'),
-             _add_greeting.send('Jane','Doe', 'Hello')
-        ]
-
-        # this will spint the 4 tasks into 3 stages (2 + 2 + 1 tasks in each) followed by a flatten
-        pipeline = in_parallel(entries, num_stages=3, max_parallelism=2)
-        result = self.test_harness.run_pipeline(pipeline)
-        self.assertEqual(result, ['Hello John Smith', 'Goodbye John Smith', 'Hello to you John Smith', 'Goodbye to you John Smith', 'Hello Jane Doe'])
 
 if __name__ == '__main__':
     unittest.main()
