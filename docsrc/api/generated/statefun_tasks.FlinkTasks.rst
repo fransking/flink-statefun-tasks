@@ -25,7 +25,6 @@ FlinkTasks
       ~FlinkTasks.run_async
       ~FlinkTasks.send
       ~FlinkTasks.send_result
-      ~FlinkTasks.set_storage_backend
       ~FlinkTasks.try_get_pipeline
       ~FlinkTasks.unpack_task_request
       ~FlinkTasks.value_specs

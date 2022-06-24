@@ -70,7 +70,7 @@ class BeginPipelineHandler(PipelineMessageHandler):
                     task.request = self._serialiser.serialise_args_and_kwargs(([]), kwargs)
 
             # split into tasks to call now and those to defer if max parallelism is exceeded
-            await self.submitter.submit_tasks(context, tasks, max_parallelism=max_parallelism)
+            self.submitter.submit_tasks(context, tasks, max_parallelism=max_parallelism)
 
             # break
             return False, message

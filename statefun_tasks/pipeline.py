@@ -1,7 +1,6 @@
 from statefun_tasks.context import TaskContext
 from statefun_tasks.messages_pb2 import ChildPipeline, TaskRequest, TaskResult, TaskException, Pipeline, TaskActionRequest, TaskAction, TaskStatus
 from statefun_tasks.serialisation import DefaultSerialiser
-from statefun_tasks.storage import StorageBackend
 from statefun_tasks.types import Task, Group, TaskCancelledException, PipelineInProgress
 from statefun_tasks.type_helpers import _create_task_exception
 from statefun_tasks.pipeline_impl.handlers import BeginPipelineHandler, ContinuePipelineHandler, EndPipelineHandler, CancelPipelineHandler
@@ -13,24 +12,23 @@ from typing import Union
 
 
 class _Pipeline(object):
-    __slots__ = ('_pipeline', '_serialiser', '_is_fruitful', '_events', '_storage', '_handlers', '_graph', '_submitter')
+    __slots__ = ('_pipeline', '_serialiser', '_is_fruitful', '_events', '_handlers', '_graph', '_submitter')
 
-    def __init__(self, pipeline: list, serialiser=None, is_fruitful=True, events: EventHandlers=None, storage: StorageBackend=None):
+    def __init__(self, pipeline: list, serialiser=None, is_fruitful=True, events: EventHandlers=None):
         self._pipeline = pipeline
         self._serialiser = serialiser or DefaultSerialiser()
         self._is_fruitful = is_fruitful
         self._events = events or EventHandlers()
-        self._storage = storage
 
         self._handlers = [
-            BeginPipelineHandler(self._pipeline, self._serialiser, self._storage),
-            ContinuePipelineHandler(self._pipeline, self._serialiser, self._storage),
-            CancelPipelineHandler(self._pipeline, self._serialiser, self._storage),
-            EndPipelineHandler(self._pipeline, self._serialiser, self._storage)
+            BeginPipelineHandler(self._pipeline, self._serialiser),
+            ContinuePipelineHandler(self._pipeline, self._serialiser),
+            CancelPipelineHandler(self._pipeline, self._serialiser),
+            EndPipelineHandler(self._pipeline, self._serialiser)
         ]
 
         self._graph = PipelineGraph(self._pipeline)
-        self._submitter = DeferredTaskSubmitter(self._graph, self._serialiser, self._storage)
+        self._submitter = DeferredTaskSubmitter(self._graph, self._serialiser)
 
     @property
     def events(self) -> EventHandlers:
@@ -48,13 +46,13 @@ class _Pipeline(object):
         return pipeline
 
     @staticmethod
-    def from_proto(pipeline_proto: Pipeline, serialiser, events, storage):
+    def from_proto(pipeline_proto: Pipeline, serialiser, events):
         def _from_proto(entry):
             return Task.from_proto(entry) if entry.HasField('task_entry') else Group.from_proto(entry)
 
         pipeline = [_from_proto(proto) for proto in pipeline_proto.entries]
 
-        return _Pipeline(pipeline, serialiser=serialiser, events=events, storage=storage)
+        return _Pipeline(pipeline, serialiser=serialiser, events=events)
 
     async def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], state: Any=None) -> bool:
         handled = False
@@ -110,7 +108,7 @@ class _Pipeline(object):
         await self.events.notify_pipeline_status_changed(context, context.pipeline_state.pipeline, context.pipeline_state.status.value)
 
         try:
-            await self._submitter.unpause_tasks(context)
+            self._submitter.unpause_tasks(context)
 
             # tell any child pipelines to resume
             for child_pipeline in context.pipeline_state.child_pipelines:

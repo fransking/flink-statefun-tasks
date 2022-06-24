@@ -135,10 +135,7 @@ message TaskDeferral {
 
 message PausedTask {
     string destination = 1;
-    oneof task_request_or_task_uid {
-        TaskRequest task_request = 2;
-        string task_uid = 3;
-    }
+    TaskRequest task_request = 2;
 }
 
 message PipelineState {

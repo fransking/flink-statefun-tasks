@@ -1,4 +1,3 @@
-from statefun_tasks.storage import StorageBackend
 from statefun_tasks.serialisation import DefaultSerialiser
 from statefun_tasks.pipeline_builder import PipelineBuilder
 
@@ -41,7 +40,6 @@ class FlinkTasks(object):
         self._serialiser = serialiser if serialiser is not None else DefaultSerialiser()
         self._bindings = {}
         self._events = EventHandlers()
-        self._storage = None
         
         # to register in Flink's @functions.bind() attribute
         self._value_specs = [
@@ -150,15 +148,6 @@ class FlinkTasks(object):
         EventHandler for this FlinkTasks instance
         """
         return self._events
-
-    def set_storage_backend(self, storage: StorageBackend):
-        """
-        Sets the storage backend to use if required. The default is to use Flink state exclusively but temporary results from large parallelisms 
-        may cause memory issues in which case they can be saved outside in e.g. an S3 bucket or Redis
-
-        :param storage: results storage backend to use
-        """
-        self._storage = storage
 
     def value_specs(self):
         return self._value_specs
@@ -319,7 +308,7 @@ class FlinkTasks(object):
         pipeline_protos = context.pipeline_state.pipeline
 
         if pipeline_protos is not None:
-            return _Pipeline.from_proto(pipeline_protos, self._serialiser, self._events, self._storage)
+            return _Pipeline.from_proto(pipeline_protos, self._serialiser, self._events)
         else:
             raise ValueError(f'Missing pipeline for task_id - {context.get_task_id()}')
 
