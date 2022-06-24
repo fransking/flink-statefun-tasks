@@ -22,9 +22,11 @@ PipelineBuilder
       ~PipelineBuilder.from_proto
       ~PipelineBuilder.get_destination
       ~PipelineBuilder.get_tasks
+      ~PipelineBuilder.inline
       ~PipelineBuilder.is_empty
       ~PipelineBuilder.send
       ~PipelineBuilder.set
+      ~PipelineBuilder.set_task_defaults
       ~PipelineBuilder.to_pipeline
       ~PipelineBuilder.to_proto
       ~PipelineBuilder.to_task_request
@@ -34,6 +36,7 @@ PipelineBuilder
     
    
       ~PipelineBuilder.id
+      ~PipelineBuilder.is_inline
 
    
    
@@ -45,5 +48,6 @@ PipelineBuilder
    .. autosummary::
    
       ~PipelineBuilder.id
+      ~PipelineBuilder.is_inline
    
    

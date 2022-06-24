@@ -2,11 +2,26 @@ from statefun_tasks.types import Task, Group, RetryPolicy, ProtobufSerialisable
 from statefun_tasks.utils import _gen_id, _is_tuple
 from statefun_tasks.pipeline import _Pipeline
 from statefun_tasks.messages_pb2 import TaskRequest, Pipeline
+from statefun_tasks.builtin import builtin
 
 from typing import Iterable
 
 
-def in_parallel(entries: list, max_parallelism=None):
+
+def in_parallel(entries: list, max_parallelism=None, num_stages:int = 1, stage_display_name=None):
+    if num_stages > 1:
+        # split up a group such [[1,2,3,4,5,6]] into inline pipelines each with a subset of the group
+        # i.e. [[p[1,2], p[3,4], p[5,6]]] followed by a flatten to allow for better distribution
+        # of a parallelism over multiple workers
+        chunk_size = max(int(len(entries) / num_stages), 1)
+        max_parallelism = None if max_parallelism is None else max(int(max_parallelism / num_stages), 1)
+        stages = [entries[i:i + chunk_size] for i in range(0, len(entries), chunk_size)]
+
+        if len(stages) > 1:
+            per_stage_group = [PipelineBuilder().append_group(stage, max_parallelism=max_parallelism) for stage in stages]
+            group = [PipelineBuilder().append(builtin.run_pipeline.to_task(args=group.inline())) for group in per_stage_group] 
+            return PipelineBuilder().append_group(group, max_parallelism).continue_with(builtin.flatten_results)
+
     return PipelineBuilder().append_group(entries, max_parallelism)
 
 
@@ -20,6 +35,9 @@ class PipelineBuilder(ProtobufSerialisable):
     def __init__(self, pipeline: list = None):
         self._pipeline = [] if pipeline is None else pipeline
         self._builder_id = _gen_id()
+        self._inline = False
+        self._inline_args = None
+        self._inline_state = None
 
     @property
     def id(self):
@@ -31,6 +49,13 @@ class PipelineBuilder(ProtobufSerialisable):
     @id.setter
     def id(self, value):
         self._builder_id = value
+
+    @property
+    def is_inline(self):
+        """
+        Returns true if the pipeline is inline or not
+        """
+        return self._inline
 
     def append(self, task: Task) -> 'PipelineBuilder':
         """
@@ -176,13 +201,13 @@ class PipelineBuilder(ProtobufSerialisable):
 
     def to_task_request(self, serialiser) -> TaskRequest:
         """
-        Serialises the pipeline as a TaskRequest with a task type of '__builtins.run_pipeline'
+        Serialises the pipeline as a TaskRequest with a task type of builtin.run_pipeline
 
         :param serialiser: the serialiser to use such as DefaultSerialiser
         :return: TaskRequest protobuf message
         """
         task_id = self._builder_id
-        task_type = '__builtins.run_pipeline'
+        task_type = builtin.run_pipeline.task_name
         args = self.validate().to_proto(serialiser)
         kwargs = {}
 
@@ -223,7 +248,40 @@ class PipelineBuilder(ProtobufSerialisable):
         :return: a Flink Tasks pipeline
         """
         self.validate()
-        return _Pipeline(self._pipeline, events=events, serialiser=serialiser, is_fruitful=is_fruitful)
+
+        return _Pipeline(self._pipeline, 
+            inline=self._inline, 
+            inline_args=self._inline_args,
+            inline_state=self._inline_state,
+            is_fruitful=is_fruitful,
+            serialiser=serialiser,
+            events=events)
+
+    def set_task_defaults(self, default_namespace, default_worker_name) ->  'PipelineBuilder':
+        """
+        Sets defaults on task entries if they are not set
+        :return: the builder
+        """
+        for task in self._get_tasks():
+            if task.namespace == '':
+                task.namespace = default_namespace
+            if task.worker_name == '':
+                task.worker_name = default_worker_name
+
+        return self
+
+    def inline(self, args=None, state=None) ->  'PipelineBuilder':
+        """
+        Marks the pipeline as being inline or not.  
+        Inline pipelines accept inputs from and share state with their parent task.
+        :param option args: the inline arguments to be passed to the initial task(s) in this pipeline
+        :param option state: the inline state to be shared with this pipeline
+        :return: the builder
+        """
+        self._inline = True
+        self._inline_args = args
+        self._inline_state = state
+        return self
 
     def validate(self) -> 'PipelineBuilder':
         """
@@ -263,7 +321,7 @@ class PipelineBuilder(ProtobufSerialisable):
         :param serialiser: the serialiser to use such as DefaultSerialiser
         :return: Pipeline protobuf message
         """
-        return _Pipeline(self._pipeline, serialiser=serialiser).to_proto()
+        return self.to_pipeline(serialiser=serialiser).to_proto()
 
     @staticmethod
     def from_proto(pipeline_proto: Pipeline) -> 'PipelineBuilder':
@@ -281,7 +339,12 @@ class PipelineBuilder(ProtobufSerialisable):
             elif proto.HasField('group_entry'):
                 pipeline.append(Group.from_proto(proto))
 
-        return PipelineBuilder(pipeline)
+        builder = PipelineBuilder(pipeline)
+
+        if pipeline_proto.inline:
+            builder = builder.inline([pipeline_proto.inline_args, pipeline_proto.inline_state])
+
+        return builder
 
     def get_tasks(self) -> list:
         """

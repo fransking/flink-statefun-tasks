@@ -16,12 +16,12 @@ class DeferredTaskSubmitter(object):
         self._graph = graph
         self._serialiser = serialiser
 
-    def submit_tasks(self, context: TaskContext, tasks: List[Task], task_result_or_exception=None, max_parallelism=None):     
+    def submit_tasks(self, context: TaskContext, tasks: List[Task], task_result_or_exception=None, task_state=None, max_parallelism=None):     
         # unpack task_result into result + state so we can merge in extras later
         if task_result_or_exception is not None:
             task_result, task_state = self._serialiser.unpack_response(task_result_or_exception)
         else:
-            task_result, task_state = None, None
+            task_result, task_state = None, task_state
 
         # split into tasks to call vs those to defer
         if max_parallelism is None or max_parallelism < 1:

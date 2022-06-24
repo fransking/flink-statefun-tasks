@@ -44,7 +44,8 @@ class EndPipelineHandler(PipelineMessageHandler):
             'result' if isinstance(task_result_or_exception, TaskResult) else 'error')
 
         # pass back any state that we were given at the start of the pipeline
-        task_result_or_exception.state.CopyFrom(context.pipeline_state.task_state)
+        if not context.pipeline_state.pipeline.inline:
+            task_result_or_exception.state.CopyFrom(context.pipeline_state.task_state)
 
         # finally emit the result (to egress, destination address or caller address)
         self.result_emitter.emit_result(context, task_request, task_result_or_exception)

@@ -2,10 +2,7 @@ from statefun_tasks.types import Group, _type_name
 from statefun_tasks.context import TaskContext
 from statefun_tasks.protobuf import pack_any
 from statefun_tasks.messages_pb2 import TaskResults, TaskResult, TaskException, MapOfStringToAny
-from google.protobuf.wrappers_pb2 import StringValue
-from google.protobuf.any_pb2 import Any
 from collections import deque
-import traceback as tb
 import logging
 
 
