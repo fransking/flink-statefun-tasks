@@ -3,24 +3,22 @@ from statefun_tasks.utils import _gen_id, _is_tuple
 from statefun_tasks.pipeline import _Pipeline
 from statefun_tasks.messages_pb2 import TaskRequest, Pipeline
 from statefun_tasks.builtin import builtin
-
 from typing import Iterable
 
 
-
-def in_parallel(entries: list, max_parallelism=None, num_stages:int = 1, stage_display_name=None):
+def in_parallel(entries: list, max_parallelism=None, num_stages:int = 1):
     if num_stages > 1:
         # split up a group such [[1,2,3,4,5,6]] into inline pipelines each with a subset of the group
         # i.e. [[p[1,2], p[3,4], p[5,6]]] followed by a flatten to allow for better distribution
         # of a parallelism over multiple workers
         chunk_size = max(int(len(entries) / num_stages), 1)
-        max_parallelism = None if max_parallelism is None else max(int(max_parallelism / num_stages), 1)
+        per_stage_max_parallelism = None if max_parallelism is None else max(int(max_parallelism / num_stages), 1)
         stages = [entries[i:i + chunk_size] for i in range(0, len(entries), chunk_size)]
 
         if len(stages) > 1:
-            per_stage_group = [PipelineBuilder().append_group(stage, max_parallelism=max_parallelism) for stage in stages]
-            group = [PipelineBuilder().append(builtin.run_pipeline.to_task(args=group.inline())) for group in per_stage_group] 
-            return PipelineBuilder().append_group(group, max_parallelism).continue_with(builtin.flatten_results)
+            per_stage_pipeline = [PipelineBuilder().append_group(stage, max_parallelism=per_stage_max_parallelism) for stage in stages]
+            group = [PipelineBuilder().append(builtin.run_pipeline.to_task(args=pipeline.inline())) for pipeline in per_stage_pipeline] 
+            return PipelineBuilder().append_group(group, max_parallelism=max_parallelism).continue_with(builtin.flatten_results)
 
     return PipelineBuilder().append_group(entries, max_parallelism)
 
