@@ -11,7 +11,7 @@ from statefun_tasks.pipeline import _Pipeline
 from statefun_tasks.tasks import FlinkTask
 from statefun_tasks.task_impl.handlers import TaskRequestHandler, TaskResponseHandler, TaskActionHandler, ChildPipelineHandler
 from statefun_tasks.events import EventHandlers
-from statefun_tasks.builtin_tasks import run_pipeline
+from statefun_tasks.builtin_tasks import run_pipeline, flatten_results
 
 from statefun.request_reply import BatchContext
 from typing import Union
@@ -41,7 +41,8 @@ class FlinkTasks(object):
         self._bindings = {}
         self._events = EventHandlers()
 
-        self.register_builtin('run_pipeline', run_pipeline)
+        self.register_builtin(run_pipeline, with_context=True, with_state=True)
+        self.register_builtin(flatten_results)
 
         self._handlers = [
             TaskRequestHandler(),
@@ -143,16 +144,15 @@ class FlinkTasks(object):
     def value_specs(self):
         return self._value_specs
 
-    def register_builtin(self, type_name, fun, **params):
+    def register_builtin(self, fun, **params):
         """
         Registers a built in Flink Task e.g. __builtins.run_pipeline
         This should only be used if you want to provide your own built in (pre-defined) tasks
 
-        :param type_name: task type to expose the built in as
         :param fun: a function, partial or lambda representing the built in
         :param params: any additional parameters to the Flink Task (such as a retry policy)
         """
-        self._bindings[f'__builtins.{type_name}'] = FlinkTask(fun, self._serialiser, self._events, **params)
+        self._bindings[fun.task_name] = FlinkTask(fun, self._serialiser, self.events, **params)
 
     def register(self, fun, wrapper=None, module_name=None, **params):
         """
