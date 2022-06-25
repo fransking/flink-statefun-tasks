@@ -95,7 +95,6 @@
 <li class="toctree-l1"><a class="reference internal" href="events.html">Events</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Extensions</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#inline-tasks">Inline Tasks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#state-offloading">State offloading</a></li>
 </ul>
 </li>
 </ul>
@@ -194,25 +193,6 @@ but in test environments or when working with interactive notebooks it may be us
 
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">hello_world</span><span class="o">.</span><span class="n">send</span><span class="p">()</span>
 <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">submit_async</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="state-offloading">
-<h2>State offloading<a class="headerlink" href="#state-offloading" title="Permalink to this headline">¶</a></h2>
-<p>When running a large number of parallel tasks via in_parallel(), the pipeline must store and then aggregate each result before passing to the next task or
-returning the result to the egress or caller.  Depending on what the tasks return this could cause the state to grow beyond the memory constraints of a single worker.
-If that is the case, offloading this state to external storage may be a solution.  Once enabled and the state size exceeds a configured threshold, further items are offloaded
-to the storage backend and the state then holds a pointer to this data.</p>
-<p>The same can apply when a large number of parallel requests are deferred due to a max_parallelism setting or the pipeline being paused.</p>
-<p>Generally the recommendation is to pass pointers to large data sets with offloading provided as a best effort convenience.</p>
-<p>There is an example S3 based backend in the extensions/s3_storage folder.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">statefun_tasks</span> <span class="kn">import</span> <span class="n">StorageBackend</span>
-
-<span class="k">class</span> <span class="nc">CustomStorageBackend</span><span class="p">(</span><span class="n">StorageBackend</span><span class="p">):</span>
-    <span class="o">...</span>
-
-
-<span class="n">tasks</span><span class="o">.</span><span class="n">set_storage_backend</span><span class="p">(</span><span class="n">storage</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

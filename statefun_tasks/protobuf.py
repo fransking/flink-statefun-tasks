@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from statefun_tasks.utils import _is_tuple
 from statefun_tasks.messages_pb2 import MapOfStringToAny, ArrayOfAny, TupleOfAny, TaskEntry, GroupEntry, NoneValue, \
     TaskRetryPolicy, TaskRequest, TaskResult, TaskException, TaskState, TaskResults, Pipeline, PipelineEntry, Address, \
-    ArgsAndKwargs, PipelineState
+    ArgsAndKwargs, PipelineState, TaskResultOrException
 
 from google.protobuf.wrappers_pb2 import DoubleValue, Int64Value, BoolValue, StringValue, BytesValue
 from google.protobuf.any_pb2 import Any
@@ -37,7 +37,8 @@ _FRAMEWORK_KNOWN_PROTO_TYPES = [
     PipelineEntry,
     Address,
     ArgsAndKwargs,
-    PipelineState
+    PipelineState,
+    TaskResultOrException
 ]
 
 TProtoType = TypeVar('TProtoType', bound=Message)

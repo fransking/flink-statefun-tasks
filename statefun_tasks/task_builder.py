@@ -1,4 +1,3 @@
-from statefun_tasks.storage import StorageBackend
 from statefun_tasks.serialisation import DefaultSerialiser
 from statefun_tasks.pipeline_builder import PipelineBuilder
 
@@ -13,7 +12,7 @@ from statefun_tasks.pipeline import _Pipeline
 from statefun_tasks.tasks import FlinkTask
 from statefun_tasks.task_impl.handlers import TaskRequestHandler, TaskResponseHandler, TaskActionHandler, ChildPipelineHandler
 from statefun_tasks.events import EventHandlers
-from statefun_tasks.builtin_tasks import run_pipeline
+from statefun_tasks.builtin_tasks import run_pipeline, flatten_results
 
 from statefun import ValueSpec, Context, Message
 from datetime import timedelta
@@ -41,7 +40,6 @@ class FlinkTasks(object):
         self._serialiser = serialiser if serialiser is not None else DefaultSerialiser()
         self._bindings = {}
         self._events = EventHandlers()
-        self._storage = None
         
         # to register in Flink's @functions.bind() attribute
         self._value_specs = [
@@ -52,7 +50,8 @@ class FlinkTasks(object):
             ValueSpec(name="pipeline_state", type=PIPELINE_STATE_TYPE),
         ]
 
-        self.register_builtin('run_pipeline', run_pipeline)
+        self.register_builtin(run_pipeline, with_context=True, with_state=True)
+        self.register_builtin(flatten_results)
 
         self._handlers = [
             TaskRequestHandler(),
@@ -151,28 +150,18 @@ class FlinkTasks(object):
         """
         return self._events
 
-    def set_storage_backend(self, storage: StorageBackend):
-        """
-        Sets the storage backend to use if required. The default is to use Flink state exclusively but temporary results from large parallelisms 
-        may cause memory issues in which case they can be saved outside in e.g. an S3 bucket or Redis
-
-        :param storage: results storage backend to use
-        """
-        self._storage = storage
-
     def value_specs(self):
         return self._value_specs
 
-    def register_builtin(self, type_name, fun, **params):
+    def register_builtin(self, fun, **params):
         """
         Registers a built in Flink Task e.g. __builtins.run_pipeline
         This should only be used if you want to provide your own built in (pre-defined) tasks
 
-        :param type_name: task type to expose the built in as
         :param fun: a function, partial or lambda representing the built in
         :param params: any additional parameters to the Flink Task (such as a retry policy)
         """
-        self._bindings[f'__builtins.{type_name}'] = FlinkTask(fun, self._serialiser, self.events, **params)
+        self._bindings[fun.task_name] = FlinkTask(fun, self._serialiser, self.events, **params)
 
     def register(self, fun, wrapper=None, module_name=None, **params):
         """
@@ -319,7 +308,7 @@ class FlinkTasks(object):
         pipeline_protos = context.pipeline_state.pipeline
 
         if pipeline_protos is not None:
-            return _Pipeline.from_proto(pipeline_protos, self._serialiser, self._events, self._storage)
+            return _Pipeline.from_proto(pipeline_protos, self._serialiser, self._events)
         else:
             raise ValueError(f'Missing pipeline for task_id - {context.get_task_id()}')
 

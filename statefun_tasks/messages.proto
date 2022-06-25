@@ -56,6 +56,12 @@ message PipelineEntry {
 
 message Pipeline {
     repeated PipelineEntry entries = 1;
+
+    // whether to inline this pipeline - i.e. pass arguments from and share state with the parent task
+    // or treat as independent - defaults to false
+    bool inline = 2;
+    optional google.protobuf.Any inline_args = 3;
+    optional google.protobuf.Any inline_state = 4;
 }
 
 message TaskRetryPolicy {
@@ -135,10 +141,7 @@ message TaskDeferral {
 
 message PausedTask {
     string destination = 1;
-    oneof task_request_or_task_uid {
-        TaskRequest task_request = 2;
-        string task_uid = 3;
-    }
+    TaskRequest task_request = 2;
 }
 
 message PipelineState {

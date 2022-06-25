@@ -132,6 +132,12 @@ class StatePassingTests(unittest.TestCase):
 
         self.assertEqual(_final_state, 4560)
 
+    def test_passing_state_through_tasks_in_parallel_in_stages(self):
+        group = in_parallel([a_pipeline_stage.send(), a_pipeline_stage.send()], num_stages=50)
+        pipeline = set_pipeline_state.send().continue_with(group).continue_with(return_state)
+        result = self.test_harness.run_pipeline(pipeline)
+
+        self.assertEqual({'New': 'State', 'Some': 'State'}, result)
 
 if __name__ == '__main__':
     unittest.main()

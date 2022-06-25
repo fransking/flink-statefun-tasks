@@ -1,6 +1,7 @@
 from statefun_tasks.context import TaskContext
 from statefun_tasks.pipeline_impl.handlers import PipelineMessageHandler
 from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, TaskStatus, PipelineState, ChildPipeline, TaskInfo
+from statefun_tasks.protobuf import unpack_any
 from statefun_tasks.serialisation import pack_any
 from statefun_tasks.utils import _gen_id
 from statefun_tasks.type_helpers import _create_task_result
@@ -62,7 +63,17 @@ class BeginPipelineHandler(PipelineMessageHandler):
         else:
             # else get initial tasks(s) to call - might be single start of chain task or a group of tasks to call in parallel
             tasks, max_parallelism, slice = self.graph.get_initial_tasks()
+            task_state = None
 
+            # if this is an inline pipeline then pass in the inline args
+            if context.pipeline_state.pipeline.inline:
+                args = unpack_any(context.pipeline_state.pipeline.inline_args, known_proto_types=[])
+                task_state = unpack_any(context.pipeline_state.pipeline.inline_state, known_proto_types=[])
+
+                for task in tasks:
+                    task_args_and_kwargs = self._serialiser.to_args_and_kwargs(task.request)
+                    task.request = self._serialiser.merge_args_and_kwargs(args, task_args_and_kwargs)
+            
             # if we skipped over empty group(s) then make sure we pass empty array to next task (result of in_parallel([]) is intuitively [])
             if slice > 0:
                 for task in tasks:
@@ -70,7 +81,7 @@ class BeginPipelineHandler(PipelineMessageHandler):
                     task.request = self._serialiser.serialise_args_and_kwargs(([]), kwargs)
 
             # split into tasks to call now and those to defer if max parallelism is exceeded
-            await self.submitter.submit_tasks(context, tasks, max_parallelism=max_parallelism)
+            self.submitter.submit_tasks(context, tasks, task_state=task_state, max_parallelism=max_parallelism)
 
             # break
             return False, message
