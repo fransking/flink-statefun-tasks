@@ -4,6 +4,7 @@ from statefun_tasks.pipeline import _Pipeline
 from statefun_tasks.messages_pb2 import TaskRequest, Pipeline
 from statefun_tasks.builtin import builtin
 from typing import Iterable
+import math
 
 
 def in_parallel(entries: list, max_parallelism=None, num_stages:int = 1):
@@ -11,7 +12,7 @@ def in_parallel(entries: list, max_parallelism=None, num_stages:int = 1):
         # split up a group such [[1,2,3,4,5,6]] into inline pipelines each with a subset of the group
         # i.e. [[p[1,2], p[3,4], p[5,6]]] followed by a flatten to allow for better distribution
         # of a parallelism over multiple workers
-        chunk_size = max(int(len(entries) / num_stages), 1)
+        chunk_size = max(math.ceil(len(entries) / num_stages), 1)
         per_stage_max_parallelism = None if max_parallelism is None else max(int(max_parallelism / num_stages), 1)
         stages = [entries[i:i + chunk_size] for i in range(0, len(entries), chunk_size)]
 
