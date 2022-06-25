@@ -31,18 +31,18 @@ class ContinuePipelineHandler(PipelineMessageHandler):
             return False, task_result_or_exception
 
         # release deferred tasks if they can now run
-        await self.submitter.release_tasks(context, caller_uid, task_result_or_exception)
+        self.submitter.release_tasks(context, caller_uid, task_result_or_exception)
 
         # get the next step of the pipeline to run (if any)
         current_step, next_step, group, empty_group = self.graph.get_next_step_in_pipeline(caller_uid)
 
         # if this task is part group then we need to record the results so we can aggregate later
         if group is not None:
-            await self.result_aggregator.add_result(context, caller_uid, task_result_or_exception)
+            self.result_aggregator.add_result(context, caller_uid, task_result_or_exception)
 
             # once the group is complete aggregate the results
             if group.is_complete():
-                task_result_or_exception = await self.result_aggregator.aggregate(context, group)
+                task_result_or_exception = self.result_aggregator.aggregate(context, group)
 
                 # pause the pipeline if this completed group is a wait
                 if group.is_wait:
@@ -78,7 +78,7 @@ class ContinuePipelineHandler(PipelineMessageHandler):
 
         if any(tasks):
             # split into tasks to call now and those to defer if max parallelism is exceeded
-            await self.submitter.submit_tasks(context, tasks, task_result_or_exception=task_result_or_exception, max_parallelism=max_parallelism)
+            self.submitter.submit_tasks(context, tasks, task_result_or_exception=task_result_or_exception, max_parallelism=max_parallelism)
 
         else:
             last_step = self._pipeline[-1]

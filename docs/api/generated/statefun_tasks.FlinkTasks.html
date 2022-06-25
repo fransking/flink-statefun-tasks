@@ -247,19 +247,16 @@ to be exposed as tasks.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.send_result" title="statefun_tasks.FlinkTasks.send_result"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_result</span></code></a>(context, task_request, result[, …])</p></td>
 <td><p>Sends a result :type context: <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskContext</span></code> :param context: TaskContext :type task_request: <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskRequest</span></code> :param task_request: the incoming TaskRequest :param result: the result(s) to return :param state: the state to include in the result.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.set_storage_backend" title="statefun_tasks.FlinkTasks.set_storage_backend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_storage_backend</span></code></a>(storage)</p></td>
-<td><p>Sets the storage backend to use if required.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">try_get_pipeline</span></code>(context)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">try_get_pipeline</span></code>(context)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.unpack_task_request" title="statefun_tasks.FlinkTasks.unpack_task_request"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unpack_task_request</span></code></a>(task_request)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.unpack_task_request" title="statefun_tasks.FlinkTasks.unpack_task_request"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unpack_task_request</span></code></a>(task_request)</p></td>
 <td><p>Unpacks a TaskRequest into args, kwargs and state</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">value_specs</span></code>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">value_specs</span></code>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.events" title="statefun_tasks.FlinkTasks.events"><code class="xref py py-obj docutils literal notranslate"><span class="pre">events</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.events" title="statefun_tasks.FlinkTasks.events"><code class="xref py py-obj docutils literal notranslate"><span class="pre">events</span></code></a></p></td>
 <td><p>EventHandler for this FlinkTasks instance</p></td>
 </tr>
 </tbody>
@@ -446,18 +443,6 @@ This should only be used if you want to provide your own built in (pre-defined) 
 :param task_request: the incoming TaskRequest
 :param result: the result(s) to return
 :param state: the state to include in the result.  If not specified it will be copied from the TaskRequest</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="statefun_tasks.FlinkTasks.set_storage_backend">
-<span class="sig-name descname"><span class="pre">set_storage_backend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">storage</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.set_storage_backend" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sets the storage backend to use if required. The default is to use Flink state exclusively but temporary results from large parallelisms
-may cause memory issues in which case they can be saved outside in e.g. an S3 bucket or Redis</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>storage</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">StorageBackend</span></code>) – results storage backend to use</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">

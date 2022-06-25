@@ -15,10 +15,6 @@ from statefun_tasks.protobuf import pack_any, unpack_any
 from statefun_tasks.serialisation import DefaultSerialiser
 
 
-# storage
-from statefun_tasks.storage import StorageBackend
-
-
 # types
 from statefun_tasks.types import Task, Group, RetryPolicy, TaskAlreadyExistsException, TaskCancelledException, TasksException, PipelineInProgress, YieldTaskInvocation
 
