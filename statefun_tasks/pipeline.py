@@ -12,15 +12,15 @@ from typing import Union
 
 
 class _Pipeline(object):
-    __slots__ = ('_pipeline', '_serialiser', '_is_fruitful', '_events', '_inline', '_inline_args', '_inline_state', '_handlers', '_graph', '_submitter')
+    __slots__ = ('_pipeline', '_serialiser', '_is_fruitful', '_events', '_inline', '_initial_args', '_initial_state', '_handlers', '_graph', '_submitter')
 
-    def __init__(self, pipeline: list, serialiser=None, is_fruitful=True, inline=False, inline_args=None, inline_state=None, events: EventHandlers=None):
+    def __init__(self, pipeline: list, serialiser=None, is_fruitful=True, inline=False, initial_args=None, initial_state=None, events: EventHandlers=None):
         self._pipeline = pipeline
         self._serialiser = serialiser or DefaultSerialiser()
         self._is_fruitful = is_fruitful
         self._inline = inline
-        self._inline_args = inline_args
-        self._inline_state = inline_state
+        self._initial_args = initial_args
+        self._initial_state = initial_state
         self._events = events or EventHandlers()
 
         self._handlers = [
@@ -45,11 +45,18 @@ class _Pipeline(object):
         return self._is_fruitful
 
     def to_proto(self) -> Pipeline:
-        return Pipeline(
+        pipeline = Pipeline(
             entries=[p.to_proto(self._serialiser) for p in self._pipeline], 
-            inline=self._inline,
-            inline_args=pack_any(self._serialiser.to_proto(self._inline_args)), 
-            inline_state=pack_any(self._serialiser.to_proto(self._inline_state)))
+            inline=self._inline)
+
+        if self._initial_args is not None:
+            pipeline.initial_args.CopyFrom(pack_any(self._serialiser.to_proto(self._initial_args)))
+        
+        if self._initial_state is not None:
+            pipeline.initial_state.CopyFrom(pack_any(self._serialiser.to_proto(self._initial_state)))
+        
+
+        return pipeline
 
     @staticmethod
     def from_proto(pipeline_proto: Pipeline, serialiser, events):
@@ -59,8 +66,8 @@ class _Pipeline(object):
         return _Pipeline(
             pipeline=[_from_proto(proto) for proto in pipeline_proto.entries], 
             inline=pipeline_proto.inline, 
-            inline_args=pipeline_proto.inline_args,
-            inline_state=pipeline_proto.inline_state,\
+            initial_args=pipeline_proto.initial_args,
+            initial_state=pipeline_proto.initial_state,\
             serialiser=serialiser, events=events)
 
 

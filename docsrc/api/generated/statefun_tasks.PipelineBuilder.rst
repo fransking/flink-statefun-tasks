@@ -32,6 +32,7 @@ PipelineBuilder
       ~PipelineBuilder.to_task_request
       ~PipelineBuilder.validate
       ~PipelineBuilder.wait
+      ~PipelineBuilder.with_initial
    
     
    
