@@ -59,7 +59,7 @@ class FlinkTask(object):
             elif asyncio.iscoroutine(fn_result):
                 fn_result = await fn_result
 
-            pipeline, task_result, fn_state = self._to_pipeline_or_task_result(task_request, fn_result, fn_state)
+            pipeline, task_result, fn_state = self._to_pipeline_or_task_result(task_context, task_request, fn_result, fn_state)
 
         
         except YieldTaskInvocation:
@@ -72,7 +72,7 @@ class FlinkTask(object):
 
         return task_result, task_exception, pipeline, fn_state
 
-    def _to_pipeline_or_task_result(self, task_request, fn_result, fn_state):
+    def _to_pipeline_or_task_result(self, task_context, task_request, fn_result, fn_state):
         pipeline, task_result, is_fruitful = None, None, self._is_fruitful
 
         if is_fruitful and task_request.HasField('is_fruitful'):
@@ -100,7 +100,10 @@ class FlinkTask(object):
         if isinstance(fn_result, PipelineBuilder):
             # this new pipeline which once complete will yield the result of the whole pipeline
             # back to the caller as if it were a simple task
-            pipeline = fn_result.to_pipeline(self._serialiser, is_fruitful=is_fruitful, events=self._events)
+            pipeline = fn_result.set_task_defaults(
+                default_namespace=task_context.get_namespace(), 
+                default_worker_name=task_context.get_worker_name()).\
+            to_pipeline(serialiser=self._serialiser, is_fruitful=is_fruitful, events=self._events)
             fn_result = ()
 
         # drop the result if the task is marked as not fruitful or caller has asked for the result to be dropped
