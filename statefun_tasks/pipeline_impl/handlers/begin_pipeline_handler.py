@@ -63,17 +63,21 @@ class BeginPipelineHandler(PipelineMessageHandler):
         else:
             # else get initial tasks(s) to call - might be single start of chain task or a group of tasks to call in parallel
             tasks, max_parallelism, slice = self.graph.get_initial_tasks()
-            task_state = None
 
-            # if this is an inline pipeline then pass in the inline args
-            if context.pipeline_state.pipeline.inline:
-                args = unpack_any(context.pipeline_state.pipeline.inline_args, known_proto_types=[])
-                task_state = unpack_any(context.pipeline_state.pipeline.inline_state, known_proto_types=[])
+            # send initial state to each initial task if we have some
+            if context.pipeline_state.pipeline.HasField('initial_state'):                
+                task_state = unpack_any(context.pipeline_state.pipeline.initial_state, known_proto_types=[])
+            else:
+                task_state = None
+
+            # send initial arguments to each initial task if we have them
+            if context.pipeline_state.pipeline.HasField('initial_args'):
+                args = unpack_any(context.pipeline_state.pipeline.initial_args, known_proto_types=[])
 
                 for task in tasks:
                     task_args_and_kwargs = self._serialiser.to_args_and_kwargs(task.request)
                     task.request = self._serialiser.merge_args_and_kwargs(args, task_args_and_kwargs)
-            
+        
             # if we skipped over empty group(s) then make sure we pass empty array to next task (result of in_parallel([]) is intuitively [])
             if slice > 0:
                 for task in tasks:

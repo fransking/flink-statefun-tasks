@@ -1,9 +1,11 @@
+from re import L
 from statefun_tasks.types import Task, Group, RetryPolicy, ProtobufSerialisable
 from statefun_tasks.utils import _gen_id, _is_tuple
 from statefun_tasks.pipeline import _Pipeline
 from statefun_tasks.messages_pb2 import TaskRequest, Pipeline
 from statefun_tasks.builtin import builtin
 from typing import Iterable
+import math
 
 
 def in_parallel(entries: list, max_parallelism=None, num_stages:int = 1):
@@ -11,7 +13,7 @@ def in_parallel(entries: list, max_parallelism=None, num_stages:int = 1):
         # split up a group such [[1,2,3,4,5,6]] into inline pipelines each with a subset of the group
         # i.e. [[p[1,2], p[3,4], p[5,6]]] followed by a flatten to allow for better distribution
         # of a parallelism over multiple workers
-        chunk_size = max(int(len(entries) / num_stages), 1)
+        chunk_size = max(math.ceil(len(entries) / num_stages), 1)
         per_stage_max_parallelism = None if max_parallelism is None else max(int(max_parallelism / num_stages), 1)
         stages = [entries[i:i + chunk_size] for i in range(0, len(entries), chunk_size)]
 
@@ -34,8 +36,8 @@ class PipelineBuilder(ProtobufSerialisable):
         self._pipeline = [] if pipeline is None else pipeline
         self._builder_id = _gen_id()
         self._inline = False
-        self._inline_args = None
-        self._inline_state = None
+        self._initial_args = None
+        self._initial_state = None
 
     @property
     def id(self):
@@ -249,8 +251,8 @@ class PipelineBuilder(ProtobufSerialisable):
 
         return _Pipeline(self._pipeline, 
             inline=self._inline, 
-            inline_args=self._inline_args,
-            inline_state=self._inline_state,
+            initial_args=self._initial_args,
+            initial_state=self._initial_state,
             is_fruitful=is_fruitful,
             serialiser=serialiser,
             events=events)
@@ -268,17 +270,24 @@ class PipelineBuilder(ProtobufSerialisable):
 
         return self
 
-    def inline(self, args=None, state=None) ->  'PipelineBuilder':
+    def with_initial(self, args=None, state=None) ->  'PipelineBuilder':
         """
-        Marks the pipeline as being inline or not.  
-        Inline pipelines accept inputs from and share state with their parent task.
-        :param option args: the inline arguments to be passed to the initial task(s) in this pipeline
-        :param option state: the inline state to be shared with this pipeline
+        Optionally sets the initial args and state to be passed to the initial tasks(s) in this pipeline
+        :param option args: arguments
+        :param option state: state
         :return: the builder
         """
-        self._inline = True
-        self._inline_args = args
-        self._inline_state = state
+        self._initial_args = args
+        self._initial_state = state
+        return self
+
+    def inline(self, is_inline=True) ->  'PipelineBuilder':
+        """
+        Marks the pipeline as being inline (or not).  By default pipelines are not inline.
+        Inline pipelines accept inputs from and share state with their parent task.
+        :return: the builder
+        """
+        self._inline = is_inline
         return self
 
     def validate(self) -> 'PipelineBuilder':
@@ -340,7 +349,16 @@ class PipelineBuilder(ProtobufSerialisable):
         builder = PipelineBuilder(pipeline)
 
         if pipeline_proto.inline:
-            builder = builder.inline([pipeline_proto.inline_args, pipeline_proto.inline_state])
+            builder = builder.inline()
+
+        args, state = None, None
+        if pipeline_proto.HasField('initial_args'):
+            args = pipeline_proto.initial_args
+
+        if pipeline_proto.HasField('initial_state'):
+            state = pipeline_proto.initial_state
+
+        builder = builder.with_initial(args, state)
 
         return builder
 

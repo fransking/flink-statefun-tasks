@@ -15,7 +15,9 @@ def run_pipeline(context: TaskContext, state, *args):
 
     # if the pipeline is inline then pass in the args to this task and state
     if pipeline_proto.inline:
-        pipeline = pipeline.inline(args, state)
+        pipeline = pipeline.inline()
+
+    pipeline = pipeline.with_initial(args, state)
 
     return state, pipeline
 
