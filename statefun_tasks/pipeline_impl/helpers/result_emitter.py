@@ -33,6 +33,4 @@ class ResultEmitter(object):
 
         # or call back to our caller (if there is one)
         elif context.pipeline_state.caller_id is not None:
-            if context.pipeline_state.caller_id != context.get_caller_id():  # don't call back to self
-                context.send_message(context.pipeline_state.caller_address, context.pipeline_state.caller_id,
-                                     task_result_or_exception)
+            context.send_message(context.pipeline_state.caller_address, context.pipeline_state.caller_id, task_result_or_exception)
