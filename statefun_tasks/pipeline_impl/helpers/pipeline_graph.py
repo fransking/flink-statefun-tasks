@@ -49,7 +49,8 @@ class PipelineGraph(object):
         raise ValueError(f'Task {task_id} not found')
 
     def is_empty(self):
-        return not any(self.get_initial_tasks())
+        tasks, _ ,_  = self.get_initial_tasks()
+        return not any(tasks)
         
     def get_task_chain(self, task_id):
         
