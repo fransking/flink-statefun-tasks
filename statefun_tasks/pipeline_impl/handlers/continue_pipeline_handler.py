@@ -38,11 +38,13 @@ class ContinuePipelineHandler(PipelineMessageHandler):
         current_step, next_step, group, empty_group = self.graph.get_next_step_in_pipeline(caller_uid)
 
         # if this task is part group then we need to record the results so we can aggregate later
+        group_is_complete = False
         if group is not None:
+            group_is_complete = group.is_complete()
             self.result_aggregator.add_result(context, caller_uid, task_result_or_exception)
 
             # once the group is complete aggregate the results
-            if group.is_complete():
+            if group_is_complete:
                 task_result_or_exception = self.result_aggregator.aggregate(context, group)
 
                 # pause the pipeline if this completed group is a wait
@@ -54,8 +56,13 @@ class ContinuePipelineHandler(PipelineMessageHandler):
                 await pipeline.pause(context)
 
         # if we got an exception then the next step is the finally_task if there is one (or none otherwise)
+        # but only once the group is complete (if we are in a group)
         if isinstance(task_result_or_exception, TaskException):
-            next_step = self.graph.try_get_finally_task(caller_uid)
+            if group is not None:
+                if group_is_complete:
+                    next_step = self.graph.try_get_finally_task(caller_uid)
+            else:
+                next_step = self.graph.try_get_finally_task(caller_uid)
 
         # else if we came across an empty group between this task and next_entry then our result must be an empty array []
         # as we cannot call an empty group but can synthesise the result (remembering to pass through state)
@@ -91,7 +98,7 @@ class ContinuePipelineHandler(PipelineMessageHandler):
 
 
             elif isinstance(task_result_or_exception, TaskException):
-                if group is None or group.is_complete():
+                if group is None or group_is_complete:
                     # else if have an exception then we failed but waiting for any parallel tasks in the group to complete first
                     context.pipeline_state.status.value = TaskStatus.FAILED
                     await pipeline.events.notify_pipeline_status_changed(context, context.pipeline_state.pipeline, context.pipeline_state.status.value)
