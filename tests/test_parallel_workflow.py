@@ -101,6 +101,12 @@ def _add_greeting(first_name, last_name, greeting):
     return f'{greeting} {first_name} {last_name}'
 
 
+@tasks.bind()
+def _return_empty_parallel():
+    return in_parallel([])
+
+
+
 class ParallelWorkflowTests(unittest.TestCase):
     def setUp(self) -> None:
         self.test_harness = TestHarness()
@@ -243,6 +249,13 @@ class ParallelWorkflowTests(unittest.TestCase):
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, [])
 
+
+    def test_empty_parallel_child_pipeline(self):
+        pipeline = _return_empty_parallel.send().continue_with(_print_results2, abc=12)
+
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, '[]12')
+
     def test_empty_parallel_workflow_with_a_continuation(self):
         pipeline = in_parallel([]).continue_with(_print_results2, abc=12)
 
@@ -344,6 +357,7 @@ class ParallelWorkflowTests(unittest.TestCase):
 
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, ['Hello John Smith', 'Hello John Doe', 'Hello John Adams'])
+
 
 if __name__ == '__main__':
     unittest.main()
