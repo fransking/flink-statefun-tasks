@@ -4,7 +4,7 @@ Tasks vs Functions
 Stateful Functions
 ------------------
 
-In Flink Stateful Functions a stateful function has inputs, outputs, state and has a logical address name of up a namespace, type and id:
+In Flink Stateful Functions a stateful function has inputs, outputs, state and has a logical address made of up a namespace, type and id:
 
 .. code-block:: python
 

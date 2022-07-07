@@ -64,6 +64,7 @@ class TaskContext(object):
         """
         ID of the top most pipeline if this task is called as part of a pipeline else None.  This will be different from 
         get_pipeline_id() if the pipeline is nested
+        
         :return: root pipeline ID
         """
         return self._task_meta.get('root_pipeline_id', None)
@@ -71,6 +72,7 @@ class TaskContext(object):
     def get_root_pipeline_address(self):
         """
         Address of the top most pipeline if this task is called as part of a pipeline else None.
+        
         :return: root pipeline address
         """
         return self._task_meta.get('root_pipeline_address', None)
@@ -78,6 +80,7 @@ class TaskContext(object):
     def get_pipeline_id(self):
         """
         ID of the pipeline if this task is called as part of a pipeline else None
+
         :return: pipeline ID
         """
         return self._task_meta.get('pipeline_id', None)
@@ -86,13 +89,30 @@ class TaskContext(object):
         """
         Address of the pipeline if this task is called as part of a pipeline else None
 
-        :return: pipeline ID
+        :return: pipeline address
         """
         return self._task_meta.get('pipeline_address', None)
+
+    def get_parent_pipeline_id(self):
+        """
+        ID of the parent pipeline if this task is called as part of a pipeline else None
+
+        :return: pipeline ID
+        """
+        return self._task_meta.get('inline_parent_pipeline_id', self.get_pipeline_id())
+
+    def get_parent_pipeline_address(self):
+        """
+        Address of the parent pipeline if this task is called as part of a pipeline else None
+
+        :return: pipeline address
+        """
+        return self._task_meta.get('inline_parent_pipeline_address', self.get_pipeline_address())
 
     def get_parent_task_id(self):
         """
         ID of the parent task if this task has one else None
+
         :return: parent task ID
         """
         return self._task_meta.get('parent_task_id', None)
@@ -100,6 +120,7 @@ class TaskContext(object):
     def get_parent_task_address(self):
         """
         ID of the parent task address if this task has one else None
+
         :return: parent task address
         """
         return self._task_meta.get('parent_task_address', None)
