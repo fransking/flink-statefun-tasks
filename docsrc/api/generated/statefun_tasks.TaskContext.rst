@@ -20,6 +20,8 @@ TaskContext
       ~TaskContext.get_caller_id
       ~TaskContext.get_display_name
       ~TaskContext.get_namespace
+      ~TaskContext.get_parent_pipeline_address
+      ~TaskContext.get_parent_pipeline_id
       ~TaskContext.get_parent_task_address
       ~TaskContext.get_parent_task_id
       ~TaskContext.get_pipeline_address

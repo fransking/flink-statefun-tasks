@@ -71,7 +71,6 @@ class TaskContext(object):
         """
         ID of the top most pipeline if this task is called as part of a pipeline else None.  This will be different from 
         get_pipeline_id() if the pipeline is nested
-
         :return: root pipeline ID
         """
         return self._task_meta.get('root_pipeline_id', None)
@@ -96,9 +95,25 @@ class TaskContext(object):
         """
         Address of the pipeline if this task is called as part of a pipeline else None
 
-        :return: pipeline ID
+        :return: pipeline address
         """
         return self._task_meta.get('pipeline_address', None)
+
+    def get_parent_pipeline_id(self):
+        """
+        ID of the parent pipeline if this task is called as part of a pipeline else None
+
+        :return: pipeline ID
+        """
+        return self._task_meta.get('inline_parent_pipeline_id', self.get_pipeline_id())
+
+    def get_parent_pipeline_address(self):
+        """
+        Address of the parent pipeline if this task is called as part of a pipeline else None
+
+        :return: pipeline address
+        """
+        return self._task_meta.get('inline_parent_pipeline_address', self.get_pipeline_address())
 
     def get_parent_task_id(self):
         """
