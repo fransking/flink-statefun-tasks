@@ -124,6 +124,27 @@ class DeferredTaskSubmitter(object):
         # allow callers to drop the results of fruitful tasks in their pipelines if they wish
         request.is_fruitful = task.is_fruitful
 
+        # add extra task meta
+        self._set_task_meta(context, task, request, deferral)
+
+        self._serialiser.serialise_request(request, task_request, state=task_state, retry_policy=task.retry_policy)
+        return request
+
+    def _send_task(self, context, destination, task_request):
+        # if the pipeline is paused we record the tasks to be sent into the pipeline state
+        if  context.pipeline_state.status.value == TaskStatus.PAUSED:
+            
+            paused_task = PausedTask(destination=destination, task_request=task_request)
+            context.pipeline_state.paused_tasks.append(paused_task)
+
+        # else send the tasks to their destinations
+        else:
+            context.send_message(destination, task_request.id, task_request)
+
+    def _set_task_meta(self, context, task, request, deferral=None):
+        # allow callers to drop the results of fruitful tasks in their pipelines if they wish
+        request.is_fruitful = task.is_fruitful
+
         # set invocation id to pipeline invocation id
         request.invocation_id = context.pipeline_state.invocation_id
 
@@ -132,6 +153,11 @@ class DeferredTaskSubmitter(object):
         request.meta['pipeline_id'] = context.pipeline_state.id
         request.meta['root_pipeline_id'] = context.pipeline_state.root_id
         request.meta['root_pipeline_address'] = context.pipeline_state.root_address
+
+        # retain the correct parent pipeline for nested inline child pipelines
+        if context.pipeline_state.pipeline.inline:
+            request.meta['inline_parent_pipeline_id'] = context.get_parent_pipeline_id()
+            request.meta['inline_parent_pipeline_address'] = context.get_parent_pipeline_address()
 
         if task.display_name is not None:
             request.meta['display_name'] = task.display_name
@@ -147,17 +173,3 @@ class DeferredTaskSubmitter(object):
             if context.get_caller_id() is not None:
                 request.meta['parent_task_address'] = context.get_caller_address()
                 request.meta['parent_task_id'] = context.get_caller_id()
-
-        self._serialiser.serialise_request(request, task_request, state=task_state, retry_policy=task.retry_policy)
-        return request
-
-    def _send_task(self, context, destination, task_request):
-        # if the pipeline is paused we record the tasks to be sent into the pipeline state
-        if  context.pipeline_state.status.value == TaskStatus.PAUSED:
-            
-            paused_task = PausedTask(destination=destination, task_request=task_request)
-            context.pipeline_state.paused_tasks.append(paused_task)
-
-        # else send the tasks to their destinations
-        else:
-            context.send_message(destination, task_request.id, task_request)
