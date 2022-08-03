@@ -17,12 +17,12 @@ TaskStatus
 
    .. autosummary::
    
-      ~TaskStatus.CANCELLED
-      ~TaskStatus.CANCELLING
+      ~TaskStatus.PENDING
+      ~TaskStatus.RUNNING
       ~TaskStatus.COMPLETED
       ~TaskStatus.FAILED
       ~TaskStatus.PAUSED
-      ~TaskStatus.PENDING
-      ~TaskStatus.RUNNING
+      ~TaskStatus.CANCELLING
+      ~TaskStatus.CANCELLED
    
    

@@ -31,7 +31,6 @@ class PipelineBuilder(ProtobufSerialisable):
 
     :param optional pipeline: list of initial pipeline entries e.g. from another builder
     """
-
     def __init__(self, pipeline: list = None):
         self._pipeline = [] if pipeline is None else pipeline
         self._builder_id = _gen_id()
@@ -211,10 +210,6 @@ class PipelineBuilder(ProtobufSerialisable):
         args = self.validate().to_proto(serialiser)
         kwargs = {}
 
-        # send a single argument by itself instead of wrapped inside a tuple
-        if _is_tuple(args) and len(args) == 1:
-            args = args[0]
-
         task_request = TaskRequest(id=task_id, type=task_type, uid=_gen_id())
         args_and_kwargs = serialiser.serialise_args_and_kwargs(args, kwargs)
         serialiser.serialise_request(task_request, args_and_kwargs)
@@ -270,15 +265,19 @@ class PipelineBuilder(ProtobufSerialisable):
 
         return self
 
-    def with_initial(self, args=None, state=None) ->  'PipelineBuilder':
+    def with_initial(self, args=Ellipsis, state=Ellipsis) ->  'PipelineBuilder':
         """
         Optionally sets the initial args and state to be passed to the initial tasks(s) in this pipeline
         :param option args: arguments
         :param option state: state
         :return: the builder
         """
-        self._initial_args = args
-        self._initial_state = state
+        if args != Ellipsis:
+            self._initial_args = args
+
+        if state != Ellipsis:
+            self._initial_state = state
+            
         return self
 
     def inline(self, is_inline=True) ->  'PipelineBuilder':

@@ -1,5 +1,5 @@
 from statefun_tasks.types import Task
-from statefun_tasks.utils import _gen_id, _type_name
+from statefun_tasks.utils import _gen_id
 
 
 def builtin(task_name, is_fruitful=True):  
