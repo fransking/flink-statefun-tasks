@@ -71,11 +71,9 @@ class BeginPipelineHandler(PipelineMessageHandler):
 
             # send initial arguments to each initial task if we have them
             if context.pipeline_state.pipeline.HasField('initial_args'):
-                args = unpack_any(context.pipeline_state.pipeline.initial_args, known_proto_types=[])
-
-                for task in tasks:
-                    task_args_and_kwargs = self._serialiser.to_args_and_kwargs(task.request)
-                    task.request = self._serialiser.merge_args_and_kwargs(args, task_args_and_kwargs)
+                initial_args = unpack_any(context.pipeline_state.pipeline.initial_args, known_proto_types=[])
+            else:
+                initial_args = None
 
             # if we skipped over empty group(s) then make sure we pass empty array to next task (result of in_parallel([]) is intuitively [])
             if slice > 0:
@@ -84,7 +82,7 @@ class BeginPipelineHandler(PipelineMessageHandler):
                     task.request = self._serialiser.serialise_args_and_kwargs(([]), kwargs)
 
             # split into tasks to call now and those to defer if max parallelism is exceeded
-            self.submitter.submit_tasks(context, tasks, task_state=task_state, max_parallelism=max_parallelism)
+            self.submitter.submit_tasks(context, tasks, task_state=task_state, max_parallelism=max_parallelism, initial_args=initial_args)
 
             # break
             return False, message

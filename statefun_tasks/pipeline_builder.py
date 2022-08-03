@@ -270,15 +270,19 @@ class PipelineBuilder(ProtobufSerialisable):
 
         return self
 
-    def with_initial(self, args=None, state=None) ->  'PipelineBuilder':
+    def with_initial(self, args=Ellipsis, state=Ellipsis) ->  'PipelineBuilder':
         """
         Optionally sets the initial args and state to be passed to the initial tasks(s) in this pipeline
         :param option args: arguments
         :param option state: state
         :return: the builder
         """
-        self._initial_args = args
-        self._initial_state = state
+        if args != Ellipsis:
+            self._initial_args = args
+
+        if state != Ellipsis:
+            self._initial_state = state
+            
         return self
 
     def inline(self, is_inline=True) ->  'PipelineBuilder':
