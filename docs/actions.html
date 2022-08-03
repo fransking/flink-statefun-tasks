@@ -1,70 +1,35 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>Actions &mdash; Flink Tasks  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Stateful Tasks" href="stateful_tasks.html" />
     <link rel="prev" title="Pipelines" href="pipelines.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="index.html" class="icon icon-home"> Flink Tasks
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -72,19 +37,8 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <p class="caption"><span class="caption-text">About</span></p>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">About</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tasks_vs_functions.html">Tasks vs Functions</a></li>
@@ -108,114 +62,74 @@
 <li class="toctree-l1"><a class="reference internal" href="events.html">Events</a></li>
 <li class="toctree-l1"><a class="reference internal" href="extensions.html">Extensions</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Developer Guide</span></p>
+<p class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="deployment_topologies.html">Deployment Topologies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Flink Tasks</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
       <li>Actions</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="actions">
-<h1>Actions<a class="headerlink" href="#actions" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="actions">
+<h1>Actions<a class="headerlink" href="#actions" title="Permalink to this heading"></a></h1>
 <p>Actions are out of band operations on existing pipelines enabling clients ‘fire and forget’ a pipeline and later perform some operation on it.</p>
-<div class="section" id="querying">
-<h2>Querying<a class="headerlink" href="#querying" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="pipeline-status">
-<h3>Pipeline Status<a class="headerlink" href="#pipeline-status" title="Permalink to this headline">¶</a></h3>
+<section id="querying">
+<h2>Querying<a class="headerlink" href="#querying" title="Permalink to this heading"></a></h2>
+<section id="pipeline-status">
+<h3>Pipeline Status<a class="headerlink" href="#pipeline-status" title="Permalink to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">divide</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">client</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>                                     <span class="c1"># non-blocking &#39;fire and forget&#39;</span>
 
 <span class="n">status</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get_status_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>            <span class="c1"># type: TaskStatus</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="pipeline-request">
-<h3>Pipeline Request<a class="headerlink" href="#pipeline-request" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="pipeline-request">
+<h3>Pipeline Request<a class="headerlink" href="#pipeline-request" title="Permalink to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">divide</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">client</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>                                     <span class="c1"># non-blocking &#39;fire and forget&#39;</span>
 
 <span class="n">request</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get_request_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>          <span class="c1"># type: TaskRequest</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="pipeline-result">
-<h3>Pipeline Result<a class="headerlink" href="#pipeline-result" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="pipeline-result">
+<h3>Pipeline Result<a class="headerlink" href="#pipeline-result" title="Permalink to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">divide</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">client</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>                                     <span class="c1"># non-blocking &#39;fire and forget&#39;</span>
 
 <span class="n">request</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get_result_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>           <span class="c1"># type: TaskResult</span>
 </pre></div>
 </div>
-</div>
-</div>
-<div class="section" id="flow-control">
-<h2>Flow Control<a class="headerlink" href="#flow-control" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="flow-control">
+<h2>Flow Control<a class="headerlink" href="#flow-control" title="Permalink to this heading"></a></h2>
 <p>Pipelines may be paused, unpaused and cancelled</p>
-<div class="section" id="pausing-resuming-pipelines">
-<h3>Pausing &amp; Resuming Pipelines<a class="headerlink" href="#pausing-resuming-pipelines" title="Permalink to this headline">¶</a></h3>
+<section id="pausing-resuming-pipelines">
+<h3>Pausing &amp; Resuming Pipelines<a class="headerlink" href="#pausing-resuming-pipelines" title="Permalink to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">a_long_running_task</span><span class="o">.</span><span class="n">send</span><span class="p">()</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">save</span><span class="p">)</span>
 <span class="n">client</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>                                     <span class="c1"># non-blocking &#39;fire and forget&#39;</span>
 
@@ -226,9 +140,9 @@
 <span class="n">status</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get_status_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>            <span class="c1"># TaskStatus.RUNNING or TaskStatus.COMPLETED</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="cancelling-a-pipeline">
-<h3>Cancelling a Pipeline<a class="headerlink" href="#cancelling-a-pipeline" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="cancelling-a-pipeline">
+<h3>Cancelling a Pipeline<a class="headerlink" href="#cancelling-a-pipeline" title="Permalink to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">a_long_running_task</span><span class="o">.</span><span class="n">send</span><span class="p">()</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">save</span><span class="p">)</span>
 <span class="n">client</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>                                     <span class="c1"># non-blocking &#39;fire and forget&#39;</span>
 
@@ -236,56 +150,39 @@
 <span class="n">status</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get_status_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>            <span class="c1"># TaskStatus.CANCELLED</span>
 </pre></div>
 </div>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="stateful_tasks.html" class="btn btn-neutral float-right" title="Stateful Tasks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="pipelines.html" class="btn btn-neutral float-left" title="Pipelines" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="stateful_tasks.html" class="btn btn-neutral float-right" title="Stateful Tasks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2020-2022, Frans King &amp; Luke Ashworth.
-
-    </p>
+    <p>&#169; Copyright 2020-2022, Frans King &amp; Luke Ashworth.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

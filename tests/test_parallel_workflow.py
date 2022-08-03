@@ -358,6 +358,16 @@ class ParallelWorkflowTests(unittest.TestCase):
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, ['Hello John Smith', 'Hello John Doe', 'Hello John Adams'])
 
+    def test_passing_initial_args_into_parallel_pipeline(self):
+        pipeline = in_parallel([_say_hello.send(last_name='Smith'), _say_hello.send(last_name='Doe')]).with_initial(args='John')
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, ['Hello John Smith', 'Hello John Doe'])
+        
+    def test_passing_initial_args_into_parallel_pipeline_when_tasks_are_deferred_due_to_max_parallelism(self):
+        pipeline = in_parallel([_say_hello.send(last_name='Smith'), _say_hello.send(last_name='Doe')], max_parallelism=1).with_initial(args='John')
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, ['Hello John Smith', 'Hello John Doe'])
+
 
 if __name__ == '__main__':
     unittest.main()

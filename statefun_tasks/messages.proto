@@ -134,10 +134,15 @@ message TaskState {
 }
 
 message TaskDeferral {
-    repeated string task_uids = 1;
+    repeated DeferredTask tasks = 1;
     optional string parent_task_address = 2;
     optional string parent_task_id = 3;
     optional TaskResultOrException task_result_or_exception = 4;
+}
+
+message DeferredTask {
+    string task_uid = 1;
+    bool has_initial_args = 2;
 }
 
 message PausedTask {

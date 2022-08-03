@@ -1,70 +1,35 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>Introduction &mdash; Flink Tasks  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Tasks vs Functions" href="tasks_vs_functions.html" />
     <link rel="prev" title="Flink Tasks" href="index.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="index.html" class="icon icon-home"> Flink Tasks
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -72,19 +37,8 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <p class="caption"><span class="caption-text">About</span></p>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">About</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#what-is-it">What is it?</a></li>
@@ -101,86 +55,46 @@
 <li class="toctree-l1"><a class="reference internal" href="events.html">Events</a></li>
 <li class="toctree-l1"><a class="reference internal" href="extensions.html">Extensions</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Developer Guide</span></p>
+<p class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="deployment_topologies.html">Deployment Topologies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Flink Tasks</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
       <li>Introduction</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="introduction">
-<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="what-is-it">
-<h2>What is it?<a class="headerlink" href="#what-is-it" title="Permalink to this headline">¶</a></h2>
+             
+  <section id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading"></a></h1>
+<section id="what-is-it">
+<h2>What is it?<a class="headerlink" href="#what-is-it" title="Permalink to this heading"></a></h2>
 <p>A lightweight API that borrows concepts from Celery to allow Python developers to run task based workflows on Apache Flink Stateful Functions.
 Workflows are composed of Tasks which accept parameters and can be chained together as continuations into a Pipeline.
 The Pipeline becomes the Flink state.</p>
-</div>
-<div class="section" id="motivation">
-<h2>Motivation<a class="headerlink" href="#motivation" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="motivation">
+<h2>Motivation<a class="headerlink" href="#motivation" title="Permalink to this heading"></a></h2>
 <p>I use Celery in my professional life to orchestrate distributed Python workflows.  These workflows are typically 1-N-1 such as:</p>
 <ul class="simple">
 <li><p>Load a portfolio of stocks</p></li>
@@ -223,9 +137,9 @@ The Pipeline becomes the Flink state.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">test_result</span> <span class="o">=</span> <span class="n">compute_average</span><span class="p">([</span><span class="n">compute_std_dev</span><span class="p">(</span><span class="n">load_timeseries</span><span class="p">(</span><span class="s1">&#39;BT.L&#39;</span><span class="p">)),</span> <span class="n">compute_std_dev</span><span class="p">(</span><span class="n">load_timeseries</span><span class="p">(</span><span class="s1">&#39;VOD.L&#39;</span><span class="p">))])</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="flink-stateful-functions">
-<h2>Flink Stateful Functions<a class="headerlink" href="#flink-stateful-functions" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="flink-stateful-functions">
+<h2>Flink Stateful Functions<a class="headerlink" href="#flink-stateful-functions" title="Permalink to this heading"></a></h2>
 <p>Let’s revisit our stocks example and try to implement it as Flink Stateful Functions.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@functions</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="s1">&#39;examples/load_timeseries&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">load_timeseries</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
@@ -295,9 +209,9 @@ and keeps the state management in one place</p>
         <span class="n">context</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;average -&gt; context.storage.initial_caller&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="flink-tasks">
-<h2>Flink Tasks<a class="headerlink" href="#flink-tasks" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="flink-tasks">
+<h2>Flink Tasks<a class="headerlink" href="#flink-tasks" title="Permalink to this heading"></a></h2>
 <p>Flink Tasks wraps up this orchestration function into a pipeline so that developers can focus on writing simple functions that are
 combined into workflows using an intuitive API based around ordinary Python functions.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tasks</span> <span class="o">=</span> <span class="n">FlinkTasks</span><span class="p">(</span>
@@ -337,55 +251,38 @@ combined into workflows using an intuitive API based around ordinary Python func
         <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
 </pre></div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="tasks_vs_functions.html" class="btn btn-neutral float-right" title="Tasks vs Functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="index.html" class="btn btn-neutral float-left" title="Flink Tasks" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tasks_vs_functions.html" class="btn btn-neutral float-right" title="Tasks vs Functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2020-2022, Frans King &amp; Luke Ashworth.
-
-    </p>
+    <p>&#169; Copyright 2020-2022, Frans King &amp; Luke Ashworth.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>
