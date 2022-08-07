@@ -20,6 +20,9 @@ class ContinuePipelineHandler(PipelineMessageHandler):
         task_result_or_exception = message
         caller_uid = message.uid
 
+        # update last known task state in case we need to cancel later and call a finally task passing through the current state
+        context.pipeline_state.last_task_state.CopyFrom(task_result_or_exception.state)                    
+
         # mark pipeline step as complete
         if not self.graph.mark_task_complete(caller_uid, task_result_or_exception):
             return False, task_result_or_exception
@@ -47,6 +50,9 @@ class ContinuePipelineHandler(PipelineMessageHandler):
             if group_is_complete:
                 task_result_or_exception = self.result_aggregator.aggregate(context, group)
 
+                # update last known task state in case we need to cancel later and call a finally task passing through the current state
+                context.pipeline_state.last_task_state.CopyFrom(task_result_or_exception.state)   
+
                 # pause the pipeline if this completed group is a wait
                 if group.is_wait:
                     await pipeline.pause(context)
@@ -72,8 +78,7 @@ class ContinuePipelineHandler(PipelineMessageHandler):
 
         # turn next step into remainder of tasks to call
         if isinstance(next_step, Task):
-            tasks = [next_step]
-            max_parallelism = 1
+            tasks, max_parallelism = [next_step], 1
 
             if next_step.is_finally:
                 # record the result of the task prior to the finally task so we can return it once the finally task completes

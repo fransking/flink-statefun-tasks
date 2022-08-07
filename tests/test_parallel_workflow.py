@@ -14,6 +14,10 @@ say_goodbye_called = False
 def _say_hello(first_name, last_name):
     return f'Hello {first_name} {last_name}'
 
+@tasks.bind()
+def _say_hello_with_title(first_name, last_name, title="Mr"):
+    return f'Hello {title} {first_name} {last_name}'
+
 
 @tasks.bind()
 def _say_goodbye(greeting, goodbye_message):
@@ -367,6 +371,26 @@ class ParallelWorkflowTests(unittest.TestCase):
         pipeline = in_parallel([_say_hello.send(last_name='Smith'), _say_hello.send(last_name='Doe')], max_parallelism=1).with_initial(args='John')
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, ['Hello John Smith', 'Hello John Doe'])
+
+    def test_passing_initial_args_into_parallel_pipeline_when_task_has_default_parameters(self):
+        pipeline = in_parallel([_say_hello_with_title.send(last_name="Smith")]).with_initial(args='John')
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, ['Hello Mr John Smith'])
+
+    def test_passing_initial_args_into_parallel_pipeline_when_task_overriding_default_parameters(self):
+        pipeline = in_parallel([_say_hello_with_title.send(last_name="Smith", title="Sir")]).with_initial(args='John')
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, ['Hello Sir John Smith'])
+
+    def test_passing_initial_args_into_parallel_pipeline_when_setting_initial_kwargs(self):
+        pipeline = in_parallel([_say_hello_with_title.send(last_name="Smith")]).with_initial(args=('John',), kwargs={'title': 'Sir'})
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, ['Hello Sir John Smith'])
+
+    def test_passing_initial_args_into_parallel_pipeline_when_setting_initial_kwargs_in_addition_to_task_kwargs(self):
+        pipeline = in_parallel([_say_hello_with_title.send(last_name="Smith"), _say_hello_with_title.send(last_name="Adams", title='Mr')]).with_initial(args=('John',), kwargs={'title': 'Sir'})
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, ['Hello Sir John Smith', 'Hello Mr John Adams'])
         
 
 if __name__ == '__main__':

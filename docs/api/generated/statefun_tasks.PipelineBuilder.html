@@ -261,8 +261,8 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.wait" title="statefun_tasks.PipelineBuilder.wait"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wait</span></code></a>()</p></td>
 <td><p>Causes the pipeline to automatically pause at this point</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.with_initial" title="statefun_tasks.PipelineBuilder.with_initial"><code class="xref py py-obj docutils literal notranslate"><span class="pre">with_initial</span></code></a>([args, state])</p></td>
-<td><p>Optionally sets the initial args and state to be passed to the initial tasks(s) in this pipeline :param option args: arguments :param option state: state :rtype: <a class="reference internal" href="#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a> :return: the builder</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.with_initial" title="statefun_tasks.PipelineBuilder.with_initial"><code class="xref py py-obj docutils literal notranslate"><span class="pre">with_initial</span></code></a>([args, kwargs, state])</p></td>
+<td><p>Optionally sets the initial args kwargs and state to be passed to the initial tasks(s) in this pipeline :param option args: arguments as tuple or TupleOfAny :param option state: state :param option kwargs: keyword arguments as dict or MapStringToAny :rtype: <a class="reference internal" href="#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a> :return: the builder</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.id" title="statefun_tasks.PipelineBuilder.id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">id</span></code></a></p></td>
 <td><p>The ID of this pipeline</p></td>
@@ -609,10 +609,11 @@ Inline pipelines accept inputs from and share state with their parent task.
 
 <dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.PipelineBuilder.with_initial">
-<span class="sig-name descname"><span class="pre">with_initial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Ellipsis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Ellipsis</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.with_initial" title="Permalink to this definition">¶</a></dt>
-<dd><p>Optionally sets the initial args and state to be passed to the initial tasks(s) in this pipeline
-:param option args: arguments
+<span class="sig-name descname"><span class="pre">with_initial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Ellipsis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Ellipsis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Ellipsis</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.with_initial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optionally sets the initial args kwargs and state to be passed to the initial tasks(s) in this pipeline
+:param option args: arguments as tuple or TupleOfAny
 :param option state: state
+:param option kwargs: keyword arguments as dict or MapStringToAny
 :rtype: <a class="reference internal" href="#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>
 :return: the builder</p>
 </dd></dl>

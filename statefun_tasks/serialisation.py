@@ -111,30 +111,41 @@ class DefaultSerialiser(object):
             return ArgsAndKwargs(args=args, kwargs=MapOfStringToAny())
 
     @staticmethod
-    def merge_args_and_kwargs(task_result: Message, task_args_and_kwargs: ArgsAndKwargs) -> Any:
+    def merge_args_and_kwargs(task_args_and_kwargs: ArgsAndKwargs, args: Message = None, kwargs: MapOfStringToAny = None) -> Any:
         """
         Merges args & kwargs passed explicity to a task entry in a pipeline with results from the previous task.
         If there are no args & kwargs to merge then the result of the previous task is returned unchanged
-        :param task_result: the request payload proto
-        :param task_args_and_kwargs: the args and kwargs from the task entry to merge
+
+        :param task_args_and_kwargs: the args and kwargs from the task entry to merge args and kwargs into
+        :param option args: the args to merge from
+        :param option kwargs: the kwargs to merge from
         :return: Any
         """
-        args_to_merge = task_args_and_kwargs.args
-        kwargs = task_args_and_kwargs.kwargs
-
-        if not any(args_to_merge.items) and not any(kwargs.items):
-            return pack_any(task_result)
-
+        args = args or TupleOfAny()
+        kwargs = kwargs or MapOfStringToAny()
         merged_args = TupleOfAny()
+
+        task_args = task_args_and_kwargs.args
+        task_kwargs = task_args_and_kwargs.kwargs
+
+        # merge in any extra kwargs into the task_kwargs
+        for key in kwargs.items:
+            if not key in task_kwargs.items:
+                task_kwargs.items[key].CopyFrom(kwargs.items[key])
+
+        # if the task args and kwargs are still empty then just return args
+        if not any(task_args.items) and not any(task_kwargs.items):
+            return pack_any(args)
+
         # task result may be a single proto in which case we have to wrap into TupleOfAny to be able to extend
-        if not isinstance(task_result, TupleOfAny):
-            merged_args.items.append(pack_any(task_result))
+        if not isinstance(args, TupleOfAny):
+            merged_args.items.append(pack_any(args))
         else:
-            merged_args.items.extend(task_result.items)
+            merged_args.items.extend(args.items)
 
-        merged_args.items.extend(args_to_merge.items)
+        merged_args.items.extend(task_args.items)
 
-        return pack_any(ArgsAndKwargs(args=merged_args, kwargs=kwargs))
+        return pack_any(ArgsAndKwargs(args=merged_args, kwargs=task_kwargs))
 
     def serialise_request(self, task_request: TaskRequest, request: Any, state=None, retry_policy=None):
         """

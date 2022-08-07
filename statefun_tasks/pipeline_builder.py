@@ -31,12 +31,12 @@ class PipelineBuilder(ProtobufSerialisable):
 
     :param optional pipeline: list of initial pipeline entries e.g. from another builder
     """
-
     def __init__(self, pipeline: list = None):
         self._pipeline = [] if pipeline is None else pipeline
         self._builder_id = _gen_id()
         self._inline = False
         self._initial_args = None
+        self._initial_kwargs = None
         self._initial_state = None
 
     @property
@@ -211,10 +211,6 @@ class PipelineBuilder(ProtobufSerialisable):
         args = self.validate().to_proto(serialiser)
         kwargs = {}
 
-        # send a single argument by itself instead of wrapped inside a tuple
-        if _is_tuple(args) and len(args) == 1:
-            args = args[0]
-
         task_request = TaskRequest(id=task_id, type=task_type, uid=_gen_id())
         args_and_kwargs = serialiser.serialise_args_and_kwargs(args, kwargs)
         serialiser.serialise_request(task_request, args_and_kwargs)
@@ -252,6 +248,7 @@ class PipelineBuilder(ProtobufSerialisable):
         return _Pipeline(self._pipeline, 
             inline=self._inline, 
             initial_args=self._initial_args,
+            initial_kwargs=self._initial_kwargs,
             initial_state=self._initial_state,
             is_fruitful=is_fruitful,
             serialiser=serialiser,
@@ -270,15 +267,19 @@ class PipelineBuilder(ProtobufSerialisable):
 
         return self
 
-    def with_initial(self, args=Ellipsis, state=Ellipsis) ->  'PipelineBuilder':
+    def with_initial(self, args=Ellipsis, kwargs=Ellipsis, state=Ellipsis) ->  'PipelineBuilder':
         """
-        Optionally sets the initial args and state to be passed to the initial tasks(s) in this pipeline
-        :param option args: arguments
+        Optionally sets the initial args kwargs and state to be passed to the initial tasks(s) in this pipeline
+        :param option args: arguments as tuple or TupleOfAny
         :param option state: state
+        :param option kwargs: keyword arguments as dict or MapStringToAny
         :return: the builder
         """
         if args != Ellipsis:
             self._initial_args = args
+
+        if kwargs != Ellipsis:
+            self._initial_kwargs = kwargs
 
         if state != Ellipsis:
             self._initial_state = state
@@ -355,14 +356,14 @@ class PipelineBuilder(ProtobufSerialisable):
         if pipeline_proto.inline:
             builder = builder.inline()
 
-        args, state = None, None
         if pipeline_proto.HasField('initial_args'):
-            args = pipeline_proto.initial_args
+            builder.with_initial(args=pipeline_proto.initial_args)
+
+        if pipeline_proto.HasField('initial_kwargs'):
+            builder.with_initial(kwargs=pipeline_proto.initial_kwargs)
 
         if pipeline_proto.HasField('initial_state'):
-            state = pipeline_proto.initial_state
-
-        builder = builder.with_initial(args, state)
+            builder.with_initial(state=pipeline_proto.initial_state)
 
         return builder
 
