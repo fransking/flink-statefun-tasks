@@ -153,7 +153,7 @@ class TestHarness:
             invocation.argument.CopyFrom(TypedValue(typename=flink_type.typename, has_value=True, value=message_arg.SerializeToString()))
 
         self._copy_state_to_invocation(target.namespace, target.type, target.id, to_function)
-        result_bytes = asyncio.get_event_loop().run_until_complete(handler.handle_async(to_function.SerializeToString()))
+        result_bytes = asyncio.new_event_loop().run_until_complete(handler.handle_async(to_function.SerializeToString()))
         result = self._process_result(to_function, result_bytes)
 
         # remember first egress result
