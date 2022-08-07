@@ -388,10 +388,10 @@ class ParallelWorkflowTests(unittest.TestCase):
         self.assertEqual(result, ['Hello Sir John Smith'])
 
     def test_passing_initial_args_into_parallel_pipeline_when_setting_initial_kwargs_in_addition_to_task_kwargs(self):
-        pipeline = in_parallel([_say_hello_with_title.send(last_name="Smith"), _say_hello_with_title.send(last_name="Adams", title='Mr')]).with_initial(args=('John',), kwargs={'title': 'Sir'})
+        pipeline = in_parallel([_say_hello_with_title.send(last_name="Smith"), _say_hello_with_title.send(last_name="Adams", title='Mr')], num_stages=2).with_initial(args=('John',), kwargs={'title': 'Sir'})
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, ['Hello Sir John Smith', 'Hello Mr John Adams'])
-        
+
 
 if __name__ == '__main__':
     unittest.main()

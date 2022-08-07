@@ -4,7 +4,7 @@ from statefun_tasks.builtin import builtin
 
 
 @builtin('__builtins.run_pipeline')
-def run_pipeline(context: TaskContext, state, *args):
+def run_pipeline(context: TaskContext, state, *args, **kwargs):
     pipeline_proto = args[-1]
     args = args[:-1]
 
@@ -22,10 +22,12 @@ def run_pipeline(context: TaskContext, state, *args):
     if len(args) > 0:
         pipeline = pipeline.with_initial(args=args)
 
+    if any(kwargs):
+        pipeline = pipeline.with_initial(kwargs=kwargs)
+
     return state, pipeline
 
 
-       
 @builtin('__builtins.flatten_results')
 def flatten_results(results):
     return [item for items in results for item in items]
