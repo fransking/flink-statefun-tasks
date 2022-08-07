@@ -49,12 +49,14 @@
 <li class="toctree-l2"><a class="reference internal" href="#passing-state">Passing State</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#accessing-the-context">Accessing the Context</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#error-handling">Error Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setting-initial-parameters">Setting Initial Parameters:</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#orchestrator-tasks">Orchestrator Tasks</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#composition">Composition</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#conditional-execution">Conditional Execution</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#recursion">Recursion</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#inline-pipelines">Inline Pipelines</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="actions.html">Actions</a></li>
@@ -147,6 +149,18 @@
 <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">submit_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>Large parallelisms may be limited by the performance of a single pipeline function aggregating the results.
+In this case it is possible to split up the parallelism into multiple inline pipelines ‘map/reduce’ style
+using the num_stages parameter:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">in_parallel</span><span class="p">([</span>
+    <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+    <span class="o">...</span>
+<span class="p">],</span> <span class="n">num_stages</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">submit_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>
+</pre></div>
+</div>
 </section>
 <section id="passing-state">
 <h2>Passing State<a class="headerlink" href="#passing-state" title="Permalink to this heading"></a></h2>
@@ -199,6 +213,29 @@ success or failure.  This is a good place to put any clean up logic.</p>
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">finally_do</span><span class="p">(</span><span class="n">cleanup</span><span class="p">)</span>
 </pre></div>
 </div>
+</section>
+<section id="setting-initial-parameters">
+<h2>Setting Initial Parameters:<a class="headerlink" href="#setting-initial-parameters" title="Permalink to this heading"></a></h2>
+<p>Consider a pipeline that multiplies in parallel the numbers 1 to 10000 by 2.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">in_parallel</span><span class="p">([</span>
+    <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+    <span class="o">...</span>
+    <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10000</span><span class="p">)</span>
+<span class="p">],</span> <span class="n">num_stages</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>When serialised to protobuf the first parameter to each function is repeated in each serialised task.
+To reduce message size this parameter can be set on the pipeline using the ‘with_initial’ function on the PipelineBuilder:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">in_parallel</span><span class="p">([</span>
+    <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+    <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+    <span class="o">...</span>
+    <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">10000</span><span class="p">)</span>
+<span class="p">],</span> <span class="n">num_stages</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">with_initial</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Initial kwargs and task state may also be set this way.</p>
 </section>
 <section id="orchestrator-tasks">
 <h2>Orchestrator Tasks<a class="headerlink" href="#orchestrator-tasks" title="Permalink to this heading"></a></h2>
@@ -253,6 +290,37 @@ patterns:</p>
 </pre></div>
 </div>
 </section>
+</section>
+<section id="inline-pipelines">
+<h2>Inline Pipelines<a class="headerlink" href="#inline-pipelines" title="Permalink to this heading"></a></h2>
+<p>State is isolated by default between a parent pipeline and any child pipelines that it creates.  This
+is done on the assumption that a pipeline that calls a task that itself creates a pipeline would rather
+treat that child pipeline as a so called black box implementation of the task that parent is called and hence
+the states should be kept independent.</p>
+<p>This behaviour can be overriden by declaring the child pipeline as ‘inline’:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">with_state</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">is_fruitful</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">setup_state</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">initial</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">initial</span>
+
+<span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">with_state</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">return_state</span><span class="p">(</span><span class="n">state</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">state</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;The state is </span><span class="si">{</span><span class="n">state</span><span class="si">}</span><span class="s1">&#39;</span>
+
+<span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">create_child_pipeline</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">return_state</span><span class="o">.</span><span class="n">send</span><span class="p">()</span>
+
+<span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">create_inline_child_pipeline</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">return_state</span><span class="o">.</span><span class="n">send</span><span class="p">()</span><span class="o">.</span><span class="n">inline</span><span class="p">()</span>
+
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">setup_state</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;initial state&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">create_child_pipeline</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">flink</span><span class="o">.</span><span class="n">submit_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>  <span class="c1"># result will be None</span>
+
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">setup_state</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;initial state&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">create_inline_child_pipeline</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">flink</span><span class="o">.</span><span class="n">submit_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>  <span class="c1"># result will be &#39;The state is initial state&#39;</span>
+</pre></div>
+</div>
 </section>
 </section>
 
