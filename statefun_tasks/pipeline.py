@@ -12,14 +12,25 @@ from typing import Union
 
 
 class _Pipeline(object):
-    __slots__ = ('_pipeline', '_serialiser', '_is_fruitful', '_events', '_inline', '_initial_args', '_initial_state', '_handlers', '_graph', '_submitter')
+    __slots__ = ('_pipeline', '_serialiser', '_is_fruitful', '_events', '_inline', '_initial_args', '_initial_kwargs', '_initial_state', '_handlers', '_graph', '_submitter')
 
-    def __init__(self, pipeline: list, serialiser=None, is_fruitful=True, inline=False, initial_args=None, initial_state=None, events: EventHandlers=None):
+    def __init__(
+        self, 
+        pipeline: list, 
+        serialiser=None, 
+        is_fruitful=True, 
+        inline=False, 
+        initial_args=None, 
+        initial_kwargs=None, 
+        initial_state=None, 
+        events: EventHandlers=None):
+        
         self._pipeline = pipeline
         self._serialiser = serialiser or DefaultSerialiser()
         self._is_fruitful = is_fruitful
         self._inline = inline
         self._initial_args = initial_args
+        self._initial_kwargs = initial_kwargs
         self._initial_state = initial_state
         self._events = events or EventHandlers()
 
@@ -56,10 +67,12 @@ class _Pipeline(object):
         if self._initial_args is not None:
             pipeline.initial_args.CopyFrom(pack_any(self._serialiser.to_proto(self._initial_args)))
         
+        if self._initial_kwargs is not None:
+            pipeline.initial_kwargs.CopyFrom(self._serialiser.to_proto(self._initial_kwargs))
+
         if self._initial_state is not None:
             pipeline.initial_state.CopyFrom(pack_any(self._serialiser.to_proto(self._initial_state)))
         
-
         return pipeline
 
     @staticmethod
@@ -71,7 +84,8 @@ class _Pipeline(object):
             pipeline=[_from_proto(proto) for proto in pipeline_proto.entries], 
             inline=pipeline_proto.inline, 
             initial_args=pipeline_proto.initial_args,
-            initial_state=pipeline_proto.initial_state,\
+            initial_kwargs=pipeline_proto.initial_kwargs,
+            initial_state=pipeline_proto.initial_state,
             serialiser=serialiser, events=events)
 
     async def handle_message(self, context: TaskContext, message: Union[TaskRequest, TaskResult, TaskException], state: Any=None) -> bool:
@@ -151,7 +165,7 @@ class _Pipeline(object):
             cancel_action = TaskActionRequest(id=child_pipeline.id, uid=_gen_id(), action=TaskAction.CANCEL_PIPELINE)
             context.send_message(child_pipeline.address, cancel_action.id, cancel_action)
 
-        # construct the cancellation exception to send to caller of this pipeline
+        # construct the cancellation exception to send to caller of this pipeline using last known task state from the pipeline
         ex = ex or TaskCancelledException('Pipeline was cancelled')
         cancellation_ex = _create_task_exception(context.storage.task_request, ex, context.pipeline_state.last_task_state)
 

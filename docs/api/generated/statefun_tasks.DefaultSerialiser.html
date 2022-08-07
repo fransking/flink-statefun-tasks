@@ -130,7 +130,7 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.DefaultSerialiser.from_proto" title="statefun_tasks.DefaultSerialiser.from_proto"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_proto</span></code></a>(proto[, default])</p></td>
 <td><p>Converts from protobuf to Python</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.DefaultSerialiser.merge_args_and_kwargs" title="statefun_tasks.DefaultSerialiser.merge_args_and_kwargs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge_args_and_kwargs</span></code></a>(task_result, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.DefaultSerialiser.merge_args_and_kwargs" title="statefun_tasks.DefaultSerialiser.merge_args_and_kwargs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge_args_and_kwargs</span></code></a>(task_args_and_kwargs)</p></td>
 <td><p>Merges args &amp; kwargs passed explicity to a task entry in a pipeline with results from the previous task.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_converters</span></code>(converters)</p></td>
@@ -220,14 +220,15 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.DefaultSerialiser.merge_args_and_kwargs">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">merge_args_and_kwargs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_args_and_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.DefaultSerialiser.merge_args_and_kwargs" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">merge_args_and_kwargs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_args_and_kwargs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.DefaultSerialiser.merge_args_and_kwargs" title="Permalink to this definition"></a></dt>
 <dd><p>Merges args &amp; kwargs passed explicity to a task entry in a pipeline with results from the previous task.
 If there are no args &amp; kwargs to merge then the result of the previous task is returned unchanged</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>task_result</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Message</span></code>) – the request payload proto</p></li>
-<li><p><strong>task_args_and_kwargs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ArgsAndKwargs</span></code>) – the args and kwargs from the task entry to merge</p></li>
+<li><p><strong>task_args_and_kwargs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ArgsAndKwargs</span></code>) – the args and kwargs from the task entry to merge args and kwargs into</p></li>
+<li><p><strong>args</strong> (<em>option</em>) – the args to merge from</p></li>
+<li><p><strong>kwargs</strong> (<em>option</em>) – the kwargs to merge from</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>

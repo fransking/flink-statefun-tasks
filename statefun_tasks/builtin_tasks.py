@@ -24,7 +24,7 @@ def run_pipeline(context: TaskContext, state, *args):
 
     return state, pipeline
 
-       
+
 @builtin('__builtins.flatten_results')
 def flatten_results(results):
     return [item for items in results for item in items]
