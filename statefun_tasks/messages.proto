@@ -61,8 +61,10 @@ message Pipeline {
     // or treat as independent - defaults to false
     bool inline = 2;
 
+    // parameters to pass to the initial tasks in this pipeline
     optional google.protobuf.Any initial_args = 3;
-    optional google.protobuf.Any initial_state = 4;
+    optional MapOfStringToAny initial_kwargs = 4;
+    optional google.protobuf.Any initial_state = 5;
 }
 
 message TaskRetryPolicy {
@@ -164,7 +166,7 @@ message PipelineState {
         TaskException exception_before_finally = 10;
     }
     bool is_fruitful = 11;
-    google.protobuf.Any task_state = 12;
+    google.protobuf.Any task_state = 12;  // state from the task that created this pipeline
 
     // optimised so we only store deferral data once not multiple times per task uid
     map<string, TaskDeferral> task_deferrals_by_id = 13;
@@ -176,7 +178,7 @@ message PipelineState {
 
     repeated ChildPipeline child_pipelines = 17;
 
-    google.protobuf.Any last_task_state = 18;
+    google.protobuf.Any last_task_state = 18;  // state from the last task run within this pipeline
     string invocation_id = 19;
 }
 

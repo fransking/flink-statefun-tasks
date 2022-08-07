@@ -67,6 +67,20 @@ Parallel pipelines can have their concurrency limited using a semphore like max_
     
     result = await client.submit_async(pipeline)
 
+Large parallelisms may be limited by the performance of a single pipeline function aggregating the results.  
+In this case it is possible to split up the parallelism into multiple inline pipelines 'map/reduce' style
+using the num_stages parameter:
+
+.. code-block:: python
+
+    pipeline = in_parallel([
+        multiply.send(3, 2),
+        multiply.send(4, 5),
+        ...
+    ], num_stages=10)
+    
+    result = await client.submit_async(pipeline)
+
 Passing State
 -------------
 
@@ -131,6 +145,36 @@ The *finally_do* task is non-fruitful so the result of the pipeline is the resul
     pipeline = multiply.send(3, 2).finally_do(cleanup)
 
 
+Setting Initial Parameters:
+---------------------------
+
+Consider a pipeline that multiplies in parallel the numbers 1 to 10000 by 2.
+
+.. code-block:: python
+
+    pipeline = in_parallel([
+        multiply.send(2, 1),
+        multiply.send(2, 2),
+        ...
+        multiply.send(2, 10000)
+    ], num_stages=10)
+
+When serialised to protobuf the first parameter to each function is repeated in each serialised task.
+To reduce message size this parameter can be set on the pipeline using the 'with_initial' function on the PipelineBuilder:
+
+.. code-block:: python
+
+    pipeline = in_parallel([
+        multiply.send(1),
+        multiply.send(2),
+        ...
+        multiply.send(10000)
+    ], num_stages=10).with_initial(args=2)
+
+
+Initial kwargs and task state may also be set this way.
+
+
 Orchestrator Tasks
 ------------------
 
@@ -191,3 +235,38 @@ Recursion
 
 
     pipeline = count_to_100.send(0)
+
+
+Inline Pipelines
+----------------
+
+State is isolated by default between a parent pipeline and any child pipelines that it creates.  This
+is done on the assumption that a pipeline that calls a task that itself creates a pipeline would rather 
+treat that child pipeline as a so called black box implementation of the task that parent is called and hence
+the states should be kept independent.  
+
+This behaviour can be overriden by declaring the child pipeline as 'inline':
+
+.. code-block:: python
+
+    @tasks.bind(with_state=True, is_fruitful=False)
+    def setup_state(_, initial)
+        return initial
+
+    @tasks.bind(with_state=True)
+    def return_state(state):
+        return state, f'The state is {state}'
+
+    @tasks.bind()
+    def create_child_pipeline():
+        return return_state.send()
+
+    @tasks.bind()
+    def create_inline_child_pipeline():
+        return return_state.send().inline()
+
+    pipeline = setup_state.send('initial state').continue_with(create_child_pipeline)
+    result = await flink.submit_async(pipeline)  # result will be None
+
+    pipeline = setup_state.send('initial state').continue_with(create_inline_child_pipeline)
+    result = await flink.submit_async(pipeline)  # result will be 'The state is initial state'
