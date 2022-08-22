@@ -64,11 +64,11 @@ class BeginPipelineHandler(PipelineMessageHandler):
         else:
             # else get initial tasks(s) to call - might be single start of chain task or a group of tasks to call in parallel
             tasks, max_parallelism, slice = self.graph.get_initial_tasks()
-            task_state, initial_args, initial_kwargs = None, None, None
+            initial_state, initial_args, initial_kwargs = None, None, None
 
             # send initial state to each initial task if we have some
-            if context.pipeline_state.pipeline.HasField('initial_state'):   
-                task_state = unpack_any(context.pipeline_state.pipeline.initial_state, known_proto_types=[])
+            if context.pipeline_state.pipeline.HasField('initial_state'):
+                initial_state = unpack_any(context.pipeline_state.pipeline.initial_state, known_proto_types=[])
 
             # send initial arguments to each initial task if we have them
             if context.pipeline_state.pipeline.HasField('initial_args'):
@@ -88,9 +88,9 @@ class BeginPipelineHandler(PipelineMessageHandler):
             self.submitter.submit_tasks(
                 context, 
                 tasks, 
-                task_state=task_state, 
                 initial_args=initial_args, 
                 initial_kwargs=initial_kwargs,
+                initial_state=initial_state,
                 max_parallelism=max_parallelism)
 
             # break

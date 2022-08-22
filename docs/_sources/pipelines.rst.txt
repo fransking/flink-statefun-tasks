@@ -145,8 +145,8 @@ The *finally_do* task is non-fruitful so the result of the pipeline is the resul
     pipeline = multiply.send(3, 2).finally_do(cleanup)
 
 
-Setting Initial Parameters:
----------------------------
+Setting Initial Parameters
+--------------------------
 
 Consider a pipeline that multiplies in parallel the numbers 1 to 10000 by 2.
 
