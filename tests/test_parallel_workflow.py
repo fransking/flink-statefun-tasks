@@ -73,6 +73,11 @@ def _say_hello_with_initial_state(_, first_name, last_name, initial_state):
     return initial_state, f'Hello {first_name} {last_name}'
 
 
+@tasks.bind(with_state=True)
+def _say_hello_from_state(initial_state):
+    return initial_state, f'Hello {initial_state}'
+
+
 @tasks.bind()
 def _say_goodbye_with_state(greeting, goodbye_message):
     return f'{greeting}. So now I will say {goodbye_message}'
@@ -388,9 +393,19 @@ class ParallelWorkflowTests(unittest.TestCase):
         self.assertEqual(result, ['Hello Sir John Smith'])
 
     def test_passing_initial_args_into_parallel_pipeline_when_setting_initial_kwargs_in_addition_to_task_kwargs(self):
-        pipeline = in_parallel([_say_hello_with_title.send(last_name="Smith"), _say_hello_with_title.send(last_name="Adams", title='Mr')], num_stages=2).with_initial(args=('John',), kwargs={'title': 'Sir'})
+        pipeline = in_parallel([_say_hello_with_title.send(last_name="Smith"), _say_hello_with_title.send(last_name="Adams", title='Mr')], max_parallelism=1, num_stages=2).with_initial(args=('John',), kwargs={'title': 'Sir'})
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, ['Hello Sir John Smith', 'Hello Mr John Adams'])
+
+    def test_passing_initial_args_into_parallel_pipeline_when_setting_only_initial_kwargs_in_addition_to_task_kwargs(self):
+        pipeline = in_parallel([_say_hello_with_title.send(last_name="Smith"), _say_hello_with_title.send(last_name="Adams", title='Mr')], max_parallelism=1, num_stages=2).with_initial(kwargs={'title': 'Sir', 'first_name': 'John'})
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, ['Hello Sir John Smith', 'Hello Mr John Adams'])
+
+    def test_passing_initial_state_into_parallel_pipeline(self):
+        pipeline = in_parallel([_say_hello_from_state.send(), _say_hello_from_state.send()], max_parallelism=1, num_stages=2).with_initial(state='John Smith')
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, ['Hello John Smith', 'Hello John Smith'])
 
 
 if __name__ == '__main__':

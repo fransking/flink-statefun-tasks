@@ -22,16 +22,16 @@ class DeferredTaskSubmitter(object):
         context: TaskContext, 
         tasks: List[Task], 
         task_result_or_exception=None, 
-        task_state=None, 
         initial_args=None, 
-        initial_kwargs=None, 
-        max_parallelism=None): 
+        initial_kwargs=None,
+        initial_state=None,
+        max_parallelism=None):     
         
         # unpack task_result into result + state so we can merge in extras later
         if task_result_or_exception is not None:
             task_result, task_state = self._serialiser.unpack_response(task_result_or_exception)
         else:
-            task_result, task_state = None, task_state
+            task_result, task_state = None, None
 
         # split into tasks to call vs those to defer
         if max_parallelism is None or max_parallelism < 1:
@@ -40,7 +40,7 @@ class DeferredTaskSubmitter(object):
             tasks_to_call, tasks_to_defer = tasks[:max_parallelism], tasks[max_parallelism:]
 
         if any(tasks_to_defer):
-            has_initial_args = initial_args is not None or initial_kwargs is not None
+            has_initial_args = initial_args is not None or initial_kwargs is not None or initial_state is not None
             
             # create task deferral to hold these deferred tasks
             deferral_id = self._create_task_deferral(context, tasks_to_defer, task_result_or_exception, has_initial_args)
@@ -50,9 +50,9 @@ class DeferredTaskSubmitter(object):
             for task in tasks_to_call:
                 last_task = self._graph.get_last_task_in_chain(task.uid)
                 context.pipeline_state.task_deferral_ids_by_task_uid[last_task.uid] = deferral_id
-            
-        for task in tasks_to_call:
-            task_request = self._create_task_request(context, task, task.request, task_state, initial_args, initial_kwargs, task_result)
+        
+        for task in tasks_to_call:      
+            task_request = self._create_task_request(context, task, task.request, task_state, initial_args, initial_kwargs, initial_state, task_result)
             self._send_task(context, task.get_destination(), task_request)
 
 
@@ -71,14 +71,23 @@ class DeferredTaskSubmitter(object):
                 
                 deferred_task = task_deferral.tasks.pop()
                 task = self._graph.get_task(deferred_task.task_uid) 
-                
-                initial_args, initial_kwargs = None, None
 
-                if deferred_task.has_initial_args:
-                    initial_args = unpack_any(context.pipeline_state.pipeline.initial_args, known_proto_types=[])
-                    initial_kwargs = context.pipeline_state.pipeline.initial_kwargs
+                initial_args, initial_kwargs, initial_state = None, None, None
 
-                task_request = self._create_task_request_from_deferral(context, task, task_deferral, initial_args, initial_kwargs)
+                if deferred_task.has_initial_args:                    
+                    # send initial state to each initial task if we have some
+                    if context.pipeline_state.pipeline.HasField('initial_state'):   
+                        initial_state = unpack_any(context.pipeline_state.pipeline.initial_state, known_proto_types=[])
+
+                    # send initial arguments to each initial task if we have them
+                    if context.pipeline_state.pipeline.HasField('initial_args'):
+                        initial_args = unpack_any(context.pipeline_state.pipeline.initial_args, known_proto_types=[])
+
+                    # send initial kwargs to each initial task if we have them
+                    if context.pipeline_state.pipeline.HasField('initial_kwargs'):
+                        initial_kwargs = context.pipeline_state.pipeline.initial_kwargs
+
+                task_request = self._create_task_request_from_deferral(context, task, task_deferral, initial_args, initial_kwargs, initial_state)
                 
                 # add task we are submitting to deferral task
                 last_task = self._graph.get_last_task_in_chain(deferred_task.task_uid)
@@ -91,7 +100,6 @@ class DeferredTaskSubmitter(object):
                 # clean up
                 del context.pipeline_state.task_deferral_ids_by_task_uid[parent_id]
                 del context.pipeline_state.task_deferrals_by_id[deferral_id]
-
 
     def unpause_tasks(self, context):
         for paused_task in context.pipeline_state.paused_tasks:
@@ -120,8 +128,9 @@ class DeferredTaskSubmitter(object):
 
         return deferral_id
 
-    def _create_task_request_from_deferral(self, context, task, task_deferral, initial_args, initial_kwargs):
+    def _create_task_request_from_deferral(self, context, task, task_deferral, initial_args, initial_kwargs, initial_state):
         task_state, task_result = None, None
+
         if task_deferral.HasField('task_result_or_exception'):
             
             if task_deferral.task_result_or_exception.HasField('task_result'):
@@ -131,9 +140,9 @@ class DeferredTaskSubmitter(object):
 
             task_result, task_state = self._serialiser.unpack_response(task_result_or_exception)
 
-        return self._create_task_request(context, task, task.request, task_state, initial_args, initial_kwargs, task_result, task_deferral)
+        return self._create_task_request(context, task, task.request, task_state, initial_args, initial_kwargs, initial_state, task_result, task_deferral)
 
-    def _create_task_request(self, context, task, task_request, task_state=None, initial_args=None, initial_kwargs=None, task_result=None, deferral=None):
+    def _create_task_request(self, context, task, task_request, task_state=None, initial_args=None, initial_kwargs=None, initial_state=None, task_result=None, deferral=None):
         if initial_args is not None or initial_kwargs is not None:
             task_args_and_kwargs = self._serialiser.to_args_and_kwargs(task.request)
             task.request = self._serialiser.merge_args_and_kwargs(task_args_and_kwargs, initial_args, initial_kwargs)
@@ -141,6 +150,9 @@ class DeferredTaskSubmitter(object):
         elif task_result is not None:
             task_args_and_kwargs = self._serialiser.to_args_and_kwargs(task.request)
             task_request = self._serialiser.merge_args_and_kwargs(task_args_and_kwargs, task_result if not task.is_finally else TupleOfAny(), None)
+
+        # use initial state if provided
+        task_state = initial_state if initial_state is not None else task_state
 
         request = TaskRequest(id=task.task_id, type=task.task_type, uid=task.uid)
 
