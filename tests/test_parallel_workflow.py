@@ -7,11 +7,16 @@ from tests.utils import TestHarness, tasks, TaskErrorException
 join_results_called = False
 join_results2_called = False
 join_results3_called = False
+count_any_results = False
 say_goodbye_called = False
+say_hello_called = False
+
 
 
 @tasks.bind()
 def _say_hello(first_name, last_name):
+    global say_hello_called
+    say_hello_called = True
     return f'Hello {first_name} {last_name}'
 
 @tasks.bind()
@@ -50,6 +55,13 @@ def _join_results3(results):
     global join_results3_called
     join_results3_called = True
     return '; '.join(results)
+
+
+@tasks.bind()
+def _count_any_results(*args):
+    global count_any_results
+    count_any_results = True
+    return len(*args)
 
 
 @tasks.bind()
@@ -227,13 +239,14 @@ class ParallelWorkflowTests(unittest.TestCase):
 
         pipeline = in_parallel([
             _say_hello.send("John", "Smith"),
-            _fail.send(),
+            _fail.send().continue_with(_count_any_results),
             _say_goodbye.send("John", "Bye")
         ]).continue_with(_join_results)
 
         self.assertRaises(TaskErrorException, self.test_harness.run_pipeline, pipeline)
 
         self.assertEqual(join_results_called, False)
+        self.assertEqual(count_any_results, False)
         self.assertEqual(say_goodbye_called, True)
 
     def test_parallel_workflow_with_error_and_continuations(self):
