@@ -1,4 +1,3 @@
-from unittest.case import skip
 from statefun_tasks.context import TaskContext
 from statefun_tasks.pipeline_impl.handlers import PipelineMessageHandler
 from statefun_tasks.types import Task, Group, TasksException
@@ -63,10 +62,9 @@ class ContinuePipelineHandler(PipelineMessageHandler):
 
         # if we got an exception then the next step is the finally_task if there is one (or none otherwise)
         # but only once the group is complete (if we are in a group)
-        if isinstance(task_result_or_exception, TaskException):
-            if group is not None:
-                if group_is_complete:
-                    next_step = self.graph.try_get_finally_task(caller_uid)
+        if isinstance(task_result_or_exception, TaskException):        
+            if group is not None and group_is_complete:
+                next_step = self.graph.try_get_finally_task(caller_uid) if group_is_complete else None
             else:
                 next_step = self.graph.try_get_finally_task(caller_uid)
 
@@ -100,7 +98,6 @@ class ContinuePipelineHandler(PipelineMessageHandler):
                 # if we are at the last step in the pipeline then we are complete
                 context.pipeline_state.status.value = TaskStatus.COMPLETED if isinstance(task_result_or_exception, TaskResult) else TaskStatus.FAILED
                 await pipeline.events.notify_pipeline_status_changed(context, context.pipeline_state.pipeline, context.pipeline_state.status.value)
-
 
             elif isinstance(task_result_or_exception, TaskException):
                 if group is None or group_is_complete:
