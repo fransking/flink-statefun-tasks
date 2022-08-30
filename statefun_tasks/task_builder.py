@@ -1,7 +1,7 @@
 from statefun_tasks.serialisation import DefaultSerialiser
 from statefun_tasks.pipeline_builder import PipelineBuilder
 
-from statefun_tasks.types import Task, RetryPolicy, \
+from statefun_tasks.types import Task, RetryPolicy, MessageSizeExceeded, \
     TASK_STATE_TYPE, TASK_REQUEST_TYPE, TASK_RESULT_TYPE, TASK_EXCEPTION_TYPE, PIPELINE_STATE_TYPE
 
 from statefun_tasks.messages_pb2 import TaskResult, TaskException, TaskRequest, Address
@@ -31,12 +31,14 @@ class FlinkTasks(object):
     :param default_namespace: namespace to expose functions under. Maps to Flink Statefun function namespace in module.yaml
     :param default_worker_name: worker name to expose.  Maps to Flink Statefun function type in module.yaml
     :param egress_type_name: egress type name.  Maps to Flink Statefun egress in module.yaml
+    :param optional egress_message_max_size: maximum size of an egress message in bytes. If specified attempts to send messages over this size will raise a MessageSizeExceeded exception
     :param optional serialiser: serialiser to use (will use DefaultSerialiser if not set)
     """
-    def __init__(self, default_namespace: str = None, default_worker_name: str = None, egress_type_name: str = None, serialiser = None):
+    def __init__(self, default_namespace: str = None, default_worker_name: str = None, egress_type_name: str = None, egress_message_max_size: int = None, serialiser = None):
         self._default_namespace = default_namespace
         self._default_worker_name = default_worker_name
         self._egress_type_name = egress_type_name
+        self._egress_message_max_size = egress_message_max_size
         self._serialiser = serialiser if serialiser is not None else DefaultSerialiser()
         self._bindings = {}
         self._events = EventHandlers()
@@ -200,7 +202,7 @@ class FlinkTasks(object):
         :param context: context object provided by Flink
         :param message: the task input protobuf message
         """
-        with TaskContext(context, self._egress_type_name, self._serialiser) as task_context:
+        with TaskContext(context, self._egress_type_name, self._egress_message_max_size, self._serialiser) as task_context:
 
             for handler in self._handlers:
                 task_input = handler.unpack(task_context, message)
@@ -323,15 +325,20 @@ class FlinkTasks(object):
         if isinstance(task_result, (TaskResult, TaskException)):
             task_result.invocation_id = task_input.invocation_id
             
-        # either send a message to egress if reply_topic was specified
+        # send a message to egress if reply_topic was specified
         if task_input.HasField('reply_topic'):
-            context.send_egress_message(topic=task_input.reply_topic, value=task_result)
+            try:
+                context.send_egress_message(topic=task_input.reply_topic, value=task_result)
+            except MessageSizeExceeded as e:
+                _log.warning(f'Unable to send egress message - {e}')
+                context.send_egress_message(topic=task_input.reply_topic, value=_create_task_exception(task_input, e))
 
         # or call back to a particular flink function if reply_address was specified
         elif task_input.HasField('reply_address'):
             address, identifer = context.to_address_and_id(task_input.reply_address)
             context.send_message(address, identifer, task_result, delay, cancellation_token)
 
+        # otherwise call back to the caller (if there is one)
         elif isinstance(task_input, TaskRequest):
             address, caller_id = self._get_caller_address_and_id(context, task_input)
             if address is not None and caller_id is not None:

@@ -1,6 +1,11 @@
 from statefun_tasks.context import TaskContext
 from statefun_tasks.messages_pb2 import TaskResult, TupleOfAny
 from statefun_tasks.serialisation import pack_any
+from statefun_tasks.types import MessageSizeExceeded
+from statefun_tasks.type_helpers import _create_task_exception
+import logging
+
+_log = logging.getLogger('FlinkTasks')
 
 
 class ResultEmitter(object):
@@ -22,10 +27,10 @@ class ResultEmitter(object):
             # task failed or was cancelled
             context.storage.task_exception = task_result_or_exception
 
-        # either send a message to egress if reply_topic was specified
+        # send a message to egress if reply_topic was specified
         if task_request.HasField('reply_topic'):
-            context.send_egress_message(topic=task_request.reply_topic, value=task_result_or_exception)
-
+            self._send_egress_message(context, task_request, task_result_or_exception)
+            
         # or call back to a particular flink function if reply_address was specified
         elif task_request.HasField('reply_address'):
             address, identifer = context.to_address_and_id(task_request.reply_address)
@@ -34,3 +39,10 @@ class ResultEmitter(object):
         # or call back to our caller (if there is one)
         elif context.pipeline_state.caller_id is not None:
             context.send_message(context.pipeline_state.caller_address, context.pipeline_state.caller_id, task_result_or_exception)
+
+    def _send_egress_message(self, context, task_request, task_result_or_exception):
+        try:
+            context.send_egress_message(topic=task_request.reply_topic, value=task_result_or_exception)
+        except MessageSizeExceeded as e:
+            _log.warning(f'Unable to send egress message - {e}')
+            context.send_egress_message(topic=task_request.reply_topic, value=_create_task_exception(task_request, e))
