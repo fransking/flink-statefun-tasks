@@ -16,7 +16,8 @@ from statefun_tasks.serialisation import DefaultSerialiser
 
 
 # types
-from statefun_tasks.types import Task, Group, RetryPolicy, TaskAlreadyExistsException, TaskCancelledException, TasksException, PipelineInProgress, YieldTaskInvocation
+from statefun_tasks.types import Task, Group, RetryPolicy, TaskAlreadyExistsException, TaskCancelledException, TasksException, PipelineInProgress, \
+    YieldTaskInvocation, MessageSizeExceeded
 
 
 # protobuf message types

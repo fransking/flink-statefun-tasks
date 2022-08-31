@@ -309,3 +309,7 @@ class ProtobufSerialisable(ABC):
     @abstractmethod
     def to_proto(serialiser):
         pass
+
+class MessageSizeExceeded(Exception):
+    def __init__(self):
+        super().__init__()
