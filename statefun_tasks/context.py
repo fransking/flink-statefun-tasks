@@ -1,7 +1,8 @@
 from statefun_tasks.serialisation import DefaultSerialiser
 from statefun_tasks.type_helpers import flink_value_type_for
-from statefun_tasks.messages_pb2 import TaskState, TaskRequest, Address
+from statefun_tasks.messages_pb2 import TaskState, TaskRequest
 from statefun_tasks.protobuf import pack_any
+from statefun_tasks.types import MessageSizeExceeded
 
 from statefun import kafka_egress_message, message_builder, Context, SdkAddress
 from datetime import timedelta
@@ -13,14 +14,28 @@ class TaskContext(object):
 
     :param context: Flink context
     :param egress_type_name: egress type name to use when calling send_egress_message()
+    :param optional egress_message_max_size: maximum size of an egress message in bytes. If specified attempts to send messages over this size will raise a MessageSizeExceeded exception
     :param optional serialiser: serialiser to use (will use DefaultSerialiser if not set)
     """
-    __slots__ = ('_context', '_egress_type_name', '_serialiser', 'storage', 'task_state', 'pipeline_state', 'pipeline_state_size', '_task_meta', '_task_name', '_task_uid')
+    __slots__ = (
+        '_context', 
+        '_egress_type_name', 
+        '_serialiser', 
+        '_egress_message_max_size',
+        'storage', 
+        'task_state', 
+        'pipeline_state', 
+        'pipeline_state_size', 
+        '_task_meta', 
+        '_task_name', 
+        '_task_uid'
+        )
 
-    def __init__(self, context: Context, egress_type_name: str, serialiser=None):
+    def __init__(self, context: Context, egress_type_name: str, egress_message_max_size=None, serialiser=None):
         self._context = context
         self._egress_type_name = egress_type_name
         self._serialiser = serialiser if serialiser is not None else DefaultSerialiser()
+        self._egress_message_max_size = egress_message_max_size
 
         self.storage = context.storage
         self.task_state = self.storage.task_state or TaskState()
@@ -247,6 +262,11 @@ class TaskContext(object):
         :param value: the message to send
         """
         proto_bytes = pack_any(value).SerializeToString()
+
+        if self._egress_message_max_size and len(proto_bytes) > self._egress_message_max_size:
+            if len(proto_bytes) > self._egress_message_max_size:
+                raise MessageSizeExceeded(f'Message size of {len(proto_bytes)} bytes exceeded the maximum size of {self._egress_message_max_size} bytes')
+
         message = kafka_egress_message(typename=self._egress_type_name, topic=topic, value=proto_bytes)
         self._context.send_egress(message)
 
