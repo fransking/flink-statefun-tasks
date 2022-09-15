@@ -236,12 +236,13 @@ class Task:
 
 
 class Group:
-    __slots__ = ('group_id', 'max_parallelism', 'is_wait', '_group')
+    __slots__ = ('group_id', 'max_parallelism', 'is_wait', '_group', 'return_exceptions')
 
-    def __init__(self, group_id, max_parallelism=None, is_wait=None):
+    def __init__(self, group_id, max_parallelism=None, is_wait=None, return_exceptions=False):
         self.group_id = group_id
         self.max_parallelism = max_parallelism
         self.is_wait = is_wait
+        self.return_exceptions = return_exceptions
         self._group = []
 
     def add_to_group(self, tasks):
@@ -261,13 +262,24 @@ class Group:
 
     def to_proto(self, serialiser) -> PipelineEntry:
         group = [Pipeline(entries=[entry.to_proto(serialiser) for entry in entries]) for entries in self._group]
-        proto = GroupEntry(group_id=self.group_id, group=group, max_parallelism=self.max_parallelism, is_wait=self.is_wait)
+
+        proto = GroupEntry(
+            group_id=self.group_id, 
+            group=group, 
+            max_parallelism=self.max_parallelism, 
+            is_wait=self.is_wait,
+            return_exceptions=self.return_exceptions)
 
         return PipelineEntry(group_entry=proto)
 
     @staticmethod
     def from_proto(proto: PipelineEntry):
-        group = Group(group_id=proto.group_entry.group_id, max_parallelism=proto.group_entry.max_parallelism, is_wait=proto.group_entry.is_wait)
+        group = Group(
+            group_id=proto.group_entry.group_id, 
+            max_parallelism=proto.group_entry.max_parallelism, 
+            is_wait=proto.group_entry.is_wait,
+            return_exceptions=proto.group_entry.return_exceptions)
+            
         stack = deque([(proto.group_entry.group, group)])  
 
         while len(stack) > 0:
@@ -278,7 +290,13 @@ class Group:
 
                 for proto in pipeline.entries:
                     if proto.HasField('group_entry'):
-                        stack_group = Group(group_id=proto.group_entry.group_id, max_parallelism=proto.group_entry.max_parallelism, is_wait=proto.group_entry.is_wait)
+
+                        stack_group = Group(
+                            group_id=proto.group_entry.group_id, 
+                            max_parallelism=proto.group_entry.max_parallelism, 
+                            is_wait=proto.group_entry.is_wait,
+                            return_exceptions=proto.group_entry.return_exceptions)
+                        
                         entries.append(stack_group)
                         stack.append((proto.group_entry.group, stack_group))
                     else:

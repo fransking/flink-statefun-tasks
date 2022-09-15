@@ -47,7 +47,7 @@ class ResultAggregator(object):
                 if isinstance(last_entry, Group):
                     if last_entry.group_id in task_results.by_uid:
                         # if we have already aggregated this group just append the results
-                        self._append_results(last_entry.group_id, task_results, results, aggregated_states, aggregated_errors)
+                        self._append_results(group, last_entry.group_id, task_results, results, aggregated_states, aggregated_errors)
                     else:
                         # otherwise iterate over group
                         stack_results = []
@@ -55,7 +55,7 @@ class ResultAggregator(object):
                         stack.append((last_entry, stack_results))
                 else:
                     # aggregate the group
-                    self._append_results(pipeline[-1].uid, task_results, results, aggregated_states, aggregated_errors)
+                    self._append_results(group, pipeline[-1].uid, task_results, results, aggregated_states, aggregated_errors)
 
 
         aggregated_errors = [error for error in aggregated_errors if error is not None]
@@ -86,17 +86,21 @@ class ResultAggregator(object):
 
         return task_result_or_exception
 
-    def _append_results(self, uid, task_results, aggregated_results, aggregated_states, aggregated_errors):
+    def _append_results(self, group, uid, task_results, aggregated_results, aggregated_states, aggregated_errors):
         proto = task_results.by_uid[uid]  # Any
         result, state, error = self._unpack_result(proto)
 
-        # We don't need the individual task results anymore so remove to save space / reduce message size
-        del task_results.by_uid[uid] 
+        if group.return_exceptions and error is not None:
+            # return the error as the result instead of it being raised as an exception
+            result = error
+            error = None
 
         aggregated_results.append(result)
-        
-        aggregated_states.append(state)  # states are flat not nested so don't get stacked
-        aggregated_errors.append(error)  # errors are flat not nested so don't get stacked
+        aggregated_states.append(state)
+        aggregated_errors.append(error)
+
+        # We don't need the individual task results anymore so remove to save space / reduce message size
+        del task_results.by_uid[uid] 
 
     @staticmethod
     def _aggregate_state(aggregated_states):

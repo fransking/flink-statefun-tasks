@@ -121,7 +121,7 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.append" title="statefun_tasks.PipelineBuilder.append"><code class="xref py py-obj docutils literal notranslate"><span class="pre">append</span></code></a>(task)</p></td>
 <td><p>Appends a single task onto this pipeline</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.append_group" title="statefun_tasks.PipelineBuilder.append_group"><code class="xref py py-obj docutils literal notranslate"><span class="pre">append_group</span></code></a>(pipelines[, max_parallelism])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.append_group" title="statefun_tasks.PipelineBuilder.append_group"><code class="xref py py-obj docutils literal notranslate"><span class="pre">append_group</span></code></a>(pipelines[, max_parallelism, ...])</p></td>
 <td><p>Appends tasks from another pipeline builder into a new in_parallel group inside this one</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.append_to" title="statefun_tasks.PipelineBuilder.append_to"><code class="xref py py-obj docutils literal notranslate"><span class="pre">append_to</span></code></a>(other)</p></td>
@@ -220,13 +220,14 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.PipelineBuilder.append_group">
-<span class="sig-name descname"><span class="pre">append_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipelines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_parallelism</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.append_group" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">append_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipelines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_parallelism</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_exceptions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.append_group" title="Permalink to this definition"></a></dt>
 <dd><p>Appends tasks from another pipeline builder into a new in_parallel group inside this one</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>other</strong> – the other pipeline builder</p></li>
 <li><p><strong>max_parallelism</strong> (<em>option</em>) – the maximum number of tasks to invoke in parallel for this group</p></li>
+<li><p><strong>return_exceptions</strong> (<em>option</em>) – if True then tasks that raise exceptions will not cause an aggregated exception to be thrown but instead will appear in the results</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
