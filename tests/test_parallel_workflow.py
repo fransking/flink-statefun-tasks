@@ -420,6 +420,20 @@ class ParallelWorkflowTests(unittest.TestCase):
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, ['Hello John Smith', 'Hello John Smith'])
 
+    def test_parallel_workflow_with_error_when_returning_exceptions(self):
+        global join_results_called
+        join_results_called = False
+
+        pipeline = in_parallel([
+            _say_hello.send("John", "Smith"), 
+            _fail.send().continue_with(_count_any_results), 
+            _say_hello.send("Jane", "Doe")], return_exceptions=True)
+
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result[0], 'Hello John Smith')
+        self.assertEqual(result[1].exception_message, 'I am supposed to fail')
+        self.assertEqual(result[2], 'Hello Jane Doe')
+
 
 if __name__ == '__main__':
     unittest.main()

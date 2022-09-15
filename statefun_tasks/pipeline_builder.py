@@ -8,7 +8,19 @@ from typing import Iterable
 import math
 
 
-def in_parallel(entries: list, max_parallelism=None, num_stages:int = 1):
+def in_parallel(entries: list, max_parallelism=None, num_stages:int = 1, return_exceptions=False):
+    """
+    Creates a parallism of tasks to be run concurrently
+
+    pipeline = in_parallel([a.send(i) for i in range(100)]) 
+
+    :param entries: the tasks to run
+    :param optional max_parallelism: the maximum number of tasks to run in parallel at a time
+    :param optional num_stages: the number of sub-pipelines to break this parallelism into.  Used to scale larger parallelisms.
+    :param optional return_exceptions: if True then tasks that raise exceptions will not cause an aggregated exception to be thrown but instead will appear in the results
+    :return: a pipeline
+    """
+
     if num_stages > 1:
         # split up a group such [[1,2,3,4,5,6]] into inline pipelines each with a subset of the group
         # i.e. [[p[1,2], p[3,4], p[5,6]]] followed by a flatten to allow for better distribution
@@ -20,9 +32,9 @@ def in_parallel(entries: list, max_parallelism=None, num_stages:int = 1):
         if len(stages) > 1:
             per_stage_pipeline = [PipelineBuilder().append_group(stage, max_parallelism=per_stage_max_parallelism) for stage in stages]
             group = [PipelineBuilder().append(builtin.run_pipeline.to_task(args=pipeline.inline())) for pipeline in per_stage_pipeline] 
-            return PipelineBuilder().append_group(group, max_parallelism=max_parallelism).continue_with(builtin.flatten_results)
+            return PipelineBuilder().append_group(group, max_parallelism=max_parallelism, return_exceptions=return_exceptions).continue_with(builtin.flatten_results)
 
-    return PipelineBuilder().append_group(entries, max_parallelism)
+    return PipelineBuilder().append_group(entries, max_parallelism, return_exceptions=return_exceptions)
 
 
 class PipelineBuilder(ProtobufSerialisable):
@@ -77,15 +89,16 @@ class PipelineBuilder(ProtobufSerialisable):
         other._pipeline.extend(self._pipeline)
         return self
 
-    def append_group(self, pipelines: Iterable['PipelineBuilder'], max_parallelism=None) -> 'PipelineBuilder':
+    def append_group(self, pipelines: Iterable['PipelineBuilder'], max_parallelism=None, return_exceptions=False) -> 'PipelineBuilder':
         """
         Appends tasks from another pipeline builder into a new in_parallel group inside this one
 
         :param other: the other pipeline builder
         :param option max_parallelism: the maximum number of tasks to invoke in parallel for this group 
+        :param option return_exceptions: if True then tasks that raise exceptions will not cause an aggregated exception to be thrown but instead will appear in the results
         :return: the builder
         """
-        group = Group(_gen_id(), max_parallelism=max_parallelism)
+        group = Group(_gen_id(), max_parallelism=max_parallelism, return_exceptions=return_exceptions)
 
         for pipeline in pipelines:
             pipeline._add_to_group(group)
