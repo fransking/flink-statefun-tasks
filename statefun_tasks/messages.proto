@@ -45,6 +45,7 @@ message GroupEntry {
     repeated Pipeline group = 2;
     int32 max_parallelism = 3;
     bool is_wait = 4;
+    bool return_exceptions = 5;
 }
 
 message PipelineEntry {
