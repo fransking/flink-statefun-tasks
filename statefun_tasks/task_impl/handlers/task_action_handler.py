@@ -23,10 +23,10 @@ class TaskActionHandler(MessageHandler):
         try:
             
             result = await self._handle(context, tasks, action_request)
-            tasks.emit_result(context, action_request, _create_task_result(action_request, result))
+            await tasks.emit_result(context, action_request, _create_task_result(action_request, result))
 
         except Exception as ex:
-            tasks.emit_result(context, action_request, _create_task_exception(action_request, ex))
+            await tasks.emit_result(context, action_request, _create_task_exception(action_request, ex))
 
     async def _handle(self, context, tasks, action_request):
 

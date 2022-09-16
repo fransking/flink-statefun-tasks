@@ -217,7 +217,7 @@ class FlinkTasks(object):
 
                     except Exception as ex:
                         _log.error(f'Error invoking {task_context} - {ex}')
-                        self.fail(task_context, task_input, ex)
+                        await self.fail(task_context, task_input, ex)
                         
                     finally:
                         return
@@ -275,7 +275,7 @@ class FlinkTasks(object):
         args, kwargs, state = self._serialiser.deserialise_request(task_request)
         return args, kwargs, state
 
-    def send_result(self, context: TaskContext, task_request: TaskRequest, result, state=Ellipsis, delay: timedelta=None, cancellation_token: str = ""):
+    async def send_result(self, context: TaskContext, task_request: TaskRequest, result, state=Ellipsis, delay: timedelta=None, cancellation_token: str = ""):
         """
         Sends a result
         :param context: TaskContext
@@ -292,9 +292,9 @@ class FlinkTasks(object):
 
         self._serialiser.serialise_result(task_result, result, state)
 
-        self.emit_result(context, task_request, task_result, delay,  cancellation_token)
+        await self.emit_result(context, task_request, task_result, delay,  cancellation_token)
 
-    def fail(self, context, task_input, ex, delay: timedelta=None, cancellation_token: str = ""):
+    async def fail(self, context, task_input, ex, delay: timedelta=None, cancellation_token: str = ""):
         """
         Sends a failure
         :param context: TaskContext
@@ -304,7 +304,7 @@ class FlinkTasks(object):
         :param optional cancellation_token: a cancellation token to associate with this message
         """
         task_exception = _create_task_exception(task_input, ex)
-        self.emit_result(context, task_input, task_exception, delay,  cancellation_token)
+        await self.emit_result(context, task_input, task_exception, delay, cancellation_token)
 
     def get_pipeline(self, context):
         pipeline_protos = context.pipeline_state.pipeline
@@ -320,10 +320,11 @@ class FlinkTasks(object):
         except:
             return None
 
-    def emit_result(self, context, task_input, task_result, delay: timedelta=None, cancellation_token: str = None):
-        # copy over invocation id
+    async def emit_result(self, context, task_input, task_result, delay: timedelta=None, cancellation_token: str = None):
+        # copy over invocation id and notify we are about to emit a result
         if isinstance(task_result, (TaskResult, TaskException)):
             task_result.invocation_id = task_input.invocation_id
+            await self.events.notify_emit_result(context, task_result)
             
         # send a message to egress if reply_topic was specified
         if task_input.HasField('reply_topic'):

@@ -34,7 +34,7 @@ def yield_invocation(context: TaskContext, fail_once=False):
 
 
 @tasks.bind(with_context=True, task_id='123')
-def resume_invocation(context: TaskContext, pipeline_id):
+async def resume_invocation(context: TaskContext, pipeline_id):
     task_state = context.get_state()
 
     # get saved task_request and unpack its state
@@ -42,7 +42,7 @@ def resume_invocation(context: TaskContext, pipeline_id):
     _, _, state = tasks.unpack_task_request(task_request)
 
     # send the result back for this task_request updating the state
-    tasks.send_result(context, task_request, (), state + [4])
+    await tasks.send_result(context, task_request, (), state + [4])
 
     return True
 

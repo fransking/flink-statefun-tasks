@@ -5,6 +5,7 @@ from asyncio import iscoroutine
 
 class EventHandlers(object):
     def __init__(self):
+        self._on_task_received_handlers = []
         self._on_task_started_handlers = []
         self._on_task_finished_handlers = []
         self._on_task_retry_handlers = []
@@ -12,6 +13,13 @@ class EventHandlers(object):
         self._on_pipeline_status_changed = []
         self._on_pipeline_task_finished_handlers = []
         self._on_pipeline_finished_handlers = []
+        self._on_emit_result_handlers = []
+
+    def on_task_received(self, handler):
+        """
+        @tasks.events.on_task_received decorator
+        """
+        self._on_task_received_handlers.append(handler)
 
     def on_task_started(self, handler):
         """
@@ -54,6 +62,18 @@ class EventHandlers(object):
         @tasks.events.on_pipeline_finished decorator
         """
         self._on_pipeline_finished_handlers.append(handler)
+
+    def on_emit_result(self, handler):
+        """
+        @tasks.events.on_emit_result decorator
+        """
+        self._on_emit_result_handlers.append(handler)
+
+    async def notify_task_received(self, context, task_request: TaskRequest):
+        """
+        Calls all on_task_received event handlers
+        """
+        await self._notify_all(self._on_task_received_handlers, context, task_request)
 
     async def notify_task_started(self, context, task_request: TaskRequest):
         """
@@ -107,6 +127,16 @@ class EventHandlers(object):
 
         await self._notify_all(self._on_pipeline_finished_handlers, context, pipeline, task_result=task_result, task_exception=task_exception)
 
+    async def notify_emit_result(self, context, task_result_or_exception):
+        """
+        Calls all notify_emit_result event handlers
+        """
+        if isinstance(task_result_or_exception, TaskResult):
+            task_result, task_exception = task_result_or_exception, None
+        else:
+            task_result, task_exception = None, task_result_or_exception
+
+        await self._notify_all(self._on_emit_result_handlers, context, task_result=task_result, task_exception=task_exception)
 
     @staticmethod
     async def _notify_all(handlers, *args, **kwargs):

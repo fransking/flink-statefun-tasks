@@ -14,7 +14,9 @@ class ResultEmitter(object):
     def __init__(self):
         pass
 
-    def emit_result(self, context: TaskContext, task_request, task_result_or_exception):
+    async def emit_result(self, context: TaskContext, task_request, task_result_or_exception, pipeline: '_Pipeline'):
+        await pipeline.events.notify_emit_result(context, task_result_or_exception)
+
         # the result of this task is the result of the pipeline
         if isinstance(task_result_or_exception, TaskResult):
 
