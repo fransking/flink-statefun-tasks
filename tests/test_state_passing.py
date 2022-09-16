@@ -69,31 +69,43 @@ def a_pipeline_calling_pipeline_stages(initial_state):
     initial_state= {'Some': 'State'}
     return initial_state, set_pipeline_state.send().continue_with(a_pipeline_stage).continue_with(return_state)
 
+
 @tasks.bind(with_state=True)
 def set_pipeline_state(initial_state):
     initial_state= {'Some': 'State'}
     return initial_state, True
+
 
 @tasks.bind(with_state=True)
 def a_pipeline_stage(state, *args):
     state['New'] = 'State'
     return state, a_task_that_sets_state.send()
 
+
 @tasks.bind(with_state=True)
 def return_state(state, *args):
     return state, state
+
 
 @tasks.bind(with_state=True)
 def a_parallel_pipeline(state):
     return state, in_parallel([a_task_that_sets_state.send() for _ in range(0, 2)]).continue_with(an_aggregation_task)
 
+
 @tasks.bind(with_state=True)
 def a_task_that_sets_state(_):
     return {'Some': 'State'}, True
 
+
 @tasks.bind(with_state=True)
 def an_aggregation_task(state, results):
     return state, state
+
+
+@tasks.bind(with_state=True)
+def an_inline_pipeline(state):
+    state = {'Some': 'State'}
+    return state, _noop.send().inline()
 
 
 class StatePassingTests(unittest.TestCase):
@@ -138,6 +150,13 @@ class StatePassingTests(unittest.TestCase):
         result = self.test_harness.run_pipeline(pipeline)
 
         self.assertEqual({'New': 'State', 'Some': 'State'}, result)
+
+    def test_passing_state_though_inline_pipelines(self):
+        pipeline = an_inline_pipeline.send().continue_with(return_state)
+        result = self.test_harness.run_pipeline(pipeline)
+
+        self.assertEqual({'Some': 'State'}, result)
+
 
 if __name__ == '__main__':
     unittest.main()
