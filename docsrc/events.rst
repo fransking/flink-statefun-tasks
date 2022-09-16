@@ -6,6 +6,18 @@ Execution flow can be interrupted by raising a TasksException in the event handl
 the result is greater than some limit in which case the caller will recieve that error instead.  
 
 
+On Task Received
+----------------
+
+Raised when a task is received but before it is recorded in state or begins to execute.
+
+.. code-block:: python
+
+    @tasks.events.on_task_received
+    def on_task_received(context, task_request):
+        pass
+
+
 On Task Started
 ---------------
 
@@ -83,10 +95,22 @@ tasks that they invoke (e.g. a general purpose compute grid).
 On Pipeline Finished
 --------------------
 
-Raised when a pipeline finishes and either produces a task_result or task_exception .
+Raised when a pipeline finishes and either produces a task_result or task_exception.
 
 .. code-block:: python
 
     @tasks.events.on_pipeline_finished
     def on_pipeline_finished(context, pipeline: Pipeline, task_result=None, task_exception=None):
+        pass
+
+
+On Emit Result
+--------------
+
+Raised when task or pipeline is finished and the result is about to be emitted but before it is recorded in state.
+
+.. code-block:: python
+
+    @tasks.events.on_emit_result
+    def on_emit_result(context, task_result=None, task_exception=None):
         pass

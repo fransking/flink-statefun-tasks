@@ -47,6 +47,7 @@
 <li class="toctree-l1"><a class="reference internal" href="actions.html">Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stateful_tasks.html">Stateful Tasks</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Events</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#on-task-received">On Task Received</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#on-task-started">On Task Started</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#on-task-retry">On Task Retry</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#on-task-finished">On Task Finished</a></li>
@@ -54,6 +55,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#on-pipeline-status-changed">On Pipeline Status Changed</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#on-pipeline-task-finished">On Pipeline Task Finished</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#on-pipeline-finished">On Pipeline Finished</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#on-emit-result">On Emit Result</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="extensions.html">Extensions</a></li>
@@ -93,6 +95,15 @@
 <p>Flink Tasks raises events at various points during the execution of a pipeline.  These events can be used to track task run time, pipeline length, state size etc.
 Execution flow can be interrupted by raising a TasksException in the event handler.  For example in on_task_finished an exception can be raised if the size of
 the result is greater than some limit in which case the caller will recieve that error instead.</p>
+<section id="on-task-received">
+<h2>On Task Received<a class="headerlink" href="#on-task-received" title="Permalink to this heading"></a></h2>
+<p>Raised when a task is received but before it is recorded in state or begins to execute.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">on_task_received</span>
+<span class="k">def</span> <span class="nf">on_task_received</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">task_request</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+</section>
 <section id="on-task-started">
 <h2>On Task Started<a class="headerlink" href="#on-task-started" title="Permalink to this heading"></a></h2>
 <p>Raised when a task begins to execute.</p>
@@ -150,9 +161,18 @@ tasks that they invoke (e.g. a general purpose compute grid).</p>
 </section>
 <section id="on-pipeline-finished">
 <h2>On Pipeline Finished<a class="headerlink" href="#on-pipeline-finished" title="Permalink to this heading"></a></h2>
-<p>Raised when a pipeline finishes and either produces a task_result or task_exception .</p>
+<p>Raised when a pipeline finishes and either produces a task_result or task_exception.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">on_pipeline_finished</span>
 <span class="k">def</span> <span class="nf">on_pipeline_finished</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">:</span> <span class="n">Pipeline</span><span class="p">,</span> <span class="n">task_result</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">task_exception</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+</section>
+<section id="on-emit-result">
+<h2>On Emit Result<a class="headerlink" href="#on-emit-result" title="Permalink to this heading"></a></h2>
+<p>Raised when task or pipeline is finished and the result is about to be emitted but before it is recorded in state.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">on_emit_result</span>
+<span class="k">def</span> <span class="nf">on_emit_result</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">task_result</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">task_exception</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="k">pass</span>
 </pre></div>
 </div>

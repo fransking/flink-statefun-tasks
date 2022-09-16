@@ -264,8 +264,7 @@ class TaskContext(object):
         proto_bytes = pack_any(value).SerializeToString()
 
         if self._egress_message_max_size and len(proto_bytes) > self._egress_message_max_size:
-            if len(proto_bytes) > self._egress_message_max_size:
-                raise MessageSizeExceeded(f'Message size of {len(proto_bytes)} bytes exceeded the maximum size of {self._egress_message_max_size} bytes')
+            raise MessageSizeExceeded(f'Message size of {len(proto_bytes)} bytes exceeded the maximum size of {self._egress_message_max_size} bytes')
 
         message = kafka_egress_message(typename=self._egress_type_name, topic=topic, value=proto_bytes)
         self._context.send_egress(message)
