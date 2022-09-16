@@ -48,7 +48,7 @@ class EndPipelineHandler(PipelineMessageHandler):
             task_result_or_exception.state.CopyFrom(context.pipeline_state.task_state)
 
         # finally emit the result (to egress, destination address or caller address)
-        self.result_emitter.emit_result(context, task_request, task_result_or_exception)
+        await self.result_emitter.emit_result(context, task_request, task_result_or_exception, pipeline)
         
         # break
         return False, task_result_or_exception

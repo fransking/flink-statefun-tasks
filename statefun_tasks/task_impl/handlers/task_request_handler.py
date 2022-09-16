@@ -19,6 +19,8 @@ class TaskRequestHandler(MessageHandler):
         return False
 
     async def handle_message(self, tasks: 'FlinkTasks', context: TaskContext, task_request: TaskRequest):
+        await tasks.events.notify_task_received(context, task_request)
+        
         context.pack_and_save('task_request', task_request)
 
         # delete any previous result / exception from state
@@ -53,12 +55,12 @@ class TaskRequestHandler(MessageHandler):
                 return  # we have triggered a retry so ignore the result of this invocation
 
             context.pack_and_save('task_result', task_exception)
-            tasks.emit_result(context, task_request, task_exception)
+            await tasks.emit_result(context, task_request, task_exception)
 
         # else if we have a task result return it
         elif task_result is not None:
             context.pack_and_save('task_result', task_result)
-            tasks.emit_result(context, task_request, task_result)
+            await tasks.emit_result(context, task_request, task_result)
 
     def _attempt_retry(self, context, task_request, task_exception):
         task_state = context.task_state.by_uid[task_request.uid]

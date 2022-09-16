@@ -209,12 +209,19 @@ class TaskContext(object):
         proto_bytes = pack_any(value).SerializeToString()
 
         if self._egress_message_max_size and len(proto_bytes) > self._egress_message_max_size:
-            if len(proto_bytes) > self._egress_message_max_size:
-                raise MessageSizeExceeded(f'Message size of {len(proto_bytes)} bytes exceeded the maximum size of {self._egress_message_max_size} bytes')
+            raise MessageSizeExceeded(f'Message size of {len(proto_bytes)} bytes exceeded the maximum size of {self._egress_message_max_size} bytes')
 
         egress_message = kafka_egress_record(topic=topic, value=pack_any(value))
         self._context.pack_and_send_egress(self._egress_type_name, egress_message)
 
+    def cancel_message(self, cancellation_token: str):
+        """
+        Not implemented in this version of statefun_tasks
+
+        :param cancellation_token: the cancellation token
+        """
+        pass
+    
     def delete(self, key):
         del self._context[key]
 
