@@ -83,10 +83,6 @@ class DeferredTaskSubmitter(object):
                     elif context.pipeline_state.pipeline.inline:
                         initial_state = unpack_any(context.pipeline_state.task_state, known_proto_types=[])
 
-                    # send initial state to each initial task if we have some
-                    if context.pipeline_state.pipeline.HasField('initial_state'):   
-                        initial_state = unpack_any(context.pipeline_state.pipeline.initial_state, known_proto_types=[])
-
                     # send initial arguments to each initial task if we have them
                     if context.pipeline_state.pipeline.HasField('initial_args'):
                         initial_args = unpack_any(context.pipeline_state.pipeline.initial_args, known_proto_types=[])
