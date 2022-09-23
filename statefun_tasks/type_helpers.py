@@ -3,6 +3,7 @@ from statefun_tasks.utils import _type_name
 from statefun_tasks.protobuf import pack_any
 from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, TaskActionRequest, TaskActionResult, TaskActionException
 
+from statefun import Type
 import traceback as tb
 
 
@@ -14,6 +15,15 @@ def flink_value_type_for(proto):
         return value_type
     
     raise ValueError(f'No Flink value type found for proto type {proto_type}')
+
+
+def add_flink_value_type_for(proto, value_type: Type):
+    proto_type = type(proto)
+
+    if proto_type in _VALUE_TYPE_MAP:
+        ValueError(f'{proto_type} already exists')
+
+    _VALUE_TYPE_MAP[proto_type] = value_type
 
 
 def _create_task_exception(task_input, ex, state=None):
