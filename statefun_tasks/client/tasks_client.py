@@ -396,7 +396,7 @@ class FlinkTasksClientFactory():
         :param optional kafka_producer_properties: additional properties to be passed to the KafkaProducer
         """
 
-        key = f'{kafka_broker_url}.{reply_topic}'
+        key = f'{kafka_broker_url}.{reply_topic}.{request_topics}.{action_topics}'
 
         if key not in FlinkTasksClientFactory.__clients:
             client = FlinkTasksClient(kafka_broker_url, request_topics, action_topics, reply_topic, serialiser=serialiser, group_id=str(uuid4()), 
