@@ -1,6 +1,7 @@
 from statefun_tasks.context import TaskContext
 from statefun_tasks.pipeline_impl.handlers import PipelineMessageHandler
 from statefun_tasks.types import Task, Group, TasksException
+from statefun_tasks.type_helpers import _create_task_result
 from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, TaskStatus
 from typing import Union
 
@@ -37,16 +38,14 @@ class ContinuePipelineHandler(PipelineMessageHandler):
         self.submitter.release_tasks(context, caller_uid, task_result_or_exception)
 
         # get the next step of the pipeline to run (if any)
-        current_step, next_step, group, empty_group = self.graph.get_next_step_in_pipeline(caller_uid)
+        current_step, next_step, group, empty_group = self.graph.get_next_step_in_pipeline(caller_uid, task_result_or_exception)
 
         # if this task is part group then we need to record the results so we can aggregate later
-        group_is_complete = False
         if group is not None:
-            group_is_complete = group.is_complete()
             self.result_aggregator.add_result(context, caller_uid, task_result_or_exception)
 
             # once the group is complete aggregate the results
-            if group_is_complete:
+            if group.is_complete():
                 task_result_or_exception = self.result_aggregator.aggregate(context, group)
 
                 # update last known task state in case we need to cancel later and call a finally task passing through the current state
@@ -60,19 +59,20 @@ class ContinuePipelineHandler(PipelineMessageHandler):
             if current_step.is_wait:  
                 await pipeline.pause(context)
 
-        # if we got an exception then the next step is the finally_task if there is one (or none otherwise)
-        # but only once the group is complete (if we are in a group)
-        if isinstance(task_result_or_exception, TaskException):        
-            if group is not None and group_is_complete:
-                next_step = self.graph.try_get_finally_task(caller_uid) if group_is_complete else None
-            else:
-                next_step = self.graph.try_get_finally_task(caller_uid)
+        # if we got an exception then if we have an exceptionally, pass the exception as a result to this task
+        if isinstance(task_result_or_exception, TaskException):
 
-        # else if we came across an empty group between this task and next_entry then our result must be an empty array []
-        # as we cannot call an empty group but can synthesise the result (remembering to pass through state)
-        elif empty_group:
-            _, state = self._serialiser.deserialise_result(task_result_or_exception)
-            self._serialiser.serialise_result(task_result_or_exception, ([]), state)
+            if next_step is not None and next_step.is_exceptionally:
+                task_exception = task_result_or_exception
+                task_result_or_exception = _create_task_result(task_exception)
+                self._serialiser.serialise_result(task_result_or_exception, task_exception, task_result_or_exception.state)
+
+        else:
+            # if we came across an empty group between this task and next_entry then our result must be an empty array []
+            # as we cannot call an empty group but can synthesise the result (remembering to pass through state)
+            if empty_group:
+                _, state = self._serialiser.deserialise_result(task_result_or_exception)
+                self._serialiser.serialise_result(task_result_or_exception, ([]), state)
 
         # turn next step into remainder of tasks to call
         if isinstance(next_step, Task):
@@ -100,7 +100,7 @@ class ContinuePipelineHandler(PipelineMessageHandler):
                 await pipeline.events.notify_pipeline_status_changed(context, context.pipeline_state.pipeline, context.pipeline_state.status.value)
 
             elif isinstance(task_result_or_exception, TaskException):
-                if group is None or group_is_complete:
+                if group is None or group.is_complete():
                     # else if have an exception then we failed but waiting for any parallel tasks in the group to complete first
                     context.pipeline_state.status.value = TaskStatus.FAILED
                     await pipeline.events.notify_pipeline_status_changed(context, context.pipeline_state.pipeline, context.pipeline_state.status.value)

@@ -19,7 +19,7 @@ from statefun_tasks.serialisation import DefaultSerialiser
 from statefun_tasks.types import Task, Group, RetryPolicy, TaskAlreadyExistsException, TaskCancelledException, TasksException, PipelineInProgress, \
     YieldTaskInvocation, MessageSizeExceeded
     
-from statefun_tasks.type_helpers import flink_value_type_for
+from statefun_tasks.type_helpers import flink_value_type_for, add_flink_value_type_for
 
 
 # protobuf message types

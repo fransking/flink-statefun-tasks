@@ -18,6 +18,7 @@ PipelineBuilder
       ~PipelineBuilder.append_to
       ~PipelineBuilder.continue_if
       ~PipelineBuilder.continue_with
+      ~PipelineBuilder.exceptionally
       ~PipelineBuilder.finally_do
       ~PipelineBuilder.from_proto
       ~PipelineBuilder.get_destination

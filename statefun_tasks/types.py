@@ -57,7 +57,7 @@ class Task:
 
     @staticmethod
     def from_fields(task_id, task_type, task_args, task_kwargs, is_finally=None, namespace=None, worker_name=None,
-                    is_fruitful=None, retry_policy=None, display_name=None, is_wait=None, uid=None, **kwargs):
+                    is_fruitful=None, retry_policy=None, display_name=None, is_wait=None, uid=None, is_exceptionally=None, **kwargs):
         proto = TaskEntry(
             task_id=task_id,
             task_type=task_type,
@@ -69,7 +69,8 @@ class Task:
             retry_policy=retry_policy,
             display_name=display_name,
             is_wait=is_wait,
-            uid=uid if uid is not None else _gen_id()
+            uid=uid if uid is not None else _gen_id(),
+            is_exceptionally = is_exceptionally
         )
         return Task(proto, task_args, task_kwargs)
 
@@ -120,7 +121,17 @@ class Task:
         return self._proto.is_finally
 
     @property
+    def is_exceptionally(self):
+        """
+        Whether this task is an exceptionally task
+        """
+        return self._proto.is_exceptionally
+
+    @property
     def is_fruitful(self):
+        """
+        Whether this task is returns a result (fruitful) or not (void)
+        """
         return self._proto.is_fruitful
 
     @is_fruitful.setter

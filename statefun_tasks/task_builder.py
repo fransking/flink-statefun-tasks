@@ -33,8 +33,9 @@ class FlinkTasks(object):
     :param egress_type_name: egress type name.  Maps to Flink Statefun egress in module.yaml
     :param optional egress_message_max_size: maximum size of an egress message in bytes. If specified attempts to send messages over this size will raise a MessageSizeExceeded exception
     :param optional serialiser: serialiser to use (will use DefaultSerialiser if not set)
+    :param optional state_expiration: duration after which state will be expired by Flink (expire_after_call)
     """
-    def __init__(self, default_namespace: str = None, default_worker_name: str = None, egress_type_name: str = None, egress_message_max_size: int = None, serialiser = None):
+    def __init__(self, default_namespace: str = None, default_worker_name: str = None, egress_type_name: str = None, egress_message_max_size: int = None, serialiser = None, state_expiration: timedelta = None):
         self._default_namespace = default_namespace
         self._default_worker_name = default_worker_name
         self._egress_type_name = egress_type_name
@@ -45,11 +46,11 @@ class FlinkTasks(object):
         
         # to register in Flink's @functions.bind() attribute
         self._value_specs = [
-            ValueSpec(name="task_request", type=TASK_REQUEST_TYPE),
-            ValueSpec(name="task_result", type=TASK_RESULT_TYPE),
-            ValueSpec(name="task_exception", type=TASK_EXCEPTION_TYPE),
-            ValueSpec(name="task_state", type=TASK_STATE_TYPE),
-            ValueSpec(name="pipeline_state", type=PIPELINE_STATE_TYPE),
+            ValueSpec(name="task_request", type=TASK_REQUEST_TYPE, expire_after_call=state_expiration),
+            ValueSpec(name="task_result", type=TASK_RESULT_TYPE, expire_after_call=state_expiration),
+            ValueSpec(name="task_exception", type=TASK_EXCEPTION_TYPE, expire_after_call=state_expiration),
+            ValueSpec(name="task_state", type=TASK_STATE_TYPE, expire_after_call=state_expiration),
+            ValueSpec(name="pipeline_state", type=PIPELINE_STATE_TYPE, expire_after_call=state_expiration),
         ]
 
         self.register_builtin(run_pipeline, with_context=True, with_state=True)
@@ -80,7 +81,7 @@ class FlinkTasks(object):
         def send(*args, **kwargs):
             return PipelineBuilder().send(function, *args, **kwargs)
 
-        def to_task(args, kwargs, is_finally=False, parameters={}):
+        def to_task(args, kwargs, is_finally=False, parameters={}, is_exceptionally=False):
             parameters = {**defaults(), **parameters}
 
             if is_finally:
@@ -92,7 +93,7 @@ class FlinkTasks(object):
             task_id = parameters.pop('task_id') or _gen_id()
             args = _unpack_single_tuple_args(args)
 
-            return Task.from_fields(task_id, task_type, args, kwargs, is_finally=is_finally, **parameters)
+            return Task.from_fields(task_id, task_type, args, kwargs, is_finally=is_finally, is_exceptionally=is_exceptionally, **parameters)
 
         function.send = send
         function.to_task = to_task
