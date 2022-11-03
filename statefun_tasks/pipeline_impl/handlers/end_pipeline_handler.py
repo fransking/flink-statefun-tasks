@@ -31,9 +31,9 @@ class EndPipelineHandler(PipelineMessageHandler):
         try:
             await pipeline.events.notify_pipeline_finished(context, context.pipeline_state.pipeline, task_result_or_exception)
         except TasksException as ex:
-            context.pipeline_state.status.value = TaskStatus.Status.RUNNING  # reset to running so we can cancel
-            await pipeline.cancel(context, ex)
-            return False, task_result_or_exception
+            if not context.pipeline_state.status.value == TaskStatus.CANCELLED:
+                await pipeline.cancel(context, ex, force=True)
+                return False, task_result_or_exception
 
         # set basic message properties
         task_result_or_exception.id = task_request.id

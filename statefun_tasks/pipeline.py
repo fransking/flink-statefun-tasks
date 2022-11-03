@@ -149,8 +149,8 @@ class _Pipeline(object):
            # abort the pipeline if we could not resume the tasks
             await self.cancel(context, ex)
 
-    async def cancel(self, context: TaskContext, ex=None):
-        if context.pipeline_state.status.value not in [TaskStatus.PENDING, TaskStatus.RUNNING, TaskStatus.PAUSED]:
+    async def cancel(self, context: TaskContext, ex=None, force=False):
+        if not force and context.pipeline_state.status.value not in [TaskStatus.PENDING, TaskStatus.RUNNING, TaskStatus.PAUSED]:
             raise ValueError(f'Pipeline is not in a state that can be cancelled')
 
         context.pipeline_state.status.value = TaskStatus.Status.CANCELLING
