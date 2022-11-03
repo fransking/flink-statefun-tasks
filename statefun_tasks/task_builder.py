@@ -81,7 +81,7 @@ class FlinkTasks(object):
         def send(*args, **kwargs):
             return PipelineBuilder().send(function, *args, **kwargs)
 
-        def to_task(args, kwargs, is_finally=False, parameters={}):
+        def to_task(args, kwargs, is_finally=False, parameters={}, is_exceptionally=False):
             parameters = {**defaults(), **parameters}
 
             if is_finally:
@@ -93,7 +93,7 @@ class FlinkTasks(object):
             task_id = parameters.pop('task_id') or _gen_id()
             args = _unpack_single_tuple_args(args)
 
-            return Task.from_fields(task_id, task_type, args, kwargs, is_finally=is_finally, **parameters)
+            return Task.from_fields(task_id, task_type, args, kwargs, is_finally=is_finally, is_exceptionally=is_exceptionally, **parameters)
 
         function.send = send
         function.to_task = to_task

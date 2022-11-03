@@ -38,6 +38,7 @@ message TaskEntry {
     optional string display_name = 10;
     bool is_wait = 11;
     string uid = 12;
+    bool is_exceptionally = 13;
 }
 
 message GroupEntry {

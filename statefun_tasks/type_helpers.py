@@ -68,4 +68,7 @@ def _create_task_result(task_input, result=None, state=None):
     if result is not None:
         task_result.result.CopyFrom(pack_any(result))
 
+    if state is not None:
+        task_result.state.CopyFrom(state)
+
     return task_result
