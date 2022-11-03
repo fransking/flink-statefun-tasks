@@ -219,55 +219,58 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.continue_with" title="statefun_tasks.PipelineBuilder.continue_with"><code class="xref py py-obj docutils literal notranslate"><span class="pre">continue_with</span></code></a>(continuation, *args, **kwargs)</p></td>
 <td><p>Adds continuation to the pipeline</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.finally_do" title="statefun_tasks.PipelineBuilder.finally_do"><code class="xref py py-obj docutils literal notranslate"><span class="pre">finally_do</span></code></a>(finally_action, *args, **kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.exceptionally" title="statefun_tasks.PipelineBuilder.exceptionally"><code class="xref py py-obj docutils literal notranslate"><span class="pre">exceptionally</span></code></a>(exception_task, *args, **kwargs)</p></td>
 <td><p>Adds finally to the pipeline</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.from_proto" title="statefun_tasks.PipelineBuilder.from_proto"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_proto</span></code></a>(pipeline_proto)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.finally_do" title="statefun_tasks.PipelineBuilder.finally_do"><code class="xref py py-obj docutils literal notranslate"><span class="pre">finally_do</span></code></a>(finally_action, *args, **kwargs)</p></td>
+<td><p>Adds finally to the pipeline</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.from_proto" title="statefun_tasks.PipelineBuilder.from_proto"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_proto</span></code></a>(pipeline_proto)</p></td>
 <td><p>Deserialises the pipeline from protobuf</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.get_destination" title="statefun_tasks.PipelineBuilder.get_destination"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_destination</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.get_destination" title="statefun_tasks.PipelineBuilder.get_destination"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_destination</span></code></a>()</p></td>
 <td><p>Returns the initial destination of the pipeline as None - i.e. use the default ingress.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.get_tasks" title="statefun_tasks.PipelineBuilder.get_tasks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_tasks</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.get_tasks" title="statefun_tasks.PipelineBuilder.get_tasks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_tasks</span></code></a>()</p></td>
 <td><p>Returns a list of all tasks identifiers (namespace, worker name, id) that make up this pipeline</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.inline" title="statefun_tasks.PipelineBuilder.inline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inline</span></code></a>([is_inline])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.inline" title="statefun_tasks.PipelineBuilder.inline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">inline</span></code></a>([is_inline])</p></td>
 <td><p>Marks the pipeline as being inline (or not).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.is_empty" title="statefun_tasks.PipelineBuilder.is_empty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_empty</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.is_empty" title="statefun_tasks.PipelineBuilder.is_empty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_empty</span></code></a>()</p></td>
 <td><p>Tests if the pipeline contains any tasks</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.send" title="statefun_tasks.PipelineBuilder.send"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send</span></code></a>(fun, *args, **kwargs)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.send" title="statefun_tasks.PipelineBuilder.send"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send</span></code></a>(fun, *args, **kwargs)</p></td>
 <td><p>Adds a task entry for the given Flink Task and arguments</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.set" title="statefun_tasks.PipelineBuilder.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set</span></code></a>([retry_policy, namespace, worker_name, …])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.set" title="statefun_tasks.PipelineBuilder.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set</span></code></a>([retry_policy, namespace, worker_name, …])</p></td>
 <td><p>Sets task properties on the last entry added to the builder</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.set_task_defaults" title="statefun_tasks.PipelineBuilder.set_task_defaults"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_task_defaults</span></code></a>(default_namespace, …)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.set_task_defaults" title="statefun_tasks.PipelineBuilder.set_task_defaults"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_task_defaults</span></code></a>(default_namespace, …)</p></td>
 <td><p>Sets defaults on task entries if they are not set :rtype: <a class="reference internal" href="#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a> :return: the builder</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.to_pipeline" title="statefun_tasks.PipelineBuilder.to_pipeline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_pipeline</span></code></a>([serialiser, is_fruitful, events])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.to_pipeline" title="statefun_tasks.PipelineBuilder.to_pipeline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_pipeline</span></code></a>([serialiser, is_fruitful, events])</p></td>
 <td><p>Concretises the builder into a pipeline</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.to_proto" title="statefun_tasks.PipelineBuilder.to_proto"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_proto</span></code></a>([serialiser])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.to_proto" title="statefun_tasks.PipelineBuilder.to_proto"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_proto</span></code></a>([serialiser])</p></td>
 <td><p>Serialises the pipeline to protobuf</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.to_task_request" title="statefun_tasks.PipelineBuilder.to_task_request"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_task_request</span></code></a>(serialiser)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.to_task_request" title="statefun_tasks.PipelineBuilder.to_task_request"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_task_request</span></code></a>(serialiser)</p></td>
 <td><p>Serialises the pipeline as a TaskRequest with a task type of builtin.run_pipeline</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.validate" title="statefun_tasks.PipelineBuilder.validate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.validate" title="statefun_tasks.PipelineBuilder.validate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate</span></code></a>()</p></td>
 <td><p>Validates the pipeline raising a ValueError if the pipeline is invalid</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.wait" title="statefun_tasks.PipelineBuilder.wait"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wait</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.wait" title="statefun_tasks.PipelineBuilder.wait"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wait</span></code></a>()</p></td>
 <td><p>Causes the pipeline to automatically pause at this point</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.with_initial" title="statefun_tasks.PipelineBuilder.with_initial"><code class="xref py py-obj docutils literal notranslate"><span class="pre">with_initial</span></code></a>([args, kwargs, state])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.with_initial" title="statefun_tasks.PipelineBuilder.with_initial"><code class="xref py py-obj docutils literal notranslate"><span class="pre">with_initial</span></code></a>([args, kwargs, state])</p></td>
 <td><p>Optionally sets the initial args kwargs and state to be passed to the initial tasks(s) in this pipeline :param option args: arguments as tuple or TupleOfAny :param option state: state :param option kwargs: keyword arguments as dict or MapStringToAny :rtype: <a class="reference internal" href="#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a> :return: the builder</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.id" title="statefun_tasks.PipelineBuilder.id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">id</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.id" title="statefun_tasks.PipelineBuilder.id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">id</span></code></a></p></td>
 <td><p>The ID of this pipeline</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.is_inline" title="statefun_tasks.PipelineBuilder.is_inline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_inline</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.is_inline" title="statefun_tasks.PipelineBuilder.is_inline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_inline</span></code></a></p></td>
 <td><p>Returns true if the pipeline is inline or not</p></td>
 </tr>
 </tbody>
@@ -372,6 +375,27 @@
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>continuation</strong> – the python function which should be decorated with &#64;tasks.bind()</p></li>
+<li><p><strong>args</strong> – the task args</p></li>
+<li><p><strong>kwargs</strong> – the task kwargs</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the builder</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="statefun_tasks.PipelineBuilder.exceptionally">
+<span class="sig-name descname"><span class="pre">exceptionally</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exception_task</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.exceptionally" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds finally to the pipeline</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>exception_task</strong> – the python function which should be decorated with &#64;tasks.bind()</p></li>
 <li><p><strong>args</strong> – the task args</p></li>
 <li><p><strong>kwargs</strong> – the task kwargs</p></li>
 </ul>

@@ -118,7 +118,7 @@ class PipelineGraph(object):
             if failed:
                 # mark this task complete and its children
                 for task in tasks:
-                    if not task.is_finally:
+                    if not task.is_exceptionally and not task.is_finally:
                         task.mark_complete()
             else:
                 tasks[0].mark_complete()
@@ -133,7 +133,40 @@ class PipelineGraph(object):
         finally_task = next((task for task in self._pipeline if isinstance(task, Task) and task.is_finally), None)
         return finally_task is not None and finally_task.uid == task_id
 
-    def get_next_step_in_pipeline(self, task_id):
+    def get_next_step_in_pipeline(self, task_id, task_result_or_exception):
+        current_step, next_step, group, empty_group = self._get_next_step_in_pipeline(task_id)
+
+        if isinstance(task_result_or_exception, TaskException):
+            # if we have a TaskException as input then we need to skip forward to the exceptionally
+            # task (if we have one) and then (or otherwise) to the finally task (if we have one)
+            task = next_step
+
+            while task is not None and isinstance(task, Task) and not task.is_exceptionally:
+                _, task, _, empty_group = self._get_next_step_in_pipeline(task.uid)
+
+            next_step = task or next_step
+
+            # if there is no exceptionally task then in the base case we have no
+            # next task (pipeline is failed) but we may have a finally task to execute first
+            if not (isinstance(next_step, Task) and next_step.is_exceptionally):
+                next_step = None
+
+                # if the task that failed is part of a group then wait for the group to complete before triggering the finally
+                if group is not None:
+                    if group.is_complete():
+                        next_step = self.try_get_finally_task(task_id)
+
+                else:
+                    next_step = self.try_get_finally_task(task_id)
+
+        else:
+            # otherwise we have a TaskResult and so we need to skip over the exceptionally task
+            while next_step is not None and isinstance(next_step, Task) and next_step.is_exceptionally:
+                _, next_step, _, empty_group = self._get_next_step_in_pipeline(next_step.uid)
+
+        return current_step, next_step, group, empty_group
+
+    def _get_next_step_in_pipeline(self, task_id):
         stack = deque([(self._pipeline, None, None, None, None)])  # FIFO (pipeline, entry after group, group, parent_group, entry after parent group)
 
         while len(stack) > 0:
@@ -173,7 +206,7 @@ class PipelineGraph(object):
                         while isinstance(next_entry, Group) and not any(next_entry):
                             empty_group_entry = next_entry
                             next_entry = _try_next(iterator)
-                            
+                        
                         return entry, next_entry, group_entry, empty_group_entry
 
         # entry, next_entry, group entry is part of, next_entry group skipped over because it was empty

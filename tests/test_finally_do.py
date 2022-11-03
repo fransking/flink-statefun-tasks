@@ -131,7 +131,7 @@ class FinallyDoTests(unittest.TestCase):
         try:
             self.test_harness.run_pipeline(pipeline)
         except TaskErrorException as e:
-            self.assertEqual(e.task_error.message, 'Invalid pipeline: "finally_do" must be called at the end of a pipeline')
+            self.assertEqual(e.task_error.message, 'Invalid pipeline: "finally_do" must be called at the end of the pipeline')
         else:
             self.fail('Expected an exception')
 
