@@ -222,8 +222,8 @@ class Task:
 
         return self.task_id, self.task_type, self._args, self._kwargs
 
-    def mark_complete(self):
-        self._proto.complete = True
+    def mark_complete(self, value=True):
+        self._proto.complete = value
 
     def is_complete(self):
         return self._proto.complete
