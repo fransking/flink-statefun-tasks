@@ -130,7 +130,26 @@ Error Handling
 Any task within a pipeline may throw exceptions and if not caught by a retry these will terminate the pipeline.  
 Unhandled exceptions are returned to the client as they are with single tasks.
 
-Pipelines may also include a *finally_do* contiunation as their final step which will be called regardless of 
+Exceptions can be caught using *exceptionally* tasks
+
+.. code-block:: python
+
+    @tasks.bind()
+    def handle_error(ex):
+        # handle error either be returning a result 
+        # or raising a new exception
+
+
+    pipeline = multiply.send(3, 2).exceptionally(handle_error)
+
+It is possible to have more than one exceptionally task in a pipeline
+
+.. code-block:: python
+
+    pipeline = a.send().exceptionally(b).continue_with(c).exceptionally(d).finally_do(e)
+
+
+Pipelines may also include a *finally_do* task as their final step which will be called regardless of 
 success or failure.  This is a good place to put any clean up logic.  
 
 The *finally_do* task is non-fruitful so the result of the pipeline is the result of the previous task (or exception):
