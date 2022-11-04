@@ -349,16 +349,7 @@ class PipelineBuilder(ProtobufSerialisable):
         if len(finally_tasks) == 1 and finally_tasks[0] != self._pipeline[-1]:
             errors.append('"finally_do" must be called at the end of the pipeline')
 
-        exceptionally_tasks = [task for task in all_tasks if task.is_exceptionally]
-        if len(exceptionally_tasks) > 1:
-            errors.append('Cannot have more than one "exceptionally" task')
-        if len(exceptionally_tasks) == 1:
-            if any(finally_tasks):
-                if exceptionally_tasks[0] != self._pipeline[-2:][0]:
-                    errors.append('"exceptionally" must be called at the end of the pipeline before finally_do')
-            elif exceptionally_tasks[0] != self._pipeline[-1]:
-                errors.append('"exceptionally" must be called at the end of the pipeline')
-                
+        exceptionally_tasks = [task for task in all_tasks if task.is_exceptionally]                
         if any(list(set(exceptionally_tasks) & set(finally_tasks))):
             errors.append('Tasks can be either finally_do or exceptionally but not both')
 

@@ -48,6 +48,11 @@ class ContinuePipelineHandler(PipelineMessageHandler):
             if group.is_complete():
                 task_result_or_exception = self.result_aggregator.aggregate(context, group)
 
+                # we may now have a TaskResult instead of TaskException so we remark the graph and get the next
+                # steps based on our overall group result or exception
+                self.graph.mark_task_complete(caller_uid, task_result_or_exception, remark=True)
+                current_step, next_step, group, empty_group = self.graph.get_next_step_in_pipeline(caller_uid, task_result_or_exception)
+
                 # update last known task state in case we need to cancel later and call a finally task passing through the current state
                 context.pipeline_state.last_task_state.CopyFrom(task_result_or_exception.state,)   
 
