@@ -129,7 +129,7 @@ def inline_task(include=None, depends=None, with_context=False, with_state=False
             task_params = {**__defaults, **params}
             return FlinkTasks.extend(run_code, **task_params).send(*args, **fn_kwargs)
 
-        def to_task(args, kwargs, is_finally=False, parameters=None):
+        def to_task(args, kwargs, is_finally=False, parameters=None, is_exceptionally=False):
 
             if __defaults is None:
                 raise ValueError('Inline tasks should be enabled with enable_inline_tasks() first')
@@ -141,7 +141,7 @@ def inline_task(include=None, depends=None, with_context=False, with_state=False
 
             fn_kwargs = {**kwargs, '__with_context': with_context, '__with_state': with_state, '__code': code}
             task_params = {**__defaults, **params}
-            return FlinkTasks.extend(run_code, **task_params).to_task(args, fn_kwargs, is_finally, {})
+            return FlinkTasks.extend(run_code, **task_params).to_task(args, fn_kwargs, is_finally, {}, is_exceptionally)
 
         fn.includes = _includes
         fn.send = send
