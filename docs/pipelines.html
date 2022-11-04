@@ -202,7 +202,21 @@ declare so in <em>&#64;tasks.bind()</em>:</p>
 <h2>Error Handling<a class="headerlink" href="#error-handling" title="Permalink to this heading"></a></h2>
 <p>Any task within a pipeline may throw exceptions and if not caught by a retry these will terminate the pipeline.
 Unhandled exceptions are returned to the client as they are with single tasks.</p>
-<p>Pipelines may also include a <em>finally_do</em> contiunation as their final step which will be called regardless of
+<p>Exceptions can be caught using <em>exceptionally</em> tasks</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">handle_error</span><span class="p">(</span><span class="n">ex</span><span class="p">):</span>
+    <span class="c1"># handle error either be returning a result</span>
+    <span class="c1"># or raising a new exception</span>
+
+
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">exceptionally</span><span class="p">(</span><span class="n">handle_error</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>It is possible to have more than one exceptionally task in a pipeline</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">send</span><span class="p">()</span><span class="o">.</span><span class="n">exceptionally</span><span class="p">(</span><span class="n">b</span><span class="p">)</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">exceptionally</span><span class="p">(</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">finally_do</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Pipelines may also include a <em>finally_do</em> task as their final step which will be called regardless of
 success or failure.  This is a good place to put any clean up logic.</p>
 <p>The <em>finally_do</em> task is non-fruitful so the result of the pipeline is the result of the previous task (or exception):</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">with_state</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
