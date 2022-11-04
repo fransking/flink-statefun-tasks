@@ -119,8 +119,10 @@ class PipelineGraph(object):
             if tasks[0].is_complete():
                 return False  # task already complete - ignore
 
+            tasks[0].mark_complete()
+
             if failed:
-                # mark this task complete and its children up to the point we hit an exceptionally task
+                # mark mark subsequent tasks complete until we reach the first exceptionally continuation
                 # this is where we will continue from
                 for task in tasks:
                     if task.is_exceptionally:
@@ -129,8 +131,7 @@ class PipelineGraph(object):
                     elif not task.is_finally:
                         task.mark_complete()
             else:
-                tasks[0].mark_complete()
-
+            
                 # mark subsequent exceptionally tasks complete until we reach the first non-exceptionally continuation
                 # this is where we will continue from
                 for task in tasks[1:]:
