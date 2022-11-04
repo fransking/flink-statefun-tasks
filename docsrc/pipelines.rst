@@ -136,7 +136,7 @@ Exceptions can be caught using *exceptionally* tasks
 
     @tasks.bind()
     def handle_error(ex):
-        # handle error either be returning a result 
+        # handle error either by returning a result 
         # or raising a new exception
 
 
