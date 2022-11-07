@@ -12,6 +12,7 @@ class EventHandlers(object):
         self._on_pipeline_created_handlers = []
         self._on_pipeline_status_changed = []
         self._on_pipeline_task_finished_handlers = []
+        self._on_pipeline_tasks_skipped_handlers = []
         self._on_pipeline_finished_handlers = []
         self._on_emit_result_handlers = []
 
@@ -56,6 +57,12 @@ class EventHandlers(object):
         @tasks.events.on_pipeline_task_finished decorator
         """
         self._on_pipeline_task_finished_handlers.append(handler)
+
+    def on_pipeline_tasks_skipped(self, handler):
+        """
+        @tasks.events.on_pipeline_tasks_skipped decorator
+        """
+        self._on_pipeline_tasks_skipped_handlers.append(handler)
 
     def on_pipeline_finished(self, handler):
         """
@@ -116,6 +123,12 @@ class EventHandlers(object):
 
         await self._notify_all(self._on_pipeline_task_finished_handlers, context, task_result=task_result, task_exception=task_exception)
 
+    async def notify_pipeline_tasks_skipped(self, context, skipped_tasks):
+        """
+        Calls all notify_pipeline_task_skipped event handlers
+        """
+        await self._notify_all(self._on_pipeline_tasks_skipped_handlers, context, raise_tasks_exceptions=False, skipped_tasks=skipped_tasks)
+
     async def notify_pipeline_finished(self, context, pipeline, task_result_or_exception):
         """
         Calls all notify_pipeline_finished event handlers
@@ -139,7 +152,7 @@ class EventHandlers(object):
         await self._notify_all(self._on_emit_result_handlers, context, task_result=task_result, task_exception=task_exception)
 
     @staticmethod
-    async def _notify_all(handlers, *args, **kwargs):
+    async def _notify_all(handlers, *args, raise_tasks_exceptions=True, **kwargs):
         for handler in handlers:
             try:
                 res = handler(*args, **kwargs)
@@ -148,6 +161,7 @@ class EventHandlers(object):
                     await res
                     
             except TasksException:
-                raise
+                if raise_tasks_exceptions:
+                    raise
             except:
                 pass

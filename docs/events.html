@@ -54,6 +54,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#on-pipeline-created">On Pipeline Created</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#on-pipeline-status-changed">On Pipeline Status Changed</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#on-pipeline-task-finished">On Pipeline Task Finished</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#on-pipeline-tasks-skipped">On Pipeline Tasks Skipped</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#on-pipeline-finished">On Pipeline Finished</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#on-emit-result">On Emit Result</a></li>
 </ul>
@@ -155,6 +156,16 @@ the result is greater than some limit in which case the caller will recieve that
 tasks that they invoke (e.g. a general purpose compute grid).</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">on_pipeline_task_finished</span>
 <span class="k">def</span> <span class="nf">on_pipeline_task_finished</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">task_result</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">task_exception</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+</section>
+<section id="on-pipeline-tasks-skipped">
+<h2>On Pipeline Tasks Skipped<a class="headerlink" href="#on-pipeline-tasks-skipped" title="Permalink to this heading"></a></h2>
+<p>Raised when tasks are skipped over by the pipeline because they are part of an orphaned branch when exceptionally tasks are used.  For example
+a.send().continue_with(b).exceptionally(c) where ‘a’ raises an exception causing the pipeline to jump to ‘c’ skipping ‘b’.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">on_pipeline_tasks_skipped</span>
+<span class="k">def</span> <span class="nf">on_pipeline_tasks_skipped</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">skipped_tasks</span><span class="p">):</span>
     <span class="k">pass</span>
 </pre></div>
 </div>
