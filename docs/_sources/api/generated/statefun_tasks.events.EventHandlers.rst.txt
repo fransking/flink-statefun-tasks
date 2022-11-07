@@ -18,6 +18,7 @@ EventHandlers
       ~EventHandlers.notify_pipeline_finished
       ~EventHandlers.notify_pipeline_status_changed
       ~EventHandlers.notify_pipeline_task_finished
+      ~EventHandlers.notify_pipeline_tasks_skipped
       ~EventHandlers.notify_task_finished
       ~EventHandlers.notify_task_received
       ~EventHandlers.notify_task_retry
@@ -27,6 +28,7 @@ EventHandlers
       ~EventHandlers.on_pipeline_finished
       ~EventHandlers.on_pipeline_status_changed
       ~EventHandlers.on_pipeline_task_finished
+      ~EventHandlers.on_pipeline_tasks_skipped
       ~EventHandlers.on_task_finished
       ~EventHandlers.on_task_received
       ~EventHandlers.on_task_retry

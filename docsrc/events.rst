@@ -92,6 +92,19 @@ tasks that they invoke (e.g. a general purpose compute grid).
         pass
 
 
+On Pipeline Tasks Skipped
+-------------------------
+
+Raised when tasks are skipped over by the pipeline because they are part of an orphaned branch when exceptionally tasks are used.  For example
+a.send().continue_with(b).exceptionally(c) where 'a' raises an exception causing the pipeline to jump to 'c' skipping 'b'. 
+
+.. code-block:: python
+
+    @tasks.events.on_pipeline_tasks_skipped
+    def on_pipeline_tasks_skipped(context, skipped_tasks):
+        pass
+
+
 On Pipeline Finished
 --------------------
 

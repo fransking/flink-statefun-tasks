@@ -119,8 +119,10 @@ class PipelineGraph(object):
             if tasks[0].is_complete():
                 return False  # task already complete - ignore
 
+            tasks[0].mark_complete()
+
             if failed:
-                # mark this task complete and its children up to the point we hit an exceptionally task
+                # mark mark subsequent tasks complete until we reach the first exceptionally continuation
                 # this is where we will continue from
                 for task in tasks:
                     if task.is_exceptionally:
@@ -129,8 +131,6 @@ class PipelineGraph(object):
                     elif not task.is_finally:
                         task.mark_complete()
             else:
-                tasks[0].mark_complete()
-
                 # mark subsequent exceptionally tasks complete until we reach the first non-exceptionally continuation
                 # this is where we will continue from
                 for task in tasks[1:]:
@@ -152,12 +152,15 @@ class PipelineGraph(object):
     def get_next_step_in_pipeline(self, task_id, task_result_or_exception):
         current_step, next_step, group, empty_group = self._get_next_step_in_pipeline(task_id)
 
+        skipped_tasks = []
+
         if isinstance(task_result_or_exception, TaskException):
             # if we have a TaskException as input then we need to skip forward to the next exceptionally
             # task if we have one or otherwise to the finally task if we have one
             task = next_step
 
             while task is not None and isinstance(task, Task) and not task.is_exceptionally:
+                skipped_tasks.append(next_step)
                 _, task, _, _ = self._get_next_step_in_pipeline(task.uid)
 
             next_step = task or next_step
@@ -177,9 +180,11 @@ class PipelineGraph(object):
             # otherwise we have a TaskResult and so we need to skip over exceptionally tasks
             while next_step is not None and isinstance(next_step, Task) and next_step.is_exceptionally:
                 next_step.mark_complete()
+                skipped_tasks.append(next_step)
+
                 _, next_step, _, _ = self._get_next_step_in_pipeline(next_step.uid)
 
-        return current_step, next_step, group, empty_group
+        return current_step, next_step, group, empty_group, skipped_tasks
 
     def _get_next_step_in_pipeline(self, task_id):
         stack = deque([(self._pipeline, None, None, None, None)])  # FIFO (pipeline, entry after group, group, parent_group, entry after parent group)
