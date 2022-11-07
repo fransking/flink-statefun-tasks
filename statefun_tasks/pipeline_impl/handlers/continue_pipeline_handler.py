@@ -38,7 +38,7 @@ class ContinuePipelineHandler(PipelineMessageHandler):
         self.submitter.release_tasks(context, caller_uid, task_result_or_exception)
 
         # get the next step of the pipeline to run (if any)
-        current_step, next_step, group, empty_group = self.graph.get_next_step_in_pipeline(caller_uid, task_result_or_exception)
+        current_step, next_step, group, empty_group, skipped_tasks = self.graph.get_next_step_in_pipeline(caller_uid, task_result_or_exception)
 
         # if this task is part group then we need to record the results so we can aggregate later
         if group is not None:
@@ -51,7 +51,7 @@ class ContinuePipelineHandler(PipelineMessageHandler):
                 # we may now have a TaskResult instead of TaskException so we remark the graph and get the next
                 # steps based on our overall group result or exception
                 self.graph.mark_task_complete(caller_uid, task_result_or_exception, remark=True)
-                current_step, next_step, group, empty_group = self.graph.get_next_step_in_pipeline(caller_uid, task_result_or_exception)
+                current_step, next_step, group, empty_group, skipped_tasks = self.graph.get_next_step_in_pipeline(caller_uid, task_result_or_exception)
 
                 # update last known task state in case we need to cancel later and call a finally task passing through the current state
                 context.pipeline_state.last_task_state.CopyFrom(task_result_or_exception.state,)   
@@ -63,6 +63,9 @@ class ContinuePipelineHandler(PipelineMessageHandler):
             # pause the pipeline if this task is a wait
             if current_step.is_wait:  
                 await pipeline.pause(context)
+
+        # notify event handlers of any skipped tasks such as exceptionally tasks that are passed over if we don't have a TaskException
+        await pipeline.events.notify_pipeline_tasks_skipped(context, skipped_tasks)
 
         # if we got an exception then if we have an exceptionally, pass the exception as a result to this task
         if isinstance(task_result_or_exception, TaskException):
