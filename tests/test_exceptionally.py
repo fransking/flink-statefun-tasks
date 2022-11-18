@@ -26,6 +26,11 @@ def _throw_another_error(*args):
 
 
 @tasks.bind()
+def _return_value(val):
+    return f'Value: {val}'
+
+
+@tasks.bind()
 def _return_error(ex):
     return f'Exception: {ex.exception_message}'
 
@@ -89,12 +94,6 @@ def workflow_with_exceptionally_in_middle_with_no_finally(first_name, last_name)
 
 
 @tasks.bind()
-def parallel_workflow_that_does_not_error(first_name, last_name):
-    return tasks.send(_say_hello, first_name, last_name) \
-        .exceptionally(_return_error)
-
-
-@tasks.bind()
 def parallel_workflow_that_errors(first_name, last_name):
     return in_parallel([_throw_error.send(), _say_hello.send(first_name, last_name), _throw_another_error.send()]) \
         .exceptionally(_return_error)
@@ -113,6 +112,30 @@ def empty_parallel_workflow_with_exceptionally_that_throws_error(first_name, las
         .continue_with(in_parallel([])) \
         .exceptionally(_return_error)
 
+
+@tasks.bind()
+def parallel_workflow_with_exceptionally_inside_that_does_not_error(first_name, last_name, max_parallelism=None):
+    return in_parallel([
+        _say_hello.send(first_name, last_name).continue_with(_return_value).exceptionally(_return_error),
+        _say_hello.send(first_name, last_name).continue_with(_return_value)
+        ], max_parallelism=max_parallelism) \
+        .continue_with(_return_value)
+
+@tasks.bind()
+def parallel_workflow_with_exceptionally_inside_that_does_error(first_name, last_name, max_parallelism=None):
+    return in_parallel([
+        _say_hello.send(first_name, last_name).continue_with(_throw_error).exceptionally(_return_error).exceptionally(_throw_error).exceptionally(_return_error),
+        _say_hello.send(first_name, last_name).continue_with(_return_value)
+        ], max_parallelism=max_parallelism) \
+        .continue_with(_return_value)
+
+@tasks.bind()
+def parallel_workflow_with_exceptionally_inside_that_does_error_and_then_errors_in_exceptionally_and_then_recovers(first_name, last_name, max_parallelism=None):
+    return in_parallel([
+        _say_hello.send(first_name, last_name).continue_with(_throw_error).exceptionally(_throw_another_error).exceptionally(_return_error),
+        _say_hello.send(first_name, last_name).continue_with(_return_value)
+        ], max_parallelism=max_parallelism) \
+        .continue_with(_return_value)
 
 class ExceptionallyTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -179,6 +202,36 @@ class ExceptionallyTests(unittest.TestCase):
 
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, 'Exception: I am supposed to fail')
+
+    def test_a_parallel_workflow_with_exceptionally_inside_that_does_not_error(self):
+        pipeline = tasks.send(parallel_workflow_with_exceptionally_inside_that_does_not_error, 'Jane', last_name='Doe')
+
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, "Value: ['Value: Hello Jane Doe', 'Value: Hello Jane Doe']")
+
+    def test_a_parallel_workflow_with_exceptionally_inside_that_does_error(self):
+        pipeline = tasks.send(parallel_workflow_with_exceptionally_inside_that_does_error, 'Jane', last_name='Doe')
+
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, "Value: ['Exception: I am supposed to fail', 'Value: Hello Jane Doe']")
+
+    def test_a_parallel_workflow_with_exceptionally_inside_that_does_not_error_and_has_max_parallelism(self):
+        pipeline = tasks.send(parallel_workflow_with_exceptionally_inside_that_does_not_error, 'Jane', last_name='Doe', max_parallelism=1)
+
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, "Value: ['Value: Hello Jane Doe', 'Value: Hello Jane Doe']")
+
+    def test_a_parallel_workflow_with_exceptionally_inside_that_does_error_and_has_max_parallelism(self):
+        pipeline = tasks.send(parallel_workflow_with_exceptionally_inside_that_does_error, 'Jane', last_name='Doe', max_parallelism=1)
+
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, "Value: ['Exception: I am supposed to fail', 'Value: Hello Jane Doe']")
+
+    def test_a_parallel_workflow_with_exceptionally_inside_that_does_error_and_then_errors_in_exceptionally_and_then_recovers(self):
+        pipeline = tasks.send(parallel_workflow_with_exceptionally_inside_that_does_error_and_then_errors_in_exceptionally_and_then_recovers, 'Jane', last_name='Doe')
+
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, "Value: ['Exception: I am supposed to fail again', 'Value: Hello Jane Doe']")
 
 
 if __name__ == '__main__':

@@ -18,18 +18,22 @@ class ResultAggregator(object):
 
     def add_result(self, context: TaskContext, task_uid, task_result_or_exception):
         task_results = context.pipeline_state.task_results  # type: TaskResults
+        last_tasks = self._graph.get_last_tasks_in_chain(task_uid)
 
-        failed = isinstance(task_result_or_exception, TaskException)
-        last_task = self._graph.get_last_task_in_chain(task_uid)
+        is_error = isinstance(task_result_or_exception, TaskException)
         packed = pack_any(task_result_or_exception)
         
-        if task_uid == last_task.uid:
-            # if we are the last task in this chain in the group then record this result so we can aggregate laster
+        # if we are the last task in this chain in the group then record this result so we can aggregate laster
+        if task_uid == last_tasks[-1].uid:
             task_results.by_uid[task_uid].CopyFrom(packed)
 
-        elif failed:
-            # additionally propagate the error onto the last stage of this chain
-            task_results.by_uid[last_task.uid].CopyFrom(packed)
+        # else if don't have an error and the only tasks left (excluding this one) are exceptionally then propogate this result onto the last task
+        elif not is_error and all([t.is_exceptionally or task_uid == t.uid for t in last_tasks]):
+            task_results.by_uid[last_tasks[-1].uid].CopyFrom(packed)
+
+        # otherwise if we have an error and no exceptionally tasks to recover with then propagate the error onto the onto the last task
+        elif is_error and not any([t.is_exceptionally for t in last_tasks]):
+            task_results.by_uid[last_tasks[-1].uid].CopyFrom(packed)
 
     def aggregate(self, context: TaskContext, group: Group):
         is_top_level = self._graph.is_top_level_group(group)
