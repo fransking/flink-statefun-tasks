@@ -102,9 +102,36 @@ class PipelineGraph(object):
 
         return tasks, None if max_parallelism < 1 else max_parallelism, slice
 
-    def get_last_task_in_chain(self, task_id):
+    def get_last_tasks_in_chain(self, task_id):
+        """
+        Returns the last tasks in the chain that this task_id is part of
+        
+        Examples:
+        
+        a -> [a, b, c] => [c]
+        b -> [a, b, c] => [c]
+
+        Exceptionally tasks are included but only if they form the remainder of the chain
+
+        Examples:
+        b -> [a, b, c, ex(d)] => [c, d]
+        b -> [a, b, c, ex(d), ex(e)] => [c, e]
+        b -> [a, b, c, ex(d), ex(e), f] => [f]
+        """
         task_chain = self.get_task_chain(task_id)
-        return task_chain[-1]
+
+        last_task = task_chain[-1]
+        last_non_exceptionally_task = None
+
+        for task in reversed(task_chain):
+            if not task.is_exceptionally:
+                last_non_exceptionally_task = task
+                break
+        
+        if last_non_exceptionally_task is not None and last_non_exceptionally_task != last_task:
+            return [last_non_exceptionally_task, last_task]
+
+        return [last_task]
 
     def mark_task_complete(self, task_id, task_result_or_exception, remark=False):
         failed = isinstance(task_result_or_exception, TaskException)
