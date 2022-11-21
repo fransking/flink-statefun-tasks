@@ -55,16 +55,16 @@ class DeferredTaskSubmitter(object):
             self._send_task(context, task.get_destination(), task_request)
 
     def release_tasks(self, context, caller_uid, task_result_or_exception):
-        # if we have a task exception then jump to the end of the chain
-        if isinstance(task_result_or_exception, TaskException):
-            task_ids = [task.uid for task in self._graph.get_last_tasks_in_chain(caller_uid) if task is not None]
-        else:
-            task_ids = [caller_uid]
+        deferral_triggers = self._get_deferral_triggers(caller_uid, task_result_or_exception)
         
-        task_id = task_ids[0] 
-        
-        if task_id in context.pipeline_state.task_deferral_ids_by_task_uid:
-            deferral_id = context.pipeline_state.task_deferral_ids_by_task_uid[task_id]
+        if not any(deferral_triggers):
+            return
+
+        # process trigger (we only use one and delete the rest below)
+        deferral_trigger = deferral_triggers[-1]
+
+        if deferral_trigger in context.pipeline_state.task_deferral_ids_by_task_uid:
+            deferral_id = context.pipeline_state.task_deferral_ids_by_task_uid[deferral_trigger]
             task_deferral = context.pipeline_state.task_deferrals_by_id[deferral_id]
 
             if any(task_deferral.tasks):
@@ -74,7 +74,7 @@ class DeferredTaskSubmitter(object):
 
                 initial_args, initial_kwargs, initial_state = None, None, None
 
-                if deferred_task.has_initial_args:                    
+                if deferred_task.has_initial_args:         
                     # send initial state to each initial task if we have some
                     if context.pipeline_state.pipeline.HasField('initial_state'):
                         initial_state = unpack_any(context.pipeline_state.pipeline.initial_state, known_proto_types=[])
@@ -95,17 +95,17 @@ class DeferredTaskSubmitter(object):
                 
                 # add task we are submitting to deferral trigger so that when it completes we can release a further deferred task
                 self._add_deferral_trigger(context, task, deferral_id)
-
+            
                 # send the task
                 self._send_task(context, task.get_destination(), task_request)
             else:
-                # clean up
-                del context.pipeline_state.task_deferral_ids_by_task_uid[task_id]
-                
-        # clean up used deferral triggers
-        for task_id in task_ids:
-            if task_id in context.pipeline_state.task_deferral_ids_by_task_uid:
-                del context.pipeline_state.task_deferral_ids_by_task_uid[task_id]
+                # delete deferral now that it is empty
+                del context.pipeline_state.task_deferrals_by_id[deferral_id]
+
+            # clean up used deferral triggers
+            for task_id in deferral_triggers:
+                if task_id in context.pipeline_state.task_deferral_ids_by_task_uid:
+                    del context.pipeline_state.task_deferral_ids_by_task_uid[task_id]
 
     def unpause_tasks(self, context):
         for paused_task in context.pipeline_state.paused_tasks:
@@ -116,6 +116,19 @@ class DeferredTaskSubmitter(object):
     def _add_deferral_trigger(self, context, task, deferral_id):
         for task in self._graph.get_last_tasks_in_chain(task.uid):
             context.pipeline_state.task_deferral_ids_by_task_uid[task.uid] = deferral_id
+
+    def _get_deferral_triggers(self, task_id, task_result_or_exception):
+        if isinstance(task_result_or_exception, TaskException):
+            # only return the triggers once we get to the last exception in the chain
+            task_ids = [task.uid for task in self._graph.get_last_tasks_in_chain(task_id) if task is not None]
+
+            if any(task_ids) and task_id == task_ids[-1]:
+                return task_ids
+            else:
+                return []
+        else:
+            # else return this task as the trigger
+            return [task_id]
 
     def _create_task_deferral(self, context, tasks_to_defer, task_result_or_exception, has_initial_args):
         # create task deferral to hold these deferred tasks

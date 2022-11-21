@@ -36,9 +36,22 @@ def _return_error(ex):
 
 
 @tasks.bind()
+def _mark_completed(*args):
+    global _completed
+    _completed = True
+    return _completed
+
+
+@tasks.bind()
+def _return_completed():
+    global _completed
+    return _completed
+
+
+@tasks.bind()
 def workflow_that_does_not_error(first_name, last_name):
     return tasks.send(_say_hello, first_name, last_name) \
-        .exceptionally(_return_error)#.finally_do(_cleanup)
+        .exceptionally(_return_error)
 
 
 @tasks.bind()
@@ -137,6 +150,14 @@ def parallel_workflow_with_exceptionally_inside_that_does_error_and_then_errors_
         ], max_parallelism=max_parallelism) \
         .continue_with(_return_value)
 
+@tasks.bind()
+def parallel_workflow_with_max_parallelsim_that_throws_error(first_name, last_name):
+    return in_parallel([
+        _say_hello.send(first_name, last_name).continue_with(_throw_error).exceptionally(_throw_another_error).exceptionally(_mark_completed),
+        _return_completed.send()
+        ], max_parallelism=1) \
+        .continue_with(_return_value)
+
 class ExceptionallyTests(unittest.TestCase):
     def setUp(self) -> None:
         self.test_harness = TestHarness()
@@ -232,6 +253,13 @@ class ExceptionallyTests(unittest.TestCase):
 
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, "Value: ['Exception: I am supposed to fail again', 'Value: Hello Jane Doe']")
+
+    def test_a_parallel_workflow_with_max_parallelsim_that_throws_error_does_not_trigger_deferred_tasks_until_it_is_complete(self):
+        pipeline = tasks.send(parallel_workflow_with_max_parallelsim_that_throws_error, 'Jane', last_name='Doe')
+
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, "Value: [True, True]")
+
 
 
 if __name__ == '__main__':
