@@ -115,23 +115,20 @@ class PipelineGraph(object):
 
         Examples:
         b -> [a, b, c, ex(d)] => [c, d]
-        b -> [a, b, c, ex(d), ex(e)] => [c, e]
+        b -> [a, b, c, ex(d), ex(e)] => [c, d, e]
         b -> [a, b, c, ex(d), ex(e), f] => [f]
         """
         task_chain = self.get_task_chain(task_id)
 
-        last_task = task_chain[-1]
-        last_non_exceptionally_task = None
+        tasks = []
 
         for task in reversed(task_chain):
-            if not task.is_exceptionally:
-                last_non_exceptionally_task = task
-                break
-        
-        if last_non_exceptionally_task is not None and last_non_exceptionally_task != last_task:
-            return [last_non_exceptionally_task, last_task]
+            tasks.insert(0, task)
 
-        return [last_task]
+            if not task.is_exceptionally:
+                break
+            
+        return tasks
 
     def mark_task_complete(self, task_id, task_result_or_exception, remark=False):
         failed = isinstance(task_result_or_exception, TaskException)
