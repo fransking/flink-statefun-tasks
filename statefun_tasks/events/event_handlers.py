@@ -149,7 +149,7 @@ class EventHandlers(object):
         else:
             task_result, task_exception = None, task_result_or_exception
 
-        await self._notify_all(self._on_emit_result_handlers, context, task_result=task_result, task_exception=task_exception)
+        await self._notify_all(self._on_emit_result_handlers, context, raise_tasks_exceptions=False, task_result=task_result, task_exception=task_exception)
 
     @staticmethod
     async def _notify_all(handlers, *args, raise_tasks_exceptions=True, **kwargs):
