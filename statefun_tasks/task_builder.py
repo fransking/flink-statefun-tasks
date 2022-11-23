@@ -1,7 +1,7 @@
 from statefun_tasks.serialisation import DefaultSerialiser
 from statefun_tasks.pipeline_builder import PipelineBuilder
 
-from statefun_tasks.types import Task, RetryPolicy, MessageSizeExceeded, \
+from statefun_tasks.types import Task, RetryPolicy, \
     TASK_STATE_TYPE, TASK_REQUEST_TYPE, TASK_RESULT_TYPE, TASK_EXCEPTION_TYPE, PIPELINE_STATE_TYPE
 
 from statefun_tasks.messages_pb2 import TaskResult, TaskException, TaskRequest, Address
@@ -16,6 +16,7 @@ from statefun_tasks.builtin_tasks import run_pipeline, flatten_results
 
 from statefun import ValueSpec, Context, Message
 from datetime import timedelta
+from functools import partial
 import logging
 
 _log = logging.getLogger('FlinkTasks')
@@ -329,7 +330,7 @@ class FlinkTasks(object):
             
         # send a message to egress if reply_topic was specified
         if task_input.HasField('reply_topic'):
-            self._send_egress_message(context, task_input, task_result)
+            context.safe_send_egress_message(task_input.reply_topic, task_result, partial(_create_task_exception, task_input))
 
         # or call back to a particular flink function if reply_address was specified
         elif task_input.HasField('reply_address'):
@@ -355,11 +356,3 @@ class FlinkTasks(object):
         caller_id = task_state.original_caller_id if task_state.original_caller_id != '' else context.get_caller_id()
 
         return address, caller_id
-
-    @staticmethod
-    def _send_egress_message(context, task_input, task_result):
-        try:
-            context.send_egress_message(topic=task_input.reply_topic, value=task_result)
-        except MessageSizeExceeded as e:
-            _log.warning(f'Unable to send egress message - {e}')
-            context.send_egress_message(topic=task_input.reply_topic, value=_create_task_exception(task_input, e))

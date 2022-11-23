@@ -177,37 +177,40 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_worker_name" title="statefun_tasks.TaskContext.get_worker_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_worker_name</span></code></a>()</p></td>
 <td><p>Own worker_name in the form of context.address.typename</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.send_egress_message" title="statefun_tasks.TaskContext.send_egress_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_egress_message</span></code></a>(topic, value)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.safe_send_egress_message" title="statefun_tasks.TaskContext.safe_send_egress_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">safe_send_egress_message</span></code></a>(topic, value, ...)</p></td>
+<td><p>Attempts to send a message to an egress topic but if this fails due to a MessageSizeExceeded exception sends the value created by the error error_function instead</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.send_egress_message" title="statefun_tasks.TaskContext.send_egress_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_egress_message</span></code></a>(topic, value)</p></td>
 <td><p>Sends a message to an egress topic</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.send_message" title="statefun_tasks.TaskContext.send_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_message</span></code></a>(destination, target_id, value)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.send_message" title="statefun_tasks.TaskContext.send_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_message</span></code></a>(destination, target_id, value)</p></td>
 <td><p>Sends a message to another Flink Task worker</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.send_message_after" title="statefun_tasks.TaskContext.send_message_after"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_message_after</span></code></a>(delay, destination, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.send_message_after" title="statefun_tasks.TaskContext.send_message_after"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_message_after</span></code></a>(delay, destination, ...)</p></td>
 <td><p>Sends a message to another Flink Task worker after some delay</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_state</span></code>(obj)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_state</span></code>(obj)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.to_address_and_id" title="statefun_tasks.TaskContext.to_address_and_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_address_and_id</span></code></a>(address)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.to_address_and_id" title="statefun_tasks.TaskContext.to_address_and_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_address_and_id</span></code></a>(address)</p></td>
 <td><p>Converts SdkAddress into a string representation</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">storage</span></code></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">storage</span></code></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_state</span></code></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_state</span></code></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pipeline_state</span></code></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pipeline_state</span></code></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pipeline_state_size</span></code></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pipeline_state_size</span></code></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.task_name" title="statefun_tasks.TaskContext.task_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_name</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.task_name" title="statefun_tasks.TaskContext.task_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_name</span></code></a></p></td>
 <td><p>The name of this task</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.task_uid" title="statefun_tasks.TaskContext.task_uid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_uid</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.task_uid" title="statefun_tasks.TaskContext.task_uid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">task_uid</span></code></a></p></td>
 <td><p>The unique ID of this task.</p></td>
 </tr>
 </tbody>
@@ -408,6 +411,23 @@ get_pipeline_id() if the pipeline is nested
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>address</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="statefun_tasks.TaskContext.safe_send_egress_message">
+<span class="sig-name descname"><span class="pre">safe_send_egress_message</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_function</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.safe_send_egress_message" title="Permalink to this definition"></a></dt>
+<dd><p>Attempts to send a message to an egress topic but if this fails
+due to a MessageSizeExceeded exception sends the value created by
+the error error_function instead</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>topic</strong> – the topic name</p></li>
+<li><p><strong>value</strong> – the message to send</p></li>
+<li><p><strong>error_function</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code>], <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]) – a callable to create the error if a MessageSizeExceeded exception was raised</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
