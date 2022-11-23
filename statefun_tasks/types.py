@@ -337,5 +337,5 @@ class ProtobufSerialisable(ABC):
         pass
 
 class MessageSizeExceeded(Exception):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, message):
+        super().__init__(message)
