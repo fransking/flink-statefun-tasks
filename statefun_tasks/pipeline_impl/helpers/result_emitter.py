@@ -42,7 +42,8 @@ class ResultEmitter(object):
         elif context.pipeline_state.caller_id is not None:
             context.send_message(context.pipeline_state.caller_address, context.pipeline_state.caller_id, task_result_or_exception)
 
-    def _send_egress_message(self, context, task_request, task_result_or_exception):
+    @staticmethod
+    def _send_egress_message(context, task_request, task_result_or_exception):
         try:
             context.send_egress_message(topic=task_request.reply_topic, value=task_result_or_exception)
         except MessageSizeExceeded as e:

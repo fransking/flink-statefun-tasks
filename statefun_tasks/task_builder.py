@@ -329,11 +329,7 @@ class FlinkTasks(object):
             
         # send a message to egress if reply_topic was specified
         if task_input.HasField('reply_topic'):
-            try:
-                context.send_egress_message(topic=task_input.reply_topic, value=task_result)
-            except MessageSizeExceeded as e:
-                _log.warning(f'Unable to send egress message - {e}')
-                context.send_egress_message(topic=task_input.reply_topic, value=_create_task_exception(task_input, e))
+            self._send_egress_message(context, task_input, task_result)
 
         # or call back to a particular flink function if reply_address was specified
         elif task_input.HasField('reply_address'):
@@ -350,7 +346,8 @@ class FlinkTasks(object):
         if task_input.uid in context.task_state.by_uid:
             del context.task_state.by_uid[task_input.uid]
 
-    def _get_caller_address_and_id(self, context, task_request):
+    @staticmethod
+    def _get_caller_address_and_id(context, task_request):
         task_state = context.task_state.by_uid[task_request.uid]
         
         # either as original caller (e.g. if this is a result of a retry) or context.get_caller_...() otherwise
@@ -358,3 +355,11 @@ class FlinkTasks(object):
         caller_id = task_state.original_caller_id if task_state.original_caller_id != '' else context.get_caller_id()
 
         return address, caller_id
+
+    @staticmethod
+    def _send_egress_message(context, task_input, task_result):
+        try:
+            context.send_egress_message(topic=task_input.reply_topic, value=task_result)
+        except MessageSizeExceeded as e:
+            _log.warning(f'Unable to send egress message - {e}')
+            context.send_egress_message(topic=task_input.reply_topic, value=_create_task_exception(task_input, e))
