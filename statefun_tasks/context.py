@@ -6,6 +6,10 @@ from statefun_tasks.types import MessageSizeExceeded
 from statefun import kafka_egress_record
 from statefun.request_reply import BatchContext
 from datetime import timedelta
+from typing import Callable, Any
+import logging
+
+_log = logging.getLogger('FlinkTasks')
 
 
 class TaskContext(object):
@@ -213,6 +217,22 @@ class TaskContext(object):
 
         egress_message = kafka_egress_record(topic=topic, value=pack_any(value))
         self._context.pack_and_send_egress(self._egress_type_name, egress_message)
+
+    def safe_pack_and_send_egress(self, topic, value, error_function: Callable[[Exception], Any]):
+        """
+        Attempts to send a message to an egress topic but if this fails
+        due to a MessageSizeExceeded exception sends the value created by 
+        the error error_function instead
+
+        :param topic: the topic name
+        :param value: the message to send
+        :param error_function: a callable to create the error if a MessageSizeExceeded exception was raised
+        """
+        try:
+            self.pack_and_send_egress(topic, value)
+        except MessageSizeExceeded as e:
+            _log.warning(f'Unable to send egress message - {e}')
+            self.pack_and_send_egress(topic, value=error_function(e))
 
     def cancel_message(self, cancellation_token: str):
         """
