@@ -52,8 +52,7 @@ class TestHarness:
                                      'task_state',
                                      'task_result',
                                      'task_exception',
-                                     'pipeline_state',
-                                     'yielded_task_request']
+                                     'pipeline_state']
         self.__states = {}
         self.__topic = 'statefun-test.requests'
         self.__initial_target_type = 'worker'
