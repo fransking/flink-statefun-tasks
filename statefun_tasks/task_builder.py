@@ -1,7 +1,7 @@
 from statefun_tasks.serialisation import DefaultSerialiser
 from statefun_tasks.pipeline_builder import PipelineBuilder
 
-from statefun_tasks.types import Task, RetryPolicy
+from statefun_tasks.types import Task, RetryPolicy, YieldTaskInvocation
 
 from statefun_tasks.messages_pb2 import ChildPipeline, TaskRequest, TaskResult, TaskException, TaskActionRequest, Address
 from statefun_tasks.type_helpers import _create_task_result, _create_task_exception
@@ -17,6 +17,7 @@ from statefun.request_reply import BatchContext
 from typing import Union
 from datetime import timedelta
 from functools import partial
+from typing import Callable, Any
 import logging
 
 _log = logging.getLogger('FlinkTasks')
@@ -231,15 +232,14 @@ class FlinkTasks(object):
                 'Expected function to have a send attribute. Make sure it is decorated with @tasks.bind()')
         return send_func(*args, **kwargs)
 
-    def clone_task_request(self, context: TaskContext) -> TaskRequest:
+    def yield_invocation(self, context: TaskContext):
         """
-        Returns a complete copy of the TaskRequest associated with this TaskContext with the 
-        caller address details extracted as necessary from the context
+        Yield invocation of this task storing the task_request in state so that it can be resumed from another task
 
-        :param context: TaskContext
-        :return: a TaskRequest
+        :param context: context object provided by Flink
         """
-        task_request = context.unpack('task_request', TaskRequest)
+        task_request = TaskRequest()
+        task_request.CopyFrom(context.unpack('task_request', TaskRequest))
 
         # copy caller details from context unless explictly set already
         if not task_request.HasField('reply_address') and not task_request.HasField('reply_topic'):
@@ -250,36 +250,33 @@ class FlinkTasks(object):
                 namespace, function_type = address.split('/')
                 task_request.reply_address.CopyFrom(Address(namespace=namespace, type=function_type, id=caller_id))
 
-        return task_request
+        context.pack_and_save('yielded_task_request', task_request)
 
-    def unpack_task_request(self, task_request: TaskRequest) -> tuple:
-        """
-        Unpacks a TaskRequest into args, kwargs and state
+        raise YieldTaskInvocation()
 
-        :param task_request: TaskRequest
-        :return: args, kwargs and state from this task_request
+    async def resume_invocation(self, context: TaskContext, result = None, state_fn : Callable[[Any], Any] = None):
         """
-        args, kwargs, state = self._serialiser.deserialise_request(task_request)
-        return args, kwargs, state
+        Yield invocation of this task storing the task_request in state so that it can be resumed from another task
 
-    async def send_result(self, context: TaskContext, task_request: TaskRequest, result, state=Ellipsis, delay: timedelta=None, cancellation_token: str = ""):
+        :param context: context object provided by Flink
+        :param optional result: result to apply as the yielded task result
+        :param optional state_fn: a mutation function to alter the state applied as the yielded task state
         """
-        Sends a result
-        :param context: TaskContext
-        :param task_request: the incoming TaskRequest
-        :param result: the result(s) to return
-        :param state: the state to include in the result.  If not specified it will be copied from the TaskRequest
-        :param optional delay: the delay before Flink sends the result
-        :param optional cancellation_token: not implemented in this version of statefun_tasks 
-        """
+        task_request = context.unpack('yielded_task_request', TaskRequest)
+
+        if task_request is None:
+            raise ValueError('This task has not yielded')
+
+        _, _, state = self._serialiser.deserialise_request(task_request)
+
+        # optionally update state
+        if state_fn is not None:
+            state = state_fn(state)
+
         task_result = _create_task_result(task_request)
-
-        if state == Ellipsis:  # default value since None is perfectly valid state
-            state = task_request.state
-
         self._serialiser.serialise_result(task_result, result, state)
 
-        await self.emit_result(context, task_request, task_result, delay,  cancellation_token)
+        await self.emit_result(context, task_request, task_result)
 
     async def fail(self, context, task_input, ex, delay: timedelta=None, cancellation_token: str = ""):
         """
