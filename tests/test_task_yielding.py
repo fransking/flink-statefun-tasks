@@ -1,6 +1,6 @@
 import unittest
 
-from statefun_tasks import TaskContext, TaskAction, TaskResult, TaskStatus, RetryPolicy
+from statefun_tasks import YieldTaskInvocation, TaskContext, TaskAction, TaskResult, TaskStatus, RetryPolicy
 from google.protobuf.any_pb2 import Any
 from tests.utils import TestHarness, tasks
 
@@ -13,6 +13,7 @@ def setup(_):
 
 @tasks.bind(with_context=True, task_id='123', retry_policy=RetryPolicy([ValueError]))
 def yield_invocation(context: TaskContext, fail_once=False):
+    pipeline_id = context.get_pipeline_id()
 
     state = context.get_state() or {}
     if fail_once:
@@ -22,16 +23,28 @@ def yield_invocation(context: TaskContext, fail_once=False):
             raise ValueError()
         else:
             del state['failed']
-            context.set_state(state)
 
-    # yield instead of returning the result of this task
-    tasks.yield_invocation(context)
+    # record this task_request in the task state
+    task_request = tasks.clone_task_request(context)
+    state[pipeline_id] = task_request
+    context.set_state(state)
+
+    # but don't do anything with it by giving up execution
+    raise YieldTaskInvocation()
 
 
 @tasks.bind(with_context=True, task_id='123')
-async def resume_invocation(context: TaskContext):
-    # resume the task that we yielded from earlier
-    await tasks.resume_invocation(context, (), lambda state: state + [4])
+async def resume_invocation(context: TaskContext, pipeline_id):
+    task_state = context.get_state()
+
+    # get saved task_request and unpack its state
+    task_request = task_state[pipeline_id]
+    _, _, state = tasks.unpack_task_request(task_request)
+
+    # send the result back for this task_request updating the state
+    await tasks.send_result(context, task_request, (), state + [4])
+
+    return True
 
 
 @tasks.bind(with_state=True)
@@ -58,7 +71,7 @@ class YieldingTasksTests(unittest.TestCase):
         self.assertEqual(self._unpack(action_result.result, TaskStatus).value, TaskStatus.RUNNING)
 
         # call another pipeline that calls back to the first pipeline 
-        pipeline2 = resume_invocation.send()
+        pipeline2 = resume_invocation.send(pipeline.id)
         self.test_harness.run_pipeline(pipeline2)
 
         action_result = self.test_harness.run_action(pipeline, TaskAction.GET_STATUS)
@@ -77,7 +90,7 @@ class YieldingTasksTests(unittest.TestCase):
         self.assertEqual(self._unpack(action_result.result, TaskStatus).value, TaskStatus.RUNNING)
 
         # call another pipeline that calls back to the first pipeline 
-        pipeline2 = resume_invocation.send()
+        pipeline2 = resume_invocation.send(pipeline.id)
         self.test_harness.run_pipeline(pipeline2)
 
         action_result = self.test_harness.run_action(pipeline, TaskAction.GET_STATUS)

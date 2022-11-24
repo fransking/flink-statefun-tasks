@@ -1,6 +1,6 @@
 import unittest
 
-from statefun_tasks import in_parallel, TaskAction
+from statefun_tasks import in_parallel, YieldTaskInvocation, TaskAction
 from tests.utils import TestHarness, tasks
 from uuid import uuid4
 
@@ -15,11 +15,16 @@ def on_task_started(context, task_request):
 
 @tasks.bind(with_context=True)
 def _yield(context):
-    tasks.yield_invocation(context)
+    task_request = tasks.clone_task_request(context)
+    context.set_state(task_request)
+    raise YieldTaskInvocation()
+
 
 @tasks.bind(with_context=True)
 async def _resume(context):
-    await tasks.resume_invocation(context)
+    task_request = context.get_state()
+    _, _, state = tasks.unpack_task_request(task_request)
+    await tasks.send_result(context, task_request, (), state)
 
 
 @tasks.bind()
