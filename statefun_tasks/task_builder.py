@@ -1,7 +1,7 @@
 from statefun_tasks.serialisation import DefaultSerialiser
 from statefun_tasks.pipeline_builder import PipelineBuilder
 
-from statefun_tasks.types import Task, RetryPolicy, MessageSizeExceeded, \
+from statefun_tasks.types import Task, RetryPolicy, \
     TASK_STATE_TYPE, TASK_REQUEST_TYPE, TASK_RESULT_TYPE, TASK_EXCEPTION_TYPE, PIPELINE_STATE_TYPE
 
 from statefun_tasks.messages_pb2 import TaskResult, TaskException, TaskRequest, Address
@@ -16,6 +16,8 @@ from statefun_tasks.builtin_tasks import run_pipeline, flatten_results
 
 from statefun import ValueSpec, Context, Message
 from datetime import timedelta
+from functools import partial
+from typing import Callable, Any, Tuple
 import logging
 
 _log = logging.getLogger('FlinkTasks')
@@ -50,7 +52,7 @@ class FlinkTasks(object):
             ValueSpec(name="task_result", type=TASK_RESULT_TYPE, expire_after_call=state_expiration),
             ValueSpec(name="task_exception", type=TASK_EXCEPTION_TYPE, expire_after_call=state_expiration),
             ValueSpec(name="task_state", type=TASK_STATE_TYPE, expire_after_call=state_expiration),
-            ValueSpec(name="pipeline_state", type=PIPELINE_STATE_TYPE, expire_after_call=state_expiration),
+            ValueSpec(name="pipeline_state", type=PIPELINE_STATE_TYPE, expire_after_call=state_expiration)
         ]
 
         self.register_builtin(run_pipeline, with_context=True, with_state=True)
@@ -225,8 +227,6 @@ class FlinkTasks(object):
             
             _log.error(f'Unsupported message type {message.typed_value.typename}')
 
-
-
     @staticmethod
     def send(func, *args, **kwargs) -> PipelineBuilder:
         """
@@ -248,7 +248,6 @@ class FlinkTasks(object):
         """
         Returns a complete copy of the TaskRequest associated with this TaskContext with the 
         caller address details extracted as necessary from the context
-
         :param context: TaskContext
         :return: a TaskRequest
         """
@@ -269,7 +268,6 @@ class FlinkTasks(object):
     def unpack_task_request(self, task_request: TaskRequest) -> tuple:
         """
         Unpacks a TaskRequest into args, kwargs and state
-
         :param task_request: TaskRequest
         :return: args, kwargs and state from this task_request
         """
@@ -329,11 +327,7 @@ class FlinkTasks(object):
             
         # send a message to egress if reply_topic was specified
         if task_input.HasField('reply_topic'):
-            try:
-                context.send_egress_message(topic=task_input.reply_topic, value=task_result)
-            except MessageSizeExceeded as e:
-                _log.warning(f'Unable to send egress message - {e}')
-                context.send_egress_message(topic=task_input.reply_topic, value=_create_task_exception(task_input, e))
+            context.safe_send_egress_message(task_input.reply_topic, task_result, partial(_create_task_exception, task_input))
 
         # or call back to a particular flink function if reply_address was specified
         elif task_input.HasField('reply_address'):
@@ -350,7 +344,8 @@ class FlinkTasks(object):
         if task_input.uid in context.task_state.by_uid:
             del context.task_state.by_uid[task_input.uid]
 
-    def _get_caller_address_and_id(self, context, task_request):
+    @staticmethod
+    def _get_caller_address_and_id(context, task_request):
         task_state = context.task_state.by_uid[task_request.uid]
         
         # either as original caller (e.g. if this is a result of a retry) or context.get_caller_...() otherwise

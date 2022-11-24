@@ -39,7 +39,7 @@ class TaskRequestHandler(MessageHandler):
         # run task code
         task_result, task_exception, pipeline, state = await flink_task.run(context, task_request)
 
-        # if a pipeline is retured then try to reset its state in case it already exists
+        # if a pipeline is returned then try to reset its state in case it already exists
         if pipeline is not None:
             try:
                 pipeline.reset(context)

@@ -2,7 +2,7 @@ Events
 ======
 
 Flink Tasks raises events at various points during the execution of a pipeline.  These events can be used to track task run time, pipeline length, state size etc.
-Execution flow can be interrupted by raising a TasksException in the event handler.  For example in on_task_finished an exception can be raised if the size of 
+Execution flow can in some circumstances be interrupted by raising a TasksException in the event handler.  For example in on_task_finished an exception can be raised if the size of 
 the result is greater than some limit in which case the caller will recieve that error instead.  
 
 
@@ -98,6 +98,8 @@ On Pipeline Tasks Skipped
 Raised when tasks are skipped over by the pipeline because they are part of an orphaned branch when exceptionally tasks are used.  For example
 a.send().continue_with(b).exceptionally(c) where 'a' raises an exception causing the pipeline to jump to 'c' skipping 'b'. 
 
+TasksExceptions raised by this event handler will be ignored.
+
 .. code-block:: python
 
     @tasks.events.on_pipeline_tasks_skipped
@@ -121,6 +123,8 @@ On Emit Result
 --------------
 
 Raised when task or pipeline is finished and the result is about to be emitted but before it is recorded in state.
+
+TasksExceptions raised by this event handler will be ignored.
 
 .. code-block:: python
 

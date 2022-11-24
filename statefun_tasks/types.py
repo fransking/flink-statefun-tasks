@@ -20,6 +20,7 @@ TASK_ACTION_RESULT_TYPE = make_protobuf_type(TaskActionResult, namespace='io.sta
 TASK_ACTION_EXCEPTION_TYPE = make_protobuf_type(TaskActionException, namespace='io.statefun_tasks.types')
 CHILD_PIPELINE_TYPE = make_protobuf_type(ChildPipeline, namespace='io.statefun_tasks.types')
 
+
 _VALUE_TYPE_MAP = {
     TaskState: PIPELINE_STATE_TYPE,
     TaskState: TASK_STATE_TYPE,
@@ -29,7 +30,7 @@ _VALUE_TYPE_MAP = {
     TaskActionRequest: TASK_ACTION_REQUEST_TYPE,
     TaskActionResult: TASK_ACTION_RESULT_TYPE,
     TaskActionException: TASK_ACTION_EXCEPTION_TYPE,
-    ChildPipeline: CHILD_PIPELINE_TYPE,
+    ChildPipeline: CHILD_PIPELINE_TYPE
 }
 
 
@@ -368,6 +369,6 @@ class ProtobufSerialisable(ABC):
 
 
 class MessageSizeExceeded(Exception):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, message):
+        super().__init__(message)
 

@@ -94,7 +94,7 @@
   <section id="events">
 <h1>Events<a class="headerlink" href="#events" title="Permalink to this heading"></a></h1>
 <p>Flink Tasks raises events at various points during the execution of a pipeline.  These events can be used to track task run time, pipeline length, state size etc.
-Execution flow can be interrupted by raising a TasksException in the event handler.  For example in on_task_finished an exception can be raised if the size of
+Execution flow can in some circumstances be interrupted by raising a TasksException in the event handler.  For example in on_task_finished an exception can be raised if the size of
 the result is greater than some limit in which case the caller will recieve that error instead.</p>
 <section id="on-task-received">
 <h2>On Task Received<a class="headerlink" href="#on-task-received" title="Permalink to this heading"></a></h2>
@@ -164,6 +164,7 @@ tasks that they invoke (e.g. a general purpose compute grid).</p>
 <h2>On Pipeline Tasks Skipped<a class="headerlink" href="#on-pipeline-tasks-skipped" title="Permalink to this heading"></a></h2>
 <p>Raised when tasks are skipped over by the pipeline because they are part of an orphaned branch when exceptionally tasks are used.  For example
 a.send().continue_with(b).exceptionally(c) where ‘a’ raises an exception causing the pipeline to jump to ‘c’ skipping ‘b’.</p>
+<p>TasksExceptions raised by this event handler will be ignored.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">on_pipeline_tasks_skipped</span>
 <span class="k">def</span> <span class="nf">on_pipeline_tasks_skipped</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">skipped_tasks</span><span class="p">):</span>
     <span class="k">pass</span>
@@ -182,6 +183,7 @@ a.send().continue_with(b).exceptionally(c) where ‘a’ raises an exception cau
 <section id="on-emit-result">
 <h2>On Emit Result<a class="headerlink" href="#on-emit-result" title="Permalink to this heading"></a></h2>
 <p>Raised when task or pipeline is finished and the result is about to be emitted but before it is recorded in state.</p>
+<p>TasksExceptions raised by this event handler will be ignored.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">on_emit_result</span>
 <span class="k">def</span> <span class="nf">on_emit_result</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">task_result</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">task_exception</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="k">pass</span>

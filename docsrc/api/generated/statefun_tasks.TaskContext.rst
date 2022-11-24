@@ -31,6 +31,7 @@ TaskContext
       ~TaskContext.get_state
       ~TaskContext.get_task_id
       ~TaskContext.get_worker_name
+      ~TaskContext.safe_send_egress_message
       ~TaskContext.send_egress_message
       ~TaskContext.send_message
       ~TaskContext.send_message_after

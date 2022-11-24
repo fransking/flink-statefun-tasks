@@ -1,10 +1,8 @@
-import asyncio
 import unittest
 
-from statefun_tasks import DefaultSerialiser, TaskAction, TaskStatus, TaskRequest, TaskResult, TaskException
+from statefun_tasks import TaskAction, TaskStatus, TaskRequest, TaskResult, TaskException
 
 from google.protobuf.any_pb2 import Any
-from tests.test_messages_pb2 import TestPerson, TestGreetingRequest, TestGreetingResponse
 from tests.utils import TestHarness, tasks, TaskErrorException
 
 

@@ -131,7 +131,7 @@ to be exposed as tasks.</p>
 <td><p>Decorator to bind a function as a Flink Task</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.clone_task_request" title="statefun_tasks.FlinkTasks.clone_task_request"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clone_task_request</span></code></a>(context)</p></td>
-<td><p>Returns a complete copy of the TaskRequest associated with this TaskContext with the caller address details extracted as necessary from the context</p></td>
+<td><p>Returns a complete copy of the TaskRequest associated with this TaskContext with the caller address details extracted as necessary from the context :type context: <a class="reference internal" href="statefun_tasks.TaskContext.html#statefun_tasks.TaskContext" title="statefun_tasks.context.TaskContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">TaskContext</span></code></a> :param context: TaskContext :rtype: <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskRequest</span></code> :return: a TaskRequest</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">emit_result</span></code>(context, task_input, task_result)</p></td>
 <td><p></p></td>
@@ -167,7 +167,7 @@ to be exposed as tasks.</p>
 <td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.unpack_task_request" title="statefun_tasks.FlinkTasks.unpack_task_request"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unpack_task_request</span></code></a>(task_request)</p></td>
-<td><p>Unpacks a TaskRequest into args, kwargs and state</p></td>
+<td><p>Unpacks a TaskRequest into args, kwargs and state :type task_request: <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskRequest</span></code> :param task_request: TaskRequest :rtype: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code> :return: args, kwargs and state from this task_request</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">value_specs</span></code>()</p></td>
 <td><p></p></td>
@@ -215,18 +215,11 @@ otherwise the Python module containing the function will be used</p></li>
 <dt class="sig sig-object py" id="statefun_tasks.FlinkTasks.clone_task_request">
 <span class="sig-name descname"><span class="pre">clone_task_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.clone_task_request" title="Permalink to this definition"></a></dt>
 <dd><p>Returns a complete copy of the TaskRequest associated with this TaskContext with the
-caller address details extracted as necessary from the context</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>context</strong> (<a class="reference internal" href="statefun_tasks.TaskContext.html#statefun_tasks.TaskContext" title="statefun_tasks.context.TaskContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">TaskContext</span></code></a>) – TaskContext</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">TaskRequest</span></code></p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>a TaskRequest</p>
-</dd>
-</dl>
+caller address details extracted as necessary from the context
+:type context: <a class="reference internal" href="statefun_tasks.TaskContext.html#statefun_tasks.TaskContext" title="statefun_tasks.context.TaskContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">TaskContext</span></code></a>
+:param context: TaskContext
+:rtype: <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskRequest</span></code>
+:return: a TaskRequest</p>
 </dd></dl>
 
 <dl class="py property">
@@ -367,18 +360,11 @@ This should only be used if you want to provide your own built in (pre-defined) 
 <dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.FlinkTasks.unpack_task_request">
 <span class="sig-name descname"><span class="pre">unpack_task_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_request</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.unpack_task_request" title="Permalink to this definition"></a></dt>
-<dd><p>Unpacks a TaskRequest into args, kwargs and state</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>task_request</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TaskRequest</span></code>) – TaskRequest</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>args, kwargs and state from this task_request</p>
-</dd>
-</dl>
+<dd><p>Unpacks a TaskRequest into args, kwargs and state
+:type task_request: <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskRequest</span></code>
+:param task_request: TaskRequest
+:rtype: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>
+:return: args, kwargs and state from this task_request</p>
 </dd></dl>
 
 </dd></dl>
