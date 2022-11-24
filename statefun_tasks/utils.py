@@ -74,26 +74,3 @@ def _unpack_single_tuple_args(args):
         args = args[0]
 
     return args
-
-
-def _split_function_state_from_result(fn_result, fn_state, with_state=False):
-    # if single result then wrap in tuple as this is the maximal case
-    if not _is_tuple(fn_result):
-        fn_result = (fn_result,)
-
-    # if this task accesses state then we expect the first element in the result tuple
-    # to be the mutated state and the task results to be remainder
-    if with_state:
-
-        if len(fn_result) < 1:
-            raise ValueError('Expecting a tuple with at least the state as the first element')
-
-        fn_state = fn_result[0]
-        fn_result = fn_result[1:] if len(fn_result) > 1 else ()
-
-    # if a single element tuple remains then unpack back to single value
-    # so (8,) becomes 8 but (8,9) remains a tuple
-    fn_result = fn_result[0] if len(fn_result) == 1 else fn_result
-
-    return fn_state, fn_result
- 
