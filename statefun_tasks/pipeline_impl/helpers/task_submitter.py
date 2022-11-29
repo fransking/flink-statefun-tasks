@@ -169,7 +169,7 @@ class DeferredTaskSubmitter(object):
     def _create_task_request(self, context, task, task_request, task_state=None, initial_args=None, initial_kwargs=None, initial_state=None, task_result=None, deferral=None):
         if initial_args is not None or initial_kwargs is not None:
             task_args_and_kwargs = self._serialiser.to_args_and_kwargs(task.request)
-            task.request = self._serialiser.merge_args_and_kwargs(task_args_and_kwargs, initial_args, initial_kwargs)
+            task_request = self._serialiser.merge_args_and_kwargs(task_args_and_kwargs, initial_args, initial_kwargs)
 
         elif task_result is not None:
             task_args_and_kwargs = self._serialiser.to_args_and_kwargs(task.request)

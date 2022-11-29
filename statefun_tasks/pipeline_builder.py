@@ -1,6 +1,6 @@
 from re import L
 from statefun_tasks.types import Task, Group, RetryPolicy, ProtobufSerialisable
-from statefun_tasks.utils import _gen_id, _is_tuple
+from statefun_tasks.utils import _gen_id
 from statefun_tasks.pipeline import _Pipeline
 from statefun_tasks.messages_pb2 import TaskRequest, Pipeline
 from statefun_tasks.builtin import builtin
@@ -69,6 +69,14 @@ class PipelineBuilder(ProtobufSerialisable):
         """
         return self._inline
 
+    @property
+    def has_initial_parameters(self):
+        """
+        Returns true if the pipeline is has initial parameters (args, kwargs, state)
+        """
+        parameters = [self._initial_args, self._initial_kwargs, self._initial_state]
+        return any([parameter is not None for parameter in parameters])
+
     def append(self, task: Task) -> 'PipelineBuilder':
         """
         Appends a single task onto this pipeline
@@ -86,14 +94,15 @@ class PipelineBuilder(ProtobufSerialisable):
         :param other: the other pipeline builder
         :return: the builder
         """
+        self._raise_if_initial_parameters_are_set()
         other._pipeline.extend(self._pipeline)
         return self
 
     def append_group(self, pipelines: Iterable['PipelineBuilder'], max_parallelism=None, return_exceptions=False) -> 'PipelineBuilder':
         """
-        Appends tasks from another pipeline builder into a new in_parallel group inside this one
+        Appends tasks from another pipeline builders into a new in_parallel group inside this one
 
-        :param other: the other pipeline builder
+        :param pipelines: the other pipeline builders
         :param option max_parallelism: the maximum number of tasks to invoke in parallel for this group 
         :param option return_exceptions: if True then tasks that raise exceptions will not cause an aggregated exception to be thrown but instead will appear in the results
         :return: the builder
@@ -101,6 +110,7 @@ class PipelineBuilder(ProtobufSerialisable):
         group = Group(_gen_id(), max_parallelism=max_parallelism, return_exceptions=return_exceptions)
 
         for pipeline in pipelines:
+            self._raise_if_initial_parameters_are_set(pipeline)
             pipeline._add_to_group(group)
 
         self._pipeline.append(group)
@@ -108,6 +118,12 @@ class PipelineBuilder(ProtobufSerialisable):
 
     def _add_to_group(self, group: Group):
         group.add_to_group(self._pipeline)
+
+    def _raise_if_initial_parameters_are_set(self, pipeline=None):
+        pipeline = pipeline or self
+
+        if pipeline.has_initial_parameters:
+            raise ValueError('Ambiguous initial parameters')
 
     def send(self, fun, *args, **kwargs) -> 'PipelineBuilder':
         """
