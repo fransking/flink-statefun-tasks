@@ -420,6 +420,16 @@ class ParallelWorkflowTests(unittest.TestCase):
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, ['Hello John Smith', 'Hello John Smith'])
 
+    def test_adding_from_pipeline_with_initial_parameters_set_throws_error(self):
+        parallel_pipeline = in_parallel([_say_hello_from_state.send(), _say_hello_from_state.send()]).with_initial(state='John Smith')
+        
+        try:
+            in_parallel([parallel_pipeline])
+        except ValueError as ex:
+            self.assertEqual(str(ex), 'Ambiguous initial parameters')
+        else:
+            self.fail('Expected an exception')
+
     def test_parallel_workflow_with_error_when_returning_exceptions(self):
         global join_results_called
         join_results_called = False

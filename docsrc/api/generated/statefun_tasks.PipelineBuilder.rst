@@ -37,6 +37,7 @@ PipelineBuilder
    
     
    
+      ~PipelineBuilder.has_initial_parameters
       ~PipelineBuilder.id
       ~PipelineBuilder.is_inline
 
@@ -49,6 +50,7 @@ PipelineBuilder
 
    .. autosummary::
    
+      ~PipelineBuilder.has_initial_parameters
       ~PipelineBuilder.id
       ~PipelineBuilder.is_inline
    
