@@ -167,5 +167,25 @@ class SimplePipelineTests(unittest.TestCase):
         else:
             self.fail('Expected a TaskErrorException')
 
+    def test_pipeline_composition(self):
+        pipeline = tasks.send(_say_hello, 'Jane', 'Doe')
+        continuation = tasks.send(_say_goodbye, goodbye_message="see you later!")
+        continuation.append_to(pipeline)
+
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, 'Hello Jane Doe.  So now I will say see you later!')
+
+    def test_pipeline_composition_fails_if_initial_parameters_are_set(self):
+        pipeline = tasks.send(_say_hello, 'Jane', 'Doe')
+        continuation = tasks.send(_say_goodbye, goodbye_message="see you later!").with_initial(state=1)
+
+        try:
+            continuation.append_to(pipeline)
+        except ValueError as ex:
+            self.assertEqual(str(ex), 'Ambiguous initial parameters')
+        else:
+            self.fail('Expected an exception')
+
+
 if __name__ == '__main__':
     unittest.main()
