@@ -248,7 +248,7 @@ class PipelineBuilder(ProtobufSerialisable):
 
     def exceptionally(self, exception_task, *args, **kwargs) -> 'PipelineBuilder':
         """
-        Adds finally to the pipeline
+        Adds exceptionally to the pipeline
 
         :param exception_task: the python function which should be decorated with @tasks.bind()
         :param args: the task args
