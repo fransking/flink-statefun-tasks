@@ -127,6 +127,33 @@ def empty_parallel_workflow_with_exceptionally_that_throws_error(first_name, las
 
 
 @tasks.bind()
+def task_that_fails_followed_by_in_a_parallel_followed_by_exceptionally(first_name, last_name):
+    grouping = [
+        _say_hello.send(first_name, last_name),
+        _say_hello.send(first_name, last_name)
+    ]
+
+    grouping2 = [
+        _say_hello.send(first_name, last_name),
+        _say_hello.send(first_name, last_name)
+    ]
+
+    grouping3 = [
+        _say_hello.send(first_name, last_name),
+        _say_hello.send(first_name, last_name)
+    ]
+
+    grouping4 = in_parallel(grouping3)
+
+    return _throw_error.send() \
+        .continue_with(in_parallel(grouping)) \
+        .continue_with(_say_hello, first_name, last_name) \
+        .continue_with(in_parallel([grouping4])) \
+        .continue_with(_say_hello, first_name, last_name) \
+        .exceptionally(_return_error)
+
+
+@tasks.bind()
 def parallel_workflow_with_exceptionally_inside_that_does_not_error(first_name, last_name, max_parallelism=None):
     return in_parallel([
         _say_hello.send(first_name, last_name).continue_with(_return_value).exceptionally(_return_error),
@@ -220,6 +247,12 @@ class ExceptionallyTests(unittest.TestCase):
 
     def test_an_empty_parallel_pipeline_with_exceptionally(self):
         pipeline = tasks.send(empty_parallel_workflow_with_exceptionally_that_throws_error, 'Jane', last_name='Doe')
+
+        result = self.test_harness.run_pipeline(pipeline)
+        self.assertEqual(result, 'Exception: I am supposed to fail')
+
+    def test_a_task_that_fails_followed_by_in_a_parallel_followed_by_exceptionally(self):
+        pipeline = tasks.send(task_that_fails_followed_by_in_a_parallel_followed_by_exceptionally, 'Jane', last_name='Doe')
 
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result, 'Exception: I am supposed to fail')
