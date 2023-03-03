@@ -183,9 +183,16 @@ class PipelineGraph(object):
             # task if we have one or otherwise to the finally task if we have one
             task = next_step
 
-            while task is not None and isinstance(task, Task) and not task.is_exceptionally:
-                skipped_tasks.append(next_step)
-                _, task, _, _ = self._get_next_step_in_pipeline(task.uid)
+            # this is made more complicated by having possibly nested groups which also need to be skipped over
+            while task is not None:
+                if isinstance(task, Group):
+                    skipped_tasks.extend(self.yield_tasks([task]))
+                    _, task, _, _ = self._get_next_step_in_pipeline(skipped_tasks[-1].uid)
+                elif isinstance(task, Task) and not task.is_exceptionally:
+                    skipped_tasks.append(task)
+                    _, task, _, _ = self._get_next_step_in_pipeline(task.uid)
+                else:
+                    break
 
             next_step = task or next_step
 
