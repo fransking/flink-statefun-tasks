@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FlinkTasks &mdash; Flink Tasks  documentation</title>
@@ -12,10 +12,8 @@
   <![endif]-->
   
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -28,11 +26,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> Flink Tasks
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Flink Tasks
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -55,7 +57,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../deployment_topologies.html">Deployment Topologies</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../../api.html">API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../flink_tasks.html">Worker API</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">FlinkTasks</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">FlinkTasks</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#statefun_tasks.FlinkTasks"><code class="docutils literal notranslate"><span class="pre">FlinkTasks</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="statefun_tasks.TaskContext.html">TaskContext</a></li>
 <li class="toctree-l3"><a class="reference internal" href="statefun_tasks.PipelineBuilder.html">PipelineBuilder</a></li>
 <li class="toctree-l3"><a class="reference internal" href="statefun_tasks.DefaultSerialiser.html">DefaultSerialiser</a></li>
@@ -80,10 +85,10 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../api.html">API Reference</a> &raquo;</li>
-          <li><a href="../flink_tasks.html">Worker API</a> &raquo;</li>
-      <li>FlinkTasks</li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../api.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../flink_tasks.html">Worker API</a></li>
+      <li class="breadcrumb-item active">FlinkTasks</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -101,7 +106,7 @@
 <p>An instance should be instantiated at the top of your api file and used to decorate functions
 to be exposed as tasks.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>default_namespace</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – namespace to expose functions under. Maps to Flink Statefun function namespace in module.yaml</p></li>
 <li><p><strong>default_worker_name</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – worker name to expose.  Maps to Flink Statefun function type in module.yaml</p></li>
@@ -119,10 +124,6 @@ to be exposed as tasks.</p>
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.__init__" title="statefun_tasks.FlinkTasks.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([default_namespace, ...])</p></td>
 <td><p></p></td>
@@ -140,7 +141,7 @@ to be exposed as tasks.</p>
 <td><p>Adds the extensions to make a function unsable by a PipelineBuilder -&gt; fn.send(), fn.to_task() and fn.defaults()</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.fail" title="statefun_tasks.FlinkTasks.fail"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fail</span></code></a>(context, task_input, ex[, delay, ...])</p></td>
-<td><p>Sends a failure :param context: TaskContext :param task_input: the incoming TaskRequest or TaskActionRequest :param ex: the exception to return :param optional delay: the delay before Flink sends the result :param optional cancellation_token: a cancellation token to associate with this message</p></td>
+<td><p>Sends a failure :type context: :param context: TaskContext :type task_input: :param task_input: the incoming TaskRequest or TaskActionRequest :type ex: :param ex: the exception to return :param optional delay: the delay before Flink sends the result :param optional cancellation_token: a cancellation token to associate with this message</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_pipeline</span></code>(context)</p></td>
 <td><p></p></td>
@@ -161,7 +162,7 @@ to be exposed as tasks.</p>
 <td><p>Returns a PipelineBuilder with this task as the first item in the pipeline</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.send_result" title="statefun_tasks.FlinkTasks.send_result"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_result</span></code></a>(context, task_request, result[, ...])</p></td>
-<td><p>Sends a result :type context: <a class="reference internal" href="statefun_tasks.TaskContext.html#statefun_tasks.TaskContext" title="statefun_tasks.context.TaskContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">TaskContext</span></code></a> :param context: TaskContext :type task_request: <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskRequest</span></code> :param task_request: the incoming TaskRequest :param result: the result(s) to return :param state: the state to include in the result.</p></td>
+<td><p>Sends a result :type context: <a class="reference internal" href="statefun_tasks.TaskContext.html#statefun_tasks.TaskContext" title="statefun_tasks.context.TaskContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">TaskContext</span></code></a> :param context: TaskContext :type task_request: <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskRequest</span></code> :param task_request: the incoming TaskRequest :type result: :param result: the result(s) to return :type state: :param state: the state to include in the result.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">try_get_pipeline</span></code>(context)</p></td>
 <td><p></p></td>
@@ -179,10 +180,6 @@ to be exposed as tasks.</p>
 </table>
 <p class="rubric">Attributes</p>
 <table class="autosummary longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.events" title="statefun_tasks.FlinkTasks.events"><code class="xref py py-obj docutils literal notranslate"><span class="pre">events</span></code></a></p></td>
 <td><p>EventHandler for this FlinkTasks instance</p></td>
@@ -194,7 +191,7 @@ to be exposed as tasks.</p>
 <span class="sig-name descname"><span class="pre">bind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">worker_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retry_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_fruitful</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.bind" title="Permalink to this definition"></a></dt>
 <dd><p>Decorator to bind a function as a Flink Task</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>namespace</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – namespace to use in place of the default</p></li>
 <li><p><strong>worker_name</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – worker name to use in place of the default</p></li>
@@ -226,11 +223,6 @@ caller address details extracted as necessary from the context
 <dt class="sig sig-object py" id="statefun_tasks.FlinkTasks.events">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">events</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers" title="statefun_tasks.events.event_handlers.EventHandlers"><span class="pre">EventHandlers</span></a></em><a class="headerlink" href="#statefun_tasks.FlinkTasks.events" title="Permalink to this definition"></a></dt>
 <dd><p>EventHandler for this FlinkTasks instance</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers" title="statefun_tasks.events.event_handlers.EventHandlers"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventHandlers</span></code></a></p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -238,7 +230,7 @@ caller address details extracted as necessary from the context
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retry_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.extend" title="Permalink to this definition"></a></dt>
 <dd><p>Adds the extensions to make a function unsable by a PipelineBuilder -&gt; fn.send(), fn.to_task() and fn.defaults()</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>function</strong> – the function to wrap</p></li>
 <li><p><strong>retry_policy</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">RetryPolicy</span></code>]) – retry policy to use should the task throw an exception</p></li>
@@ -252,8 +244,11 @@ caller address details extracted as necessary from the context
 <dt class="sig sig-object py" id="statefun_tasks.FlinkTasks.fail">
 <em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cancellation_token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.fail" title="Permalink to this definition"></a></dt>
 <dd><p>Sends a failure
+:type context:
 :param context: TaskContext
+:type task_input:
 :param task_input: the incoming TaskRequest or TaskActionRequest
+:type ex:
 :param ex: the exception to return
 :param optional delay: the delay before Flink sends the result
 :param optional cancellation_token: a cancellation token to associate with this message</p>
@@ -264,13 +259,13 @@ caller address details extracted as necessary from the context
 <span class="sig-name descname"><span class="pre">get_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.get_task" title="Permalink to this definition"></a></dt>
 <dd><p>Returns the Flink Task instance for a given task type name</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>task_type</strong> – task type name e.g. examples.multiply</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">FlinkTask</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>the Flink Task</p>
 </dd>
 </dl>
@@ -282,7 +277,7 @@ caller address details extracted as necessary from the context
 <dd><p>Registers a Python function as a Flink Task.
 Normally you would attribute the function with &#64;tasks.bind() instead</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>fun</strong> – the python function</p></li>
 <li><p><strong>wrapper</strong> (<em>optional</em>) – if wrapping a task function with e.g. functools.wraps then pass the wrapper here</p></li>
@@ -299,7 +294,7 @@ Normally you would attribute the function with &#64;tasks.bind() instead</p>
 <dd><p>Registers a built in Flink Task e.g. __builtins.run_pipeline
 This should only be used if you want to provide your own built in (pre-defined) tasks</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>fun</strong> – a function, partial or lambda representing the built in</p></li>
 <li><p><strong>params</strong> – any additional parameters to the Flink Task (such as a retry policy)</p></li>
@@ -313,7 +308,7 @@ This should only be used if you want to provide your own built in (pre-defined) 
 <em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.run_async" title="Permalink to this definition"></a></dt>
 <dd><p>Runs an async Flink Task</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>context</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Context</span></code>) – context object provided by Flink</p></li>
 <li><p><strong>message</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Message</span></code>) – the task input protobuf message</p></li>
@@ -327,17 +322,17 @@ This should only be used if you want to provide your own built in (pre-defined) 
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">send</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.send" title="Permalink to this definition"></a></dt>
 <dd><p>Returns a PipelineBuilder with this task as the first item in the pipeline</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>func</strong> – a function decorated with &#64;tasks.bind()</p></li>
 <li><p><strong>args</strong> – task args</p></li>
 <li><p><strong>kwargs</strong> – task kwargs</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>a pipeline builder</p>
 </dd>
 </dl>
@@ -351,7 +346,9 @@ This should only be used if you want to provide your own built in (pre-defined) 
 :param context: TaskContext
 :type task_request: <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskRequest</span></code>
 :param task_request: the incoming TaskRequest
+:type result:
 :param result: the result(s) to return
+:type state:
 :param state: the state to include in the result.  If not specified it will be copied from the TaskRequest
 :param optional delay: the delay before Flink sends the result
 :param optional cancellation_token: a cancellation token to associate with this message</p>

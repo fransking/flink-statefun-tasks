@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DefaultSerialiser &mdash; Flink Tasks  documentation</title>
@@ -12,10 +12,8 @@
   <![endif]-->
   
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -28,11 +26,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> Flink Tasks
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Flink Tasks
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -58,7 +60,10 @@
 <li class="toctree-l3"><a class="reference internal" href="statefun_tasks.FlinkTasks.html">FlinkTasks</a></li>
 <li class="toctree-l3"><a class="reference internal" href="statefun_tasks.TaskContext.html">TaskContext</a></li>
 <li class="toctree-l3"><a class="reference internal" href="statefun_tasks.PipelineBuilder.html">PipelineBuilder</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">DefaultSerialiser</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">DefaultSerialiser</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#statefun_tasks.DefaultSerialiser"><code class="docutils literal notranslate"><span class="pre">DefaultSerialiser</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="statefun_tasks.events.EventHandlers.html">EventHandlers</a></li>
 </ul>
 </li>
@@ -80,10 +85,10 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../api.html">API Reference</a> &raquo;</li>
-          <li><a href="../flink_tasks.html">Worker API</a> &raquo;</li>
-      <li>DefaultSerialiser</li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../api.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../flink_tasks.html">Worker API</a></li>
+      <li class="breadcrumb-item active">DefaultSerialiser</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -99,7 +104,7 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">statefun_tasks.</span></span><span class="sig-name descname"><span class="pre">DefaultSerialiser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">known_proto_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protobuf_converters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.DefaultSerialiser" title="Permalink to this definition"></a></dt>
 <dd><p>Default protobuf serialiser for Flink Tasks</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>known_proto_types</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Message</span></code>]]]) – an array of known protobuf types that will not be packed inside Any</p>
 </dd>
 </dl>
@@ -110,10 +115,6 @@
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.DefaultSerialiser.__init__" title="statefun_tasks.DefaultSerialiser.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([known_proto_types, ...])</p></td>
 <td><p></p></td>
@@ -164,10 +165,10 @@
 <span class="sig-name descname"><span class="pre">deserialise_args_and_kwargs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.DefaultSerialiser.deserialise_args_and_kwargs" title="Permalink to this definition"></a></dt>
 <dd><p>Deserialises Any into Python args and kwargs</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>request</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>) – the protobuf message</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Any</span></code>) – the protobuf message</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>tuple of args and kwargs</p>
 </dd>
 </dl>
@@ -178,10 +179,10 @@
 <span class="sig-name descname"><span class="pre">deserialise_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_request</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.DefaultSerialiser.deserialise_request" title="Permalink to this definition"></a></dt>
 <dd><p>Dserialises a TaskRequest back into args, kwargs and state</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>task_request</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TaskRequest</span></code>) – the TaskRequest</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>tuple of task args, kwargs and state</p>
 </dd>
 </dl>
@@ -192,10 +193,10 @@
 <span class="sig-name descname"><span class="pre">deserialise_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_result</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.DefaultSerialiser.deserialise_result" title="Permalink to this definition"></a></dt>
 <dd><p>Dserialises a TaskResult back into result and state</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>task_result</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TaskResult</span></code>) – the TaskResult</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>tuple of result and state</p>
 </dd>
 </dl>
@@ -206,13 +207,13 @@
 <span class="sig-name descname"><span class="pre">from_proto</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.DefaultSerialiser.from_proto" title="Permalink to this definition"></a></dt>
 <dd><p>Converts from protobuf to Python</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>proto</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Message</span></code>) – the protobuf message</p></li>
 <li><p><strong>default</strong> (<em>option</em>) – an optional default value to return</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>the Python type or default value if deserialisation return None</p>
 </dd>
 </dl>
@@ -224,17 +225,17 @@
 <dd><p>Merges args &amp; kwargs passed explicity to a task entry in a pipeline with results from the previous task.
 If there are no args &amp; kwargs to merge then the result of the previous task is returned unchanged</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>task_args_and_kwargs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ArgsAndKwargs</span></code>) – the args and kwargs from the task entry to merge args and kwargs into</p></li>
 <li><p><strong>args</strong> (<em>option</em>) – the args to merge from</p></li>
 <li><p><strong>kwargs</strong> (<em>option</em>) – the kwargs to merge from</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Any</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Any</p>
 </dd>
 </dl>
@@ -247,16 +248,16 @@ If there are no args &amp; kwargs to merge then the result of the previous task 
 <p>If there is a single arg and no kwargs and the arg is already a protobuf it returns
 that instance packed inside an Any.  Otherwise it returns an ArgsAndKwargs packed in an Any.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>args</strong> – the Python args</p></li>
 <li><p><strong>kwargs</strong> – the Python kwargs</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Any</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>protobuf Any</p>
 </dd>
 </dl>
@@ -267,10 +268,10 @@ that instance packed inside an Any.  Otherwise it returns an ArgsAndKwargs packe
 <span class="sig-name descname"><span class="pre">serialise_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retry_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.DefaultSerialiser.serialise_request" title="Permalink to this definition"></a></dt>
 <dd><p>Serialises args, kwargs and optional state into a TaskRequest</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>task_request</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TaskRequest</span></code>) – the TaskRequest</p></li>
-<li><p><strong>request</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>) – request (proto format)</p></li>
+<li><p><strong>request</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Any</span></code>) – request (proto format)</p></li>
 <li><p><strong>state</strong> (<em>optional</em>) – task state</p></li>
 <li><p><strong>retry_policy</strong> (<em>optional</em>) – task retry policy</p></li>
 </ul>
@@ -283,7 +284,7 @@ that instance packed inside an Any.  Otherwise it returns an ArgsAndKwargs packe
 <span class="sig-name descname"><span class="pre">serialise_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.DefaultSerialiser.serialise_result" title="Permalink to this definition"></a></dt>
 <dd><p>Serialises the result of a task invocation into a TaskResult</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>task_result</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TaskResult</span></code>) – the TaskResult</p></li>
 <li><p><strong>result</strong> – task result</p></li>
@@ -298,13 +299,13 @@ that instance packed inside an Any.  Otherwise it returns an ArgsAndKwargs packe
 <span class="sig-name descname"><span class="pre">to_args_and_kwargs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.DefaultSerialiser.to_args_and_kwargs" title="Permalink to this definition"></a></dt>
 <dd><p>Unpacks Any into Protobuf ArgsAndKwargs</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>request</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>) – the protobuf message</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Any</span></code>) – the protobuf message</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ArgsAndKwargs</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>ArgsAndKwargs</p>
 </dd>
 </dl>
@@ -315,13 +316,13 @@ that instance packed inside an Any.  Otherwise it returns an ArgsAndKwargs packe
 <span class="sig-name descname"><span class="pre">to_proto</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.DefaultSerialiser.to_proto" title="Permalink to this definition"></a></dt>
 <dd><p>Converts from Python to protobuf</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>item</strong> – the item to convert</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Message</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>the protobuf message possibly packed in an Any</p>
 </dd>
 </dl>
@@ -333,10 +334,10 @@ that instance packed inside an Any.  Otherwise it returns an ArgsAndKwargs packe
 <dd><p>Unpacks a TaskResult or TaskException back into result and state.
 If a TaskException is provided as input then the return value will be TupleOfAny, TaskException.state</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>task_result_or_exception</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TaskResult</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskException</span></code>]) – the TaskResult</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>tuple of result and state.</p>
 </dd>
 </dl>
