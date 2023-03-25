@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TaskContext &mdash; Flink Tasks  documentation</title>
@@ -12,10 +12,8 @@
   <![endif]-->
   
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -28,11 +26,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> Flink Tasks
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Flink Tasks
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -56,7 +58,10 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../../api.html">API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../flink_tasks.html">Worker API</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="statefun_tasks.FlinkTasks.html">FlinkTasks</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">TaskContext</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">TaskContext</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#statefun_tasks.TaskContext"><code class="docutils literal notranslate"><span class="pre">TaskContext</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="statefun_tasks.PipelineBuilder.html">PipelineBuilder</a></li>
 <li class="toctree-l3"><a class="reference internal" href="statefun_tasks.DefaultSerialiser.html">DefaultSerialiser</a></li>
 <li class="toctree-l3"><a class="reference internal" href="statefun_tasks.events.EventHandlers.html">EventHandlers</a></li>
@@ -80,10 +85,10 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../api.html">API Reference</a> &raquo;</li>
-          <li><a href="../flink_tasks.html">Worker API</a> &raquo;</li>
-      <li>TaskContext</li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../api.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../flink_tasks.html">Worker API</a></li>
+      <li class="breadcrumb-item active">TaskContext</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -99,7 +104,7 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">statefun_tasks.</span></span><span class="sig-name descname"><span class="pre">TaskContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">egress_type_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">egress_message_max_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">serialiser</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext" title="Permalink to this definition"></a></dt>
 <dd><p>Task context wrapper around Flink context</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>context</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Context</span></code>) – Flink context</p></li>
 <li><p><strong>egress_type_name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – egress type name to use when calling send_egress_message()</p></li>
@@ -115,10 +120,6 @@
 
 <p class="rubric">Methods</p>
 <table class="autosummary longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.__init__" title="statefun_tasks.TaskContext.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(context, egress_type_name[, ...])</p></td>
 <td><p></p></td>
@@ -217,10 +218,6 @@
 </table>
 <p class="rubric">Attributes</p>
 <table class="autosummary longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">storage</span></code></p></td>
 <td><p></p></td>
@@ -247,7 +244,7 @@
 <span class="sig-name descname"><span class="pre">cancel_message</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cancellation_token</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.cancel_message" title="Permalink to this definition"></a></dt>
 <dd><p>Attempts to cancel a message associated with this cancellation token</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>cancellation_token</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the cancellation token</p>
 </dd>
 </dl>
@@ -258,7 +255,7 @@
 <span class="sig-name descname"><span class="pre">contextualise_from</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_request</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.contextualise_from" title="Permalink to this definition"></a></dt>
 <dd><p>Sets additional context properties from the supplied task request</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>task_request</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TaskRequest</span></code>) – the task request</p>
 </dd>
 </dl>
@@ -269,7 +266,7 @@
 <span class="sig-name descname"><span class="pre">get_address</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_address" title="Permalink to this definition"></a></dt>
 <dd><p>Own address in the form of context.address.typename</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>address</p>
 </dd>
 </dl>
@@ -280,7 +277,7 @@
 <span class="sig-name descname"><span class="pre">get_caller_address</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_caller_address" title="Permalink to this definition"></a></dt>
 <dd><p>Caller address in the form of context.caller.typename</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>address</p>
 </dd>
 </dl>
@@ -291,7 +288,7 @@
 <span class="sig-name descname"><span class="pre">get_caller_id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_caller_id" title="Permalink to this definition"></a></dt>
 <dd><p>Caller task Id in the form of context.caller.id</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>task Id</p>
 </dd>
 </dl>
@@ -302,7 +299,7 @@
 <span class="sig-name descname"><span class="pre">get_namespace</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_namespace" title="Permalink to this definition"></a></dt>
 <dd><p>Own namespace in the form of context.address.typename</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>address</p>
 </dd>
 </dl>
@@ -313,7 +310,7 @@
 <span class="sig-name descname"><span class="pre">get_parent_pipeline_address</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_parent_pipeline_address" title="Permalink to this definition"></a></dt>
 <dd><p>Address of the parent pipeline if this task is called as part of a pipeline else None</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>pipeline address</p>
 </dd>
 </dl>
@@ -324,7 +321,7 @@
 <span class="sig-name descname"><span class="pre">get_parent_pipeline_id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_parent_pipeline_id" title="Permalink to this definition"></a></dt>
 <dd><p>ID of the parent pipeline if this task is called as part of a pipeline else None</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>pipeline ID</p>
 </dd>
 </dl>
@@ -335,7 +332,7 @@
 <span class="sig-name descname"><span class="pre">get_parent_task_address</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_parent_task_address" title="Permalink to this definition"></a></dt>
 <dd><p>ID of the parent task address if this task has one else None</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>parent task address</p>
 </dd>
 </dl>
@@ -346,7 +343,7 @@
 <span class="sig-name descname"><span class="pre">get_parent_task_id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_parent_task_id" title="Permalink to this definition"></a></dt>
 <dd><p>ID of the parent task if this task has one else None</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>parent task ID</p>
 </dd>
 </dl>
@@ -357,7 +354,7 @@
 <span class="sig-name descname"><span class="pre">get_pipeline_address</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_pipeline_address" title="Permalink to this definition"></a></dt>
 <dd><p>Address of the pipeline if this task is called as part of a pipeline else None</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>pipeline address</p>
 </dd>
 </dl>
@@ -368,7 +365,7 @@
 <span class="sig-name descname"><span class="pre">get_pipeline_id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_pipeline_id" title="Permalink to this definition"></a></dt>
 <dd><p>ID of the pipeline if this task is called as part of a pipeline else None</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>pipeline ID</p>
 </dd>
 </dl>
@@ -379,7 +376,7 @@
 <span class="sig-name descname"><span class="pre">get_root_pipeline_address</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_root_pipeline_address" title="Permalink to this definition"></a></dt>
 <dd><p>Address of the top most pipeline if this task is called as part of a pipeline else None.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>root pipeline address</p>
 </dd>
 </dl>
@@ -398,7 +395,7 @@ get_pipeline_id() if the pipeline is nested
 <span class="sig-name descname"><span class="pre">get_task_id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_task_id" title="Permalink to this definition"></a></dt>
 <dd><p>Own task Id in the form of context.address.id</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>task Id</p>
 </dd>
 </dl>
@@ -409,7 +406,7 @@ get_pipeline_id() if the pipeline is nested
 <span class="sig-name descname"><span class="pre">get_worker_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_worker_name" title="Permalink to this definition"></a></dt>
 <dd><p>Own worker_name in the form of context.address.typename</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>address</p>
 </dd>
 </dl>
@@ -422,7 +419,7 @@ get_pipeline_id() if the pipeline is nested
 due to a MessageSizeExceeded exception sends the value created by
 the error error_function instead</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>topic</strong> – the topic name</p></li>
 <li><p><strong>value</strong> – the message to send</p></li>
@@ -437,7 +434,7 @@ the error error_function instead</p>
 <span class="sig-name descname"><span class="pre">send_egress_message</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.send_egress_message" title="Permalink to this definition"></a></dt>
 <dd><p>Sends a message to an egress topic</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>topic</strong> – the topic name</p></li>
 <li><p><strong>value</strong> – the message to send</p></li>
@@ -451,7 +448,7 @@ the error error_function instead</p>
 <span class="sig-name descname"><span class="pre">send_message</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">destination</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cancellation_token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.send_message" title="Permalink to this definition"></a></dt>
 <dd><p>Sends a message to another Flink Task worker</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>destination</strong> – the destination to send the message to (e.g. example/worker)</p></li>
 <li><p><strong>target_id</strong> – the target Id</p></li>
@@ -468,7 +465,7 @@ the error error_function instead</p>
 <span class="sig-name descname"><span class="pre">send_message_after</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">destination</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cancellation_token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.send_message_after" title="Permalink to this definition"></a></dt>
 <dd><p>Sends a message to another Flink Task worker after some delay</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>delay</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">timedelta</span></code>) – the delay</p></li>
 <li><p><strong>destination</strong> – the destination to send the message to (e.g. example/worker)</p></li>
@@ -498,10 +495,10 @@ stateful identity of this task</p>
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">to_address_and_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.to_address_and_id" title="Permalink to this definition"></a></dt>
 <dd><p>Converts SdkAddress into a string representation</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>address</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">SdkAddress</span></code>) – SDK address</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>address and id in the format namespace/type/id</p>
 </dd>
 </dl>
