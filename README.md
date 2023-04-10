@@ -22,6 +22,6 @@ def say_goodbye(greeting):
     return f'{greeting}.  So now I will say goodbye'
 ```
 
-Try the [demo](https://flink-demo-az.sbbsystems.co.uk)
+Try the [demo](https://flink-demo-az.sbbsystems.co.uk).
 
 Additional documentation can be found [here](https://fransking.github.io/flink-statefun-tasks).
