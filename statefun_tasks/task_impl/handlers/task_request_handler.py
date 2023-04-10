@@ -54,7 +54,7 @@ class TaskRequestHandler(MessageHandler):
             if self._attempt_retry(context, task_request, task_exception):
                 return  # we have triggered a retry so ignore the result of this invocation
 
-            context.pack_and_save('task_result', task_exception)
+            context.pack_and_save('task_exception', task_exception)
             await tasks.emit_result(context, task_request, task_exception)
 
         # else if we have a task result return it
