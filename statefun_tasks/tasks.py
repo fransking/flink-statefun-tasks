@@ -5,6 +5,7 @@ from statefun_tasks.utils import _is_tuple, _type_name, _annotated_protos_for
 from statefun_tasks.messages_pb2 import TaskRequest
 from statefun_tasks.type_helpers import _create_task_result, _create_task_exception
 from statefun_tasks.types import YieldTaskInvocation
+from statefun_tasks.effects import Effect
 
 from typing import AsyncGenerator, Generator
 import inspect
@@ -41,7 +42,7 @@ class FlinkTask(object):
         return self._fun
 
     async def run(self, task_context: TaskContext, task_request: TaskRequest):
-        task_result, task_exception, pipeline = None, None, None
+        task_result, task_exception, pipeline, effect = None, None, None, None
 
         task_args, kwargs, fn_state = self._to_task_args_and_kwargs(task_context, task_request)
 
@@ -58,11 +59,19 @@ class FlinkTask(object):
 
             # await coros
             elif asyncio.iscoroutine(fn_result):
-                fn_result = await fn_result
+                fn_result = await fn_result               
 
+            # result of a task might be wrapped in an effect
+            if isinstance(fn_result, Effect):
+                effect = fn_result
+                fn_result = effect.fn_result
+                
             pipeline, task_result, fn_state = self._to_pipeline_or_task_result(task_context, task_request, fn_result, fn_state)
 
-        
+            # apply effects if we have them
+            if effect is not None:
+                effect.apply(task_result)
+
         except YieldTaskInvocation as e:
             # task yielded so we don't output anything
             ()
@@ -74,7 +83,7 @@ class FlinkTask(object):
         return task_result, task_exception, pipeline, fn_state
 
     def _to_pipeline_or_task_result(self, task_context, task_request, fn_result, fn_state):
-        pipeline, task_result, is_fruitful = None, None, self._is_fruitful
+        pipeline, is_fruitful = None, self._is_fruitful
 
         if is_fruitful and task_request.HasField('is_fruitful'):
             is_fruitful = task_request.is_fruitful

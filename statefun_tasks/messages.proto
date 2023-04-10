@@ -104,6 +104,7 @@ message TaskResult {
     google.protobuf.Any state = 4;
     optional string invocation_id = 5;
     string uid = 6;
+    bool is_wait = 11;
 }
 
 message TaskException {
@@ -117,6 +118,7 @@ message TaskException {
     TaskRetryPolicy retry_policy = 8;
     optional string invocation_id = 9;
     string uid = 10;
+    bool is_wait = 11;
 }
 
 message TaskResultOrException {
