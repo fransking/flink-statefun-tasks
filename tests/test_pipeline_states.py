@@ -75,6 +75,21 @@ class PipelineStateTests(unittest.TestCase):
         self.assertIn(pipeline.id, _status)
         self.assertEqual(_status[pipeline.id], TaskStatus.PAUSED)
 
+    def test_pipeline_with_task_in_a_group_that_waits(self):
+        pipeline = in_parallel([
+            tasks.send(_say_hello, 'Jane', 'Doe').wait(),
+            tasks.send(_say_hello, 'Joe', 'Blogs')
+            ]).continue_with(_say_goodbye, goodbye_message="see you later!")
+        self.test_harness.run_pipeline(pipeline)
+
+        entries = pipeline.get_tasks()
+        self.assertIn(entries[0][2], _started)  # first task in group
+        self.assertIn(entries[1][2], _started)  # second task in group
+        self.assertNotIn(entries[2][2], _started)  # task after group
+        
+        self.assertIn(pipeline.id, _status)
+        self.assertEqual(_status[pipeline.id], TaskStatus.PAUSED)
+
     def test_pipeline_with_group_that_waits(self):
         pipeline = in_parallel([
             tasks.send(_say_hello, 'Jane', 'Doe'),
