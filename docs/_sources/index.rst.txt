@@ -16,6 +16,7 @@ Check out the source code on `GitHub <https://github.com/fransking/flink-statefu
    pipelines
    actions
    stateful_tasks
+   effects
    events
    extensions
 
