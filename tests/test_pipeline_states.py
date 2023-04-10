@@ -2,6 +2,7 @@ import asyncio
 import unittest
 
 from statefun_tasks import in_parallel
+from statefun_tasks.effects import with_pause_pipeline
 from statefun_tasks.messages_pb2 import TaskStatus, TaskAction, TaskException
 from tests.utils import TestHarness, tasks
 from google.protobuf.any_pb2 import Any
@@ -47,11 +48,21 @@ def _set_state(_, state):
 
 
 @tasks.bind(with_state=True)
+def _set_state_with_effect(_, state):
+    return with_pause_pipeline(state)
+
+
+@tasks.bind(with_state=True)
 def _cleanup(state):
     global _final_state
 
     _final_state = state
     return state
+
+
+@tasks.bind()
+def _say_hello_with_effect(first_name, last_name):
+    return with_pause_pipeline(f'Hello {first_name} {last_name}')
 
 
 class PipelineStateTests(unittest.TestCase):
@@ -173,6 +184,31 @@ class PipelineStateTests(unittest.TestCase):
 
         # state is present in the finally_do
         self.assertEqual(_final_state, 'Some new state')
+
+    def test_pipeline_with_task_that_waits_via_an_effect(self):
+        pipeline = tasks.send(_say_hello_with_effect, 'Jane', 'Doe').continue_with(_say_goodbye, goodbye_message="see you later!")
+        self.test_harness.run_pipeline(pipeline)
+
+        entries = pipeline.get_tasks()
+        self.assertIn(entries[0][2], _started)  # first task
+        self.assertNotIn(entries[1][2], _started)  # second task after wait
+
+        self.assertIn(pipeline.id, _status)
+        self.assertEqual(_status[pipeline.id], TaskStatus.PAUSED)
+
+    def test_pipeline_with_state_that_is_mutated_then_waits_via_an_effect_and_then_is_cancelled(self):
+        pipeline = _set_state.send('Some initial state').continue_with(_set_state_with_effect, 'Some new state').continue_with(_say_hello, 'Jane', 'Doe').finally_do(_cleanup)
+        self.test_harness.run_pipeline(pipeline)
+        self.test_harness.run_action(pipeline, TaskAction.CANCEL_PIPELINE)
+
+        # pipeline result is an exception
+        action_result = self.test_harness.run_action(pipeline, TaskAction.GET_RESULT)
+        task_exception = self._unpack(action_result.result, TaskException)
+        self.assertEqual(task_exception.id, pipeline.id)
+
+        # state is present in the finally_do
+        self.assertEqual(_final_state, 'Some new state')
+
 
 if __name__ == '__main__':
     unittest.main()
