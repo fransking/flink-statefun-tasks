@@ -59,10 +59,10 @@ class ContinuePipelineHandler(PipelineMessageHandler):
                 # pause the pipeline if this completed group is a wait
                 if group.is_wait:
                     await pipeline.pause(context)
-        else:
-            # pause the pipeline if this task is a wait
-            if current_step.is_wait:  
-                await pipeline.pause(context)
+
+        # pause the pipeline if this task is a wait
+        if current_step.is_wait:  
+            await pipeline.pause(context)
 
         # notify event handlers of any skipped tasks such as exceptionally tasks that are passed over if we don't have a TaskException
         await pipeline.events.notify_pipeline_tasks_skipped(context, skipped_tasks)
