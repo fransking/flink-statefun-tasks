@@ -70,12 +70,12 @@ Raised when a task has returned a pipeline and it starts to run.
 On Pipeline Status Changed
 --------------------------
 
-Raised when the state of a pipeline changes e.g. from running to paused or completed.  Status can be read from the context.pipeline_state (PipelineState proto).
+Raised when the state of a pipeline changes e.g. from running to paused or completed.
 
 .. code-block:: python
 
     @tasks.events.on_pipeline_status_changed
-    def on_pipeline_status_changed(context, pipeline: Pipeline):
+    def on_pipeline_status_changed(context, pipeline: Pipeline, status: TaskStatus):
         pass
 
 
