@@ -37,18 +37,27 @@ def enable_inline_tasks(tasks: FlinkTasks):
 
         safer_locals = {'fn': fn, 'args': fn_args, 'kwargs': kwargs}
 
-        # sample restrictions on loaded code
-        # ----------------------------------
-        #
-        # safer_builtins = {**fn.__globals__['__builtins__']}
-        # fn.__globals__['__builtins__'] = safer_builtins
-        # del safer_builtins['exit']
+        # sample restrictions on loaded code to prevent accidents but not malicious behaviour
+        # don't accept pickled code from untrusted sources
+        safer_builtins = {**fn.__builtins__} if hasattr(fn, '__builtins__') else {**fn.__globals__['__builtins__']}  # Python >= 3.10 uses fn.__builtins__
+
+        if 'exit' in safer_builtins:
+            del safer_builtins['exit']
+
+        if 'quit' in safer_builtins:
+            del safer_builtins['quit']
 
         # safer_open = open
         # def safer_open(file, *sargs, **skwargs):
-        #     # you might check and raise error if file not in valid list of files for example...
-        #     open(file, *sargs, **skwargs)
+        #     raise OSError("Not allowed")
         # safer_builtins['open'] = safer_open
+
+        if hasattr(fn, '__builtins__'):
+            # Python >= 3.10
+            fn.__builtins__.clear()
+            fn.__builtins__.update(**safer_builtins)
+        else:
+            fn.__globals__['__builtins__'] = safer_builtins
 
         exec('__res = fn(*args, **kwargs)', {}, safer_locals)
         res = safer_locals['__res']
@@ -88,6 +97,7 @@ def inline_task(include=None, depends=None, with_context=False, with_state=False
             all_includes.update(dependency.includes())
 
         return list(all_includes)
+
 
     def pickle(fn):
         modules = _includes()

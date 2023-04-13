@@ -22,4 +22,4 @@ from statefun_tasks.types import Task, Group, RetryPolicy, TaskAlreadyExistsExce
 
 # protobuf message types
 from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, TaskActionRequest, TaskActionResult, \
-    TaskActionException, TaskAction, TaskStatus, TaskDeferral, PausedTask, ChildPipeline, Address, TaskInfo, DeferredTask
+    TaskActionException, TaskAction, TaskStatus, TaskDeferral, PausedTask, Pipeline, ChildPipeline, Address, TaskInfo, DeferredTask
