@@ -146,9 +146,9 @@ the result is greater than some limit in which case the caller will recieve that
 </section>
 <section id="on-pipeline-status-changed">
 <h2>On Pipeline Status Changed<a class="headerlink" href="#on-pipeline-status-changed" title="Permalink to this heading"></a></h2>
-<p>Raised when the state of a pipeline changes e.g. from running to paused or completed.  Status can be read from the context.pipeline_state (PipelineState proto).</p>
+<p>Raised when the state of a pipeline changes e.g. from running to paused or completed.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">on_pipeline_status_changed</span>
-<span class="k">def</span> <span class="nf">on_pipeline_status_changed</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">:</span> <span class="n">Pipeline</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">on_pipeline_status_changed</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">:</span> <span class="n">Pipeline</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="n">TaskStatus</span><span class="p">):</span>
     <span class="k">pass</span>
 </pre></div>
 </div>
