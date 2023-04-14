@@ -10,3 +10,4 @@ twine
 keyrings.alt
 cloudpickle
 aiobotocore
+pytest

@@ -2,8 +2,8 @@ import unittest
 
 from google.protobuf.any_pb2 import Any
 
-from tests.test_messages_pb2 import TestProto, TestResultProto, UnknownProto
-from tests.utils import TestHarness, tasks
+from tests.test_messages_pb2 import Proto, ResultProto, UnknownProto
+from tests.utils import FlinkTestHarness, tasks
 
 
 class MyClass:
@@ -16,8 +16,8 @@ def return_my_class_my_field(my_class):
 
 
 @tasks.bind()
-def receive_and_reply_protobuf_fully_annotated(test_proto: TestProto) -> TestResultProto:
-    return TestResultProto(value_str=str(type(test_proto)))
+def receive_and_reply_protobuf_fully_annotated(test_proto: Proto) -> ResultProto:
+    return ResultProto(value_str=str(type(test_proto)))
 
 
 @tasks.bind()
@@ -26,8 +26,8 @@ def receive_and_reply_protobuf_not_annotated(test_proto) -> Any:
 
 
 @tasks.bind()
-def protobuf_fully_annotated_continuation(test_proto: TestResultProto) -> TestResultProto:
-    return TestResultProto(value_str=str(type(test_proto)))
+def protobuf_fully_annotated_continuation(test_proto: ResultProto) -> ResultProto:
+    return ResultProto(value_str=str(type(test_proto)))
 
 
 @tasks.bind()
@@ -37,7 +37,7 @@ def receive_and_reply_primitives(a, b, c, d):
 
 class RequestResultSerialisationTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.test_harness = TestHarness()
+        self.test_harness = FlinkTestHarness()
 
     def test_sending_request_data_that_is_not_protobuf_serialisable(self):
         pipeline = tasks.send(return_my_class_my_field, MyClass())
@@ -50,16 +50,16 @@ class RequestResultSerialisationTests(unittest.TestCase):
 
 
     def test_sending_protobuf_to_function_with_annotations_uses_exact_protos(self):
-        pipeline = tasks.send(receive_and_reply_protobuf_fully_annotated, TestProto())
+        pipeline = tasks.send(receive_and_reply_protobuf_fully_annotated, Proto())
         result = self.test_harness.run_pipeline(pipeline)
-        self.assertIsInstance(result, TestResultProto)
-        self.assertEqual("<class 'test_messages_pb2.TestProto'>", result.value_str)
+        self.assertIsInstance(result, ResultProto)
+        self.assertEqual("<class 'test_messages_pb2.Proto'>", result.value_str)
 
     def test_sending_protobuf_to_function_continations_with_annotations_uses_exact_protos(self):
-        pipeline = tasks.send(receive_and_reply_protobuf_fully_annotated, TestProto()).continue_with(protobuf_fully_annotated_continuation)
+        pipeline = tasks.send(receive_and_reply_protobuf_fully_annotated, Proto()).continue_with(protobuf_fully_annotated_continuation)
         result = self.test_harness.run_pipeline(pipeline)
-        self.assertIsInstance(result, TestResultProto)
-        self.assertEqual("<class 'test_messages_pb2.TestResultProto'>", result.value_str)
+        self.assertIsInstance(result, ResultProto)
+        self.assertEqual("<class 'test_messages_pb2.ResultProto'>", result.value_str)
 
     def test_sending_protobuf_to_function_without_annotations_packs_as_any(self):
         pipeline = tasks.send(receive_and_reply_protobuf_not_annotated, UnknownProto())
@@ -83,14 +83,14 @@ class RequestResultSerialisationTests(unittest.TestCase):
         self.assertEqual(('four', ), d)
 
     def test_sending_embedded_protobuf_in_primitives_to_function(self):
-        pipeline = tasks.send(receive_and_reply_primitives, 1, TestProto(), [3], UnknownProto())
+        pipeline = tasks.send(receive_and_reply_primitives, 1, Proto(), [3], UnknownProto())
         result = self.test_harness.run_pipeline(pipeline)
         self.assertIsInstance(result, list)
 
         a, b, c, d = result
 
         self.assertEqual(1, a)
-        self.assertIsInstance(b, TestProto)
+        self.assertIsInstance(b, Proto)
         self.assertEqual({'c': [3]}, c)
 
         p, = d

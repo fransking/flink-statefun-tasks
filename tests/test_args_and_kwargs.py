@@ -1,6 +1,6 @@
 import unittest
 
-from tests.utils import TestHarness, tasks, TaskErrorException
+from tests.utils import FlinkTestHarness, tasks, TaskErrorException
 
 
 @tasks.bind()
@@ -31,7 +31,7 @@ def multi_arg_workflow_with_some_defaults(a, b, c='c', d='d'):
 
 class ArgsAndKwargsTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.test_harness = TestHarness()
+        self.test_harness = FlinkTestHarness()
 
     def test_passing_all_args(self):
         pipeline = tasks.send(multi_arg_workflow, 'a', 'b', 'c', 'd')

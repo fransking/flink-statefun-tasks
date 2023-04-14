@@ -1,6 +1,6 @@
 import unittest
 
-from tests.utils import TestHarness, tasks
+from tests.utils import FlinkTestHarness, tasks
 
 _received = []
 _started = []
@@ -91,7 +91,7 @@ def _handle_error(error):
 
 class EventsTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.test_harness = TestHarness()
+        self.test_harness = FlinkTestHarness()
 
     def test_pipeline_tasks_start_and_end(self):
         pipeline = tasks.send(_say_hello, 'Jane', 'Doe').continue_with(_say_goodbye, goodbye_message="see you later!")

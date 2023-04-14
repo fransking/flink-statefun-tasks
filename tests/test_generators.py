@@ -1,6 +1,6 @@
 import unittest
 
-from tests.utils import TestHarness, tasks
+from tests.utils import FlinkTestHarness, tasks
 
 
 @tasks.bind()
@@ -19,7 +19,7 @@ def return_generator():
 
 class GeneratorTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.test_harness = TestHarness()
+        self.test_harness = FlinkTestHarness()
 
     def test_async_generator(self):
         pipeline = return_async_generator.send()

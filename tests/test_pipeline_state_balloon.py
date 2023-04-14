@@ -1,7 +1,7 @@
 import unittest
 
 from statefun_tasks import in_parallel
-from tests.utils import TestHarness, tasks
+from tests.utils import FlinkTestHarness, tasks
 from os import urandom
 
 _max_state_size = {}
@@ -38,7 +38,7 @@ def recv_data(data):
 
 class PipelineStateBalloonTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.test_harness = TestHarness()
+        self.test_harness = FlinkTestHarness()
 
     def test_pipeline_in_parallel_aggregation(self):
         pipeline = in_parallel([gen_data.send(1), gen_data.send(1), gen_data.send(1)])
