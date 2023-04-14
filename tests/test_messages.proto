@@ -2,10 +2,10 @@ syntax = "proto3";
 
 package tests;
 
-message TestProto {
+message Proto {
 }
 
-message TestResultProto {
+message ResultProto {
     string value_str = 1;
 }
 
@@ -13,29 +13,29 @@ message UnknownProto {
     string value_str = 1;
 }
 
-message TestPerson {
+message Person {
     string first_name = 1;
     string last_name = 2;
 }
 
-message TestGreetingRequest {
-    TestPerson person = 1;
+message GreetingRequest {
+    Person person = 1;
     string message = 2;
 }
 
-message TestGreetingResponse {
+message GreetingResponse {
     string greeting = 3;
 }
 
-message TestMyType {
+message MyType {
     string string_field = 1;
 }
 
-message TestHelloWorkflowInputMessage {
+message HelloWorkflowInputMessage {
     string first_name = 1;
     string last_name = 2;
 }
 
-message TestHelloWorkflowResultMessage {
+message HelloWorkflowResultMessage {
     string message = 1;
 }

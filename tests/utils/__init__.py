@@ -1,1 +1,1 @@
-from .test_harness import tasks, TestHarness, TaskErrorException, other_tasks_instance
+from .test_harness import tasks, FlinkTestHarness, TaskErrorException, other_tasks_instance

@@ -3,12 +3,12 @@ from datetime import timedelta
 
 from statefun_tasks.extensions.inline_tasks import enable_inline_tasks, inline_task
 from statefun_tasks import RetryPolicy
-from tests.utils import TestHarness, tasks
+from tests.utils import FlinkTestHarness, tasks
 
 
 class InlineTasksTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.test_harness = TestHarness()
+        self.test_harness = FlinkTestHarness()
         enable_inline_tasks(tasks)
 
     def test_inline_task(self):

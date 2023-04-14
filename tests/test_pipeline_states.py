@@ -4,7 +4,7 @@ import unittest
 from statefun_tasks import in_parallel
 from statefun_tasks.effects import with_pause_pipeline
 from statefun_tasks.messages_pb2 import TaskStatus, TaskAction, TaskException
-from tests.utils import TestHarness, tasks
+from tests.utils import FlinkTestHarness, tasks
 from google.protobuf.any_pb2 import Any
 
 _started = []
@@ -67,7 +67,7 @@ def _say_hello_with_effect(first_name, last_name):
 
 class PipelineStateTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.test_harness = TestHarness()
+        self.test_harness = FlinkTestHarness()
 
     @staticmethod
     def _unpack(any_proto: Any, proto_type):

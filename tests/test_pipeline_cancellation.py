@@ -1,7 +1,7 @@
 import unittest
 
 from statefun_tasks import in_parallel, YieldTaskInvocation, TaskAction
-from tests.utils import TestHarness, tasks
+from tests.utils import FlinkTestHarness, tasks
 from uuid import uuid4
 
 
@@ -34,7 +34,7 @@ def _task():
 
 class PipelineCancellationTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.test_harness = TestHarness()
+        self.test_harness = FlinkTestHarness()
 
     def test_cancelling_an_in_parallel(self):
         task_id = str(uuid4())

@@ -1,6 +1,6 @@
 import asyncio
 import unittest
-from tests.utils import TestHarness, tasks, TaskErrorException
+from tests.utils import FlinkTestHarness, tasks, TaskErrorException
 
 
 finally_flag = False
@@ -83,7 +83,7 @@ def _cleanup_with_state(state, *args):
 
 class FinallyDoTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.test_harness = TestHarness()
+        self.test_harness = FlinkTestHarness()
 
     def test_pipeline_with_finally(self):
         global finally_flag

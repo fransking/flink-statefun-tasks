@@ -19,15 +19,15 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x13test_messages.proto\x12\x05tests\"\x0b\n\tTestProto\"$\n\x0fTestResultProto\x12\x11\n\tvalue_str\x18\x01 \x01(\t\"!\n\x0cUnknownProto\x12\x11\n\tvalue_str\x18\x01 \x01(\t\"3\n\nTestPerson\x12\x12\n\nfirst_name\x18\x01 \x01(\t\x12\x11\n\tlast_name\x18\x02 \x01(\t\"I\n\x13TestGreetingRequest\x12!\n\x06person\x18\x01 \x01(\x0b\x32\x11.tests.TestPerson\x12\x0f\n\x07message\x18\x02 \x01(\t\"(\n\x14TestGreetingResponse\x12\x10\n\x08greeting\x18\x03 \x01(\t\"\"\n\nTestMyType\x12\x14\n\x0cstring_field\x18\x01 \x01(\t\"F\n\x1dTestHelloWorkflowInputMessage\x12\x12\n\nfirst_name\x18\x01 \x01(\t\x12\x11\n\tlast_name\x18\x02 \x01(\t\"1\n\x1eTestHelloWorkflowResultMessage\x12\x0f\n\x07message\x18\x01 \x01(\tb\x06proto3'
+  serialized_pb=b'\n\x13test_messages.proto\x12\x05tests\"\x07\n\x05Proto\" \n\x0bResultProto\x12\x11\n\tvalue_str\x18\x01 \x01(\t\"!\n\x0cUnknownProto\x12\x11\n\tvalue_str\x18\x01 \x01(\t\"/\n\x06Person\x12\x12\n\nfirst_name\x18\x01 \x01(\t\x12\x11\n\tlast_name\x18\x02 \x01(\t\"A\n\x0fGreetingRequest\x12\x1d\n\x06person\x18\x01 \x01(\x0b\x32\r.tests.Person\x12\x0f\n\x07message\x18\x02 \x01(\t\"$\n\x10GreetingResponse\x12\x10\n\x08greeting\x18\x03 \x01(\t\"\x1e\n\x06MyType\x12\x14\n\x0cstring_field\x18\x01 \x01(\t\"B\n\x19HelloWorkflowInputMessage\x12\x12\n\nfirst_name\x18\x01 \x01(\t\x12\x11\n\tlast_name\x18\x02 \x01(\t\"-\n\x1aHelloWorkflowResultMessage\x12\x0f\n\x07message\x18\x01 \x01(\tb\x06proto3'
 )
 
 
 
 
-_TESTPROTO = _descriptor.Descriptor(
-  name='TestProto',
-  full_name='tests.TestProto',
+_PROTO = _descriptor.Descriptor(
+  name='Proto',
+  full_name='tests.Proto',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
@@ -46,20 +46,20 @@ _TESTPROTO = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=30,
-  serialized_end=41,
+  serialized_end=37,
 )
 
 
-_TESTRESULTPROTO = _descriptor.Descriptor(
-  name='TestResultProto',
-  full_name='tests.TestResultProto',
+_RESULTPROTO = _descriptor.Descriptor(
+  name='ResultProto',
+  full_name='tests.ResultProto',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='value_str', full_name='tests.TestResultProto.value_str', index=0,
+      name='value_str', full_name='tests.ResultProto.value_str', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -77,8 +77,8 @@ _TESTRESULTPROTO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=43,
-  serialized_end=79,
+  serialized_start=39,
+  serialized_end=71,
 )
 
 
@@ -109,28 +109,28 @@ _UNKNOWNPROTO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=81,
-  serialized_end=114,
+  serialized_start=73,
+  serialized_end=106,
 )
 
 
-_TESTPERSON = _descriptor.Descriptor(
-  name='TestPerson',
-  full_name='tests.TestPerson',
+_PERSON = _descriptor.Descriptor(
+  name='Person',
+  full_name='tests.Person',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='first_name', full_name='tests.TestPerson.first_name', index=0,
+      name='first_name', full_name='tests.Person.first_name', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='last_name', full_name='tests.TestPerson.last_name', index=1,
+      name='last_name', full_name='tests.Person.last_name', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -148,28 +148,28 @@ _TESTPERSON = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=116,
-  serialized_end=167,
+  serialized_start=108,
+  serialized_end=155,
 )
 
 
-_TESTGREETINGREQUEST = _descriptor.Descriptor(
-  name='TestGreetingRequest',
-  full_name='tests.TestGreetingRequest',
+_GREETINGREQUEST = _descriptor.Descriptor(
+  name='GreetingRequest',
+  full_name='tests.GreetingRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='person', full_name='tests.TestGreetingRequest.person', index=0,
+      name='person', full_name='tests.GreetingRequest.person', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='message', full_name='tests.TestGreetingRequest.message', index=1,
+      name='message', full_name='tests.GreetingRequest.message', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -187,21 +187,21 @@ _TESTGREETINGREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=169,
-  serialized_end=242,
+  serialized_start=157,
+  serialized_end=222,
 )
 
 
-_TESTGREETINGRESPONSE = _descriptor.Descriptor(
-  name='TestGreetingResponse',
-  full_name='tests.TestGreetingResponse',
+_GREETINGRESPONSE = _descriptor.Descriptor(
+  name='GreetingResponse',
+  full_name='tests.GreetingResponse',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='greeting', full_name='tests.TestGreetingResponse.greeting', index=0,
+      name='greeting', full_name='tests.GreetingResponse.greeting', index=0,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -219,21 +219,21 @@ _TESTGREETINGRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=244,
-  serialized_end=284,
+  serialized_start=224,
+  serialized_end=260,
 )
 
 
-_TESTMYTYPE = _descriptor.Descriptor(
-  name='TestMyType',
-  full_name='tests.TestMyType',
+_MYTYPE = _descriptor.Descriptor(
+  name='MyType',
+  full_name='tests.MyType',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='string_field', full_name='tests.TestMyType.string_field', index=0,
+      name='string_field', full_name='tests.MyType.string_field', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -251,28 +251,28 @@ _TESTMYTYPE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=286,
-  serialized_end=320,
+  serialized_start=262,
+  serialized_end=292,
 )
 
 
-_TESTHELLOWORKFLOWINPUTMESSAGE = _descriptor.Descriptor(
-  name='TestHelloWorkflowInputMessage',
-  full_name='tests.TestHelloWorkflowInputMessage',
+_HELLOWORKFLOWINPUTMESSAGE = _descriptor.Descriptor(
+  name='HelloWorkflowInputMessage',
+  full_name='tests.HelloWorkflowInputMessage',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='first_name', full_name='tests.TestHelloWorkflowInputMessage.first_name', index=0,
+      name='first_name', full_name='tests.HelloWorkflowInputMessage.first_name', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='last_name', full_name='tests.TestHelloWorkflowInputMessage.last_name', index=1,
+      name='last_name', full_name='tests.HelloWorkflowInputMessage.last_name', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -290,21 +290,21 @@ _TESTHELLOWORKFLOWINPUTMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=322,
-  serialized_end=392,
+  serialized_start=294,
+  serialized_end=360,
 )
 
 
-_TESTHELLOWORKFLOWRESULTMESSAGE = _descriptor.Descriptor(
-  name='TestHelloWorkflowResultMessage',
-  full_name='tests.TestHelloWorkflowResultMessage',
+_HELLOWORKFLOWRESULTMESSAGE = _descriptor.Descriptor(
+  name='HelloWorkflowResultMessage',
+  full_name='tests.HelloWorkflowResultMessage',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='message', full_name='tests.TestHelloWorkflowResultMessage.message', index=0,
+      name='message', full_name='tests.HelloWorkflowResultMessage.message', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -322,35 +322,35 @@ _TESTHELLOWORKFLOWRESULTMESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=394,
-  serialized_end=443,
+  serialized_start=362,
+  serialized_end=407,
 )
 
-_TESTGREETINGREQUEST.fields_by_name['person'].message_type = _TESTPERSON
-DESCRIPTOR.message_types_by_name['TestProto'] = _TESTPROTO
-DESCRIPTOR.message_types_by_name['TestResultProto'] = _TESTRESULTPROTO
+_GREETINGREQUEST.fields_by_name['person'].message_type = _PERSON
+DESCRIPTOR.message_types_by_name['Proto'] = _PROTO
+DESCRIPTOR.message_types_by_name['ResultProto'] = _RESULTPROTO
 DESCRIPTOR.message_types_by_name['UnknownProto'] = _UNKNOWNPROTO
-DESCRIPTOR.message_types_by_name['TestPerson'] = _TESTPERSON
-DESCRIPTOR.message_types_by_name['TestGreetingRequest'] = _TESTGREETINGREQUEST
-DESCRIPTOR.message_types_by_name['TestGreetingResponse'] = _TESTGREETINGRESPONSE
-DESCRIPTOR.message_types_by_name['TestMyType'] = _TESTMYTYPE
-DESCRIPTOR.message_types_by_name['TestHelloWorkflowInputMessage'] = _TESTHELLOWORKFLOWINPUTMESSAGE
-DESCRIPTOR.message_types_by_name['TestHelloWorkflowResultMessage'] = _TESTHELLOWORKFLOWRESULTMESSAGE
+DESCRIPTOR.message_types_by_name['Person'] = _PERSON
+DESCRIPTOR.message_types_by_name['GreetingRequest'] = _GREETINGREQUEST
+DESCRIPTOR.message_types_by_name['GreetingResponse'] = _GREETINGRESPONSE
+DESCRIPTOR.message_types_by_name['MyType'] = _MYTYPE
+DESCRIPTOR.message_types_by_name['HelloWorkflowInputMessage'] = _HELLOWORKFLOWINPUTMESSAGE
+DESCRIPTOR.message_types_by_name['HelloWorkflowResultMessage'] = _HELLOWORKFLOWRESULTMESSAGE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
-TestProto = _reflection.GeneratedProtocolMessageType('TestProto', (_message.Message,), {
-  'DESCRIPTOR' : _TESTPROTO,
+Proto = _reflection.GeneratedProtocolMessageType('Proto', (_message.Message,), {
+  'DESCRIPTOR' : _PROTO,
   '__module__' : 'test_messages_pb2'
-  # @@protoc_insertion_point(class_scope:tests.TestProto)
+  # @@protoc_insertion_point(class_scope:tests.Proto)
   })
-_sym_db.RegisterMessage(TestProto)
+_sym_db.RegisterMessage(Proto)
 
-TestResultProto = _reflection.GeneratedProtocolMessageType('TestResultProto', (_message.Message,), {
-  'DESCRIPTOR' : _TESTRESULTPROTO,
+ResultProto = _reflection.GeneratedProtocolMessageType('ResultProto', (_message.Message,), {
+  'DESCRIPTOR' : _RESULTPROTO,
   '__module__' : 'test_messages_pb2'
-  # @@protoc_insertion_point(class_scope:tests.TestResultProto)
+  # @@protoc_insertion_point(class_scope:tests.ResultProto)
   })
-_sym_db.RegisterMessage(TestResultProto)
+_sym_db.RegisterMessage(ResultProto)
 
 UnknownProto = _reflection.GeneratedProtocolMessageType('UnknownProto', (_message.Message,), {
   'DESCRIPTOR' : _UNKNOWNPROTO,
@@ -359,47 +359,47 @@ UnknownProto = _reflection.GeneratedProtocolMessageType('UnknownProto', (_messag
   })
 _sym_db.RegisterMessage(UnknownProto)
 
-TestPerson = _reflection.GeneratedProtocolMessageType('TestPerson', (_message.Message,), {
-  'DESCRIPTOR' : _TESTPERSON,
+Person = _reflection.GeneratedProtocolMessageType('Person', (_message.Message,), {
+  'DESCRIPTOR' : _PERSON,
   '__module__' : 'test_messages_pb2'
-  # @@protoc_insertion_point(class_scope:tests.TestPerson)
+  # @@protoc_insertion_point(class_scope:tests.Person)
   })
-_sym_db.RegisterMessage(TestPerson)
+_sym_db.RegisterMessage(Person)
 
-TestGreetingRequest = _reflection.GeneratedProtocolMessageType('TestGreetingRequest', (_message.Message,), {
-  'DESCRIPTOR' : _TESTGREETINGREQUEST,
+GreetingRequest = _reflection.GeneratedProtocolMessageType('GreetingRequest', (_message.Message,), {
+  'DESCRIPTOR' : _GREETINGREQUEST,
   '__module__' : 'test_messages_pb2'
-  # @@protoc_insertion_point(class_scope:tests.TestGreetingRequest)
+  # @@protoc_insertion_point(class_scope:tests.GreetingRequest)
   })
-_sym_db.RegisterMessage(TestGreetingRequest)
+_sym_db.RegisterMessage(GreetingRequest)
 
-TestGreetingResponse = _reflection.GeneratedProtocolMessageType('TestGreetingResponse', (_message.Message,), {
-  'DESCRIPTOR' : _TESTGREETINGRESPONSE,
+GreetingResponse = _reflection.GeneratedProtocolMessageType('GreetingResponse', (_message.Message,), {
+  'DESCRIPTOR' : _GREETINGRESPONSE,
   '__module__' : 'test_messages_pb2'
-  # @@protoc_insertion_point(class_scope:tests.TestGreetingResponse)
+  # @@protoc_insertion_point(class_scope:tests.GreetingResponse)
   })
-_sym_db.RegisterMessage(TestGreetingResponse)
+_sym_db.RegisterMessage(GreetingResponse)
 
-TestMyType = _reflection.GeneratedProtocolMessageType('TestMyType', (_message.Message,), {
-  'DESCRIPTOR' : _TESTMYTYPE,
+MyType = _reflection.GeneratedProtocolMessageType('MyType', (_message.Message,), {
+  'DESCRIPTOR' : _MYTYPE,
   '__module__' : 'test_messages_pb2'
-  # @@protoc_insertion_point(class_scope:tests.TestMyType)
+  # @@protoc_insertion_point(class_scope:tests.MyType)
   })
-_sym_db.RegisterMessage(TestMyType)
+_sym_db.RegisterMessage(MyType)
 
-TestHelloWorkflowInputMessage = _reflection.GeneratedProtocolMessageType('TestHelloWorkflowInputMessage', (_message.Message,), {
-  'DESCRIPTOR' : _TESTHELLOWORKFLOWINPUTMESSAGE,
+HelloWorkflowInputMessage = _reflection.GeneratedProtocolMessageType('HelloWorkflowInputMessage', (_message.Message,), {
+  'DESCRIPTOR' : _HELLOWORKFLOWINPUTMESSAGE,
   '__module__' : 'test_messages_pb2'
-  # @@protoc_insertion_point(class_scope:tests.TestHelloWorkflowInputMessage)
+  # @@protoc_insertion_point(class_scope:tests.HelloWorkflowInputMessage)
   })
-_sym_db.RegisterMessage(TestHelloWorkflowInputMessage)
+_sym_db.RegisterMessage(HelloWorkflowInputMessage)
 
-TestHelloWorkflowResultMessage = _reflection.GeneratedProtocolMessageType('TestHelloWorkflowResultMessage', (_message.Message,), {
-  'DESCRIPTOR' : _TESTHELLOWORKFLOWRESULTMESSAGE,
+HelloWorkflowResultMessage = _reflection.GeneratedProtocolMessageType('HelloWorkflowResultMessage', (_message.Message,), {
+  'DESCRIPTOR' : _HELLOWORKFLOWRESULTMESSAGE,
   '__module__' : 'test_messages_pb2'
-  # @@protoc_insertion_point(class_scope:tests.TestHelloWorkflowResultMessage)
+  # @@protoc_insertion_point(class_scope:tests.HelloWorkflowResultMessage)
   })
-_sym_db.RegisterMessage(TestHelloWorkflowResultMessage)
+_sym_db.RegisterMessage(HelloWorkflowResultMessage)
 
 
 # @@protoc_insertion_point(module_scope)

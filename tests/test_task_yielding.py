@@ -2,7 +2,7 @@ import unittest
 
 from statefun_tasks import YieldTaskInvocation, TaskContext, TaskAction, TaskResult, TaskStatus, RetryPolicy
 from google.protobuf.any_pb2 import Any
-from tests.utils import TestHarness, tasks
+from tests.utils import FlinkTestHarness, tasks
 
 
 @tasks.bind(with_state=True, is_fruitful=False)
@@ -54,7 +54,7 @@ def a_continuation(state):
 
 class YieldingTasksTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.test_harness = TestHarness()
+        self.test_harness = FlinkTestHarness()
 
     @staticmethod
     def _unpack(any_proto: Any, proto_type):

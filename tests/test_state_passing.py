@@ -1,7 +1,7 @@
 from statefun_tasks import in_parallel
 import unittest
 
-from tests.utils import TestHarness, tasks
+from tests.utils import FlinkTestHarness, tasks
 
 _final_state = None
 
@@ -110,7 +110,7 @@ def an_inline_pipeline(state):
 
 class StatePassingTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.test_harness = TestHarness()
+        self.test_harness = FlinkTestHarness()
 
     def test_passing_state_through_task(self):
         pipeline = tasks.send(state_passing_workflow)
