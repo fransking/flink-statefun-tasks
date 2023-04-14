@@ -1,7 +1,7 @@
 import unittest
 
 from statefun_tasks import in_parallel
-from tests.utils import TestHarness, tasks
+from tests.utils import FlinkTestHarness, tasks
 
 
 _started = []
@@ -30,7 +30,7 @@ def _say_hello(context, first_name, last_name):
 
 class StatefulPipelineTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.test_harness = TestHarness()
+        self.test_harness = FlinkTestHarness()
 
     def test_simple_stateful_pipeline(self):
 

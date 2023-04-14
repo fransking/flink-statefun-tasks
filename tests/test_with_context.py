@@ -1,6 +1,6 @@
 import unittest
 
-from tests.utils import TestHarness, tasks
+from tests.utils import FlinkTestHarness, tasks
 
 
 
@@ -16,7 +16,7 @@ def _with_context_and_arg_and_state_task(context, state, arg):
 
 class WithContextTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.test_harness = TestHarness()
+        self.test_harness = FlinkTestHarness()
 
     def test_with_context_and_arg(self):
         pipeline = tasks.send(_with_context_and_arg_task, 8)

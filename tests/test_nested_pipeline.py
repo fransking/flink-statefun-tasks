@@ -1,5 +1,5 @@
 import unittest
-from tests.utils import TestHarness, tasks
+from tests.utils import FlinkTestHarness, tasks
 
 
 _root_pipeline_id = None
@@ -61,7 +61,7 @@ def _task2():
 
 class NestedPipelineTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.test_harness = TestHarness()
+        self.test_harness = FlinkTestHarness()
 
     def test_nested_pipeline(self):
         pipeline = tasks.send(hello_workflow, 'Jane', 'Doe')

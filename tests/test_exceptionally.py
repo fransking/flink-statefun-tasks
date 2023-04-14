@@ -1,5 +1,5 @@
 import unittest
-from tests.utils import TestHarness, tasks, TaskErrorException
+from tests.utils import FlinkTestHarness, tasks, TaskErrorException
 
 from statefun_tasks import in_parallel
 
@@ -187,7 +187,7 @@ def parallel_workflow_with_max_parallelsim_that_throws_error(first_name, last_na
 
 class ExceptionallyTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.test_harness = TestHarness()
+        self.test_harness = FlinkTestHarness()
 
 
     def test_pipeline_that_does_not_error_but_has_an_exceptionally(self):

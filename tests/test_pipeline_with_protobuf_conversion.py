@@ -4,8 +4,8 @@ from dataclasses import dataclass
 from google.protobuf.message import Message
 
 from statefun_tasks.protobuf import ObjectProtobufConverter
-from tests.test_messages_pb2 import TestHelloWorkflowInputMessage, TestHelloWorkflowResultMessage
-from tests.utils import TestHarness, tasks
+from tests.test_messages_pb2 import HelloWorkflowInputMessage, HelloWorkflowResultMessage
+from tests.utils import FlinkTestHarness, tasks
 from tests.utils._test_harness import test_harness_serialiser
 
 
@@ -20,36 +20,36 @@ class HelloWorkflowResult:
     message: str
 
 
-class HelloWorkflowInputProtobufConverter(ObjectProtobufConverter[TestHelloWorkflowInputMessage]):
+class HelloWorkflowInputProtobufConverter(ObjectProtobufConverter[HelloWorkflowInputMessage]):
     def can_convert_to_proto(self, obj: object) -> bool:
         return type(obj) == HelloWorkflowInput
 
     def can_convert_from_proto(self, message: Message) -> bool:
         return type(message) == HelloWorkflowInput
 
-    def convert_to_proto(self, obj: HelloWorkflowInput) -> TestHelloWorkflowInputMessage:
-        message = TestHelloWorkflowInputMessage()
+    def convert_to_proto(self, obj: HelloWorkflowInput) -> HelloWorkflowInputMessage:
+        message = HelloWorkflowInputMessage()
         message.first_name = obj.first_name
         message.last_name = obj.last_name
         return message
 
-    def convert_from_proto(self, message: TestHelloWorkflowInputMessage) -> object:
+    def convert_from_proto(self, message: HelloWorkflowInputMessage) -> object:
         return HelloWorkflowInput(message.first_name, message.last_name)
 
 
-class HelloWorkflowResultProtobufConverter(ObjectProtobufConverter[TestHelloWorkflowResultMessage]):
+class HelloWorkflowResultProtobufConverter(ObjectProtobufConverter[HelloWorkflowResultMessage]):
     def can_convert_to_proto(self, obj: object) -> bool:
         return type(obj) == HelloWorkflowResult
 
     def can_convert_from_proto(self, message: Message) -> bool:
-        return type(message) == TestHelloWorkflowResultMessage
+        return type(message) == HelloWorkflowResultMessage
 
-    def convert_to_proto(self, obj: HelloWorkflowResult) -> TestHelloWorkflowResultMessage:
-        message = TestHelloWorkflowResultMessage()
+    def convert_to_proto(self, obj: HelloWorkflowResult) -> HelloWorkflowResultMessage:
+        message = HelloWorkflowResultMessage()
         message.message = obj.message
         return message
 
-    def convert_from_proto(self, message: TestHelloWorkflowResultMessage) -> object:
+    def convert_from_proto(self, message: HelloWorkflowResultMessage) -> object:
         return HelloWorkflowResult(message.message)
 
 
@@ -80,15 +80,15 @@ class PipelineWithProtobufConversionTests(unittest.TestCase):
     def setUp(self):
         test_harness_serialiser.register_converters(
             [HelloWorkflowInputProtobufConverter(), HelloWorkflowResultProtobufConverter()])
-        test_harness_serialiser.register_proto_types([TestHelloWorkflowInputMessage, TestHelloWorkflowResultMessage])
+        test_harness_serialiser.register_proto_types([HelloWorkflowInputMessage, HelloWorkflowResultMessage])
 
     def test_hello_workflow(self):
-        test_harness = TestHarness()
+        test_harness = FlinkTestHarness()
         result = test_harness.run_pipeline(hello_workflow.send(HelloWorkflowInput('John', 'Smith')))
         self.assertEqual(result, HelloWorkflowResult('Hello John Smith'))
 
     def test_hello_workflow_from_state(self):
-        test_harness = TestHarness()
+        test_harness = FlinkTestHarness()
 
         result = test_harness.run_pipeline(hello_workflow_with_state.send(HelloWorkflowInput('John', 'Smith')))
         self.assertEqual(result, HelloWorkflowResult('Hello from state John Smith'))

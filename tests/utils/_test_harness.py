@@ -35,7 +35,7 @@ class _InvocationResult(NamedTuple):
     outgoing_messages: List[Any]
 
 
-class TestHarness:
+class FlinkTestHarness:
     """
     Provides a simplified implementation of Flink stateful functions, suitable for testing pipeline execution and task actions
     Tasks are executed within the same process.

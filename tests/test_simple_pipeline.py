@@ -2,8 +2,8 @@ import asyncio
 import unittest
 
 from statefun_tasks import DefaultSerialiser
-from tests.test_messages_pb2 import TestPerson, TestGreetingRequest, TestGreetingResponse
-from tests.utils import TestHarness, tasks, other_tasks_instance, TaskErrorException
+from tests.test_messages_pb2 import Person, GreetingRequest, GreetingResponse
+from tests.utils import FlinkTestHarness, tasks, other_tasks_instance, TaskErrorException
 
 
 @tasks.bind()
@@ -17,18 +17,18 @@ def hello_and_goodbye_workflow(first_name, last_name):
 
 
 @tasks.bind()
-def simple_protobuf_workflow(person: TestPerson):
+def simple_protobuf_workflow(person: Person):
     return tasks.send(_create_greeting, person).continue_with(_greet_person)
 
 
 @tasks.bind()
-def _create_greeting(person: TestPerson) -> TestGreetingRequest:
-    return TestGreetingRequest(person=person, message='Hello')
+def _create_greeting(person: Person) -> GreetingRequest:
+    return GreetingRequest(person=person, message='Hello')
 
 
 @tasks.bind()
-def _greet_person(greeting: TestGreetingRequest) -> TestGreetingResponse:
-    return TestGreetingResponse(greeting=f'{greeting.message} {greeting.person.first_name} {greeting.person.last_name}')
+def _greet_person(greeting: GreetingRequest) -> GreetingResponse:
+    return GreetingResponse(greeting=f'{greeting.message} {greeting.person.first_name} {greeting.person.last_name}')
 
 
 @tasks.bind()
@@ -54,7 +54,7 @@ async def _return_display_name(context):
 
 class SimplePipelineTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.test_harness = TestHarness()
+        self.test_harness = FlinkTestHarness()
 
     def test_pipeline(self):
         pipeline = tasks.send(hello_workflow, 'Jane', 'Doe')
@@ -76,10 +76,10 @@ class SimplePipelineTests(unittest.TestCase):
         self.assertEqual(result, 'Hello Jane Doe.  So now I will say see you later!')
 
     def test_simple_protobuf_pipeline(self):
-        pipeline = tasks.send(simple_protobuf_workflow, TestPerson(first_name='Jane', last_name='Doe'))
+        pipeline = tasks.send(simple_protobuf_workflow, Person(first_name='Jane', last_name='Doe'))
         proto = pipeline.to_proto(serialiser=DefaultSerialiser())
 
-        self.assertEqual(proto.entries[0].task_entry.request.type_url, 'type.googleapis.com/tests.TestPerson')
+        self.assertEqual(proto.entries[0].task_entry.request.type_url, 'type.googleapis.com/tests.Person')
 
         result = self.test_harness.run_pipeline(pipeline)
         self.assertEqual(result.greeting, 'Hello Jane Doe')
@@ -133,7 +133,7 @@ class SimplePipelineTests(unittest.TestCase):
         pipeline = _return_display_name.send()
 
         result = self.test_harness.run_pipeline(pipeline)
-        self.assertEqual(result, 'test_simple_pipeline._return_display_name')
+        self.assertEqual(result, f'{__name__}._return_display_name')
 
     def test_pipeline_with_display_name_set(self):
         pipeline = _return_display_name.send().set(display_name='test pipeline')

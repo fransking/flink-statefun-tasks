@@ -1,11 +1,9 @@
-import asyncio
 import unittest
 
-from statefun_tasks import DefaultSerialiser, TaskAction, TaskStatus, TaskRequest, TaskResult, TaskException
+from statefun_tasks import TaskAction, TaskStatus, TaskRequest, TaskResult, TaskException
 
 from google.protobuf.any_pb2 import Any
-from tests.test_messages_pb2 import TestPerson, TestGreetingRequest, TestGreetingResponse
-from tests.utils import TestHarness, tasks, TaskErrorException
+from tests.utils import FlinkTestHarness, tasks, TaskErrorException
 
 
 @tasks.bind()
@@ -15,7 +13,7 @@ def _say_hello(first_name, last_name):
 
 class TaskActionsTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.test_harness = TestHarness()
+        self.test_harness = FlinkTestHarness()
 
     @staticmethod
     def _unpack(any_proto: Any, proto_type):

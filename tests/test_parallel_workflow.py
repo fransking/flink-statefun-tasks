@@ -2,7 +2,7 @@ from typing import OrderedDict
 import unittest
 
 from statefun_tasks import in_parallel
-from tests.utils import TestHarness, tasks, TaskErrorException
+from tests.utils import FlinkTestHarness, tasks, TaskErrorException
 
 join_results_called = False
 join_results2_called = False
@@ -130,7 +130,7 @@ def _return_empty_parallel():
 
 class ParallelWorkflowTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.test_harness = TestHarness()
+        self.test_harness = FlinkTestHarness()
 
     def test_parallel_workflow(self):
         pipeline = in_parallel([

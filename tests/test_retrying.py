@@ -2,7 +2,7 @@ from datetime import timedelta
 import unittest
 
 from statefun_tasks import RetryPolicy
-from tests.utils import TestHarness, tasks, TaskErrorException
+from tests.utils import FlinkTestHarness, tasks, TaskErrorException
 
 
 
@@ -27,7 +27,7 @@ class RetryTests(unittest.TestCase):
     def setUp(self) -> None:
         global _fail_run_count
         _fail_run_count = 0
-        self.test_harness = TestHarness()
+        self.test_harness = FlinkTestHarness()
 
     def test_failing_task_1_times_with_3_retries(self):
         pipeline = tasks.send(_fail, 1)

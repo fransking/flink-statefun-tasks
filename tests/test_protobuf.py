@@ -8,7 +8,7 @@ from statefun.request_reply_pb2 import Address
 from statefun_tasks import TaskRequest
 from statefun_tasks.protobuf import _convert_from_proto, _convert_to_proto, ScalarTypeProtobufConverter, \
     _generate_default_converters, ObjectProtobufConverter
-from tests.test_messages_pb2 import TestMyType
+from tests.test_messages_pb2 import MyType
 
 
 class ProtobufTests(unittest.TestCase):
@@ -108,19 +108,19 @@ class CustomProtobufConverterTests(unittest.TestCase):
     class MyType:
         string_field: str
 
-    class MyConverter(ObjectProtobufConverter[TestMyType]):
+    class MyConverter(ObjectProtobufConverter[MyType]):
         def can_convert_to_proto(self, obj: object) -> bool:
             return type(obj) == CustomProtobufConverterTests.MyType
 
         def can_convert_from_proto(self, message: Message) -> bool:
-            return type(message) == TestMyType
+            return type(message) == MyType
 
-        def convert_to_proto(self, obj: 'CustomProtobufConverterTests.MyType') -> TestMyType:
-            message = TestMyType()
+        def convert_to_proto(self, obj: 'CustomProtobufConverterTests.MyType') -> MyType:
+            message = MyType()
             message.string_field = obj.string_field
             return message
 
-        def convert_from_proto(self, message: TestMyType) -> object:
+        def convert_from_proto(self, message: MyType) -> object:
             val = CustomProtobufConverterTests.MyType(message.string_field)
             return val
 
@@ -138,7 +138,7 @@ class CustomProtobufConverterTests(unittest.TestCase):
         converters = [self.MyConverter()]
         proto_message = _convert_to_proto(obj, converters)
         python_val = _convert_from_proto(proto_message, [], converters)
-        self.assertIsInstance(proto_message, TestMyType)
+        self.assertIsInstance(proto_message, MyType)
         self.assertIsInstance(python_val, self.MyType)
         self.assertEqual(python_val.string_field, 'my_val')
 
