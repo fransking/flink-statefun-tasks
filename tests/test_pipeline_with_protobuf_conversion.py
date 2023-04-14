@@ -6,7 +6,7 @@ from google.protobuf.message import Message
 from statefun_tasks.protobuf import ObjectProtobufConverter
 from tests.test_messages_pb2 import HelloWorkflowInputMessage, HelloWorkflowResultMessage
 from tests.utils import FlinkTestHarness, tasks
-from tests.utils.test_harness import test_harness_serialiser
+from tests.utils import test_harness_serialiser
 
 
 @dataclass
