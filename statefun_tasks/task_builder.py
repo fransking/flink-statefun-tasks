@@ -34,8 +34,15 @@ class FlinkTasks(object):
     :param egress_type_name: egress type name.  Maps to Flink Statefun egress in module.yaml
     :param optional egress_message_max_size: maximum size of an egress message in bytes. If specified attempts to send messages over this size will raise a MessageSizeExceeded exception
     :param optional serialiser: serialiser to use (will use DefaultSerialiser if not set)
+    :param optional keep_task_state: whether to keep state (request, result) associated with tasks as well as pipelines (defaults to false)
     """
-    def __init__(self, default_namespace: str = None, default_worker_name: str = None, egress_type_name: str = None, egress_message_max_size: int = None, serialiser = None):
+    def __init__(self, 
+                 default_namespace: str = None, 
+                 default_worker_name: str = None, 
+                 egress_type_name: str = None, 
+                 egress_message_max_size: int = None, 
+                 serialiser = None,
+                 keep_task_state = False):
         self._default_namespace = default_namespace
         self._default_worker_name = default_worker_name
         self._egress_type_name = egress_type_name
@@ -48,7 +55,7 @@ class FlinkTasks(object):
         self.register_builtin(flatten_results)
 
         self._handlers = [
-            TaskRequestHandler(),
+            TaskRequestHandler(keep_task_state),
             TaskResponseHandler(),
             TaskActionHandler(),
             ChildPipelineHandler()

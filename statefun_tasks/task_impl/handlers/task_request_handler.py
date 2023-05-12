@@ -7,7 +7,8 @@ from datetime import timedelta
 
 
 class TaskRequestHandler(MessageHandler):
-    def __init__(self):
+    def __init__(self, keep_task_state=True):
+        self._keep_task_state = keep_task_state
         pass
 
     def can_handle(self, context: TaskContext, message):
@@ -61,6 +62,14 @@ class TaskRequestHandler(MessageHandler):
         elif task_result is not None:
             context.pack_and_save('task_result', task_result)
             await tasks.emit_result(context, task_request, task_result)
+
+        if not self._keep_task_state:
+            # clear state from intermediate tasks
+            if pipeline is None:
+                context.delete('task_request')
+
+            context.delete('task_result')
+            context.delete('task_exception')
 
     def _attempt_retry(self, context, task_request, task_exception):
         task_state = context.task_state.by_uid[task_request.uid]

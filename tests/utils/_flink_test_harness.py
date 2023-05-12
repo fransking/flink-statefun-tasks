@@ -14,10 +14,12 @@ from ._test_utils import update_address, update_state, unpack_any
 default_namespace = 'test'
 default_worker_name = 'worker'
 test_harness_serialiser = DefaultSerialiser()
+
 tasks = FlinkTasks(default_namespace=default_namespace, default_worker_name=default_worker_name,
-                   egress_type_name=f'{default_namespace}/kafka-generic-egress', serialiser=test_harness_serialiser)
+                   egress_type_name=f'{default_namespace}/kafka-generic-egress', serialiser=test_harness_serialiser, keep_task_state=False)
+
 other_tasks_instance = FlinkTasks(default_namespace=default_namespace, default_worker_name=default_worker_name,
-                                  egress_type_name=f'{default_namespace}/kafka-generic-egress', serialiser=test_harness_serialiser)
+                                  egress_type_name=f'{default_namespace}/kafka-generic-egress', serialiser=test_harness_serialiser, keep_task_state=False)
 
 functions = StatefulFunctions()
 
