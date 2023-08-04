@@ -1,14 +1,17 @@
 import unittest
-
 from google.protobuf.any_pb2 import Any
-
+from statefun_tasks import FlinkTasks
 from tests.test_messages_pb2 import Proto, ResultProto, UnknownProto
-from tests.utils import FlinkTestHarness, tasks
+from tests.utils import TaskRunner
+
+
+tasks = FlinkTasks()
 
 
 class MyClass:
     def __init__(self):
         pass
+
 
 @tasks.bind()
 def return_my_class_my_field(my_class):
@@ -35,44 +38,33 @@ def receive_and_reply_primitives(a, b, c, d):
     return [a, b, {'c': c}, (d,)]
 
 
-class RequestResultSerialisationTests(unittest.TestCase):
+class RequestResultSerialisationTests(unittest.IsolatedAsyncioTestCase):
     def setUp(self) -> None:
-        self.test_harness = FlinkTestHarness()
+        self.runner = TaskRunner(tasks)
 
-    def test_sending_request_data_that_is_not_protobuf_serialisable(self):
-        pipeline = tasks.send(return_my_class_my_field, MyClass())
+    async def test_sending_request_data_that_is_not_protobuf_serialisable(self):
         try:
-            self.test_harness.run_pipeline(pipeline)
+            await self.runner.run_task(return_my_class_my_field, MyClass())
         except Exception as e:
             self.assertIn('Cannot convert value', str(e))
         else:
             self.fail('Expected an exception')
 
-
-    def test_sending_protobuf_to_function_with_annotations_uses_exact_protos(self):
-        pipeline = tasks.send(receive_and_reply_protobuf_fully_annotated, Proto())
-        result = self.test_harness.run_pipeline(pipeline)
+    async def test_sending_protobuf_to_function_with_annotations_uses_exact_protos(self):
+        result, _ = await self.runner.run_task(receive_and_reply_protobuf_fully_annotated, Proto())
         self.assertIsInstance(result, ResultProto)
         self.assertEqual("<class 'test_messages_pb2.Proto'>", result.value_str)
 
-    def test_sending_protobuf_to_function_continations_with_annotations_uses_exact_protos(self):
-        pipeline = tasks.send(receive_and_reply_protobuf_fully_annotated, Proto()).continue_with(protobuf_fully_annotated_continuation)
-        result = self.test_harness.run_pipeline(pipeline)
-        self.assertIsInstance(result, ResultProto)
-        self.assertEqual("<class 'test_messages_pb2.ResultProto'>", result.value_str)
-
-    def test_sending_protobuf_to_function_without_annotations_packs_as_any(self):
-        pipeline = tasks.send(receive_and_reply_protobuf_not_annotated, UnknownProto())
-        result = self.test_harness.run_pipeline(pipeline)
+    async def test_sending_protobuf_to_function_without_annotations_packs_as_any(self):
+        result, _ = await self.runner.run_task(receive_and_reply_protobuf_not_annotated, UnknownProto())
         self.assertIsInstance(result, Any)
 
         unknown = UnknownProto()
         result.Unpack(unknown)
         self.assertEqual("<class 'google.protobuf.any_pb2.Any'>", unknown.value_str)
 
-    def test_sending_primitives_to_function(self):
-        pipeline = tasks.send(receive_and_reply_primitives, 1, 2.0, [3], 'four')
-        result = self.test_harness.run_pipeline(pipeline)
+    async def test_sending_primitives_to_function(self):
+        result, _ = await self.runner.run_task(receive_and_reply_primitives, 1, 2.0, [3], 'four')
         self.assertIsInstance(result, list)
 
         a, b, c, d = result
@@ -82,9 +74,8 @@ class RequestResultSerialisationTests(unittest.TestCase):
         self.assertEqual({'c': [3]}, c)
         self.assertEqual(('four', ), d)
 
-    def test_sending_embedded_protobuf_in_primitives_to_function(self):
-        pipeline = tasks.send(receive_and_reply_primitives, 1, Proto(), [3], UnknownProto())
-        result = self.test_harness.run_pipeline(pipeline)
+    async def test_sending_embedded_protobuf_in_primitives_to_function(self):
+        result, _ = await self.runner.run_task(receive_and_reply_primitives, 1, Proto(), [3], UnknownProto())
         self.assertIsInstance(result, list)
 
         a, b, c, d = result
@@ -95,8 +86,3 @@ class RequestResultSerialisationTests(unittest.TestCase):
 
         p, = d
         self.assertIsInstance(p, Any)
-
-
-
-if __name__ == '__main__':
-    unittest.main()

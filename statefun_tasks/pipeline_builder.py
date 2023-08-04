@@ -1,9 +1,9 @@
 from re import L
 from statefun_tasks.types import Task, Group, RetryPolicy, ProtobufSerialisable
 from statefun_tasks.utils import _gen_id
-from statefun_tasks.pipeline import _Pipeline
 from statefun_tasks.messages_pb2 import TaskRequest, Pipeline
 from statefun_tasks.builtin import builtin
+from statefun_tasks.serialisation import pack_any, DefaultSerialiser
 from typing import Iterable
 import math
 
@@ -278,27 +278,6 @@ class PipelineBuilder(ProtobufSerialisable):
             raise AttributeError(f'Function {finally_action.__module__}.{finally_action.__name__} should be decorated with tasks.bind')
         return self
 
-    def to_pipeline(self, serialiser=None, is_fruitful=True, events=None):
-        """
-        Concretises the builder into a pipeline
-
-        :param option serialiser: the serialiser to use such as DefaultSerialiser
-        :param option is_fruitful: whether this pipeline is fruitful (i.e. returns a result). Default is True
-        :param option events: event handler instance if this pipeline should fire events
-
-        :return: a Flink Tasks pipeline
-        """
-        self.validate()
-
-        return _Pipeline(self._pipeline, 
-            inline=self._inline, 
-            initial_args=self._initial_args,
-            initial_kwargs=self._initial_kwargs,
-            initial_state=self._initial_state,
-            is_fruitful=is_fruitful,
-            serialiser=serialiser,
-            events=events)
-
     def set_task_defaults(self, default_namespace, default_worker_name) ->  'PipelineBuilder':
         """
         Sets defaults on task entries if they are not set
@@ -382,7 +361,25 @@ class PipelineBuilder(ProtobufSerialisable):
         :param serialiser: the serialiser to use such as DefaultSerialiser
         :return: Pipeline protobuf message
         """
-        return self.to_pipeline(serialiser=serialiser).to_proto()
+        self.validate()
+
+        serialiser = serialiser or DefaultSerialiser()
+
+        pipeline = Pipeline(
+            entries=[p.to_proto(serialiser) for p in self._pipeline], 
+            inline=self._inline)
+
+        if self._initial_args is not None:
+            pipeline.initial_args.CopyFrom(pack_any(serialiser.to_proto(self._initial_args)))
+        
+        if self._initial_kwargs is not None:
+            pipeline.initial_kwargs.CopyFrom(serialiser.to_proto(self._initial_kwargs))
+
+        if self._initial_state is not None:
+            pipeline.initial_state.CopyFrom(pack_any(serialiser.to_proto(self._initial_state)))
+        
+        return pipeline
+
 
     @staticmethod
     def from_proto(pipeline_proto: Pipeline) -> 'PipelineBuilder':

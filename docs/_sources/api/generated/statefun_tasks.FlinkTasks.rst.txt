@@ -18,14 +18,11 @@ FlinkTasks
       ~FlinkTasks.emit_result
       ~FlinkTasks.extend
       ~FlinkTasks.fail
-      ~FlinkTasks.get_pipeline
       ~FlinkTasks.get_task
       ~FlinkTasks.register
-      ~FlinkTasks.register_builtin
       ~FlinkTasks.run_async
       ~FlinkTasks.send
       ~FlinkTasks.send_result
-      ~FlinkTasks.try_get_pipeline
       ~FlinkTasks.unpack_task_request
       ~FlinkTasks.value_specs
    

@@ -1,9 +1,8 @@
 import unittest
-
 from statefun.request_reply_pb2 import Address
-
 from statefun_tasks.types import Task, Group
 from statefun_tasks import DefaultSerialiser, RetryPolicy
+
 
 class PipelineSerialisationTests(unittest.TestCase):
     def test_task_entry_serialisation(self):
@@ -80,7 +79,3 @@ class PipelineSerialisationTests(unittest.TestCase):
         reconsituted_entry = Task.from_proto(entry_proto).unpack(serialiser)
         retry_policy = reconsituted_entry.retry_policy
         self.assertEqual(['builtins.Exception', 'builtins.ValueError'], retry_policy.retry_for)
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -1,4 +1,4 @@
-from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, Pipeline, TaskStatus
+from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException
 from statefun_tasks.types import TasksException
 from asyncio import iscoroutine
 
@@ -9,11 +9,6 @@ class EventHandlers(object):
         self._on_task_started_handlers = []
         self._on_task_finished_handlers = []
         self._on_task_retry_handlers = []
-        self._on_pipeline_created_handlers = []
-        self._on_pipeline_status_changed = []
-        self._on_pipeline_task_finished_handlers = []
-        self._on_pipeline_tasks_skipped_handlers = []
-        self._on_pipeline_finished_handlers = []
         self._on_emit_result_handlers = []
 
     def on_task_received(self, handler):
@@ -39,36 +34,6 @@ class EventHandlers(object):
         @tasks.events.on_task_retry decorator
         """
         self._on_task_retry_handlers.append(handler)
-
-    def on_pipeline_created(self, handler):
-        """
-        @tasks.events.on_pipeline_created decorator
-        """
-        self._on_pipeline_created_handlers.append(handler)
-
-    def on_pipeline_status_changed(self, handler):
-        """
-        @tasks.events.on_pipeline_status_changed decorator
-        """
-        self._on_pipeline_status_changed.append(handler)
-
-    def on_pipeline_task_finished(self, handler):
-        """
-        @tasks.events.on_pipeline_task_finished decorator
-        """
-        self._on_pipeline_task_finished_handlers.append(handler)
-
-    def on_pipeline_tasks_skipped(self, handler):
-        """
-        @tasks.events.on_pipeline_tasks_skipped decorator
-        """
-        self._on_pipeline_tasks_skipped_handlers.append(handler)
-
-    def on_pipeline_finished(self, handler):
-        """
-        @tasks.events.on_pipeline_finished decorator
-        """
-        self._on_pipeline_finished_handlers.append(handler)
 
     def on_emit_result(self, handler):
         """
@@ -99,46 +64,6 @@ class EventHandlers(object):
         Calls all notify_task_retry event handlers
         """
         await self._notify_all(self._on_task_retry_handlers, context, task_request, retry_count)
-
-    async def notify_pipeline_created(self, context, pipeline: Pipeline):
-        """
-        Calls all notify_pipeline_created event handlers
-        """
-        await self._notify_all(self._on_pipeline_created_handlers, context, pipeline)
-
-    async def notify_pipeline_status_changed(self, context, pipeline: Pipeline, status: TaskStatus):
-        """
-        Calls all notify_pipeline_status_changed event handlers
-        """
-        await self._notify_all(self._on_pipeline_status_changed, context, pipeline, status)
-
-    async def notify_pipeline_task_finished(self, context, task_result_or_exception):
-        """
-        Calls all notify_pipeline_task_finished event handlers
-        """
-        if isinstance(task_result_or_exception, TaskResult):
-            task_result, task_exception = task_result_or_exception, None
-        else:
-            task_result, task_exception = None, task_result_or_exception
-
-        await self._notify_all(self._on_pipeline_task_finished_handlers, context, task_result=task_result, task_exception=task_exception)
-
-    async def notify_pipeline_tasks_skipped(self, context, skipped_tasks):
-        """
-        Calls all notify_pipeline_task_skipped event handlers
-        """
-        await self._notify_all(self._on_pipeline_tasks_skipped_handlers, context, raise_tasks_exceptions=False, skipped_tasks=skipped_tasks)
-
-    async def notify_pipeline_finished(self, context, pipeline, task_result_or_exception):
-        """
-        Calls all notify_pipeline_finished event handlers
-        """
-        if isinstance(task_result_or_exception, TaskResult):
-            task_result, task_exception = task_result_or_exception, None
-        else:
-            task_result, task_exception = None, task_result_or_exception
-
-        await self._notify_all(self._on_pipeline_finished_handlers, context, pipeline, task_result=task_result, task_exception=task_exception)
 
     async def notify_emit_result(self, context, task_result_or_exception):
         """

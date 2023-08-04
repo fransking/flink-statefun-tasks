@@ -146,6 +146,12 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_namespace" title="statefun_tasks.TaskContext.get_namespace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_namespace</span></code></a>()</p></td>
 <td><p>Own namespace in the form of context.address.typename</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_original_caller_address" title="statefun_tasks.TaskContext.get_original_caller_address"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_original_caller_address</span></code></a>()</p></td>
+<td><p>Original caller address irrespective of whether this task is a retry (caller is self) or not</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_original_caller_id" title="statefun_tasks.TaskContext.get_original_caller_id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_original_caller_id</span></code></a>()</p></td>
+<td><p>Original caller id irrespective of whether this task is a retry (caller is self) or not</p></td>
+</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.get_parent_pipeline_address" title="statefun_tasks.TaskContext.get_parent_pipeline_address"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_parent_pipeline_address</span></code></a>()</p></td>
 <td><p>Address of the parent pipeline if this task is called as part of a pipeline else None</p></td>
 </tr>
@@ -299,6 +305,28 @@
 <dt class="sig sig-object py" id="statefun_tasks.TaskContext.get_namespace">
 <span class="sig-name descname"><span class="pre">get_namespace</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_namespace" title="Permalink to this definition"></a></dt>
 <dd><p>Own namespace in the form of context.address.typename</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>address</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="statefun_tasks.TaskContext.get_original_caller_address">
+<span class="sig-name descname"><span class="pre">get_original_caller_address</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_original_caller_address" title="Permalink to this definition"></a></dt>
+<dd><p>Original caller address irrespective of whether this task is a retry (caller is self) or not</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>address</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="statefun_tasks.TaskContext.get_original_caller_id">
+<span class="sig-name descname"><span class="pre">get_original_caller_id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_original_caller_id" title="Permalink to this definition"></a></dt>
+<dd><p>Original caller id irrespective of whether this task is a retry (caller is self) or not</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>address</p>
@@ -520,7 +548,7 @@ stateful identity of this task</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020-2022, Frans King &amp; Luke Ashworth.</p>
+    <p>&#169; Copyright 2020-2023, Frans King &amp; Luke Ashworth.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

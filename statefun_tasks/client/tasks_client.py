@@ -1,5 +1,5 @@
-from statefun_tasks import DefaultSerialiser, PipelineBuilder, TaskRequest, TaskResult, TaskException, TaskAction, \
-    TaskActionRequest, TaskActionResult, TaskActionException, TaskStatus as TaskStatusProto, Task
+from statefun_tasks import (DefaultSerialiser, PipelineBuilder, TaskRequest, TaskResult, TaskException, TaskAction, 
+                            TaskActionRequest, TaskActionResult, TaskActionException, TaskStatus as TaskStatusProto, Task)
 from statefun_tasks.client.types import TaskError, TaskStatus
 
 from google.protobuf.any_pb2 import Any

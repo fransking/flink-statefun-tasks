@@ -1,81 +1,76 @@
 import unittest
-
-from statefun_tasks import TaskAction, TaskStatus, TaskRequest, TaskResult, TaskException
-
-from google.protobuf.any_pb2 import Any
-from tests.utils import FlinkTestHarness, tasks, TaskErrorException
+from unittest.mock import MagicMock
+from statefun_tasks import FlinkTasks, TaskAction, unpack_any, TaskStatus, TaskActionException, TaskResult, TaskException
+from tests.utils import TaskRunner
 
 
-@tasks.bind()
-def _say_hello(first_name, last_name):
-    return f'Hello {first_name} {last_name}'
+tasks = FlinkTasks()
 
 
-class TaskActionsTests(unittest.TestCase):
+class TaskActionsTests(unittest.IsolatedAsyncioTestCase):
     def setUp(self) -> None:
-        self.test_harness = FlinkTestHarness()
+        self.runner = TaskRunner(tasks)
 
-    @staticmethod
-    def _unpack(any_proto: Any, proto_type):
-        proto = proto_type()
-        any_proto.Unpack(proto)
-        return proto
+    async def test_get_status_for_pending_task(self):
+        context = MagicMock()
+        context.storage.task_result = None
+        context.storage.task_exception = None
 
-    def test_get_status_for_pending_pipeline(self):
-        pipeline = tasks.send(_say_hello, 'Jane', 'Doe')
-        action_result = self.test_harness.run_action(pipeline, TaskAction.GET_STATUS)
-        self.assertEqual(self._unpack(action_result.result, TaskStatus).value, TaskStatus.PENDING)
+        action_result = await self.runner.run_action('123', TaskAction.GET_STATUS, context=context)
+        self.assertEqual(unpack_any(action_result.result, [TaskStatus]).value, TaskStatus.PENDING)
 
-    def test_get_status_for_completed_pipeline(self):
-        pipeline = tasks.send(_say_hello, 'Jane', 'Doe')
-        self.test_harness.run_pipeline(pipeline)
-        action_result = self.test_harness.run_action(pipeline, TaskAction.GET_STATUS)
-        self.assertEqual(self._unpack(action_result.result, TaskStatus).value, TaskStatus.COMPLETED)
+    async def test_get_status_for_failed_task(self):
+        context = MagicMock()
+        context.storage.task_result = None
+        context.storage.task_exception = True
 
-    def test_get_status_for_failed_pipeline(self):
-        pipeline = tasks.send(_say_hello, 'Jane')
-        try:
-            self.test_harness.run_pipeline(pipeline)
-        except:
-            pass
+        action_result = await self.runner.run_action('123', TaskAction.GET_STATUS, context=context)
+        self.assertEqual(unpack_any(action_result.result, [TaskStatus]).value, TaskStatus.FAILED)
 
-        action_result = self.test_harness.run_action(pipeline, TaskAction.GET_STATUS)
-        self.assertEqual(self._unpack(action_result.result, TaskStatus).value, TaskStatus.FAILED)
+    async def test_get_status_for_completed_task(self):
+        context = MagicMock()
+        context.storage.task_result = True
+        context.storage.task_exception = None
 
-    def test_get_task_request_for_an_existing_pipeline(self):
-        pipeline = tasks.send(_say_hello, 'Jane', 'Doe')
-        self.test_harness.run_pipeline(pipeline)
-        action_result = self.test_harness.run_action(pipeline, TaskAction.GET_REQUEST)
-        task_request = self._unpack(action_result.result, TaskRequest)
-        self.assertEqual(task_request.id, pipeline.id)
+        action_result = await self.runner.run_action('123', TaskAction.GET_STATUS, context=context)
+        self.assertEqual(unpack_any(action_result.result, [TaskStatus]).value, TaskStatus.COMPLETED)
 
-    def test_get_task_request_for_a_non_existing_pipeline(self):
-        pipeline = tasks.send(_say_hello, 'Jane', 'Doe')
-        try:
-            self.test_harness.run_action(pipeline, TaskAction.GET_REQUEST)
-        except TaskErrorException as ex:
-            self.assertEqual(ex.task_error.message, 'Task request not found')
-        else:
-            self.fail('Expected an exception')
+    async def test_get_task_request_for_pending_task(self):
+        context = MagicMock()
+        context.storage.task_request = None
 
-    def test_get_task_result_for_a_completed_pipeline(self):
-        pipeline = tasks.send(_say_hello, 'Jane', 'Doe')
-        self.test_harness.run_pipeline(pipeline)
-        action_result = self.test_harness.run_action(pipeline, TaskAction.GET_RESULT)
-        task_result = self._unpack(action_result.result, TaskResult)
-        self.assertEqual(task_result.id, pipeline.id)
+        action_result = await self.runner.run_action('123', TaskAction.GET_REQUEST, context=context)
+        self.assertIsInstance(action_result, TaskActionException)
+        self.assertEqual(action_result.exception_message, 'Task request not found')
 
-    def test_get_task_result_for_failed_pipeline(self):
-        pipeline = tasks.send(_say_hello, 'Jane')
-        try:
-            self.test_harness.run_pipeline(pipeline)
-        except:
-            pass
+    async def test_get_task_request_for_task(self):
+        context = MagicMock()
+        context.storage.task_request = 'Mock task request'
 
-        action_result = self.test_harness.run_action(pipeline, TaskAction.GET_RESULT)
-        task_exception = self._unpack(action_result.result, TaskException)
-        self.assertEqual(task_exception.id, pipeline.id)
+        action_result = await self.runner.run_action('123', TaskAction.GET_REQUEST, context=context)
+        self.assertTrue(action_result, 'Mock task request')
 
+    async def test_get_task_result_for_pending_task(self):
+        context = MagicMock()
+        context.storage.task_result = None
+        context.storage.task_exception = None
 
-if __name__ == '__main__':
-    unittest.main()
+        action_result = await self.runner.run_action('123', TaskAction.GET_RESULT, context=context)
+        self.assertIsInstance(action_result, TaskActionException)
+        self.assertEqual(action_result.exception_message, 'Task result not found')
+
+    async def test_get_task_result_for_completed_task(self):
+        context = MagicMock()
+        context.storage.task_result = TaskResult(id='123')
+        context.storage.task_exception = None
+
+        action_result = await self.runner.run_action('123', TaskAction.GET_RESULT, context=context)
+        self.assertEqual(action_result.id, '123')
+
+    async def test_get_task_result_for_failed_task(self):
+        context = MagicMock()
+        context.storage.task_result = None
+        context.storage.task_exception = TaskException(id='123')
+
+        action_result = await self.runner.run_action('123', TaskAction.GET_RESULT, context=context)
+        self.assertEqual(action_result.id, '123')

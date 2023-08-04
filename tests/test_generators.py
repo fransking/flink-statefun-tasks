@@ -1,6 +1,9 @@
 import unittest
+from tests.utils import TaskRunner
+from statefun_tasks import FlinkTasks
 
-from tests.utils import FlinkTestHarness, tasks
+
+tasks = FlinkTasks()
 
 
 @tasks.bind()
@@ -17,19 +20,14 @@ def return_generator():
     yield 6
 
 
-class GeneratorTests(unittest.TestCase):
+class GeneratorTests(unittest.IsolatedAsyncioTestCase):
     def setUp(self) -> None:
-        self.test_harness = FlinkTestHarness()
+        self.runner = TaskRunner(tasks)
 
-    def test_async_generator(self):
-        pipeline = return_async_generator.send()
-        result = self.test_harness.run_pipeline(pipeline)
+    async def test_async_generator(self):
+        result, _ = await self.runner.run_task(return_async_generator)
         self.assertEqual(result, [1, 2, 3])  
 
-    def test_generator(self):
-        pipeline = return_generator.send()
-        result = self.test_harness.run_pipeline(pipeline)
+    async def test_generator(self):
+        result, _ = await self.runner.run_task(return_generator)
         self.assertEqual(result, [4, 5, 6])  
-
-if __name__ == '__main__':
-    unittest.main()
