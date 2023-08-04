@@ -105,6 +105,10 @@ class TaskRequestHandler(MessageHandler):
         return False
     
     def _send_pipeline_request(self, context, task_request, task_result, is_fruitful):
+        if self._embedded_pipeline_namespace is None or self._embedded_pipeline_type is None:
+            raise ValueError('Unable to forward pipeline to embedded pipeline function. \
+                             Missing configuration in FlinkTasks(embedded_pipeline_namespace=..., embedded_pipeline_type=...)')
+
         pipeline_request = TaskRequest(
                 id=task_request.id,
                 uid=task_request.uid,

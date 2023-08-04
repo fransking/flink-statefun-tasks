@@ -60,6 +60,10 @@ class PipelineForwardingTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(len(egresses), 0)
 
+    async def test_task_creating_a_nested_pipeline_fails_if_embedded_pipline_is_not_configured(self):
+        with self.assertRaises(ValueError):
+            await self.runner.run_task(_workflow, embedded_pipeline_namespace=None, embedded_pipeline_type=None)
+
     async def test_non_fruitful_nested_pipeline(self):
         messages = []
         context = MagicMock()
