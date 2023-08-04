@@ -139,51 +139,9 @@ message TaskState {
     optional google.protobuf.Any internal_state = 2;
 }
 
-message TaskDeferral {
-    repeated DeferredTask tasks = 1;
-    optional string parent_task_address = 2;
-    optional string parent_task_id = 3;
-    optional TaskResultOrException task_result_or_exception = 4;
-}
-
-message DeferredTask {
-    string task_uid = 1;
-    bool has_initial_args = 2;
-}
-
 message PausedTask {
     string destination = 1;
     TaskRequest task_request = 2;
-}
-
-message PipelineState {
-    string id = 1;
-    string address = 2;
-    string root_id = 3;
-    string root_address = 4;
-    string caller_id = 5;
-    string caller_address = 6;
-    Pipeline pipeline = 7;
-    TaskResults task_results = 8;
-    oneof before_finally {
-        TaskResult result_before_finally = 9;
-        TaskException exception_before_finally = 10;
-    }
-    bool is_fruitful = 11;
-    google.protobuf.Any task_state = 12;  // state from the task that created this pipeline
-
-    // optimised so we only store deferral data once not multiple times per task uid
-    map<string, TaskDeferral> task_deferrals_by_id = 13;
-    map<string, string> task_deferral_ids_by_task_uid = 14;
-    // end
-
-    TaskStatus status = 15;
-    repeated PausedTask paused_tasks = 16;
-
-    repeated ChildPipeline child_pipelines = 17;
-
-    google.protobuf.Any last_task_state = 18;  // state from the last task run within this pipeline
-    string invocation_id = 19;
 }
 
 message ChildPipeline {
@@ -204,10 +162,6 @@ message TaskInfo {
     string worker_name = 4;
     string task_uid = 5;
     string display_name = 6;
-}
-
-message TaskResults {
-    map<string, google.protobuf.Any> by_uid = 1;
 }
 
 enum TaskAction {
