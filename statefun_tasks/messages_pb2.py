@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x0emessages.proto\x12\x0estatefun_tasks\x1a\x19google/protobuf/any.proto\"\x0b\n\tNoneValue\"6\n\x07\x41\x64\x64ress\x12\x11\n\tnamespace\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\n\n\x02id\x18\x03 \x01(\t\"\x92\x01\n\x10MapOfStringToAny\x12:\n\x05items\x18\x01 \x03(\x0b\x32+.statefun_tasks.MapOfStringToAny.ItemsEntry\x1a\x42\n\nItemsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12#\n\x05value\x18\x02 \x01(\x0b\x32\x14.google.protobuf.Any:\x02\x38\x01\"1\n\nArrayOfAny\x12#\n\x05items\x18\x01 \x03(\x0b\x32\x14.google.protobuf.Any\"1\n\nTupleOfAny\x12#\n\x05items\x18\x01 \x03(\x0b\x32\x14.google.protobuf.Any\"\xd4\x02\n\tTaskEntry\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x11\n\ttask_type\x18\x02 \x01(\t\x12%\n\x07request\x18\x03 \x01(\x0b\x32\x14.google.protobuf.Any\x12\x10\n\x08\x63omplete\x18\x04 \x01(\x08\x12\x12\n\nis_finally\x18\x05 \x01(\x08\x12\x11\n\tnamespace\x18\x06 \x01(\t\x12\x13\n\x0bworker_name\x18\x07 \x01(\t\x12\x13\n\x0bis_fruitful\x18\x08 \x01(\x08\x12\x35\n\x0cretry_policy\x18\t \x01(\x0b\x32\x1f.statefun_tasks.TaskRetryPolicy\x12\x19\n\x0c\x64isplay_name\x18\n \x01(\tH\x00\x88\x01\x01\x12\x0f\n\x07is_wait\x18\x0b \x01(\x08\x12\x0b\n\x03uid\x18\x0c \x01(\t\x12\x18\n\x10is_exceptionally\x18\r \x01(\x08\x42\x0f\n\r_display_name\"\x8c\x01\n\nGroupEntry\x12\x10\n\x08group_id\x18\x01 \x01(\t\x12\'\n\x05group\x18\x02 \x03(\x0b\x32\x18.statefun_tasks.Pipeline\x12\x17\n\x0fmax_parallelism\x18\x03 \x01(\x05\x12\x0f\n\x07is_wait\x18\x04 \x01(\x08\x12\x19\n\x11return_exceptions\x18\x05 \x01(\x08\"|\n\rPipelineEntry\x12/\n\ntask_entry\x18\x01 \x01(\x0b\x32\x19.statefun_tasks.TaskEntryH\x00\x12\x31\n\x0bgroup_entry\x18\x02 \x01(\x0b\x32\x1a.statefun_tasks.GroupEntryH\x00\x42\x07\n\x05\x65ntry\"\xa2\x02\n\x08Pipeline\x12.\n\x07\x65ntries\x18\x01 \x03(\x0b\x32\x1d.statefun_tasks.PipelineEntry\x12\x0e\n\x06inline\x18\x02 \x01(\x08\x12/\n\x0cinitial_args\x18\x03 \x01(\x0b\x32\x14.google.protobuf.AnyH\x00\x88\x01\x01\x12=\n\x0einitial_kwargs\x18\x04 \x01(\x0b\x32 .statefun_tasks.MapOfStringToAnyH\x01\x88\x01\x01\x12\x30\n\rinitial_state\x18\x05 \x01(\x0b\x32\x14.google.protobuf.AnyH\x02\x88\x01\x01\x42\x0f\n\r_initial_argsB\x11\n\x0f_initial_kwargsB\x10\n\x0e_initial_state\"i\n\x0fTaskRetryPolicy\x12\x11\n\tretry_for\x18\x01 \x03(\t\x12\x13\n\x0bmax_retries\x18\x02 \x01(\x05\x12\x10\n\x08\x64\x65lay_ms\x18\x03 \x01(\x02\x12\x1c\n\x14\x65xponential_back_off\x18\x04 \x01(\x08\"k\n\rArgsAndKwargs\x12(\n\x04\x61rgs\x18\x01 \x01(\x0b\x32\x1a.statefun_tasks.TupleOfAny\x12\x30\n\x06kwargs\x18\x02 \x01(\x0b\x32 .statefun_tasks.MapOfStringToAny\"\xc3\x03\n\x0bTaskRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x15\n\x0breply_topic\x18\x03 \x01(\tH\x00\x12\x30\n\rreply_address\x18\x04 \x01(\x0b\x32\x17.statefun_tasks.AddressH\x00\x12%\n\x07request\x18\x05 \x01(\x0b\x32\x14.google.protobuf.Any\x12#\n\x05state\x18\x06 \x01(\x0b\x32\x14.google.protobuf.Any\x12\x35\n\x0cretry_policy\x18\x07 \x01(\x0b\x32\x1f.statefun_tasks.TaskRetryPolicy\x12\x33\n\x04meta\x18\x08 \x03(\x0b\x32%.statefun_tasks.TaskRequest.MetaEntry\x12\x18\n\x0bis_fruitful\x18\t \x01(\x08H\x01\x88\x01\x01\x12\x1a\n\rinvocation_id\x18\n \x01(\tH\x02\x88\x01\x01\x12\x0b\n\x03uid\x18\x0b \x01(\t\x1a+\n\tMetaEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x42\x07\n\x05replyB\x0e\n\x0c_is_fruitfulB\x10\n\x0e_invocation_id\"\xbd\x01\n\nTaskResult\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12$\n\x06result\x18\x03 \x01(\x0b\x32\x14.google.protobuf.Any\x12#\n\x05state\x18\x04 \x01(\x0b\x32\x14.google.protobuf.Any\x12\x1a\n\rinvocation_id\x18\x05 \x01(\tH\x00\x88\x01\x01\x12\x0b\n\x03uid\x18\x06 \x01(\t\x12\x0f\n\x07is_wait\x18\x0b \x01(\x08\x42\x10\n\x0e_invocation_id\"\xad\x02\n\rTaskException\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x16\n\x0e\x65xception_type\x18\x03 \x01(\t\x12\x19\n\x11\x65xception_message\x18\x04 \x01(\t\x12\x12\n\nstacktrace\x18\x05 \x01(\t\x12#\n\x05state\x18\x06 \x01(\x0b\x32\x14.google.protobuf.Any\x12\x13\n\x0bmaybe_retry\x18\x07 \x01(\x08\x12\x35\n\x0cretry_policy\x18\x08 \x01(\x0b\x32\x1f.statefun_tasks.TaskRetryPolicy\x12\x1a\n\rinvocation_id\x18\t \x01(\tH\x00\x88\x01\x01\x12\x0b\n\x03uid\x18\n \x01(\t\x12\x0f\n\x07is_wait\x18\x0b \x01(\x08\x42\x10\n\x0e_invocation_id\"\x9f\x01\n\x15TaskResultOrException\x12\x31\n\x0btask_result\x18\x01 \x01(\x0b\x32\x1a.statefun_tasks.TaskResultH\x00\x12\x37\n\x0etask_exception\x18\x02 \x01(\x0b\x32\x1d.statefun_tasks.TaskExceptionH\x00\x42\x1a\n\x18task_result_or_exception\"e\n\x11TaskSpecificState\x12\x13\n\x0bretry_count\x18\x01 \x01(\x05\x12\x1f\n\x17original_caller_address\x18\x02 \x01(\t\x12\x1a\n\x12original_caller_id\x18\x03 \x01(\t\"\xd8\x01\n\tTaskState\x12\x34\n\x06\x62y_uid\x18\x01 \x03(\x0b\x32$.statefun_tasks.TaskState.ByUidEntry\x12\x31\n\x0einternal_state\x18\x02 \x01(\x0b\x32\x14.google.protobuf.AnyH\x00\x88\x01\x01\x1aO\n\nByUidEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x30\n\x05value\x18\x02 \x01(\x0b\x32!.statefun_tasks.TaskSpecificState:\x02\x38\x01\x42\x11\n\x0f_internal_state\"\x90\x02\n\x0cTaskDeferral\x12+\n\x05tasks\x18\x01 \x03(\x0b\x32\x1c.statefun_tasks.DeferredTask\x12 \n\x13parent_task_address\x18\x02 \x01(\tH\x00\x88\x01\x01\x12\x1b\n\x0eparent_task_id\x18\x03 \x01(\tH\x01\x88\x01\x01\x12L\n\x18task_result_or_exception\x18\x04 \x01(\x0b\x32%.statefun_tasks.TaskResultOrExceptionH\x02\x88\x01\x01\x42\x16\n\x14_parent_task_addressB\x11\n\x0f_parent_task_idB\x1b\n\x19_task_result_or_exception\":\n\x0c\x44\x65\x66\x65rredTask\x12\x10\n\x08task_uid\x18\x01 \x01(\t\x12\x18\n\x10has_initial_args\x18\x02 \x01(\x08\"T\n\nPausedTask\x12\x13\n\x0b\x64\x65stination\x18\x01 \x01(\t\x12\x31\n\x0ctask_request\x18\x02 \x01(\x0b\x32\x1b.statefun_tasks.TaskRequest\"\xdb\x07\n\rPipelineState\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x02 \x01(\t\x12\x0f\n\x07root_id\x18\x03 \x01(\t\x12\x14\n\x0croot_address\x18\x04 \x01(\t\x12\x11\n\tcaller_id\x18\x05 \x01(\t\x12\x16\n\x0e\x63\x61ller_address\x18\x06 \x01(\t\x12*\n\x08pipeline\x18\x07 \x01(\x0b\x32\x18.statefun_tasks.Pipeline\x12\x31\n\x0ctask_results\x18\x08 \x01(\x0b\x32\x1b.statefun_tasks.TaskResults\x12;\n\x15result_before_finally\x18\t \x01(\x0b\x32\x1a.statefun_tasks.TaskResultH\x00\x12\x41\n\x18\x65xception_before_finally\x18\n \x01(\x0b\x32\x1d.statefun_tasks.TaskExceptionH\x00\x12\x13\n\x0bis_fruitful\x18\x0b \x01(\x08\x12(\n\ntask_state\x18\x0c \x01(\x0b\x32\x14.google.protobuf.Any\x12R\n\x14task_deferrals_by_id\x18\r \x03(\x0b\x32\x34.statefun_tasks.PipelineState.TaskDeferralsByIdEntry\x12\x62\n\x1dtask_deferral_ids_by_task_uid\x18\x0e \x03(\x0b\x32;.statefun_tasks.PipelineState.TaskDeferralIdsByTaskUidEntry\x12*\n\x06status\x18\x0f \x01(\x0b\x32\x1a.statefun_tasks.TaskStatus\x12\x30\n\x0cpaused_tasks\x18\x10 \x03(\x0b\x32\x1a.statefun_tasks.PausedTask\x12\x36\n\x0f\x63hild_pipelines\x18\x11 \x03(\x0b\x32\x1d.statefun_tasks.ChildPipeline\x12-\n\x0flast_task_state\x18\x12 \x01(\x0b\x32\x14.google.protobuf.Any\x12\x15\n\rinvocation_id\x18\x13 \x01(\t\x1aV\n\x16TaskDeferralsByIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12+\n\x05value\x18\x02 \x01(\x0b\x32\x1c.statefun_tasks.TaskDeferral:\x02\x38\x01\x1a?\n\x1dTaskDeferralIdsByTaskUidEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x42\x10\n\x0e\x62\x65\x66ore_finally\"\xbe\x01\n\rChildPipeline\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x02 \x01(\t\x12\x0f\n\x07root_id\x18\x03 \x01(\t\x12\x14\n\x0croot_address\x18\x04 \x01(\t\x12\x11\n\tcaller_id\x18\x05 \x01(\t\x12\x16\n\x0e\x63\x61ller_address\x18\x06 \x01(\t\x12\'\n\x05tasks\x18\x07 \x03(\x0b\x32\x18.statefun_tasks.TaskInfo\x12\x15\n\rinvocation_id\x18\x08 \x01(\t\"~\n\x08TaskInfo\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x11\n\ttask_type\x18\x02 \x01(\t\x12\x11\n\tnamespace\x18\x03 \x01(\t\x12\x13\n\x0bworker_name\x18\x04 \x01(\t\x12\x10\n\x08task_uid\x18\x05 \x01(\t\x12\x14\n\x0c\x64isplay_name\x18\x06 \x01(\t\"\x89\x01\n\x0bTaskResults\x12\x36\n\x06\x62y_uid\x18\x01 \x03(\x0b\x32&.statefun_tasks.TaskResults.ByUidEntry\x1a\x42\n\nByUidEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12#\n\x05value\x18\x02 \x01(\x0b\x32\x14.google.protobuf.Any:\x02\x38\x01\"\xaa\x01\n\x11TaskActionRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x15\n\x0breply_topic\x18\x02 \x01(\tH\x00\x12\x30\n\rreply_address\x18\x03 \x01(\x0b\x32\x17.statefun_tasks.AddressH\x00\x12*\n\x06\x61\x63tion\x18\x04 \x01(\x0e\x32\x1a.statefun_tasks.TaskAction\x12\x0b\n\x03uid\x18\x05 \x01(\tB\x07\n\x05reply\"}\n\x10TaskActionResult\x12\n\n\x02id\x18\x01 \x01(\t\x12*\n\x06\x61\x63tion\x18\x02 \x01(\x0e\x32\x1a.statefun_tasks.TaskAction\x12$\n\x06result\x18\x03 \x01(\x0b\x32\x14.google.protobuf.Any\x12\x0b\n\x03uid\x18\x04 \x01(\t\"\xa1\x01\n\x13TaskActionException\x12\n\n\x02id\x18\x01 \x01(\t\x12*\n\x06\x61\x63tion\x18\x02 \x01(\x0e\x32\x1a.statefun_tasks.TaskAction\x12\x16\n\x0e\x65xception_type\x18\x03 \x01(\t\x12\x19\n\x11\x65xception_message\x18\x04 \x01(\t\x12\x12\n\nstacktrace\x18\x05 \x01(\t\x12\x0b\n\x03uid\x18\x06 \x01(\t\"\xa8\x01\n\nTaskStatus\x12\x30\n\x05value\x18\x01 \x01(\x0e\x32!.statefun_tasks.TaskStatus.Status\"h\n\x06Status\x12\x0b\n\x07PENDING\x10\x00\x12\x0b\n\x07RUNNING\x10\x01\x12\r\n\tCOMPLETED\x10\x02\x12\n\n\x06\x46\x41ILED\x10\x03\x12\n\n\x06PAUSED\x10\x04\x12\x0e\n\nCANCELLING\x10\x05\x12\r\n\tCANCELLED\x10\x06\"e\n\x0fPipelineCreated\x12\x11\n\tcaller_id\x18\x01 \x01(\t\x12\x16\n\x0e\x63\x61ller_address\x18\x02 \x01(\t\x12\'\n\x05tasks\x18\x03 \x03(\x0b\x32\x18.statefun_tasks.TaskInfo\"C\n\x15PipelineStatusChanged\x12*\n\x06status\x18\x01 \x01(\x0b\x32\x1a.statefun_tasks.TaskStatus\"\xff\x01\n\x05\x45vent\x12\x13\n\x0bpipeline_id\x18\x01 \x01(\t\x12\x18\n\x10pipeline_address\x18\x02 \x01(\t\x12\x18\n\x10root_pipeline_id\x18\x03 \x01(\t\x12\x1d\n\x15root_pipeline_address\x18\x04 \x01(\t\x12;\n\x10pipeline_created\x18\x05 \x01(\x0b\x32\x1f.statefun_tasks.PipelineCreatedH\x00\x12H\n\x17pipeline_status_changed\x18\x06 \x01(\x0b\x32%.statefun_tasks.PipelineStatusChangedH\x00\x42\x07\n\x05\x65vent*|\n\nTaskAction\x12\x0e\n\nGET_STATUS\x10\x00\x12\x0f\n\x0bGET_REQUEST\x10\x01\x12\x0e\n\nGET_RESULT\x10\x02\x12\x12\n\x0ePAUSE_PIPELINE\x10\x03\x12\x14\n\x10UNPAUSE_PIPELINE\x10\x04\x12\x13\n\x0f\x43\x41NCEL_PIPELINE\x10\x05\x62\x06proto3'
+  serialized_pb=b'\n\x0emessages.proto\x12\x0estatefun_tasks\x1a\x19google/protobuf/any.proto\"\x0b\n\tNoneValue\"6\n\x07\x41\x64\x64ress\x12\x11\n\tnamespace\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\n\n\x02id\x18\x03 \x01(\t\"\x92\x01\n\x10MapOfStringToAny\x12:\n\x05items\x18\x01 \x03(\x0b\x32+.statefun_tasks.MapOfStringToAny.ItemsEntry\x1a\x42\n\nItemsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12#\n\x05value\x18\x02 \x01(\x0b\x32\x14.google.protobuf.Any:\x02\x38\x01\"1\n\nArrayOfAny\x12#\n\x05items\x18\x01 \x03(\x0b\x32\x14.google.protobuf.Any\"1\n\nTupleOfAny\x12#\n\x05items\x18\x01 \x03(\x0b\x32\x14.google.protobuf.Any\"\xd4\x02\n\tTaskEntry\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x11\n\ttask_type\x18\x02 \x01(\t\x12%\n\x07request\x18\x03 \x01(\x0b\x32\x14.google.protobuf.Any\x12\x10\n\x08\x63omplete\x18\x04 \x01(\x08\x12\x12\n\nis_finally\x18\x05 \x01(\x08\x12\x11\n\tnamespace\x18\x06 \x01(\t\x12\x13\n\x0bworker_name\x18\x07 \x01(\t\x12\x13\n\x0bis_fruitful\x18\x08 \x01(\x08\x12\x35\n\x0cretry_policy\x18\t \x01(\x0b\x32\x1f.statefun_tasks.TaskRetryPolicy\x12\x19\n\x0c\x64isplay_name\x18\n \x01(\tH\x00\x88\x01\x01\x12\x0f\n\x07is_wait\x18\x0b \x01(\x08\x12\x0b\n\x03uid\x18\x0c \x01(\t\x12\x18\n\x10is_exceptionally\x18\r \x01(\x08\x42\x0f\n\r_display_name\"\x8c\x01\n\nGroupEntry\x12\x10\n\x08group_id\x18\x01 \x01(\t\x12\'\n\x05group\x18\x02 \x03(\x0b\x32\x18.statefun_tasks.Pipeline\x12\x17\n\x0fmax_parallelism\x18\x03 \x01(\x05\x12\x0f\n\x07is_wait\x18\x04 \x01(\x08\x12\x19\n\x11return_exceptions\x18\x05 \x01(\x08\"|\n\rPipelineEntry\x12/\n\ntask_entry\x18\x01 \x01(\x0b\x32\x19.statefun_tasks.TaskEntryH\x00\x12\x31\n\x0bgroup_entry\x18\x02 \x01(\x0b\x32\x1a.statefun_tasks.GroupEntryH\x00\x42\x07\n\x05\x65ntry\"\xa2\x02\n\x08Pipeline\x12.\n\x07\x65ntries\x18\x01 \x03(\x0b\x32\x1d.statefun_tasks.PipelineEntry\x12\x0e\n\x06inline\x18\x02 \x01(\x08\x12/\n\x0cinitial_args\x18\x03 \x01(\x0b\x32\x14.google.protobuf.AnyH\x00\x88\x01\x01\x12=\n\x0einitial_kwargs\x18\x04 \x01(\x0b\x32 .statefun_tasks.MapOfStringToAnyH\x01\x88\x01\x01\x12\x30\n\rinitial_state\x18\x05 \x01(\x0b\x32\x14.google.protobuf.AnyH\x02\x88\x01\x01\x42\x0f\n\r_initial_argsB\x11\n\x0f_initial_kwargsB\x10\n\x0e_initial_state\"i\n\x0fTaskRetryPolicy\x12\x11\n\tretry_for\x18\x01 \x03(\t\x12\x13\n\x0bmax_retries\x18\x02 \x01(\x05\x12\x10\n\x08\x64\x65lay_ms\x18\x03 \x01(\x02\x12\x1c\n\x14\x65xponential_back_off\x18\x04 \x01(\x08\"k\n\rArgsAndKwargs\x12(\n\x04\x61rgs\x18\x01 \x01(\x0b\x32\x1a.statefun_tasks.TupleOfAny\x12\x30\n\x06kwargs\x18\x02 \x01(\x0b\x32 .statefun_tasks.MapOfStringToAny\"\xc3\x03\n\x0bTaskRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x15\n\x0breply_topic\x18\x03 \x01(\tH\x00\x12\x30\n\rreply_address\x18\x04 \x01(\x0b\x32\x17.statefun_tasks.AddressH\x00\x12%\n\x07request\x18\x05 \x01(\x0b\x32\x14.google.protobuf.Any\x12#\n\x05state\x18\x06 \x01(\x0b\x32\x14.google.protobuf.Any\x12\x35\n\x0cretry_policy\x18\x07 \x01(\x0b\x32\x1f.statefun_tasks.TaskRetryPolicy\x12\x33\n\x04meta\x18\x08 \x03(\x0b\x32%.statefun_tasks.TaskRequest.MetaEntry\x12\x18\n\x0bis_fruitful\x18\t \x01(\x08H\x01\x88\x01\x01\x12\x1a\n\rinvocation_id\x18\n \x01(\tH\x02\x88\x01\x01\x12\x0b\n\x03uid\x18\x0b \x01(\t\x1a+\n\tMetaEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x42\x07\n\x05replyB\x0e\n\x0c_is_fruitfulB\x10\n\x0e_invocation_id\"\xbd\x01\n\nTaskResult\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12$\n\x06result\x18\x03 \x01(\x0b\x32\x14.google.protobuf.Any\x12#\n\x05state\x18\x04 \x01(\x0b\x32\x14.google.protobuf.Any\x12\x1a\n\rinvocation_id\x18\x05 \x01(\tH\x00\x88\x01\x01\x12\x0b\n\x03uid\x18\x06 \x01(\t\x12\x0f\n\x07is_wait\x18\x0b \x01(\x08\x42\x10\n\x0e_invocation_id\"\xad\x02\n\rTaskException\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x16\n\x0e\x65xception_type\x18\x03 \x01(\t\x12\x19\n\x11\x65xception_message\x18\x04 \x01(\t\x12\x12\n\nstacktrace\x18\x05 \x01(\t\x12#\n\x05state\x18\x06 \x01(\x0b\x32\x14.google.protobuf.Any\x12\x13\n\x0bmaybe_retry\x18\x07 \x01(\x08\x12\x35\n\x0cretry_policy\x18\x08 \x01(\x0b\x32\x1f.statefun_tasks.TaskRetryPolicy\x12\x1a\n\rinvocation_id\x18\t \x01(\tH\x00\x88\x01\x01\x12\x0b\n\x03uid\x18\n \x01(\t\x12\x0f\n\x07is_wait\x18\x0b \x01(\x08\x42\x10\n\x0e_invocation_id\"\x9f\x01\n\x15TaskResultOrException\x12\x31\n\x0btask_result\x18\x01 \x01(\x0b\x32\x1a.statefun_tasks.TaskResultH\x00\x12\x37\n\x0etask_exception\x18\x02 \x01(\x0b\x32\x1d.statefun_tasks.TaskExceptionH\x00\x42\x1a\n\x18task_result_or_exception\"e\n\x11TaskSpecificState\x12\x13\n\x0bretry_count\x18\x01 \x01(\x05\x12\x1f\n\x17original_caller_address\x18\x02 \x01(\t\x12\x1a\n\x12original_caller_id\x18\x03 \x01(\t\"\xd8\x01\n\tTaskState\x12\x34\n\x06\x62y_uid\x18\x01 \x03(\x0b\x32$.statefun_tasks.TaskState.ByUidEntry\x12\x31\n\x0einternal_state\x18\x02 \x01(\x0b\x32\x14.google.protobuf.AnyH\x00\x88\x01\x01\x1aO\n\nByUidEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x30\n\x05value\x18\x02 \x01(\x0b\x32!.statefun_tasks.TaskSpecificState:\x02\x38\x01\x42\x11\n\x0f_internal_state\"T\n\nPausedTask\x12\x13\n\x0b\x64\x65stination\x18\x01 \x01(\t\x12\x31\n\x0ctask_request\x18\x02 \x01(\x0b\x32\x1b.statefun_tasks.TaskRequest\"\xbe\x01\n\rChildPipeline\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x02 \x01(\t\x12\x0f\n\x07root_id\x18\x03 \x01(\t\x12\x14\n\x0croot_address\x18\x04 \x01(\t\x12\x11\n\tcaller_id\x18\x05 \x01(\t\x12\x16\n\x0e\x63\x61ller_address\x18\x06 \x01(\t\x12\'\n\x05tasks\x18\x07 \x03(\x0b\x32\x18.statefun_tasks.TaskInfo\x12\x15\n\rinvocation_id\x18\x08 \x01(\t\"~\n\x08TaskInfo\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x11\n\ttask_type\x18\x02 \x01(\t\x12\x11\n\tnamespace\x18\x03 \x01(\t\x12\x13\n\x0bworker_name\x18\x04 \x01(\t\x12\x10\n\x08task_uid\x18\x05 \x01(\t\x12\x14\n\x0c\x64isplay_name\x18\x06 \x01(\t\"\xaa\x01\n\x11TaskActionRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x15\n\x0breply_topic\x18\x02 \x01(\tH\x00\x12\x30\n\rreply_address\x18\x03 \x01(\x0b\x32\x17.statefun_tasks.AddressH\x00\x12*\n\x06\x61\x63tion\x18\x04 \x01(\x0e\x32\x1a.statefun_tasks.TaskAction\x12\x0b\n\x03uid\x18\x05 \x01(\tB\x07\n\x05reply\"}\n\x10TaskActionResult\x12\n\n\x02id\x18\x01 \x01(\t\x12*\n\x06\x61\x63tion\x18\x02 \x01(\x0e\x32\x1a.statefun_tasks.TaskAction\x12$\n\x06result\x18\x03 \x01(\x0b\x32\x14.google.protobuf.Any\x12\x0b\n\x03uid\x18\x04 \x01(\t\"\xa1\x01\n\x13TaskActionException\x12\n\n\x02id\x18\x01 \x01(\t\x12*\n\x06\x61\x63tion\x18\x02 \x01(\x0e\x32\x1a.statefun_tasks.TaskAction\x12\x16\n\x0e\x65xception_type\x18\x03 \x01(\t\x12\x19\n\x11\x65xception_message\x18\x04 \x01(\t\x12\x12\n\nstacktrace\x18\x05 \x01(\t\x12\x0b\n\x03uid\x18\x06 \x01(\t\"\xa8\x01\n\nTaskStatus\x12\x30\n\x05value\x18\x01 \x01(\x0e\x32!.statefun_tasks.TaskStatus.Status\"h\n\x06Status\x12\x0b\n\x07PENDING\x10\x00\x12\x0b\n\x07RUNNING\x10\x01\x12\r\n\tCOMPLETED\x10\x02\x12\n\n\x06\x46\x41ILED\x10\x03\x12\n\n\x06PAUSED\x10\x04\x12\x0e\n\nCANCELLING\x10\x05\x12\r\n\tCANCELLED\x10\x06\"e\n\x0fPipelineCreated\x12\x11\n\tcaller_id\x18\x01 \x01(\t\x12\x16\n\x0e\x63\x61ller_address\x18\x02 \x01(\t\x12\'\n\x05tasks\x18\x03 \x03(\x0b\x32\x18.statefun_tasks.TaskInfo\"C\n\x15PipelineStatusChanged\x12*\n\x06status\x18\x01 \x01(\x0b\x32\x1a.statefun_tasks.TaskStatus\"?\n\x14PipelineTasksSkipped\x12\'\n\x05tasks\x18\x01 \x03(\x0b\x32\x18.statefun_tasks.TaskInfo\"r\n\x14PipelineTaskFinished\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0b\n\x03uid\x18\x02 \x01(\t\x12*\n\x06status\x18\x03 \x01(\x0b\x32\x1a.statefun_tasks.TaskStatus\x12\x15\n\rsize_in_bytes\x18\x04 \x01(\r\"\x8f\x03\n\x05\x45vent\x12\x13\n\x0bpipeline_id\x18\x01 \x01(\t\x12\x18\n\x10pipeline_address\x18\x02 \x01(\t\x12\x18\n\x10root_pipeline_id\x18\x03 \x01(\t\x12\x1d\n\x15root_pipeline_address\x18\x04 \x01(\t\x12;\n\x10pipeline_created\x18\x05 \x01(\x0b\x32\x1f.statefun_tasks.PipelineCreatedH\x00\x12H\n\x17pipeline_status_changed\x18\x06 \x01(\x0b\x32%.statefun_tasks.PipelineStatusChangedH\x00\x12\x46\n\x16pipeline_tasks_skipped\x18\x07 \x01(\x0b\x32$.statefun_tasks.PipelineTasksSkippedH\x00\x12\x46\n\x16pipeline_task_finished\x18\x08 \x01(\x0b\x32$.statefun_tasks.PipelineTaskFinishedH\x00\x42\x07\n\x05\x65vent*|\n\nTaskAction\x12\x0e\n\nGET_STATUS\x10\x00\x12\x0f\n\x0bGET_REQUEST\x10\x01\x12\x0e\n\nGET_RESULT\x10\x02\x12\x12\n\x0ePAUSE_PIPELINE\x10\x03\x12\x14\n\x10UNPAUSE_PIPELINE\x10\x04\x12\x13\n\x0f\x43\x41NCEL_PIPELINE\x10\x05\x62\x06proto3'
   ,
   dependencies=[google_dot_protobuf_dot_any__pb2.DESCRIPTOR,])
 
@@ -65,8 +65,8 @@ _TASKACTION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=5873,
-  serialized_end=5997,
+  serialized_start=4733,
+  serialized_end=4857,
 )
 _sym_db.RegisterEnumDescriptor(_TASKACTION)
 
@@ -124,8 +124,8 @@ _TASKSTATUS_STATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=5337,
-  serialized_end=5441,
+  serialized_start=3872,
+  serialized_end=3976,
 )
 _sym_db.RegisterEnumDescriptor(_TASKSTATUS_STATUS)
 
@@ -1240,113 +1240,6 @@ _TASKSTATE = _descriptor.Descriptor(
 )
 
 
-_TASKDEFERRAL = _descriptor.Descriptor(
-  name='TaskDeferral',
-  full_name='statefun_tasks.TaskDeferral',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='tasks', full_name='statefun_tasks.TaskDeferral.tasks', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='parent_task_address', full_name='statefun_tasks.TaskDeferral.parent_task_address', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='parent_task_id', full_name='statefun_tasks.TaskDeferral.parent_task_id', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='task_result_or_exception', full_name='statefun_tasks.TaskDeferral.task_result_or_exception', index=3,
-      number=4, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-    _descriptor.OneofDescriptor(
-      name='_parent_task_address', full_name='statefun_tasks.TaskDeferral._parent_task_address',
-      index=0, containing_type=None,
-      create_key=_descriptor._internal_create_key,
-    fields=[]),
-    _descriptor.OneofDescriptor(
-      name='_parent_task_id', full_name='statefun_tasks.TaskDeferral._parent_task_id',
-      index=1, containing_type=None,
-      create_key=_descriptor._internal_create_key,
-    fields=[]),
-    _descriptor.OneofDescriptor(
-      name='_task_result_or_exception', full_name='statefun_tasks.TaskDeferral._task_result_or_exception',
-      index=2, containing_type=None,
-      create_key=_descriptor._internal_create_key,
-    fields=[]),
-  ],
-  serialized_start=2937,
-  serialized_end=3209,
-)
-
-
-_DEFERREDTASK = _descriptor.Descriptor(
-  name='DeferredTask',
-  full_name='statefun_tasks.DeferredTask',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='task_uid', full_name='statefun_tasks.DeferredTask.task_uid', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='has_initial_args', full_name='statefun_tasks.DeferredTask.has_initial_args', index=1,
-      number=2, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3211,
-  serialized_end=3269,
-)
-
-
 _PAUSEDTASK = _descriptor.Descriptor(
   name='PausedTask',
   full_name='statefun_tasks.PausedTask',
@@ -1381,247 +1274,8 @@ _PAUSEDTASK = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3271,
-  serialized_end=3355,
-)
-
-
-_PIPELINESTATE_TASKDEFERRALSBYIDENTRY = _descriptor.Descriptor(
-  name='TaskDeferralsByIdEntry',
-  full_name='statefun_tasks.PipelineState.TaskDeferralsByIdEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='statefun_tasks.PipelineState.TaskDeferralsByIdEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='statefun_tasks.PipelineState.TaskDeferralsByIdEntry.value', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=b'8\001',
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4176,
-  serialized_end=4262,
-)
-
-_PIPELINESTATE_TASKDEFERRALIDSBYTASKUIDENTRY = _descriptor.Descriptor(
-  name='TaskDeferralIdsByTaskUidEntry',
-  full_name='statefun_tasks.PipelineState.TaskDeferralIdsByTaskUidEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='statefun_tasks.PipelineState.TaskDeferralIdsByTaskUidEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='statefun_tasks.PipelineState.TaskDeferralIdsByTaskUidEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=b'8\001',
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4264,
-  serialized_end=4327,
-)
-
-_PIPELINESTATE = _descriptor.Descriptor(
-  name='PipelineState',
-  full_name='statefun_tasks.PipelineState',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='id', full_name='statefun_tasks.PipelineState.id', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='address', full_name='statefun_tasks.PipelineState.address', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='root_id', full_name='statefun_tasks.PipelineState.root_id', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='root_address', full_name='statefun_tasks.PipelineState.root_address', index=3,
-      number=4, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='caller_id', full_name='statefun_tasks.PipelineState.caller_id', index=4,
-      number=5, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='caller_address', full_name='statefun_tasks.PipelineState.caller_address', index=5,
-      number=6, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='pipeline', full_name='statefun_tasks.PipelineState.pipeline', index=6,
-      number=7, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='task_results', full_name='statefun_tasks.PipelineState.task_results', index=7,
-      number=8, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='result_before_finally', full_name='statefun_tasks.PipelineState.result_before_finally', index=8,
-      number=9, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='exception_before_finally', full_name='statefun_tasks.PipelineState.exception_before_finally', index=9,
-      number=10, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='is_fruitful', full_name='statefun_tasks.PipelineState.is_fruitful', index=10,
-      number=11, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='task_state', full_name='statefun_tasks.PipelineState.task_state', index=11,
-      number=12, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='task_deferrals_by_id', full_name='statefun_tasks.PipelineState.task_deferrals_by_id', index=12,
-      number=13, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='task_deferral_ids_by_task_uid', full_name='statefun_tasks.PipelineState.task_deferral_ids_by_task_uid', index=13,
-      number=14, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='status', full_name='statefun_tasks.PipelineState.status', index=14,
-      number=15, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='paused_tasks', full_name='statefun_tasks.PipelineState.paused_tasks', index=15,
-      number=16, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='child_pipelines', full_name='statefun_tasks.PipelineState.child_pipelines', index=16,
-      number=17, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='last_task_state', full_name='statefun_tasks.PipelineState.last_task_state', index=17,
-      number=18, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='invocation_id', full_name='statefun_tasks.PipelineState.invocation_id', index=18,
-      number=19, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[_PIPELINESTATE_TASKDEFERRALSBYIDENTRY, _PIPELINESTATE_TASKDEFERRALIDSBYTASKUIDENTRY, ],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-    _descriptor.OneofDescriptor(
-      name='before_finally', full_name='statefun_tasks.PipelineState.before_finally',
-      index=0, containing_type=None,
-      create_key=_descriptor._internal_create_key,
-    fields=[]),
-  ],
-  serialized_start=3358,
-  serialized_end=4345,
+  serialized_start=2936,
+  serialized_end=3020,
 )
 
 
@@ -1701,8 +1355,8 @@ _CHILDPIPELINE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4348,
-  serialized_end=4538,
+  serialized_start=3023,
+  serialized_end=3213,
 )
 
 
@@ -1768,78 +1422,8 @@ _TASKINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4540,
-  serialized_end=4666,
-)
-
-
-_TASKRESULTS_BYUIDENTRY = _descriptor.Descriptor(
-  name='ByUidEntry',
-  full_name='statefun_tasks.TaskResults.ByUidEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='statefun_tasks.TaskResults.ByUidEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='statefun_tasks.TaskResults.ByUidEntry.value', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=b'8\001',
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4740,
-  serialized_end=4806,
-)
-
-_TASKRESULTS = _descriptor.Descriptor(
-  name='TaskResults',
-  full_name='statefun_tasks.TaskResults',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='by_uid', full_name='statefun_tasks.TaskResults.by_uid', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[_TASKRESULTS_BYUIDENTRY, ],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4669,
-  serialized_end=4806,
+  serialized_start=3215,
+  serialized_end=3341,
 )
 
 
@@ -1903,8 +1487,8 @@ _TASKACTIONREQUEST = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=4809,
-  serialized_end=4979,
+  serialized_start=3344,
+  serialized_end=3514,
 )
 
 
@@ -1956,8 +1540,8 @@ _TASKACTIONRESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4981,
-  serialized_end=5106,
+  serialized_start=3516,
+  serialized_end=3641,
 )
 
 
@@ -2023,8 +1607,8 @@ _TASKACTIONEXCEPTION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5109,
-  serialized_end=5270,
+  serialized_start=3644,
+  serialized_end=3805,
 )
 
 
@@ -2056,8 +1640,8 @@ _TASKSTATUS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5273,
-  serialized_end=5441,
+  serialized_start=3808,
+  serialized_end=3976,
 )
 
 
@@ -2102,8 +1686,8 @@ _PIPELINECREATED = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5443,
-  serialized_end=5544,
+  serialized_start=3978,
+  serialized_end=4079,
 )
 
 
@@ -2134,8 +1718,93 @@ _PIPELINESTATUSCHANGED = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5546,
-  serialized_end=5613,
+  serialized_start=4081,
+  serialized_end=4148,
+)
+
+
+_PIPELINETASKSSKIPPED = _descriptor.Descriptor(
+  name='PipelineTasksSkipped',
+  full_name='statefun_tasks.PipelineTasksSkipped',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='tasks', full_name='statefun_tasks.PipelineTasksSkipped.tasks', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=4150,
+  serialized_end=4213,
+)
+
+
+_PIPELINETASKFINISHED = _descriptor.Descriptor(
+  name='PipelineTaskFinished',
+  full_name='statefun_tasks.PipelineTaskFinished',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='id', full_name='statefun_tasks.PipelineTaskFinished.id', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='uid', full_name='statefun_tasks.PipelineTaskFinished.uid', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='status', full_name='statefun_tasks.PipelineTaskFinished.status', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='size_in_bytes', full_name='statefun_tasks.PipelineTaskFinished.size_in_bytes', index=3,
+      number=4, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=4215,
+  serialized_end=4329,
 )
 
 
@@ -2189,6 +1858,20 @@ _EVENT = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='pipeline_tasks_skipped', full_name='statefun_tasks.Event.pipeline_tasks_skipped', index=6,
+      number=7, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='pipeline_task_finished', full_name='statefun_tasks.Event.pipeline_task_finished', index=7,
+      number=8, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -2206,8 +1889,8 @@ _EVENT = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=5616,
-  serialized_end=5871,
+  serialized_start=4332,
+  serialized_end=4731,
 )
 
 _MAPOFSTRINGTOANY_ITEMSENTRY.fields_by_name['value'].message_type = google_dot_protobuf_dot_any__pb2._ANY
@@ -2287,42 +1970,8 @@ _TASKSTATE.fields_by_name['internal_state'].message_type = google_dot_protobuf_d
 _TASKSTATE.oneofs_by_name['_internal_state'].fields.append(
   _TASKSTATE.fields_by_name['internal_state'])
 _TASKSTATE.fields_by_name['internal_state'].containing_oneof = _TASKSTATE.oneofs_by_name['_internal_state']
-_TASKDEFERRAL.fields_by_name['tasks'].message_type = _DEFERREDTASK
-_TASKDEFERRAL.fields_by_name['task_result_or_exception'].message_type = _TASKRESULTOREXCEPTION
-_TASKDEFERRAL.oneofs_by_name['_parent_task_address'].fields.append(
-  _TASKDEFERRAL.fields_by_name['parent_task_address'])
-_TASKDEFERRAL.fields_by_name['parent_task_address'].containing_oneof = _TASKDEFERRAL.oneofs_by_name['_parent_task_address']
-_TASKDEFERRAL.oneofs_by_name['_parent_task_id'].fields.append(
-  _TASKDEFERRAL.fields_by_name['parent_task_id'])
-_TASKDEFERRAL.fields_by_name['parent_task_id'].containing_oneof = _TASKDEFERRAL.oneofs_by_name['_parent_task_id']
-_TASKDEFERRAL.oneofs_by_name['_task_result_or_exception'].fields.append(
-  _TASKDEFERRAL.fields_by_name['task_result_or_exception'])
-_TASKDEFERRAL.fields_by_name['task_result_or_exception'].containing_oneof = _TASKDEFERRAL.oneofs_by_name['_task_result_or_exception']
 _PAUSEDTASK.fields_by_name['task_request'].message_type = _TASKREQUEST
-_PIPELINESTATE_TASKDEFERRALSBYIDENTRY.fields_by_name['value'].message_type = _TASKDEFERRAL
-_PIPELINESTATE_TASKDEFERRALSBYIDENTRY.containing_type = _PIPELINESTATE
-_PIPELINESTATE_TASKDEFERRALIDSBYTASKUIDENTRY.containing_type = _PIPELINESTATE
-_PIPELINESTATE.fields_by_name['pipeline'].message_type = _PIPELINE
-_PIPELINESTATE.fields_by_name['task_results'].message_type = _TASKRESULTS
-_PIPELINESTATE.fields_by_name['result_before_finally'].message_type = _TASKRESULT
-_PIPELINESTATE.fields_by_name['exception_before_finally'].message_type = _TASKEXCEPTION
-_PIPELINESTATE.fields_by_name['task_state'].message_type = google_dot_protobuf_dot_any__pb2._ANY
-_PIPELINESTATE.fields_by_name['task_deferrals_by_id'].message_type = _PIPELINESTATE_TASKDEFERRALSBYIDENTRY
-_PIPELINESTATE.fields_by_name['task_deferral_ids_by_task_uid'].message_type = _PIPELINESTATE_TASKDEFERRALIDSBYTASKUIDENTRY
-_PIPELINESTATE.fields_by_name['status'].message_type = _TASKSTATUS
-_PIPELINESTATE.fields_by_name['paused_tasks'].message_type = _PAUSEDTASK
-_PIPELINESTATE.fields_by_name['child_pipelines'].message_type = _CHILDPIPELINE
-_PIPELINESTATE.fields_by_name['last_task_state'].message_type = google_dot_protobuf_dot_any__pb2._ANY
-_PIPELINESTATE.oneofs_by_name['before_finally'].fields.append(
-  _PIPELINESTATE.fields_by_name['result_before_finally'])
-_PIPELINESTATE.fields_by_name['result_before_finally'].containing_oneof = _PIPELINESTATE.oneofs_by_name['before_finally']
-_PIPELINESTATE.oneofs_by_name['before_finally'].fields.append(
-  _PIPELINESTATE.fields_by_name['exception_before_finally'])
-_PIPELINESTATE.fields_by_name['exception_before_finally'].containing_oneof = _PIPELINESTATE.oneofs_by_name['before_finally']
 _CHILDPIPELINE.fields_by_name['tasks'].message_type = _TASKINFO
-_TASKRESULTS_BYUIDENTRY.fields_by_name['value'].message_type = google_dot_protobuf_dot_any__pb2._ANY
-_TASKRESULTS_BYUIDENTRY.containing_type = _TASKRESULTS
-_TASKRESULTS.fields_by_name['by_uid'].message_type = _TASKRESULTS_BYUIDENTRY
 _TASKACTIONREQUEST.fields_by_name['reply_address'].message_type = _ADDRESS
 _TASKACTIONREQUEST.fields_by_name['action'].enum_type = _TASKACTION
 _TASKACTIONREQUEST.oneofs_by_name['reply'].fields.append(
@@ -2338,14 +1987,24 @@ _TASKSTATUS.fields_by_name['value'].enum_type = _TASKSTATUS_STATUS
 _TASKSTATUS_STATUS.containing_type = _TASKSTATUS
 _PIPELINECREATED.fields_by_name['tasks'].message_type = _TASKINFO
 _PIPELINESTATUSCHANGED.fields_by_name['status'].message_type = _TASKSTATUS
+_PIPELINETASKSSKIPPED.fields_by_name['tasks'].message_type = _TASKINFO
+_PIPELINETASKFINISHED.fields_by_name['status'].message_type = _TASKSTATUS
 _EVENT.fields_by_name['pipeline_created'].message_type = _PIPELINECREATED
 _EVENT.fields_by_name['pipeline_status_changed'].message_type = _PIPELINESTATUSCHANGED
+_EVENT.fields_by_name['pipeline_tasks_skipped'].message_type = _PIPELINETASKSSKIPPED
+_EVENT.fields_by_name['pipeline_task_finished'].message_type = _PIPELINETASKFINISHED
 _EVENT.oneofs_by_name['event'].fields.append(
   _EVENT.fields_by_name['pipeline_created'])
 _EVENT.fields_by_name['pipeline_created'].containing_oneof = _EVENT.oneofs_by_name['event']
 _EVENT.oneofs_by_name['event'].fields.append(
   _EVENT.fields_by_name['pipeline_status_changed'])
 _EVENT.fields_by_name['pipeline_status_changed'].containing_oneof = _EVENT.oneofs_by_name['event']
+_EVENT.oneofs_by_name['event'].fields.append(
+  _EVENT.fields_by_name['pipeline_tasks_skipped'])
+_EVENT.fields_by_name['pipeline_tasks_skipped'].containing_oneof = _EVENT.oneofs_by_name['event']
+_EVENT.oneofs_by_name['event'].fields.append(
+  _EVENT.fields_by_name['pipeline_task_finished'])
+_EVENT.fields_by_name['pipeline_task_finished'].containing_oneof = _EVENT.oneofs_by_name['event']
 DESCRIPTOR.message_types_by_name['NoneValue'] = _NONEVALUE
 DESCRIPTOR.message_types_by_name['Address'] = _ADDRESS
 DESCRIPTOR.message_types_by_name['MapOfStringToAny'] = _MAPOFSTRINGTOANY
@@ -2363,19 +2022,17 @@ DESCRIPTOR.message_types_by_name['TaskException'] = _TASKEXCEPTION
 DESCRIPTOR.message_types_by_name['TaskResultOrException'] = _TASKRESULTOREXCEPTION
 DESCRIPTOR.message_types_by_name['TaskSpecificState'] = _TASKSPECIFICSTATE
 DESCRIPTOR.message_types_by_name['TaskState'] = _TASKSTATE
-DESCRIPTOR.message_types_by_name['TaskDeferral'] = _TASKDEFERRAL
-DESCRIPTOR.message_types_by_name['DeferredTask'] = _DEFERREDTASK
 DESCRIPTOR.message_types_by_name['PausedTask'] = _PAUSEDTASK
-DESCRIPTOR.message_types_by_name['PipelineState'] = _PIPELINESTATE
 DESCRIPTOR.message_types_by_name['ChildPipeline'] = _CHILDPIPELINE
 DESCRIPTOR.message_types_by_name['TaskInfo'] = _TASKINFO
-DESCRIPTOR.message_types_by_name['TaskResults'] = _TASKRESULTS
 DESCRIPTOR.message_types_by_name['TaskActionRequest'] = _TASKACTIONREQUEST
 DESCRIPTOR.message_types_by_name['TaskActionResult'] = _TASKACTIONRESULT
 DESCRIPTOR.message_types_by_name['TaskActionException'] = _TASKACTIONEXCEPTION
 DESCRIPTOR.message_types_by_name['TaskStatus'] = _TASKSTATUS
 DESCRIPTOR.message_types_by_name['PipelineCreated'] = _PIPELINECREATED
 DESCRIPTOR.message_types_by_name['PipelineStatusChanged'] = _PIPELINESTATUSCHANGED
+DESCRIPTOR.message_types_by_name['PipelineTasksSkipped'] = _PIPELINETASKSSKIPPED
+DESCRIPTOR.message_types_by_name['PipelineTaskFinished'] = _PIPELINETASKFINISHED
 DESCRIPTOR.message_types_by_name['Event'] = _EVENT
 DESCRIPTOR.enum_types_by_name['TaskAction'] = _TASKACTION
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
@@ -2523,49 +2180,12 @@ TaskState = _reflection.GeneratedProtocolMessageType('TaskState', (_message.Mess
 _sym_db.RegisterMessage(TaskState)
 _sym_db.RegisterMessage(TaskState.ByUidEntry)
 
-TaskDeferral = _reflection.GeneratedProtocolMessageType('TaskDeferral', (_message.Message,), {
-  'DESCRIPTOR' : _TASKDEFERRAL,
-  '__module__' : 'messages_pb2'
-  # @@protoc_insertion_point(class_scope:statefun_tasks.TaskDeferral)
-  })
-_sym_db.RegisterMessage(TaskDeferral)
-
-DeferredTask = _reflection.GeneratedProtocolMessageType('DeferredTask', (_message.Message,), {
-  'DESCRIPTOR' : _DEFERREDTASK,
-  '__module__' : 'messages_pb2'
-  # @@protoc_insertion_point(class_scope:statefun_tasks.DeferredTask)
-  })
-_sym_db.RegisterMessage(DeferredTask)
-
 PausedTask = _reflection.GeneratedProtocolMessageType('PausedTask', (_message.Message,), {
   'DESCRIPTOR' : _PAUSEDTASK,
   '__module__' : 'messages_pb2'
   # @@protoc_insertion_point(class_scope:statefun_tasks.PausedTask)
   })
 _sym_db.RegisterMessage(PausedTask)
-
-PipelineState = _reflection.GeneratedProtocolMessageType('PipelineState', (_message.Message,), {
-
-  'TaskDeferralsByIdEntry' : _reflection.GeneratedProtocolMessageType('TaskDeferralsByIdEntry', (_message.Message,), {
-    'DESCRIPTOR' : _PIPELINESTATE_TASKDEFERRALSBYIDENTRY,
-    '__module__' : 'messages_pb2'
-    # @@protoc_insertion_point(class_scope:statefun_tasks.PipelineState.TaskDeferralsByIdEntry)
-    })
-  ,
-
-  'TaskDeferralIdsByTaskUidEntry' : _reflection.GeneratedProtocolMessageType('TaskDeferralIdsByTaskUidEntry', (_message.Message,), {
-    'DESCRIPTOR' : _PIPELINESTATE_TASKDEFERRALIDSBYTASKUIDENTRY,
-    '__module__' : 'messages_pb2'
-    # @@protoc_insertion_point(class_scope:statefun_tasks.PipelineState.TaskDeferralIdsByTaskUidEntry)
-    })
-  ,
-  'DESCRIPTOR' : _PIPELINESTATE,
-  '__module__' : 'messages_pb2'
-  # @@protoc_insertion_point(class_scope:statefun_tasks.PipelineState)
-  })
-_sym_db.RegisterMessage(PipelineState)
-_sym_db.RegisterMessage(PipelineState.TaskDeferralsByIdEntry)
-_sym_db.RegisterMessage(PipelineState.TaskDeferralIdsByTaskUidEntry)
 
 ChildPipeline = _reflection.GeneratedProtocolMessageType('ChildPipeline', (_message.Message,), {
   'DESCRIPTOR' : _CHILDPIPELINE,
@@ -2580,21 +2200,6 @@ TaskInfo = _reflection.GeneratedProtocolMessageType('TaskInfo', (_message.Messag
   # @@protoc_insertion_point(class_scope:statefun_tasks.TaskInfo)
   })
 _sym_db.RegisterMessage(TaskInfo)
-
-TaskResults = _reflection.GeneratedProtocolMessageType('TaskResults', (_message.Message,), {
-
-  'ByUidEntry' : _reflection.GeneratedProtocolMessageType('ByUidEntry', (_message.Message,), {
-    'DESCRIPTOR' : _TASKRESULTS_BYUIDENTRY,
-    '__module__' : 'messages_pb2'
-    # @@protoc_insertion_point(class_scope:statefun_tasks.TaskResults.ByUidEntry)
-    })
-  ,
-  'DESCRIPTOR' : _TASKRESULTS,
-  '__module__' : 'messages_pb2'
-  # @@protoc_insertion_point(class_scope:statefun_tasks.TaskResults)
-  })
-_sym_db.RegisterMessage(TaskResults)
-_sym_db.RegisterMessage(TaskResults.ByUidEntry)
 
 TaskActionRequest = _reflection.GeneratedProtocolMessageType('TaskActionRequest', (_message.Message,), {
   'DESCRIPTOR' : _TASKACTIONREQUEST,
@@ -2638,6 +2243,20 @@ PipelineStatusChanged = _reflection.GeneratedProtocolMessageType('PipelineStatus
   })
 _sym_db.RegisterMessage(PipelineStatusChanged)
 
+PipelineTasksSkipped = _reflection.GeneratedProtocolMessageType('PipelineTasksSkipped', (_message.Message,), {
+  'DESCRIPTOR' : _PIPELINETASKSSKIPPED,
+  '__module__' : 'messages_pb2'
+  # @@protoc_insertion_point(class_scope:statefun_tasks.PipelineTasksSkipped)
+  })
+_sym_db.RegisterMessage(PipelineTasksSkipped)
+
+PipelineTaskFinished = _reflection.GeneratedProtocolMessageType('PipelineTaskFinished', (_message.Message,), {
+  'DESCRIPTOR' : _PIPELINETASKFINISHED,
+  '__module__' : 'messages_pb2'
+  # @@protoc_insertion_point(class_scope:statefun_tasks.PipelineTaskFinished)
+  })
+_sym_db.RegisterMessage(PipelineTaskFinished)
+
 Event = _reflection.GeneratedProtocolMessageType('Event', (_message.Message,), {
   'DESCRIPTOR' : _EVENT,
   '__module__' : 'messages_pb2'
@@ -2649,7 +2268,4 @@ _sym_db.RegisterMessage(Event)
 _MAPOFSTRINGTOANY_ITEMSENTRY._options = None
 _TASKREQUEST_METAENTRY._options = None
 _TASKSTATE_BYUIDENTRY._options = None
-_PIPELINESTATE_TASKDEFERRALSBYIDENTRY._options = None
-_PIPELINESTATE_TASKDEFERRALIDSBYTASKUIDENTRY._options = None
-_TASKRESULTS_BYUIDENTRY._options = None
 # @@protoc_insertion_point(module_scope)

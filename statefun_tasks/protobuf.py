@@ -2,8 +2,8 @@ import itertools
 from abc import ABC, abstractmethod
 from statefun_tasks.utils import _is_tuple
 from statefun_tasks.messages_pb2 import (MapOfStringToAny, ArrayOfAny, TupleOfAny, TaskEntry, GroupEntry, NoneValue,
-                                         TaskRetryPolicy, TaskRequest, TaskResult, TaskException, TaskState, TaskResults, 
-                                         Pipeline, PipelineEntry, Address,ArgsAndKwargs, PipelineState, TaskResultOrException)
+                                         TaskRetryPolicy, TaskRequest, TaskResult, TaskException, TaskState, 
+                                         Pipeline, PipelineEntry, Address,ArgsAndKwargs, TaskResultOrException)
 from google.protobuf.wrappers_pb2 import DoubleValue, Int64Value, BoolValue, StringValue, BytesValue
 from google.protobuf.any_pb2 import Any
 from google.protobuf.message import Message
@@ -31,12 +31,10 @@ _FRAMEWORK_KNOWN_PROTO_TYPES = [
     TaskResult,
     TaskException,
     TaskState,
-    TaskResults,
     Pipeline,
     PipelineEntry,
     Address,
     ArgsAndKwargs,
-    PipelineState,
     TaskResultOrException
 ]
 

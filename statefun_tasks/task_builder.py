@@ -1,7 +1,7 @@
 from statefun_tasks.serialisation import DefaultSerialiser
 from statefun_tasks.pipeline_builder import PipelineBuilder
 from statefun_tasks.types import (Task, RetryPolicy, TASK_STATE_TYPE, TASK_REQUEST_TYPE, 
-                                  TASK_RESULT_TYPE, TASK_EXCEPTION_TYPE, PIPELINE_STATE_TYPE)
+                                  TASK_RESULT_TYPE, TASK_EXCEPTION_TYPE)
 from statefun_tasks.messages_pb2 import TaskResult, TaskException, TaskRequest, Address
 from statefun_tasks.type_helpers import _create_task_result, _create_task_exception
 from statefun_tasks.context import TaskContext
@@ -59,8 +59,7 @@ class FlinkTasks(object):
             ValueSpec(name="task_request", type=TASK_REQUEST_TYPE, expire_after_call=state_expiration),
             ValueSpec(name="task_result", type=TASK_RESULT_TYPE, expire_after_call=state_expiration),
             ValueSpec(name="task_exception", type=TASK_EXCEPTION_TYPE, expire_after_call=state_expiration),
-            ValueSpec(name="task_state", type=TASK_STATE_TYPE, expire_after_call=state_expiration),
-            ValueSpec(name="pipeline_state", type=PIPELINE_STATE_TYPE, expire_after_call=state_expiration)
+            ValueSpec(name="task_state", type=TASK_STATE_TYPE, expire_after_call=state_expiration)
         ]
 
         self._handlers = [
