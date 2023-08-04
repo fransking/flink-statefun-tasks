@@ -1,10 +1,9 @@
 import itertools
 from abc import ABC, abstractmethod
 from statefun_tasks.utils import _is_tuple
-from statefun_tasks.messages_pb2 import MapOfStringToAny, ArrayOfAny, TupleOfAny, TaskEntry, GroupEntry, NoneValue, \
-    TaskRetryPolicy, TaskRequest, TaskResult, TaskException, TaskState, TaskResults, Pipeline, PipelineEntry, Address, \
-    ArgsAndKwargs, PipelineState, TaskResultOrException
-
+from statefun_tasks.messages_pb2 import (MapOfStringToAny, ArrayOfAny, TupleOfAny, TaskEntry, GroupEntry, NoneValue,
+                                         TaskRetryPolicy, TaskRequest, TaskResult, TaskException, TaskState, TaskResults, 
+                                         Pipeline, PipelineEntry, Address,ArgsAndKwargs, PipelineState, TaskResultOrException)
 from google.protobuf.wrappers_pb2 import DoubleValue, Int64Value, BoolValue, StringValue, BytesValue
 from google.protobuf.any_pb2 import Any
 from google.protobuf.message import Message
@@ -150,12 +149,6 @@ def _unwrap_value(v: Message, converters: Iterable[ObjectProtobufConverter]):
         # task args can be protobuf messages, so not everything needs to be converted
         return v
     return compatible_converter.convert_from_proto(v)
-
-
-def _parse_any_from_bytes(bytes) -> Any:
-    proto = Any()
-    proto.ParseFromString(bytes)
-    return proto
 
 
 def _is_wrapped_known_proto_type(value, known_proto_types):

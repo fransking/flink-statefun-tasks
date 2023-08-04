@@ -42,7 +42,7 @@ class FlinkTask(object):
         return self._fun
 
     async def run(self, task_context: TaskContext, task_request: TaskRequest):
-        task_result, task_exception, pipeline, effect = None, None, None, None
+        task_result, task_exception, pipeline, effect, is_fruitful = None, None, None, None, self._is_fruitful
 
         task_args, kwargs, fn_state = self._to_task_args_and_kwargs(task_context, task_request)
 
@@ -66,7 +66,7 @@ class FlinkTask(object):
                 effect = fn_result
                 fn_result = effect.fn_result
                 
-            pipeline, task_result, fn_state = self._to_pipeline_or_task_result(task_context, task_request, fn_result, fn_state)
+            pipeline, task_result, is_fruitful = self._to_pipeline_or_task_result(task_request, fn_result, fn_state)
 
             # apply effects if we have them
             if effect is not None:
@@ -80,9 +80,9 @@ class FlinkTask(object):
             # we errored so return a task_exception instead
             task_exception = self._to_task_exception(task_request, e)
 
-        return task_result, task_exception, pipeline, fn_state
+        return task_result, task_exception, pipeline, is_fruitful
 
-    def _to_pipeline_or_task_result(self, task_context, task_request, fn_result, fn_state):
+    def _to_pipeline_or_task_result(self, task_request, fn_result, fn_state):
         pipeline, is_fruitful = None, self._is_fruitful
 
         if is_fruitful and task_request.HasField('is_fruitful'):
@@ -108,23 +108,18 @@ class FlinkTask(object):
 
         # result of the task might be a Flink pipeline
         if isinstance(fn_result, PipelineBuilder):
-            # this new pipeline which once complete will yield the result of the whole pipeline
-            # back to the caller as if it were a simple task
-            pipeline = fn_result.set_task_defaults(
-                default_namespace=task_context.get_namespace(), 
-                default_worker_name=task_context.get_worker_name()).\
-            to_pipeline(serialiser=self._serialiser, is_fruitful=is_fruitful, events=self._events)
-            fn_result = ()
+            pipeline = fn_result.to_proto(self._serialiser)
+            fn_result = pipeline
 
-        # drop the result if the task is marked as not fruitful or caller has asked for the result to be dropped
-        if not is_fruitful:
+        # else drop the result if the task is marked as not fruitful or caller has asked for the result to be dropped
+        elif not is_fruitful:
             fn_result = ()
             
         task_result = _create_task_result(task_request)
 
         self._serialiser.serialise_result(task_result, fn_result, fn_state)
 
-        return pipeline, task_result, fn_state
+        return pipeline, task_result, is_fruitful
 
     def _to_task_exception(self, task_request, ex):
         # use retry policy on task request first then fallback to task definition

@@ -1,11 +1,9 @@
-from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, ArgsAndKwargs, MapOfStringToAny, \
-    TupleOfAny
-from statefun_tasks.protobuf import pack_any, unpack_any, _convert_from_proto, _convert_to_proto, \
-    ObjectProtobufConverter, _generate_default_converters
+from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, ArgsAndKwargs
+from statefun_tasks.protobuf import pack_any, _convert_from_proto, _convert_to_proto, ObjectProtobufConverter, _generate_default_converters
 from statefun_tasks.utils import _is_tuple
 from google.protobuf.any_pb2 import Any
 from google.protobuf.message import Message
-from typing import Union, Type, Iterable
+from typing import Type, Iterable
 
 
 class DefaultSerialiser(object):
@@ -14,7 +12,6 @@ class DefaultSerialiser(object):
     
     :param known_proto_types: an array of known protobuf types that will not be packed inside Any
     """
-
     def __init__(
             self,
             known_proto_types: Iterable[Type[Message]] = None,
@@ -100,58 +97,6 @@ class DefaultSerialiser(object):
 
         return args, kwargs
 
-    def to_args_and_kwargs(self, request: Any) -> ArgsAndKwargs:
-        """
-        Unpacks Any into Protobuf ArgsAndKwargs
-        
-        :param request: the protobuf message
-        :return: ArgsAndKwargs
-        """
-        unpacked = _convert_from_proto(request, self._known_proto_types, self._protobuf_converters)
-        if isinstance(unpacked, ArgsAndKwargs):
-            return unpacked
-        else:
-            args = TupleOfAny()
-            args.items.append(request)
-            return ArgsAndKwargs(args=args, kwargs=MapOfStringToAny())
-
-    @staticmethod
-    def merge_args_and_kwargs(task_args_and_kwargs: ArgsAndKwargs, args: Message = None, kwargs: MapOfStringToAny = None) -> Any:
-        """
-        Merges args & kwargs passed explicity to a task entry in a pipeline with results from the previous task.
-        If there are no args & kwargs to merge then the result of the previous task is returned unchanged
-
-        :param task_args_and_kwargs: the args and kwargs from the task entry to merge args and kwargs into
-        :param option args: the args to merge from
-        :param option kwargs: the kwargs to merge from
-        :return: Any
-        """
-        args = args or TupleOfAny()
-        kwargs = kwargs or MapOfStringToAny()
-        merged_args = TupleOfAny()
-
-        task_args = task_args_and_kwargs.args
-        task_kwargs = task_args_and_kwargs.kwargs
-
-        # merge in any extra kwargs into the task_kwargs
-        for key in kwargs.items:
-            if not key in task_kwargs.items:
-                task_kwargs.items[key].CopyFrom(kwargs.items[key])
-
-        # if the task args and kwargs are still empty then just return args
-        if not any(task_args.items) and not any(task_kwargs.items):
-            return pack_any(args)
-
-        # task result may be a single proto in which case we have to wrap into TupleOfAny to be able to extend
-        if not isinstance(args, TupleOfAny):
-            merged_args.items.append(pack_any(args))
-        else:
-            merged_args.items.extend(args.items)
-
-        merged_args.items.extend(task_args.items)
-
-        return pack_any(ArgsAndKwargs(args=merged_args, kwargs=task_kwargs))
-
     def serialise_request(self, task_request: TaskRequest, request: Any, state=None, retry_policy=None):
         """
         Serialises args, kwargs and optional state into a TaskRequest
@@ -201,21 +146,3 @@ class DefaultSerialiser(object):
         state = _convert_from_proto(task_result.state, self._known_proto_types, self._protobuf_converters)
 
         return result, state
-
-    def unpack_response(self, task_result_or_exception: Union[TaskResult, TaskException]):
-        """
-        Unpacks a TaskResult or TaskException back into result and state.
-        If a TaskException is provided as input then the return value will be TupleOfAny, TaskException.state
-        
-        :param task_result_or_exception: the TaskResult
-        :return: tuple of result and state. 
-        """
-        if isinstance(task_result_or_exception, TaskResult):
-            task_result = unpack_any(task_result_or_exception.result, self._known_proto_types)
-            task_state = task_result_or_exception.state
-        elif isinstance(task_result_or_exception, TaskException):
-            task_result = TupleOfAny()
-            task_state = task_result_or_exception.state
-        else:
-            raise ValueError(f'task_result_or_exception was neither TaskResult or TaskException')
-        return task_result, task_state

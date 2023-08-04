@@ -1,5 +1,5 @@
 from statefun_tasks.context import TaskContext
-from statefun_tasks.task_impl.handlers import MessageHandler
+from statefun_tasks.handlers import MessageHandler
 from statefun_tasks.types import TASK_ACTION_REQUEST_TYPE
 from statefun_tasks.messages_pb2 import TaskAction, TaskStatus
 from statefun_tasks.type_helpers import _create_task_result, _create_task_exception
@@ -22,16 +22,16 @@ class TaskActionHandler(MessageHandler):
     async def handle_message(self, tasks: 'FlinkTasks', context: TaskContext, action_request):
         try:
             
-            result = await self._handle(context, tasks, action_request)
+            result = await self._handle(context, action_request)
             await tasks.emit_result(context, action_request, _create_task_result(action_request, result))
 
         except Exception as ex:
             await tasks.emit_result(context, action_request, _create_task_exception(action_request, ex))
 
-    async def _handle(self, context, tasks, action_request):
+    async def _handle(self, context, action_request):
 
         if action_request.action == TaskAction.GET_STATUS:
-            return self._get_task_status(context, tasks)
+            return self._get_task_status(context)
 
         elif action_request.action == TaskAction.GET_REQUEST:
             return self._get_task_request(context)
@@ -39,24 +39,10 @@ class TaskActionHandler(MessageHandler):
         elif action_request.action == TaskAction.GET_RESULT:
             return self._get_task_result(context)
 
-        elif action_request.action == TaskAction.PAUSE_PIPELINE:
-            return await self._pause_pipeline(context, tasks)
-
-        elif action_request.action == TaskAction.UNPAUSE_PIPELINE:
-            return await self._unpause_pipeline(context, tasks)
-
-        elif action_request.action == TaskAction.CANCEL_PIPELINE:
-            return await self._cancel_pipeline(context, tasks)
-
         else:    
             raise ValueError(f'Unsupported task action {TaskAction.Name(action_request.action)}')
 
-    def _get_task_status(self, context, tasks):
-        pipeline = tasks.try_get_pipeline(context)
-
-        if pipeline is not None:
-            return pipeline.status(context)
-
+    def _get_task_status(self, context):
         if context.storage.task_exception is not None:
             return TaskStatus(value=TaskStatus.Status.FAILED)
 
@@ -84,27 +70,3 @@ class TaskActionHandler(MessageHandler):
             return task_exception
 
         raise ValueError(f'Task result not found')
-
-    async def _pause_pipeline(self, context, tasks):
-        pipeline = tasks.try_get_pipeline(context)
-
-        if pipeline is None:
-            raise ValueError('Task is not a pipeline')
-       
-        await pipeline.pause(context)
-
-    async def _unpause_pipeline(self, context, tasks):
-        pipeline = tasks.try_get_pipeline(context)
-
-        if pipeline is None:
-            raise ValueError('Task is not a pipeline')
-       
-        await pipeline.unpause(context)
-
-    async def _cancel_pipeline(self, context, tasks):
-        pipeline = tasks.try_get_pipeline(context)
-
-        if pipeline is None:
-            raise ValueError('Task is not a pipeline')
-       
-        await pipeline.cancel(context)

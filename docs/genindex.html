@@ -93,7 +93,6 @@
  | <a href="#G"><strong>G</strong></a>
  | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
- | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
  | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
@@ -244,6 +243,10 @@
 </li>
       <li><a href="api/generated/statefun_tasks.TaskContext.html#statefun_tasks.TaskContext.get_namespace">get_namespace() (statefun_tasks.TaskContext method)</a>
 </li>
+      <li><a href="api/generated/statefun_tasks.TaskContext.html#statefun_tasks.TaskContext.get_original_caller_address">get_original_caller_address() (statefun_tasks.TaskContext method)</a>
+</li>
+      <li><a href="api/generated/statefun_tasks.TaskContext.html#statefun_tasks.TaskContext.get_original_caller_id">get_original_caller_id() (statefun_tasks.TaskContext method)</a>
+</li>
       <li><a href="api/generated/statefun_tasks.TaskContext.html#statefun_tasks.TaskContext.get_parent_pipeline_address">get_parent_pipeline_address() (statefun_tasks.TaskContext method)</a>
 </li>
       <li><a href="api/generated/statefun_tasks.TaskContext.html#statefun_tasks.TaskContext.get_parent_pipeline_id">get_parent_pipeline_id() (statefun_tasks.TaskContext method)</a>
@@ -254,10 +257,10 @@
 </li>
       <li><a href="api/generated/statefun_tasks.TaskContext.html#statefun_tasks.TaskContext.get_pipeline_address">get_pipeline_address() (statefun_tasks.TaskContext method)</a>
 </li>
-      <li><a href="api/generated/statefun_tasks.TaskContext.html#statefun_tasks.TaskContext.get_pipeline_id">get_pipeline_id() (statefun_tasks.TaskContext method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/generated/statefun_tasks.TaskContext.html#statefun_tasks.TaskContext.get_pipeline_id">get_pipeline_id() (statefun_tasks.TaskContext method)</a>
+</li>
       <li><a href="api/generated/statefun_tasks.client.FlinkTasksClient.html#statefun_tasks.client.FlinkTasksClient.get_request">get_request() (statefun_tasks.client.FlinkTasksClient method)</a>
 </li>
       <li><a href="api/generated/statefun_tasks.client.FlinkTasksClient.html#statefun_tasks.client.FlinkTasksClient.get_request_async">get_request_async() (statefun_tasks.client.FlinkTasksClient method)</a>
@@ -309,33 +312,15 @@
   </ul></td>
 </tr></table>
 
-<h2 id="M">M</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/generated/statefun_tasks.DefaultSerialiser.html#statefun_tasks.DefaultSerialiser.merge_args_and_kwargs">merge_args_and_kwargs() (statefun_tasks.DefaultSerialiser static method)</a>
-</li>
-  </ul></td>
-</tr></table>
-
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.notify_emit_result">notify_emit_result() (statefun_tasks.events.EventHandlers method)</a>
 </li>
-      <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.notify_pipeline_created">notify_pipeline_created() (statefun_tasks.events.EventHandlers method)</a>
-</li>
-      <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.notify_pipeline_finished">notify_pipeline_finished() (statefun_tasks.events.EventHandlers method)</a>
-</li>
-      <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.notify_pipeline_status_changed">notify_pipeline_status_changed() (statefun_tasks.events.EventHandlers method)</a>
-</li>
-      <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.notify_pipeline_task_finished">notify_pipeline_task_finished() (statefun_tasks.events.EventHandlers method)</a>
+      <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.notify_task_finished">notify_task_finished() (statefun_tasks.events.EventHandlers method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.notify_pipeline_tasks_skipped">notify_pipeline_tasks_skipped() (statefun_tasks.events.EventHandlers method)</a>
-</li>
-      <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.notify_task_finished">notify_task_finished() (statefun_tasks.events.EventHandlers method)</a>
-</li>
       <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.notify_task_received">notify_task_received() (statefun_tasks.events.EventHandlers method)</a>
 </li>
       <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.notify_task_retry">notify_task_retry() (statefun_tasks.events.EventHandlers method)</a>
@@ -350,20 +335,10 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.on_emit_result">on_emit_result() (statefun_tasks.events.EventHandlers method)</a>
 </li>
-      <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.on_pipeline_created">on_pipeline_created() (statefun_tasks.events.EventHandlers method)</a>
-</li>
-      <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.on_pipeline_finished">on_pipeline_finished() (statefun_tasks.events.EventHandlers method)</a>
-</li>
-      <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.on_pipeline_status_changed">on_pipeline_status_changed() (statefun_tasks.events.EventHandlers method)</a>
-</li>
-      <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.on_pipeline_task_finished">on_pipeline_task_finished() (statefun_tasks.events.EventHandlers method)</a>
+      <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.on_task_finished">on_task_finished() (statefun_tasks.events.EventHandlers method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.on_pipeline_tasks_skipped">on_pipeline_tasks_skipped() (statefun_tasks.events.EventHandlers method)</a>
-</li>
-      <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.on_task_finished">on_task_finished() (statefun_tasks.events.EventHandlers method)</a>
-</li>
       <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.on_task_received">on_task_received() (statefun_tasks.events.EventHandlers method)</a>
 </li>
       <li><a href="api/generated/statefun_tasks.events.EventHandlers.html#statefun_tasks.events.EventHandlers.on_task_retry">on_task_retry() (statefun_tasks.events.EventHandlers method)</a>
@@ -394,8 +369,6 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/generated/statefun_tasks.FlinkTasks.html#statefun_tasks.FlinkTasks.register_builtin">register_builtin() (statefun_tasks.FlinkTasks method)</a>
-</li>
       <li><a href="api/generated/statefun_tasks.FlinkTasks.html#statefun_tasks.FlinkTasks.run_async">run_async() (statefun_tasks.FlinkTasks method)</a>
 </li>
   </ul></td>
@@ -452,13 +425,9 @@
 </li>
       <li><a href="api/generated/statefun_tasks.client.TaskStatus.html#statefun_tasks.client.TaskStatus">TaskStatus (class in statefun_tasks.client)</a>
 </li>
-      <li><a href="api/generated/statefun_tasks.TaskContext.html#statefun_tasks.TaskContext.to_address_and_id">to_address_and_id() (statefun_tasks.TaskContext static method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/generated/statefun_tasks.DefaultSerialiser.html#statefun_tasks.DefaultSerialiser.to_args_and_kwargs">to_args_and_kwargs() (statefun_tasks.DefaultSerialiser method)</a>
-</li>
-      <li><a href="api/generated/statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder.to_pipeline">to_pipeline() (statefun_tasks.PipelineBuilder method)</a>
+      <li><a href="api/generated/statefun_tasks.TaskContext.html#statefun_tasks.TaskContext.to_address_and_id">to_address_and_id() (statefun_tasks.TaskContext static method)</a>
 </li>
       <li><a href="api/generated/statefun_tasks.DefaultSerialiser.html#statefun_tasks.DefaultSerialiser.to_proto">to_proto() (statefun_tasks.DefaultSerialiser method)</a>
 
@@ -474,8 +443,6 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/generated/statefun_tasks.DefaultSerialiser.html#statefun_tasks.DefaultSerialiser.unpack_response">unpack_response() (statefun_tasks.DefaultSerialiser method)</a>
-</li>
       <li><a href="api/generated/statefun_tasks.FlinkTasks.html#statefun_tasks.FlinkTasks.unpack_task_request">unpack_task_request() (statefun_tasks.FlinkTasks method)</a>
 </li>
   </ul></td>
@@ -516,7 +483,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020-2022, Frans King &amp; Luke Ashworth.</p>
+    <p>&#169; Copyright 2020-2023, Frans King &amp; Luke Ashworth.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

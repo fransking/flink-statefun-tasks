@@ -1,23 +1,18 @@
 from statefun_tasks.serialisation import DefaultSerialiser
 from statefun_tasks.pipeline_builder import PipelineBuilder
-
-from statefun_tasks.types import Task, RetryPolicy, \
-    TASK_STATE_TYPE, TASK_REQUEST_TYPE, TASK_RESULT_TYPE, TASK_EXCEPTION_TYPE, PIPELINE_STATE_TYPE
-
+from statefun_tasks.types import (Task, RetryPolicy, TASK_STATE_TYPE, TASK_REQUEST_TYPE, 
+                                  TASK_RESULT_TYPE, TASK_EXCEPTION_TYPE, PIPELINE_STATE_TYPE)
 from statefun_tasks.messages_pb2 import TaskResult, TaskException, TaskRequest, Address
 from statefun_tasks.type_helpers import _create_task_result, _create_task_exception
 from statefun_tasks.context import TaskContext
 from statefun_tasks.utils import _task_type_for, _unpack_single_tuple_args, _gen_id
-from statefun_tasks.pipeline import _Pipeline
 from statefun_tasks.tasks import FlinkTask
-from statefun_tasks.task_impl.handlers import TaskRequestHandler, TaskResponseHandler, TaskActionHandler, ChildPipelineHandler
+from statefun_tasks.handlers import TaskRequestHandler, TaskActionHandler
 from statefun_tasks.events import EventHandlers
-from statefun_tasks.builtin_tasks import run_pipeline, flatten_results
 
 from statefun import ValueSpec, Context, Message
 from datetime import timedelta
 from functools import partial
-from typing import Callable, Any, Tuple
 import logging
 
 _log = logging.getLogger('FlinkTasks')
@@ -37,6 +32,8 @@ class FlinkTasks(object):
     :param optional serialiser: serialiser to use (will use DefaultSerialiser if not set)
     :param optional state_expiration: duration after which state will be expired by Flink (expire_after_call)
     :param optional keep_task_state: whether to keep state (request, result) associated with tasks as well as pipelines (defaults to false)
+    :param optional embedded_pipeline_namespace: namespace of the embedded function that pipelines will be forwarded to
+    :param optional embedded_pipeline_type: type name of the embedded function that pipelines will be forwarded to
     """
     def __init__(self, 
                  default_namespace: str = None, 
@@ -45,7 +42,10 @@ class FlinkTasks(object):
                  egress_message_max_size: int = None, 
                  serialiser = None, 
                  state_expiration: timedelta = None,
-                 keep_task_state = False):
+                 keep_task_state = False,
+                 embedded_pipeline_namespace: str = None,
+                 embedded_pipeline_type: str = None):
+    
         self._default_namespace = default_namespace
         self._default_worker_name = default_worker_name
         self._egress_type_name = egress_type_name
@@ -63,14 +63,9 @@ class FlinkTasks(object):
             ValueSpec(name="pipeline_state", type=PIPELINE_STATE_TYPE, expire_after_call=state_expiration)
         ]
 
-        self.register_builtin(run_pipeline, with_context=True, with_state=True)
-        self.register_builtin(flatten_results)
-
         self._handlers = [
-            TaskRequestHandler(keep_task_state),
-            TaskResponseHandler(),
-            TaskActionHandler(),
-            ChildPipelineHandler()
+            TaskRequestHandler(embedded_pipeline_namespace, embedded_pipeline_type, keep_task_state),
+            TaskActionHandler()
         ]
 
     @staticmethod
@@ -165,16 +160,6 @@ class FlinkTasks(object):
 
     def value_specs(self):
         return self._value_specs
-
-    def register_builtin(self, fun, **params):
-        """
-        Registers a built in Flink Task e.g. __builtins.run_pipeline
-        This should only be used if you want to provide your own built in (pre-defined) tasks
-
-        :param fun: a function, partial or lambda representing the built in
-        :param params: any additional parameters to the Flink Task (such as a retry policy)
-        """
-        self._bindings[fun.task_name] = FlinkTask(fun, self._serialiser, self.events, **params)
 
     def register(self, fun, wrapper=None, module_name=None, **params):
         """
@@ -313,20 +298,6 @@ class FlinkTasks(object):
         task_exception = _create_task_exception(task_input, ex)
         await self.emit_result(context, task_input, task_exception, delay, cancellation_token)
 
-    def get_pipeline(self, context):
-        pipeline_protos = context.pipeline_state.pipeline
-
-        if pipeline_protos is not None:
-            return _Pipeline.from_proto(pipeline_protos, self._serialiser, self._events)
-        else:
-            raise ValueError(f'Missing pipeline for task_id - {context.get_task_id()}')
-
-    def try_get_pipeline(self, context):
-        try:
-            return self.get_pipeline(context)
-        except:
-            return None
-
     async def emit_result(self, context, task_input, task_result, delay: timedelta=None, cancellation_token: str = None):
         # copy over invocation id and notify we are about to emit a result
         if isinstance(task_result, (TaskResult, TaskException)):
@@ -344,20 +315,12 @@ class FlinkTasks(object):
 
         # otherwise call back to the caller (if there is one)
         elif isinstance(task_input, TaskRequest):
-            address, caller_id = self._get_caller_address_and_id(context, task_input)
+            address = context.get_original_caller_address()
+            caller_id = context.get_original_caller_id()
+
             if address is not None and caller_id is not None:
                 context.send_message(address, caller_id, task_result, delay, cancellation_token)
 
         # clean up
         if task_input.uid in context.task_state.by_uid:
             del context.task_state.by_uid[task_input.uid]
-
-    @staticmethod
-    def _get_caller_address_and_id(context, task_request):
-        task_state = context.task_state.by_uid[task_request.uid]
-        
-        # either as original caller (e.g. if this is a result of a retry) or context.get_caller_...() otherwise
-        address = task_state.original_caller_address if task_state.original_caller_address != '' else context.get_caller_address()
-        caller_id = task_state.original_caller_id if task_state.original_caller_id != '' else context.get_caller_id()
-
-        return address, caller_id

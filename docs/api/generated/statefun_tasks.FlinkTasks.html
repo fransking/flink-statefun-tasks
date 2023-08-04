@@ -102,7 +102,7 @@
 <h1>FlinkTasks<a class="headerlink" href="#flinktasks" title="Permalink to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="statefun_tasks.FlinkTasks">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">statefun_tasks.</span></span><span class="sig-name descname"><span class="pre">FlinkTasks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">default_namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_worker_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">egress_type_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">egress_message_max_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">serialiser</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_expiration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_task_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">statefun_tasks.</span></span><span class="sig-name descname"><span class="pre">FlinkTasks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">default_namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_worker_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">egress_type_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">egress_message_max_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">serialiser</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_expiration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_task_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embedded_pipeline_namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embedded_pipeline_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks" title="Permalink to this definition"></a></dt>
 <dd><p>Flink Tasks implementation</p>
 <p>An instance should be instantiated at the top of your api file and used to decorate functions
 to be exposed as tasks.</p>
@@ -116,12 +116,14 @@ to be exposed as tasks.</p>
 <li><p><strong>serialiser</strong> (<em>optional</em>) – serialiser to use (will use DefaultSerialiser if not set)</p></li>
 <li><p><strong>state_expiration</strong> (<em>optional</em>) – duration after which state will be expired by Flink (expire_after_call)</p></li>
 <li><p><strong>keep_task_state</strong> (<em>optional</em>) – whether to keep state (request, result) associated with tasks as well as pipelines (defaults to false)</p></li>
+<li><p><strong>embedded_pipeline_namespace</strong> (<em>optional</em>) – namespace of the embedded function that pipelines will be forwarded to</p></li>
+<li><p><strong>embedded_pipeline_type</strong> (<em>optional</em>) – type name of the embedded function that pipelines will be forwarded to</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.FlinkTasks.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">default_namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_worker_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">egress_type_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">egress_message_max_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">serialiser</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_expiration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_task_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">default_namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_worker_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">egress_type_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">egress_message_max_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">serialiser</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_expiration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_task_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embedded_pipeline_namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embedded_pipeline_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.__init__" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -145,17 +147,11 @@ to be exposed as tasks.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.fail" title="statefun_tasks.FlinkTasks.fail"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fail</span></code></a>(context, task_input, ex[, delay, ...])</p></td>
 <td><p>Sends a failure :type context: :param context: TaskContext :type task_input: :param task_input: the incoming TaskRequest or TaskActionRequest :type ex: :param ex: the exception to return :param optional delay: the delay before Flink sends the result :param optional cancellation_token: a cancellation token to associate with this message</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_pipeline</span></code>(context)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.get_task" title="statefun_tasks.FlinkTasks.get_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_task</span></code></a>(task_type)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.get_task" title="statefun_tasks.FlinkTasks.get_task"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_task</span></code></a>(task_type)</p></td>
 <td><p>Returns the Flink Task instance for a given task type name</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.register" title="statefun_tasks.FlinkTasks.register"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register</span></code></a>(fun[, wrapper, module_name])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.register" title="statefun_tasks.FlinkTasks.register"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register</span></code></a>(fun[, wrapper, module_name])</p></td>
 <td><p>Registers a Python function as a Flink Task.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.register_builtin" title="statefun_tasks.FlinkTasks.register_builtin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_builtin</span></code></a>(fun, **params)</p></td>
-<td><p>Registers a built in Flink Task e.g.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.run_async" title="statefun_tasks.FlinkTasks.run_async"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_async</span></code></a>(context, message)</p></td>
 <td><p>Runs an async Flink Task</p></td>
@@ -166,16 +162,13 @@ to be exposed as tasks.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.send_result" title="statefun_tasks.FlinkTasks.send_result"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_result</span></code></a>(context, task_request, result[, ...])</p></td>
 <td><p>Sends a result :type context: <a class="reference internal" href="statefun_tasks.TaskContext.html#statefun_tasks.TaskContext" title="statefun_tasks.context.TaskContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">TaskContext</span></code></a> :param context: TaskContext :type task_request: <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskRequest</span></code> :param task_request: the incoming TaskRequest :type result: :param result: the result(s) to return :type state: :param state: the state to include in the result.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">try_get_pipeline</span></code>(context)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.unpack_task_request" title="statefun_tasks.FlinkTasks.unpack_task_request"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unpack_task_request</span></code></a>(task_request)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.unpack_task_request" title="statefun_tasks.FlinkTasks.unpack_task_request"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unpack_task_request</span></code></a>(task_request)</p></td>
 <td><p>Unpacks a TaskRequest into args, kwargs and state :type task_request: <code class="xref py py-class docutils literal notranslate"><span class="pre">TaskRequest</span></code> :param task_request: TaskRequest :rtype: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code> :return: args, kwargs and state from this task_request</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">value_specs</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">value_specs</span></code>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.events" title="statefun_tasks.FlinkTasks.events"><code class="xref py py-obj docutils literal notranslate"><span class="pre">events</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.FlinkTasks.events" title="statefun_tasks.FlinkTasks.events"><code class="xref py py-obj docutils literal notranslate"><span class="pre">events</span></code></a></p></td>
 <td><p>EventHandler for this FlinkTasks instance</p></td>
 </tr>
 </tbody>
@@ -291,21 +284,6 @@ Normally you would attribute the function with &#64;tasks.bind() instead</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="statefun_tasks.FlinkTasks.register_builtin">
-<span class="sig-name descname"><span class="pre">register_builtin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fun</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.register_builtin" title="Permalink to this definition"></a></dt>
-<dd><p>Registers a built in Flink Task e.g. __builtins.run_pipeline
-This should only be used if you want to provide your own built in (pre-defined) tasks</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>fun</strong> – a function, partial or lambda representing the built in</p></li>
-<li><p><strong>params</strong> – any additional parameters to the Flink Task (such as a retry policy)</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.FlinkTasks.run_async">
 <em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.FlinkTasks.run_async" title="Permalink to this definition"></a></dt>
 <dd><p>Runs an async Flink Task</p>
@@ -381,7 +359,7 @@ This should only be used if you want to provide your own built in (pre-defined) 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020-2022, Frans King &amp; Luke Ashworth.</p>
+    <p>&#169; Copyright 2020-2023, Frans King &amp; Luke Ashworth.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

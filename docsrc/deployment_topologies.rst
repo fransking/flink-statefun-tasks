@@ -1,29 +1,23 @@
 Deployment Topologies
 =====================
 
-Each task has an associated namespace and worker name corresponding to the namespace and type of a Flink function registered in the Statefun module.yaml.  The simplist deployment
-topology involves registering a single function (call it example/worker) and connecting a single ingress topic (call it task.requests) to that function.
+A basic deployment topology involves an `embedded pipeline <https://github.com/fransking/flink-statefun-tasks-embedded>`_ function connected to an ingress topic plus a number of worker functions.
 
-This may not be the optimal topology where pipelines are concerned.  When a pipeline is sent to ingress by the client and picked up by a worker, or similarly another task 
-returns its own pipeline, these tasks become orchestrators for all sub-tasks in the pipeline.  Logically we depict a pipeline as:
 
-.. code-block:: python
-
-    ingress -> a() -> b() -> c() -> egress 
-
-but in reality there is a pipeline function p() acting as the orchestrator:
+This code
 
 .. code-block:: python
 
-    ingress -> p() -> a() -> p() -> b() -> p() -> c() -> p() -> egress
+    from statefun_tasks import FlinkTasks()
 
+    
+    tasks = FlinkTasks(
+        default_namespace="example",                        # default namespace for worker tasks
+        default_worker_name="generic_worker",               # default type for worker tasks
+        egress_type_name="example/kafka-generic-egress",    # egress to use for emitting results
+        embedded_pipeline_namespace="example",              # namespace of the embedded pipeline function
+        embedded_pipeline_type="embedded_pipeline")         # type of the embedded pipeline function
 
-Running p() on resource constrained workers may impact performance and it may make sense to hive these off into their own Flink function type.  Our deployments expose only
-the pipeline workers to ingress.  Other worker functions are then registered seperately in the module.yaml such as example/cpu_worker, example/gpu_worker, example/aio_worker for different
-classifications of work. 
-
-
-.. code-block:: python
 
     @tasks.bind(worker_name='cpu_worker'):
     def a():
@@ -43,10 +37,74 @@ classifications of work.
         pass
 
 
-    @tasks.bind(worker_name='pipeline_worker')
+    @tasks.bind(worker_name='generic_worker')
     def example_workflow():
         return a.send().continue_with(b).continue_with(c)
 
 
     pipeline = example_workflow.send()
     result = await client.submit_async(pipeline)
+
+
+corresponds to the following setup in the Flink module.yaml
+
+.. code-block:: yaml
+
+    version: "3.0"
+    module:
+      meta:
+        type: remote
+      spec:
+        endpoints:
+          - endpoint:
+            meta:
+              kind: http
+              spec:
+                functions: example/cpu_worker
+                ...
+          - endpoint:
+            meta:
+              kind: http
+              spec:
+                functions: example/gpu_worker
+                ...
+          - endpoint:
+            meta:
+              kind: http
+              spec:
+                functions: example/aio_worker
+                ...
+
+        ingresses:
+          - ingress:
+              meta:
+                ...
+              spec:
+                ...
+                topics:
+                  - topic: statefun-tasks.requests
+                    valueType: io.statefun_tasks.types/statefun_tasks.TaskRequest
+                    targets:
+                      - example/embedded_pipeline
+                  - topic:  statefun-tasks.actions
+                    valueType: io.statefun_tasks.types/statefun_tasks.TaskActionRequest
+                    targets:
+                      - example/embedded_pipeline
+
+        egresses:
+          - egress:
+              meta:
+                type: io.statefun.kafka/egress
+                id: example/kafka-generic-egress
+              spec: 
+                ...
+
+        pipelines:
+          - pipeline:
+              meta:
+                id: example/embedded_pipeline               # function namespace/type
+              spec:
+                stateExpiration: PT1M                       # state expiration (ISO-8601)
+                egress: example/kafka-generic-egress        # task response egress
+                eventsEgress: example/kafka-generic-egress  # events egress
+                eventsTopic: statefun-tasks.events          # events topic

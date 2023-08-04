@@ -199,6 +199,24 @@ class TaskContext(object):
         """
         return None if self._context.caller.id == "" else self._context.caller.id
 
+    def get_original_caller_address(self):
+        """
+        Original caller address irrespective of whether this task is a retry (caller is self) or not
+
+        :return: address
+        """
+        task_state = self.task_state.by_uid[self.task_uid]
+        return task_state.original_caller_address if task_state.original_caller_address != '' else self.get_caller_address()
+
+    def get_original_caller_id(self):
+        """
+        Original caller id irrespective of whether this task is a retry (caller is self) or not
+
+        :return: address
+        """
+        task_state = self.task_state.by_uid[self.task_uid]
+        return task_state.original_caller_id if task_state.original_caller_id != '' else self.get_caller_id()
+
     def set_state(self, obj):
         self.task_state.internal_state.CopyFrom(pack_any(self._serialiser.to_proto(obj)))
 
@@ -216,6 +234,7 @@ class TaskContext(object):
         :param address: SDK address
         :return: address and id in the format namespace/type/id
         """
+        print(address)
         return f'{address.namespace}/{address.type}', address.id
 
     def send_message_after(self, delay: timedelta, destination, target_id, value, cancellation_token: str = ""):

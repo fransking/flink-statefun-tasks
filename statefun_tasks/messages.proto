@@ -203,6 +203,7 @@ message TaskInfo {
     string namespace = 3;
     string worker_name = 4;
     string task_uid = 5;
+    string display_name = 6;
 }
 
 message TaskResults {
@@ -255,4 +256,39 @@ message TaskStatus {
         CANCELLED = 6;
     }
     Status value = 1;
+}
+
+message PipelineCreated {
+    string caller_id = 1;
+    string caller_address = 2;
+    repeated TaskInfo tasks = 3;
+}
+
+message PipelineStatusChanged {
+    TaskStatus status = 1;
+}
+
+message PipelineTasksSkipped {
+    repeated TaskInfo tasks = 1;
+}
+
+message PipelineTaskFinished {
+    string id = 1;
+    string uid = 2;
+    TaskStatus status = 3;
+    uint32 size_in_bytes = 4;
+}
+
+message Event {
+    string pipeline_id = 1;
+    string pipeline_address = 2;
+    string root_pipeline_id = 3;
+    string root_pipeline_address = 4;
+
+    oneof event {
+        PipelineCreated pipeline_created = 5;
+        PipelineStatusChanged pipeline_status_changed = 6;
+        PipelineTasksSkipped pipeline_tasks_skipped = 7;
+        PipelineTaskFinished pipeline_task_finished = 8;
+    }
 }

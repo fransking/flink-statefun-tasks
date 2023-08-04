@@ -1,10 +1,8 @@
 import unittest
 from dataclasses import dataclass
-
 from google.protobuf.message import Message
 from google.protobuf.wrappers_pb2 import DoubleValue, StringValue
 from statefun.request_reply_pb2 import Address
-
 from statefun_tasks import TaskRequest
 from statefun_tasks.protobuf import _convert_from_proto, _convert_to_proto, ScalarTypeProtobufConverter, \
     _generate_default_converters, ObjectProtobufConverter
@@ -141,7 +139,3 @@ class CustomProtobufConverterTests(unittest.TestCase):
         self.assertIsInstance(proto_message, MyType)
         self.assertIsInstance(python_val, self.MyType)
         self.assertEqual(python_val.string_field, 'my_val')
-
-
-if __name__ == '__main__':
-    unittest.main()

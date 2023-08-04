@@ -28,7 +28,6 @@ PipelineBuilder
       ~PipelineBuilder.send
       ~PipelineBuilder.set
       ~PipelineBuilder.set_task_defaults
-      ~PipelineBuilder.to_pipeline
       ~PipelineBuilder.to_proto
       ~PipelineBuilder.to_task_request
       ~PipelineBuilder.validate

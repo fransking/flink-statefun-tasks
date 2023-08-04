@@ -4,7 +4,6 @@ from google.protobuf.any_pb2 import Any
 import inspect
 from uuid import uuid4
 from typing import get_type_hints
-from itertools import chain
 
 
 def _gen_id():
@@ -21,21 +20,6 @@ def _type_name(thing):
 def _task_type_for(fun, module_name=None):
     module = fun.__module__ if module_name is None else module_name
     return ".".join([module, fun.__name__])
-
-
-def _try_next(iterator):
-    try:
-        return next(iterator)
-    except StopIteration:
-        return None
-
-
-def _try_peek(iterator):
-    try:
-        n = next(iterator)
-        return n, chain([n], iterator)
-    except StopIteration:
-        return None, iterator
 
 
 def _is_named_tuple(value):

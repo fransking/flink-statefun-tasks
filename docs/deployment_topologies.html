@@ -84,21 +84,20 @@
              
   <section id="deployment-topologies">
 <h1>Deployment Topologies<a class="headerlink" href="#deployment-topologies" title="Permalink to this heading"></a></h1>
-<p>Each task has an associated namespace and worker name corresponding to the namespace and type of a Flink function registered in the Statefun module.yaml.  The simplist deployment
-topology involves registering a single function (call it example/worker) and connecting a single ingress topic (call it task.requests) to that function.</p>
-<p>This may not be the optimal topology where pipelines are concerned.  When a pipeline is sent to ingress by the client and picked up by a worker, or similarly another task
-returns its own pipeline, these tasks become orchestrators for all sub-tasks in the pipeline.  Logically we depict a pipeline as:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ingress</span> <span class="o">-&gt;</span> <span class="n">a</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">b</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">c</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">egress</span>
-</pre></div>
-</div>
-<p>but in reality there is a pipeline function p() acting as the orchestrator:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ingress</span> <span class="o">-&gt;</span> <span class="n">p</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">a</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">p</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">b</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">p</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">c</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">p</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">egress</span>
-</pre></div>
-</div>
-<p>Running p() on resource constrained workers may impact performance and it may make sense to hive these off into their own Flink function type.  Our deployments expose only
-the pipeline workers to ingress.  Other worker functions are then registered seperately in the module.yaml such as example/cpu_worker, example/gpu_worker, example/aio_worker for different
-classifications of work.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">worker_name</span><span class="o">=</span><span class="s1">&#39;cpu_worker&#39;</span><span class="p">):</span>
+<p>A basic deployment topology involves an <a class="reference external" href="https://github.com/fransking/flink-statefun-tasks-embedded">embedded pipeline</a> function connected to an ingress topic plus a number of worker functions.</p>
+<p>This code</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">statefun_tasks</span> <span class="kn">import</span> <span class="n">FlinkTasks</span><span class="p">()</span>
+
+
+<span class="n">tasks</span> <span class="o">=</span> <span class="n">FlinkTasks</span><span class="p">(</span>
+    <span class="n">default_namespace</span><span class="o">=</span><span class="s2">&quot;example&quot;</span><span class="p">,</span>                        <span class="c1"># default namespace for worker tasks</span>
+    <span class="n">default_worker_name</span><span class="o">=</span><span class="s2">&quot;generic_worker&quot;</span><span class="p">,</span>               <span class="c1"># default type for worker tasks</span>
+    <span class="n">egress_type_name</span><span class="o">=</span><span class="s2">&quot;example/kafka-generic-egress&quot;</span><span class="p">,</span>    <span class="c1"># egress to use for emitting results</span>
+    <span class="n">embedded_pipeline_namespace</span><span class="o">=</span><span class="s2">&quot;example&quot;</span><span class="p">,</span>              <span class="c1"># namespace of the embedded pipeline function</span>
+    <span class="n">embedded_pipeline_type</span><span class="o">=</span><span class="s2">&quot;embedded_pipeline&quot;</span><span class="p">)</span>         <span class="c1"># type of the embedded pipeline function</span>
+
+
+<span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">worker_name</span><span class="o">=</span><span class="s1">&#39;cpu_worker&#39;</span><span class="p">):</span>
 <span class="k">def</span> <span class="nf">a</span><span class="p">():</span>
     <span class="c1"># do CPU bound work</span>
     <span class="k">pass</span>
@@ -116,13 +115,74 @@ classifications of work.</p>
     <span class="k">pass</span>
 
 
-<span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">worker_name</span><span class="o">=</span><span class="s1">&#39;pipeline_worker&#39;</span><span class="p">)</span>
+<span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">worker_name</span><span class="o">=</span><span class="s1">&#39;generic_worker&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">example_workflow</span><span class="p">():</span>
     <span class="k">return</span> <span class="n">a</span><span class="o">.</span><span class="n">send</span><span class="p">()</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">b</span><span class="p">)</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
 
 
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">example_workflow</span><span class="o">.</span><span class="n">send</span><span class="p">()</span>
 <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">submit_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>corresponds to the following setup in the Flink module.yaml</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3.0&quot;</span>
+<span class="nt">module</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">meta</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">remote</span>
+<span class="w">  </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">endpoints</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">endpoint</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">meta</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+<span class="w">          </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">functions</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example/cpu_worker</span>
+<span class="w">            </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">endpoint</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">meta</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+<span class="w">          </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">functions</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example/gpu_worker</span>
+<span class="w">            </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">endpoint</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">meta</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+<span class="w">          </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">functions</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example/aio_worker</span>
+<span class="w">            </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+
+<span class="w">    </span><span class="nt">ingresses</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">ingress</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">meta</span><span class="p">:</span>
+<span class="w">            </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">          </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">            </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">            </span><span class="l l-Scalar l-Scalar-Plain">topics</span><span class="p p-Indicator">:</span>
+<span class="w">              </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">statefun-tasks.requests</span>
+<span class="w">                </span><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.statefun_tasks.types/statefun_tasks.TaskRequest</span>
+<span class="w">                </span><span class="nt">targets</span><span class="p">:</span>
+<span class="w">                  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example/embedded_pipeline</span>
+<span class="w">              </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">topic</span><span class="p">:</span><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">statefun-tasks.actions</span>
+<span class="w">                </span><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.statefun_tasks.types/statefun_tasks.TaskActionRequest</span>
+<span class="w">                </span><span class="nt">targets</span><span class="p">:</span>
+<span class="w">                  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example/embedded_pipeline</span>
+
+<span class="w">    </span><span class="nt">egresses</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">egress</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">meta</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.statefun.kafka/egress</span>
+<span class="w">            </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example/kafka-generic-egress</span>
+<span class="w">          </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">            </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+
+<span class="w">    </span><span class="nt">pipelines</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">pipeline</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">meta</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example/embedded_pipeline</span><span class="w">               </span><span class="c1"># function namespace/type</span>
+<span class="w">          </span><span class="nt">spec</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">stateExpiration</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PT1M</span><span class="w">                       </span><span class="c1"># state expiration (ISO-8601)</span>
+<span class="w">            </span><span class="nt">egress</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example/kafka-generic-egress</span><span class="w">        </span><span class="c1"># task response egress</span>
+<span class="w">            </span><span class="nt">eventsEgress</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example/kafka-generic-egress</span><span class="w">  </span><span class="c1"># events egress</span>
+<span class="w">            </span><span class="nt">eventsTopic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">statefun-tasks.events</span><span class="w">          </span><span class="c1"># events topic</span>
 </pre></div>
 </div>
 </section>
@@ -138,7 +198,7 @@ classifications of work.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2020-2022, Frans King &amp; Luke Ashworth.</p>
+    <p>&#169; Copyright 2020-2023, Frans King &amp; Luke Ashworth.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

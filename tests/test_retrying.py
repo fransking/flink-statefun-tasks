@@ -1,77 +1,53 @@
-from datetime import timedelta
 import unittest
-
-from statefun_tasks import RetryPolicy
-from tests.utils import FlinkTestHarness, tasks, TaskErrorException
-
-
-
-@tasks.bind()
-def fail_workflow(fail_times):
-    return tasks.send(_fail, fail_times)
+from unittest.mock import MagicMock
+from statefun_tasks import FlinkTasks, RetryPolicy
+from statefun_tasks.utils import _task_type_for
+from statefun_tasks.messages_pb2 import TaskSpecificState, TaskRetryPolicy
+from tests.utils import TaskRunner
 
 
-@tasks.bind(with_context=True, retry_policy=RetryPolicy(retry_for=[Exception], max_retries=3))
-def _fail(context, count):
-    fail_count = context.get_state(0)
-    
-    if fail_count < count:
-        fail_count += 1
-        context.set_state(fail_count)
-        raise ValueError(f'Failed after {fail_count} iterations')
-        
-    return f'Succeeded after {fail_count} failures'
+tasks = FlinkTasks()
 
 
-class RetryTests(unittest.TestCase):
+@tasks.bind(retry_policy=RetryPolicy(retry_for=[ValueError], max_retries=1))
+def _fail():
+    raise ValueError('Fail')
+
+
+class RetryTests(unittest.IsolatedAsyncioTestCase):
     def setUp(self) -> None:
-        global _fail_run_count
-        _fail_run_count = 0
-        self.test_harness = FlinkTestHarness()
+        self.runner = TaskRunner(tasks)
 
-    def test_failing_task_1_times_with_3_retries(self):
-        pipeline = tasks.send(_fail, 1)
-        result = self.test_harness.run_pipeline(pipeline)
-        self.assertEqual(result, 'Succeeded after 1 failures')
+    async def test_task_failing_retries_if_failure_count_is_less_than_max_retries(self):
+        task_id = '123'
+        task_uid = 'u123'
+        caller_address = 'test/test_task_failing_retries_if_failure_count_is_less_than_max_retries'
+        caller_id = '456'
+        
+        messages = []
+        context = MagicMock()
+        context.send_message = lambda *args: messages.append(args[0:3])
+        
+        await self.runner.run_task(_fail, context=context, task_id=task_id, task_uid=task_uid, caller_address=caller_address, caller_id=caller_id)
+        _, _, retry_request = [m for m in messages if  m[2].uid == task_uid][0]
+        
+        self.assertEqual(context.task_state.by_uid[task_uid].original_caller_address, caller_address)
+        self.assertEqual(context.task_state.by_uid[task_uid].original_caller_id, caller_id)
+        self.assertEqual(context.task_state.by_uid[task_uid].retry_count, 1)
 
-    def test_failing_task_3_times_with_3_retries(self):
-        pipeline = tasks.send(_fail, 3)
-        result = self.test_harness.run_pipeline(pipeline)
-        self.assertEqual(result, 'Succeeded after 3 failures')
+        self.assertEqual(retry_request.id, task_id)
+        self.assertEqual(retry_request.uid, task_uid)
+        self.assertEqual(retry_request.type, _task_type_for(_fail))
 
-    def test_failing_task_4_times_with_3_retries(self):
-        pipeline = tasks.send(_fail, 4)
-        try:
-            self.test_harness.run_pipeline(pipeline)
-        except TaskErrorException as e:
-            self.assertEqual(e.task_error.message, 'Failed after 4 iterations')
-        else:
-            self.fail('Expected an exception')
+    async def test_task_fails_if_the_failure_count_exceeds_max_retries(self):
+        with self.assertRaises(ValueError):
+            await self.runner.run_task(_fail, task_state=TaskSpecificState(retry_count=1))
 
-    def test_failing_pipeline_1_time_with_3_retries(self):
-        pipeline = tasks.send(fail_workflow, 1)
-        result = self.test_harness.run_pipeline(pipeline)
-        self.assertEqual(result, 'Succeeded after 1 failures')
+    async def test_task_retry_policy_can_be_overriden(self):
+        task_uid = 'u123'
+        context = MagicMock()
+        retry_policy = TaskRetryPolicy(retry_for=["builtins.ValueError"], max_retries=2)
+        task_state = TaskSpecificState(retry_count=1)
 
-    def test_failing_pipeline_3_times_with_3_retries(self):
-        pipeline = tasks.send(fail_workflow, 3)
-        result = self.test_harness.run_pipeline(pipeline)
-        self.assertEqual(result, 'Succeeded after 3 failures')
-
-    def test_failing_pipeline_4_times_with_3_retries(self):
-        pipeline = tasks.send(fail_workflow, 4)
-        try:
-            self.test_harness.run_pipeline(pipeline)
-        except TaskErrorException as e:
-            self.assertEqual(e.task_error.message, 'Failed after 4 iterations')
-        else:
-            self.fail('Expected an exception')
-
-    def test_failing_pipeline_with_retry_policy_override(self):
-        pipeline = tasks.send(_fail, 4).set(retry_policy=RetryPolicy(retry_for=[Exception], max_retries=4, delay=timedelta(seconds=1)))
-        result = self.test_harness.run_pipeline(pipeline)
-        self.assertEqual(result, 'Succeeded after 4 failures')
-
-
-if __name__ == '__main__':
-    unittest.main()
+        await self.runner.run_task(_fail, context=context, task_uid=task_uid, retry_policy=retry_policy, task_state=task_state)
+        self.assertEqual(context.task_state.by_uid[task_uid].retry_count, 2)
