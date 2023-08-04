@@ -28,8 +28,6 @@ class TaskContext(object):
         '_egress_message_max_size',
         'storage', 
         'task_state', 
-        'pipeline_state', 
-        'pipeline_state_size', 
         '_task_meta', 
         '_task_name', 
         '_task_uid'
@@ -43,8 +41,6 @@ class TaskContext(object):
 
         self.storage = context.storage
         self.task_state = self.storage.task_state or TaskState()
-        self.pipeline_state = self.storage.pipeline_state
-        self.pipeline_state_size = self.pipeline_state.ByteSize() if self.pipeline_state is not None else 0
 
         self._task_meta = {}
         self._task_name = None
@@ -314,9 +310,6 @@ class TaskContext(object):
 
     def __exit__(self, exc_type, exc_value, traceback):
         self._context.storage.task_state = self.task_state
-
-        if self.pipeline_state is not None:
-            self._context.storage.pipeline_state = self.pipeline_state
 
     def __str__(self):
         return f'task_name: {self.task_name}, task_id: {self.get_task_id()}, caller: {self.get_caller_id()}'

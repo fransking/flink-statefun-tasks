@@ -45,6 +45,8 @@ class TaskRunner():
                        task_state: TaskSpecificState=None,
                        retry_policy: TaskRetryPolicy=None,
                        state=None,
+                       embedded_pipeline_namespace='test',
+                       embedded_pipeline_type='embedded_pipeline',
                        **kwargs):
         
         task_type = task_or_task_type if isinstance(task_or_task_type, str) else _task_type_for(task_or_task_type)
@@ -70,7 +72,7 @@ class TaskRunner():
         context.get_original_caller_id = lambda: caller_id
         context.task_state.by_uid = {task_request.uid: task_state or TaskSpecificState()}
 
-        handler = TaskRequestHandler(embedded_pipeline_namespace="test", embedded_pipeline_type="embedded_pipeline")
+        handler = TaskRequestHandler(embedded_pipeline_namespace=embedded_pipeline_namespace, embedded_pipeline_type=embedded_pipeline_type)
         await handler.handle_message(self._tasks, context, task_request)
 
         try:
