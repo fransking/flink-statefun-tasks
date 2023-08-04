@@ -56,10 +56,12 @@ class TaskRequestHandler(MessageHandler):
             context.storage.task_exception = task_exception
             await tasks.emit_result(context, task_request, task_exception)
 
-        # else if we have a task result return it
+        # else if we have a task result return it unless the result is a pipeline
         elif task_result is not None:
             context.storage.task_result = task_result
-            await tasks.emit_result(context, task_request, task_result)
+
+            if pipeline is None:
+                await tasks.emit_result(context, task_request, task_result)
 
         if not self._keep_task_state:
             # clear state from intermediate tasks

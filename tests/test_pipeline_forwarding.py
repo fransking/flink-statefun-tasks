@@ -52,6 +52,14 @@ class PipelineForwardingTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(pipeline_request.is_fruitful)
         self.assertEqual(unpack_any(pipeline_request.state, []).value, 'initial')
 
+    async def test_task_creating_a_nested_pipeline_does_not_egress(self):
+        egresses = []
+        context = MagicMock()
+        context.safe_send_egress_message = lambda *args: egresses.append(args)
+        await self.runner.run_task(_workflow, context=context, state='initial', reply_topic='test')
+
+        self.assertEqual(len(egresses), 0)
+
     async def test_non_fruitful_nested_pipeline(self):
         messages = []
         context = MagicMock()
