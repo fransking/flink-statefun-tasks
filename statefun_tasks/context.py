@@ -230,7 +230,6 @@ class TaskContext(object):
         :param address: SDK address
         :return: address and id in the format namespace/type/id
         """
-        print(address)
         return f'{address.namespace}/{address.type}', address.id
 
     def send_message_after(self, delay: timedelta, destination, target_id, value, cancellation_token: str = ""):
