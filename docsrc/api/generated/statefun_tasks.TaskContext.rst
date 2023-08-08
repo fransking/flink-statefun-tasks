@@ -44,8 +44,6 @@ TaskContext
    
       ~TaskContext.storage
       ~TaskContext.task_state
-      ~TaskContext.pipeline_state
-      ~TaskContext.pipeline_state_size
       ~TaskContext.task_name
       ~TaskContext.task_uid
 
@@ -60,8 +58,6 @@ TaskContext
    
       ~TaskContext.storage
       ~TaskContext.task_state
-      ~TaskContext.pipeline_state
-      ~TaskContext.pipeline_state_size
       ~TaskContext.task_name
       ~TaskContext.task_uid
    
