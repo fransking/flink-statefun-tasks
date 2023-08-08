@@ -212,10 +212,26 @@ message TaskStatus {
     Status value = 1;
 }
 
+message GroupInfo {
+    string group_id = 1;
+    repeated PipelineInfo group = 2;
+}
+
+message EntryInfo {
+    oneof entry {
+        TaskInfo task_entry = 1;
+        GroupInfo group_entry = 2;
+    }
+}
+
+message PipelineInfo {
+    repeated EntryInfo entries = 1;
+}
+
 message PipelineCreated {
     string caller_id = 1;
     string caller_address = 2;
-    repeated TaskInfo tasks = 3;
+    PipelineInfo pipeline = 3;
 }
 
 message PipelineStatusChanged {
