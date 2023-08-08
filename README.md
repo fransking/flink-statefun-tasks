@@ -25,3 +25,5 @@ def say_goodbye(greeting):
 Try the [demo](https://flink-demo-az.sbbsystems.co.uk).
 
 Additional documentation can be found [here](https://fransking.github.io/flink-statefun-tasks).
+
+The pipeline function can be downloaded [here](https://github.com/fransking/flink-statefun-tasks-embedded).
