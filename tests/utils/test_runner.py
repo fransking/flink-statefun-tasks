@@ -19,6 +19,7 @@ class TaskRunner():
                             task_uid=None, 
                             retry_policy: TaskRetryPolicy=None, 
                             state=None,
+                            task_meta=None,
                             **kwargs):
         
         request = TaskRequest(id=task_id or _gen_id(), uid=task_uid or _gen_id(), invocation_id=_gen_id(), type=task_type)
@@ -28,6 +29,10 @@ class TaskRunner():
         elif reply_address is not None:
             request.reply_address.CopyFrom(reply_address)
         
+        if task_meta is not None:
+            for k, v in task_meta.items():
+                request.meta[k] = v
+
         args_and_kwargs = self._serialiser.serialise_args_and_kwargs(args, kwargs)
         self._serialiser.serialise_request(request, args_and_kwargs, state=state, retry_policy=retry_policy)
         return request
@@ -47,6 +52,7 @@ class TaskRunner():
                        state=None,
                        embedded_pipeline_namespace='test',
                        embedded_pipeline_type='embedded_pipeline',
+                       task_meta=None,
                        **kwargs):
         
         task_type = task_or_task_type if isinstance(task_or_task_type, str) else _task_type_for(task_or_task_type)
@@ -59,6 +65,7 @@ class TaskRunner():
                                                 task_uid=task_uid,
                                                 retry_policy=retry_policy,
                                                 state=state,
+                                                task_meta=task_meta,
                                                 **kwargs)
 
         caller_id = caller_id or _gen_id()
