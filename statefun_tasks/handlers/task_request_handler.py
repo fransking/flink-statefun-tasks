@@ -114,7 +114,8 @@ class TaskRequestHandler(MessageHandler):
                 uid=task_request.uid,
                 invocation_id=task_request.invocation_id,
                 type="__builtins.run_pipeline",
-                is_fruitful=is_fruitful
+                is_fruitful=is_fruitful,
+                meta=task_request.meta
         )
 
         pipeline_request.request.CopyFrom(task_result.result)
