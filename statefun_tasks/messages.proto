@@ -242,13 +242,6 @@ message PipelineTasksSkipped {
     repeated TaskInfo tasks = 1;
 }
 
-message PipelineTaskFinished {
-    string id = 1;
-    string uid = 2;
-    TaskStatus status = 3;
-    uint32 size_in_bytes = 4;
-}
-
 message Event {
     string pipeline_id = 1;
     string pipeline_address = 2;
@@ -259,6 +252,5 @@ message Event {
         PipelineCreated pipeline_created = 5;
         PipelineStatusChanged pipeline_status_changed = 6;
         PipelineTasksSkipped pipeline_tasks_skipped = 7;
-        PipelineTaskFinished pipeline_task_finished = 8;
     }
 }

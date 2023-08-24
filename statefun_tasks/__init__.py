@@ -28,7 +28,7 @@ from statefun_tasks.type_helpers import flink_value_type_for, add_flink_value_ty
 from statefun_tasks.messages_pb2 import (TaskRequest, TaskResult, TaskException, TaskActionRequest, TaskActionResult,
                                          TaskActionException, TaskAction, TaskStatus, PausedTask, Pipeline, ChildPipeline, 
                                          Address, TaskInfo, Event, PipelineCreated,  PipelineInfo, TaskInfo, GroupInfo, 
-                                         EntryInfo, PipelineStatusChanged, PipelineTasksSkipped, PipelineTaskFinished)
+                                         EntryInfo, PipelineStatusChanged, PipelineTasksSkipped)
 
 
 # builtin tasks
