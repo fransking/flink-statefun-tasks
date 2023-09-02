@@ -8,7 +8,7 @@ from typing import Iterable
 import math
 
 
-def in_parallel(entries: list, max_parallelism=None, num_stages:int = 1, return_exceptions=False):
+def in_parallel(entries: list, max_parallelism=None, num_stages:int = 1, return_exceptions=False, is_unordered=False):
     """
     Creates a parallism of tasks to be run concurrently
 
@@ -18,6 +18,7 @@ def in_parallel(entries: list, max_parallelism=None, num_stages:int = 1, return_
     :param optional max_parallelism: the maximum number of tasks to run in parallel at a time
     :param optional num_stages: the number of sub-pipelines to break this parallelism into.  Used to scale larger parallelisms.
     :param optional return_exceptions: if True then tasks that raise exceptions will not cause an aggregated exception to be thrown but instead will appear in the results
+    :param option is_unordered: if True then the results of the group will come back unordered.  Unordered groups are more efficiently aggregated by Flink.
     :return: a pipeline
     """
 
@@ -30,11 +31,22 @@ def in_parallel(entries: list, max_parallelism=None, num_stages:int = 1, return_
         stages = [entries[i:i + chunk_size] for i in range(0, len(entries), chunk_size)]
 
         if len(stages) > 1:
-            per_stage_pipeline = [PipelineBuilder().append_group(stage, max_parallelism=per_stage_max_parallelism) for stage in stages]
+            per_stage_pipeline = [
+                PipelineBuilder().append_group(stage, 
+                                               max_parallelism=per_stage_max_parallelism, 
+                                               return_exceptions=return_exceptions,
+                                               is_unordered=is_unordered) 
+                for stage in stages
+            ]
+            
             group = [PipelineBuilder().append(builtin.run_pipeline.to_task(args=pipeline.inline())) for pipeline in per_stage_pipeline] 
-            return PipelineBuilder().append_group(group, max_parallelism=max_parallelism, return_exceptions=return_exceptions).continue_with(builtin.flatten_results)
 
-    return PipelineBuilder().append_group(entries, max_parallelism, return_exceptions=return_exceptions)
+            return PipelineBuilder().append_group(group, 
+                                                  max_parallelism=max_parallelism, 
+                                                  return_exceptions=return_exceptions,
+                                                  is_unordered=is_unordered).continue_with(builtin.flatten_results)
+
+    return PipelineBuilder().append_group(entries, max_parallelism, return_exceptions=return_exceptions, is_unordered=is_unordered)
 
 
 class PipelineBuilder(ProtobufSerialisable):
@@ -98,16 +110,17 @@ class PipelineBuilder(ProtobufSerialisable):
         other._pipeline.extend(self._pipeline)
         return self
 
-    def append_group(self, pipelines: Iterable['PipelineBuilder'], max_parallelism=None, return_exceptions=False) -> 'PipelineBuilder':
+    def append_group(self, pipelines: Iterable['PipelineBuilder'], max_parallelism=None, return_exceptions=False, is_unordered=False) -> 'PipelineBuilder':
         """
         Appends tasks from another pipeline builders into a new in_parallel group inside this one
 
         :param pipelines: the other pipeline builders
         :param option max_parallelism: the maximum number of tasks to invoke in parallel for this group 
         :param option return_exceptions: if True then tasks that raise exceptions will not cause an aggregated exception to be thrown but instead will appear in the results
+        :param option is_unordered: if True then the results of the group will come back unordered. Unordered groups are more efficiently aggregated by Flink.
         :return: the builder
         """
-        group = Group(_gen_id(), max_parallelism=max_parallelism, return_exceptions=return_exceptions)
+        group = Group(_gen_id(), max_parallelism=max_parallelism, return_exceptions=return_exceptions, is_unordered=is_unordered)
 
         for pipeline in pipelines:
             self._raise_if_initial_parameters_are_set(pipeline)

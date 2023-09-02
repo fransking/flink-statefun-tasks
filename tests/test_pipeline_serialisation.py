@@ -13,7 +13,6 @@ class PipelineSerialisationTests(unittest.TestCase):
         parameters = {'is_fruitful': True}
 
         entry = Task.from_fields('task_id', 'task_type', args, kwargs, **parameters, is_finally=True)
-        entry.mark_complete()
 
         entry_proto = entry.to_proto(serialiser)
         reconsituted_entry = Task.from_proto(entry_proto).unpack(serialiser)
@@ -23,7 +22,6 @@ class PipelineSerialisationTests(unittest.TestCase):
         self.assertEqual(reconsituted_entry.task_type, entry.task_type)
         self.assertEqual(reconsituted_entry.is_fruitful, True)
         self.assertEqual(reconsituted_entry.is_finally, True)
-        self.assertEqual(reconsituted_entry.is_complete(), True)
         self.assertEqual(reconsituted_entry.to_tuple(), entry.to_tuple())
 
     def test_task_entry_serialisation_with_single_protobuf_arg(self):

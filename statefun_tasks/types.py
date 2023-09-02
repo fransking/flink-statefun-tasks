@@ -220,12 +220,6 @@ class Task:
 
         return self.task_id, self.task_type, self._args, self._kwargs
 
-    def mark_complete(self, value=True):
-        self._proto.complete = value
-
-    def is_complete(self):
-        return self._proto.complete
-
     def to_proto(self, serialiser) -> PipelineEntry:
         if not self._proto_backed:
 
@@ -245,13 +239,14 @@ class Task:
 
 
 class Group:
-    __slots__ = ('group_id', 'max_parallelism', 'is_wait', '_group', 'return_exceptions')
+    __slots__ = ('group_id', 'max_parallelism', 'is_wait', '_group', 'return_exceptions', 'is_unordered')
 
-    def __init__(self, group_id, max_parallelism=None, is_wait=None, return_exceptions=False):
+    def __init__(self, group_id, max_parallelism=None, is_wait=None, return_exceptions=False, is_unordered=False):
         self.group_id = group_id
         self.max_parallelism = max_parallelism
         self.is_wait = is_wait
         self.return_exceptions = return_exceptions
+        self.is_unordered = is_unordered
         self._group = []
 
     def add_to_group(self, tasks):
@@ -263,11 +258,8 @@ class Group:
     def __next__(self):
         return self._group.__next__()
 
-    def is_complete(self):
-        return all(entry.is_complete() for entries in self._group for entry in entries)
-
     def get_destination(self):
-        return None  # _GroupEntries don't have a single destination
+        return None  # _GroupEntries don't have a destination
 
     def to_proto(self, serialiser) -> PipelineEntry:
         group = [Pipeline(entries=[entry.to_proto(serialiser) for entry in entries]) for entries in self._group]
@@ -277,7 +269,8 @@ class Group:
             group=group, 
             max_parallelism=self.max_parallelism, 
             is_wait=self.is_wait,
-            return_exceptions=self.return_exceptions)
+            return_exceptions=self.return_exceptions,
+            is_unordered=self.is_unordered)
 
         return PipelineEntry(group_entry=proto)
 
@@ -287,7 +280,8 @@ class Group:
             group_id=proto.group_entry.group_id, 
             max_parallelism=proto.group_entry.max_parallelism, 
             is_wait=proto.group_entry.is_wait,
-            return_exceptions=proto.group_entry.return_exceptions)
+            return_exceptions=proto.group_entry.return_exceptions,
+            is_unordered=proto.group_entry.is_unordered)
             
         stack = deque([(proto.group_entry.group, group)])  
 
@@ -304,7 +298,8 @@ class Group:
                             group_id=proto.group_entry.group_id, 
                             max_parallelism=proto.group_entry.max_parallelism, 
                             is_wait=proto.group_entry.is_wait,
-                            return_exceptions=proto.group_entry.return_exceptions)
+                            return_exceptions=proto.group_entry.return_exceptions,
+                            is_unordered=proto.group_entry.is_unordered)
                         
                         entries.append(stack_group)
                         stack.append((proto.group_entry.group, stack_group))
