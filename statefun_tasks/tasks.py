@@ -1,4 +1,4 @@
-from statefun_tasks.context import TaskContext
+from statefun_tasks.task_context import TaskContext
 from statefun_tasks.events.event_handlers import EventHandlers
 from statefun_tasks.pipeline_builder import PipelineBuilder
 from statefun_tasks.utils import _is_tuple, _type_name, _annotated_protos_for

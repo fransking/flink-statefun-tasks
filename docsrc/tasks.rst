@@ -49,3 +49,16 @@ Tasks can be called using the FlinkTasksClient:
 
     task = multiply.send(3, 2)  
     result = await client.submit_async(task)  # indirect invocation as a Flink Task
+
+
+Accessing the Context
+---------------------
+
+A wrapper around the Flink Statefun context can be accessed by declaring so in *@tasks.bind()*:
+
+.. code-block:: python
+
+    @tasks.bind(with_context=True)
+    def task_using_context(context):
+        caller = context.get_caller_id()
+        return f'{caller}, you called me'

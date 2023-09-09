@@ -110,20 +110,6 @@ declare so in *@tasks.bind()*:
         .continue_with(add_state)      # 15
 
 
-Accessing the Context
----------------------
-
-A wrapper around the Flink context can also be accessed by declaring so in *@tasks.bind()*:
-
-.. code-block:: python
-
-    @tasks.bind(with_context=True)
-    def task_using_context(context):
-        caller = context.get_caller_id()
-        return f'{caller}, you called me'
-
-
-
 Error Handling
 --------------
 
@@ -197,8 +183,7 @@ Initial kwargs and task state may also be set this way.
 Orchestrator Tasks
 ------------------
 
-As well as pipelines constructed client side, tasks may also return their own pipelines.  Orchestrator tasks support the following 
-patterns:
+Tasks may also return pipelines allowing for dynamic workflows with features such as:
 
 
 Composition
@@ -261,31 +246,6 @@ Inline Pipelines
 
 State is isolated by default between a parent pipeline and any child pipelines that it creates.  This
 is done on the assumption that a pipeline that calls a task that itself creates a pipeline would rather 
-treat that child pipeline as a so called black box implementation of the task that parent is called and hence
-the states should be kept independent.  
+treat that child pipeline as a so called black box implementation and hence the states should be kept independent.  
 
-This behaviour can be overriden by declaring the child pipeline as 'inline':
-
-.. code-block:: python
-
-    @tasks.bind(with_state=True, is_fruitful=False)
-    def setup_state(_, initial)
-        return initial
-
-    @tasks.bind(with_state=True)
-    def return_state(state):
-        return state, f'The state is {state}'
-
-    @tasks.bind()
-    def create_child_pipeline():
-        return return_state.send()
-
-    @tasks.bind()
-    def create_inline_child_pipeline():
-        return return_state.send().inline()
-
-    pipeline = setup_state.send('initial state').continue_with(create_child_pipeline)
-    result = await flink.submit_async(pipeline)  # result will be None
-
-    pipeline = setup_state.send('initial state').continue_with(create_inline_child_pipeline)
-    result = await flink.submit_async(pipeline)  # result will be 'The state is initial state'
+This behaviour can be overriden by declaring the child pipeline as 'inline'.

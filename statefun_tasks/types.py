@@ -258,9 +258,6 @@ class Group:
     def __next__(self):
         return self._group.__next__()
 
-    def get_destination(self):
-        return None  # _GroupEntries don't have a destination
-
     def to_proto(self, serialiser) -> PipelineEntry:
         group = [Pipeline(entries=[entry.to_proto(serialiser) for entry in entries]) for entries in self._group]
 

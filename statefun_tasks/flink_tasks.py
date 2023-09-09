@@ -1,10 +1,10 @@
-from statefun_tasks.serialisation import DefaultSerialiser
+from statefun_tasks.default_serialiser import DefaultSerialiser
 from statefun_tasks.pipeline_builder import PipelineBuilder
 from statefun_tasks.types import (Task, RetryPolicy, TASK_STATE_TYPE, TASK_REQUEST_TYPE, 
                                   TASK_RESULT_TYPE, TASK_EXCEPTION_TYPE)
 from statefun_tasks.messages_pb2 import TaskResult, TaskException, TaskRequest, Address
 from statefun_tasks.type_helpers import _create_task_result, _create_task_exception
-from statefun_tasks.context import TaskContext
+from statefun_tasks.task_context import TaskContext
 from statefun_tasks.utils import _task_type_for, _unpack_single_tuple_args, _gen_id
 from statefun_tasks.tasks import FlinkTask
 from statefun_tasks.handlers import TaskRequestHandler, TaskActionHandler
@@ -21,9 +21,6 @@ _log = logging.getLogger('FlinkTasks')
 class FlinkTasks(object):
     """
     Flink Tasks implementation
-
-    An instance should be instantiated at the top of your api file and used to decorate functions
-    to be exposed as tasks.
 
     :param default_namespace: namespace to expose functions under. Maps to Flink Statefun function namespace in module.yaml
     :param default_worker_name: worker name to expose.  Maps to Flink Statefun function type in module.yaml
@@ -70,7 +67,9 @@ class FlinkTasks(object):
     @staticmethod
     def extend(function, retry_policy: RetryPolicy = None, **params):
         """
-        Adds the extensions to make a function unsable by a PipelineBuilder -> fn.send(), fn.to_task() and fn.defaults()
+        Transforms a Python function into a task 
+        
+        fn() is extended with fn.send(), fn.to_task() and fn.defaults() attributes
 
         :param function: the function to wrap
         :param retry_policy: retry policy to use should the task throw an exception
@@ -158,12 +157,17 @@ class FlinkTasks(object):
         return self._events
 
     def value_specs(self):
+        """
+        Value specs to register in Flink Statefun's @functions.bind() attribute
+        """
+
         return self._value_specs
 
     def register(self, fun, wrapper=None, module_name=None, **params):
         """
         Registers a Python function as a Flink Task.
-        Normally you would attribute the function with @tasks.bind() instead
+        
+        Equivalent to decorating a function with @tasks.bind()
 
         :param fun: the python function
         :param optional wrapper: if wrapping a task function with e.g. functools.wraps then pass the wrapper here
@@ -192,7 +196,7 @@ class FlinkTasks(object):
 
     async def run_async(self, context: Context, message: Message):
         """
-        Runs an async Flink Task
+        Runs a Flink Task
 
         :param context: context object provided by Flink
         :param message: the task input protobuf message
@@ -238,8 +242,8 @@ class FlinkTasks(object):
 
     def clone_task_request(self, context: TaskContext) -> TaskRequest:
         """
-        Returns a complete copy of the TaskRequest associated with this TaskContext with the 
-        caller address details extracted as necessary from the context
+        Clones the TaskRequest associated with this TaskContext
+
         :param context: TaskContext
         :return: a TaskRequest
         """
@@ -260,6 +264,7 @@ class FlinkTasks(object):
     def unpack_task_request(self, task_request: TaskRequest) -> tuple:
         """
         Unpacks a TaskRequest into args, kwargs and state
+
         :param task_request: TaskRequest
         :return: args, kwargs and state from this task_request
         """
@@ -269,6 +274,7 @@ class FlinkTasks(object):
     async def send_result(self, context: TaskContext, task_request: TaskRequest, result, state=Ellipsis, delay: timedelta=None, cancellation_token: str = ""):
         """
         Sends a result
+
         :param context: TaskContext
         :param task_request: the incoming TaskRequest
         :param result: the result(s) to return
@@ -288,6 +294,7 @@ class FlinkTasks(object):
     async def fail(self, context, task_input, ex, delay: timedelta=None, cancellation_token: str = ""):
         """
         Sends a failure
+
         :param context: TaskContext
         :param task_input: the incoming TaskRequest or TaskActionRequest
         :param ex: the exception to return
@@ -298,6 +305,16 @@ class FlinkTasks(object):
         await self.emit_result(context, task_input, task_exception, delay, cancellation_token)
 
     async def emit_result(self, context, task_input, task_result, delay: timedelta=None, cancellation_token: str = None):
+        """
+        Emits a result
+
+        :param context: TaskContext
+        :param task_input: the incoming TaskRequest or TaskActionRequest
+        :param task_result: the TaskResult or TaskException to emit
+        :param optional delay: the delay before Flink sends the result
+        :param optional cancellation_token: a cancellation token to associate with this message
+        """
+
         # copy over invocation id and notify we are about to emit a result
         if isinstance(task_result, (TaskResult, TaskException)):
             task_result.invocation_id = task_input.invocation_id

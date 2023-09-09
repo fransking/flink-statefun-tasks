@@ -3,55 +3,14 @@ from statefun_tasks.types import Task, Group, RetryPolicy, ProtobufSerialisable
 from statefun_tasks.utils import _gen_id
 from statefun_tasks.messages_pb2 import TaskRequest, Pipeline
 from statefun_tasks.builtin import builtin
-from statefun_tasks.serialisation import pack_any, DefaultSerialiser
+from statefun_tasks.default_serialiser import pack_any, DefaultSerialiser
 from typing import Iterable
 import math
 
 
-def in_parallel(entries: list, max_parallelism=None, num_stages:int = 1, return_exceptions=False, ordered=True):
-    """
-    Creates a parallism of tasks to be run concurrently
-
-    pipeline = in_parallel([a.send(i) for i in range(100)]) 
-
-    :param entries: the tasks to run
-    :param optional max_parallelism: the maximum number of tasks to run in parallel at a time
-    :param optional num_stages: the number of sub-pipelines to break this parallelism into.  Used to scale larger parallelisms.
-    :param optional return_exceptions: if True then tasks that raise exceptions will not cause an aggregated exception to be thrown but instead will appear in the results
-    :param option ordered: if False then the results of the group will come back unordered.  Unordered groups are more efficiently aggregated by Flink.
-    :return: a pipeline
-    """
-
-    if num_stages > 1:
-        # split up a group such [[1,2,3,4,5,6]] into inline pipelines each with a subset of the group
-        # i.e. [[p[1,2], p[3,4], p[5,6]]] followed by a flatten to allow for better distribution
-        # of a parallelism over multiple workers
-        chunk_size = max(math.ceil(len(entries) / num_stages), 1)
-        per_stage_max_parallelism = None if max_parallelism is None else max(int(max_parallelism / num_stages), 1)
-        stages = [entries[i:i + chunk_size] for i in range(0, len(entries), chunk_size)]
-
-        if len(stages) > 1:
-            per_stage_pipeline = [
-                PipelineBuilder().append_group(stage, 
-                                               max_parallelism=per_stage_max_parallelism, 
-                                               return_exceptions=return_exceptions,
-                                               ordered=ordered) 
-                for stage in stages
-            ]
-            
-            group = [PipelineBuilder().append(builtin.run_pipeline.to_task(args=pipeline.inline())) for pipeline in per_stage_pipeline] 
-
-            return PipelineBuilder().append_group(group, 
-                                                  max_parallelism=max_parallelism, 
-                                                  return_exceptions=return_exceptions,
-                                                  ordered=ordered).continue_with(builtin.flatten_results)
-
-    return PipelineBuilder().append_group(entries, max_parallelism, return_exceptions=return_exceptions, ordered=ordered)
-
-
 class PipelineBuilder(ProtobufSerialisable):
     """
-    Builder class for creating pipelines of Flink Tasks
+    Builder class for creating pipelines
 
     :param optional pipeline: list of initial pipeline entries e.g. from another builder
     """
@@ -294,6 +253,7 @@ class PipelineBuilder(ProtobufSerialisable):
     def set_task_defaults(self, default_namespace, default_worker_name) ->  'PipelineBuilder':
         """
         Sets defaults on task entries if they are not set
+
         :return: the builder
         """
         for task in self._get_tasks():
@@ -307,6 +267,7 @@ class PipelineBuilder(ProtobufSerialisable):
     def with_initial(self, args=Ellipsis, kwargs=Ellipsis, state=Ellipsis) ->  'PipelineBuilder':
         """
         Optionally sets the initial args kwargs and state to be passed to the initial tasks(s) in this pipeline
+
         :param option args: arguments as tuple or TupleOfAny
         :param option state: state
         :param option kwargs: keyword arguments as dict or MapStringToAny
@@ -325,8 +286,10 @@ class PipelineBuilder(ProtobufSerialisable):
 
     def inline(self, is_inline=True) ->  'PipelineBuilder':
         """
-        Marks the pipeline as being inline (or not).  By default pipelines are not inline.
-        Inline pipelines accept inputs from and share state with their parent task.
+        Marks the pipeline as being inline (or not).  
+        
+        By default pipelines are not inline. Inline pipelines accept inputs from and share state with their parent task.
+
         :return: the builder
         """
         self._inline = is_inline
@@ -468,3 +431,44 @@ class PipelineBuilder(ProtobufSerialisable):
 
     def __next__(self):
         return self._pipeline.__next__()
+
+
+def in_parallel(entries: list, max_parallelism=None, num_stages:int = 1, return_exceptions=False, ordered=True):
+    """
+    Creates a parallism of tasks to be run concurrently
+
+    pipeline = in_parallel([a.send(i) for i in range(100)]) 
+
+    :param entries: the tasks to run
+    :param optional max_parallelism: the maximum number of tasks to run in parallel at a time
+    :param optional num_stages: the number of sub-pipelines to break this parallelism into.  Used to scale larger parallelisms.
+    :param optional return_exceptions: if True then tasks that raise exceptions will not cause an aggregated exception to be thrown but instead will appear in the results
+    :param option ordered: if False then the results of the group will come back unordered.  Unordered groups are more efficiently aggregated by Flink.
+    :return: a pipeline
+    """
+
+    if num_stages > 1:
+        # split up a group such [[1,2,3,4,5,6]] into inline pipelines each with a subset of the group
+        # i.e. [[p[1,2], p[3,4], p[5,6]]] followed by a flatten to allow for better distribution
+        # of a parallelism over multiple workers
+        chunk_size = max(math.ceil(len(entries) / num_stages), 1)
+        per_stage_max_parallelism = None if max_parallelism is None else max(int(max_parallelism / num_stages), 1)
+        stages = [entries[i:i + chunk_size] for i in range(0, len(entries), chunk_size)]
+
+        if len(stages) > 1:
+            per_stage_pipeline = [
+                PipelineBuilder().append_group(stage, 
+                                               max_parallelism=per_stage_max_parallelism, 
+                                               return_exceptions=return_exceptions,
+                                               ordered=ordered) 
+                for stage in stages
+            ]
+            
+            group = [PipelineBuilder().append(builtin.run_pipeline.to_task(args=pipeline.inline())) for pipeline in per_stage_pipeline] 
+
+            return PipelineBuilder().append_group(group, 
+                                                  max_parallelism=max_parallelism, 
+                                                  return_exceptions=return_exceptions,
+                                                  ordered=ordered).continue_with(builtin.flatten_results)
+
+    return PipelineBuilder().append_group(entries, max_parallelism, return_exceptions=return_exceptions, ordered=ordered)

@@ -11,6 +11,8 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
@@ -40,10 +42,8 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">About</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Concepts</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tasks_vs_functions.html">Tasks vs Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tasks.html">Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pipelines.html">Pipelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../actions.html">Actions</a></li>
@@ -103,7 +103,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="statefun_tasks.PipelineBuilder">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">statefun_tasks.</span></span><span class="sig-name descname"><span class="pre">PipelineBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder" title="Permalink to this definition"></a></dt>
-<dd><p>Builder class for creating pipelines of Flink Tasks</p>
+<dd><p>Builder class for creating pipelines</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>pipeline</strong> (<em>optional</em>) – list of initial pipeline entries e.g. from another builder</p>
@@ -163,7 +163,7 @@
 <td><p>Sets task properties on the last entry added to the builder</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.set_task_defaults" title="statefun_tasks.PipelineBuilder.set_task_defaults"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_task_defaults</span></code></a>(default_namespace, ...)</p></td>
-<td><p>Sets defaults on task entries if they are not set :rtype: <a class="reference internal" href="#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a> :return: the builder</p></td>
+<td><p>Sets defaults on task entries if they are not set</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.to_proto" title="statefun_tasks.PipelineBuilder.to_proto"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_proto</span></code></a>([serialiser])</p></td>
 <td><p>Serialises the pipeline to protobuf</p></td>
@@ -178,7 +178,7 @@
 <td><p>Causes the pipeline to automatically pause at this point</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.with_initial" title="statefun_tasks.PipelineBuilder.with_initial"><code class="xref py py-obj docutils literal notranslate"><span class="pre">with_initial</span></code></a>([args, kwargs, state])</p></td>
-<td><p>Optionally sets the initial args kwargs and state to be passed to the initial tasks(s) in this pipeline :param option args: arguments as tuple or TupleOfAny :param option state: state :param option kwargs: keyword arguments as dict or MapStringToAny :rtype: <a class="reference internal" href="#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a> :return: the builder</p></td>
+<td><p>Optionally sets the initial args kwargs and state to be passed to the initial tasks(s) in this pipeline</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder.has_initial_parameters" title="statefun_tasks.PipelineBuilder.has_initial_parameters"><code class="xref py py-obj docutils literal notranslate"><span class="pre">has_initial_parameters</span></code></a></p></td>
 <td><p>Returns true if the pipeline is has initial parameters (args, kwargs, state)</p></td>
@@ -398,10 +398,16 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.PipelineBuilder.inline">
 <span class="sig-name descname"><span class="pre">inline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">is_inline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.inline" title="Permalink to this definition"></a></dt>
-<dd><p>Marks the pipeline as being inline (or not).  By default pipelines are not inline.
-Inline pipelines accept inputs from and share state with their parent task.
-:rtype: <a class="reference internal" href="#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>
-:return: the builder</p>
+<dd><p>Marks the pipeline as being inline (or not).</p>
+<p>By default pipelines are not inline. Inline pipelines accept inputs from and share state with their parent task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the builder</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -469,9 +475,15 @@ Inline pipelines accept inputs from and share state with their parent task.
 <dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.PipelineBuilder.set_task_defaults">
 <span class="sig-name descname"><span class="pre">set_task_defaults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">default_namespace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_worker_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.set_task_defaults" title="Permalink to this definition"></a></dt>
-<dd><p>Sets defaults on task entries if they are not set
-:rtype: <a class="reference internal" href="#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>
-:return: the builder</p>
+<dd><p>Sets defaults on task entries if they are not set</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the builder</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -539,12 +551,22 @@ Inline pipelines accept inputs from and share state with their parent task.
 <dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.PipelineBuilder.with_initial">
 <span class="sig-name descname"><span class="pre">with_initial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Ellipsis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Ellipsis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Ellipsis</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.PipelineBuilder.with_initial" title="Permalink to this definition"></a></dt>
-<dd><p>Optionally sets the initial args kwargs and state to be passed to the initial tasks(s) in this pipeline
-:param option args: arguments as tuple or TupleOfAny
-:param option state: state
-:param option kwargs: keyword arguments as dict or MapStringToAny
-:rtype: <a class="reference internal" href="#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>
-:return: the builder</p>
+<dd><p>Optionally sets the initial args kwargs and state to be passed to the initial tasks(s) in this pipeline</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> (<em>option</em>) – arguments as tuple or TupleOfAny</p></li>
+<li><p><strong>state</strong> (<em>option</em>) – state</p></li>
+<li><p><strong>kwargs</strong> (<em>option</em>) – keyword arguments as dict or MapStringToAny</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the builder</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

@@ -1,4 +1,4 @@
-from statefun_tasks.context import TaskContext
+from statefun_tasks.task_context import TaskContext
 from statefun_tasks.handlers import MessageHandler
 from statefun_tasks.types import TASK_REQUEST_TYPE
 from statefun_tasks.messages_pb2 import TaskRequest, Address
