@@ -11,6 +11,8 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
@@ -40,18 +42,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">About</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Concepts</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tasks_vs_functions.html">Tasks vs Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tasks.html">Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pipelines.html">Pipelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="actions.html">Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stateful_tasks.html">Stateful Tasks</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Effects</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#pausing-a-pipeline">Pausing a Pipeline</a></li>
-</ul>
-</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Effects</a></li>
 <li class="toctree-l1"><a class="reference internal" href="events.html">Events</a></li>
 <li class="toctree-l1"><a class="reference internal" href="extensions.html">Extensions</a></li>
 </ul>
@@ -87,9 +84,7 @@
              
   <section id="effects">
 <h1>Effects<a class="headerlink" href="#effects" title="Permalink to this heading"></a></h1>
-<p>In some cases conditionally applying a side effect such as pausing the pipeline may be desired.  Effects can be used to achieve this.</p>
-<section id="pausing-a-pipeline">
-<h2>Pausing a Pipeline<a class="headerlink" href="#pausing-a-pipeline" title="Permalink to this heading"></a></h2>
+<p>Effects apply an action to the pipeline in addition to returning a result, for example pausing the pipeline if some condition is met.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">stateful_tasks.effects</span> <span class="kn">import</span> <span class="n">with_pause_pipeline</span>
 
 
@@ -104,7 +99,6 @@
 <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">submit_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>  <span class="c1"># pipeline will pause after the first task</span>
 </pre></div>
 </div>
-</section>
 </section>
 
 

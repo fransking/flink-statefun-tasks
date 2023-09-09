@@ -1,11 +1,8 @@
 Effects
 =======
 
-In some cases conditionally applying a side effect such as pausing the pipeline may be desired.  Effects can be used to achieve this.  
+Effects apply an action to the pipeline in addition to returning a result, for example pausing the pipeline if some condition is met.
 
-
-Pausing a Pipeline
-------------------
 
 .. code-block:: python
 

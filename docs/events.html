@@ -11,6 +11,8 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
@@ -40,21 +42,23 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">About</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Concepts</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tasks_vs_functions.html">Tasks vs Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tasks.html">Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pipelines.html">Pipelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="actions.html">Actions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stateful_tasks.html">Stateful Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="effects.html">Effects</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Events</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#on-task-received">On Task Received</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#on-task-started">On Task Started</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#on-task-retry">On Task Retry</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#on-task-finished">On Task Finished</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#on-emit-result">On Emit Result</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#worker-events">Worker Events</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#on-task-received">On Task Received</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#on-task-started">On Task Started</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#on-task-retry">On Task Retry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#on-task-finished">On Task Finished</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#on-emit-result">On Emit Result</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pipeline-events">Pipeline Events</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="extensions.html">Extensions</a></li>
@@ -91,11 +95,11 @@
              
   <section id="events">
 <h1>Events<a class="headerlink" href="#events" title="Permalink to this heading"></a></h1>
-<p>Flink Tasks raises events at various points during the execution of a task.  These events can be used to track task run time, state size etc.
-Execution flow can in some circumstances be interrupted by raising a TasksException in the event handler.  For example in on_task_finished an exception can be raised if the size of
-the result is greater than some limit in which case the caller will recieve that error instead.</p>
+<p>Flink Tasks raises events at various points during the execution of a task.</p>
+<section id="worker-events">
+<h2>Worker Events<a class="headerlink" href="#worker-events" title="Permalink to this heading"></a></h2>
 <section id="on-task-received">
-<h2>On Task Received<a class="headerlink" href="#on-task-received" title="Permalink to this heading"></a></h2>
+<h3>On Task Received<a class="headerlink" href="#on-task-received" title="Permalink to this heading"></a></h3>
 <p>Raised when a task is received but before it is recorded in state or begins to execute.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">on_task_received</span>
 <span class="k">def</span> <span class="nf">on_task_received</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">task_request</span><span class="p">):</span>
@@ -104,7 +108,7 @@ the result is greater than some limit in which case the caller will recieve that
 </div>
 </section>
 <section id="on-task-started">
-<h2>On Task Started<a class="headerlink" href="#on-task-started" title="Permalink to this heading"></a></h2>
+<h3>On Task Started<a class="headerlink" href="#on-task-started" title="Permalink to this heading"></a></h3>
 <p>Raised when a task begins to execute.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">on_task_started</span>
 <span class="k">def</span> <span class="nf">on_task_started</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">task_request</span><span class="p">):</span>
@@ -113,7 +117,7 @@ the result is greater than some limit in which case the caller will recieve that
 </div>
 </section>
 <section id="on-task-retry">
-<h2>On Task Retry<a class="headerlink" href="#on-task-retry" title="Permalink to this heading"></a></h2>
+<h3>On Task Retry<a class="headerlink" href="#on-task-retry" title="Permalink to this heading"></a></h3>
 <p>Raised if a task fails and is going to be retried due to a RetryPolicy.  The retry_count is the number of times the task has retried including this one.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">on_task_retry</span>
 <span class="k">def</span> <span class="nf">on_task_retry</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">task_request</span><span class="p">:</span> <span class="n">TaskRequest</span><span class="p">,</span> <span class="n">retry_count</span><span class="p">):</span>
@@ -122,7 +126,7 @@ the result is greater than some limit in which case the caller will recieve that
 </div>
 </section>
 <section id="on-task-finished">
-<h2>On Task Finished<a class="headerlink" href="#on-task-finished" title="Permalink to this heading"></a></h2>
+<h3>On Task Finished<a class="headerlink" href="#on-task-finished" title="Permalink to this heading"></a></h3>
 <p>Raised when a task finishes with either a task_result or a task_exception.  If the task has returned a pipeline is_pipeline will be True.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">on_task_finished</span>
 <span class="k">def</span> <span class="nf">on_task_finished</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">task_result</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">task_exception</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">is_pipeline</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -131,12 +135,45 @@ the result is greater than some limit in which case the caller will recieve that
 </div>
 </section>
 <section id="on-emit-result">
-<h2>On Emit Result<a class="headerlink" href="#on-emit-result" title="Permalink to this heading"></a></h2>
+<h3>On Emit Result<a class="headerlink" href="#on-emit-result" title="Permalink to this heading"></a></h3>
 <p>Raised when task or pipeline is finished and the result is about to be emitted but before it is recorded in state.</p>
 <p>TasksExceptions raised by this event handler will be ignored.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">on_emit_result</span>
 <span class="k">def</span> <span class="nf">on_emit_result</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">task_result</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">task_exception</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="k">pass</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="pipeline-events">
+<h2>Pipeline Events<a class="headerlink" href="#pipeline-events" title="Permalink to this heading"></a></h2>
+<p>The <a class="reference external" href="https://github.com/fransking/flink-statefun-tasks-embedded">pipeline</a> function also emits events to egress as the pipeline progresses.</p>
+<div class="highlight-protobuf notranslate"><div class="highlight"><pre><span></span><span class="kd">message</span><span class="w"> </span><span class="nc">PipelineCreated</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">string</span><span class="w"> </span><span class="na">caller_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">string</span><span class="w"> </span><span class="na">caller_address</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">    </span><span class="n">PipelineInfo</span><span class="w"> </span><span class="na">pipeline</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">message</span><span class="w"> </span><span class="nc">PipelineStatusChanged</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">TaskStatus</span><span class="w"> </span><span class="na">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">message</span><span class="w"> </span><span class="nc">PipelineTasksSkipped</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">repeated</span><span class="w"> </span><span class="n">TaskInfo</span><span class="w"> </span><span class="na">tasks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">message</span><span class="w"> </span><span class="nc">Event</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">string</span><span class="w"> </span><span class="na">pipeline_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">string</span><span class="w"> </span><span class="na">pipeline_address</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">string</span><span class="w"> </span><span class="na">root_pipeline_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">string</span><span class="w"> </span><span class="na">root_pipeline_address</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">oneof</span><span class="w"> </span><span class="n">event</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">PipelineCreated</span><span class="w"> </span><span class="na">pipeline_created</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span>
+<span class="w">        </span><span class="n">PipelineStatusChanged</span><span class="w"> </span><span class="na">pipeline_status_changed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">6</span><span class="p">;</span>
+<span class="w">        </span><span class="n">PipelineTasksSkipped</span><span class="w"> </span><span class="na">pipeline_tasks_skipped</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">7</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 </section>

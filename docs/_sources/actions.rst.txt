@@ -2,7 +2,7 @@ Actions
 =======
 
 
-Actions are out of band operations on existing pipelines enabling clients 'fire and forget' a pipeline and later perform some operation on it.
+Actions are used to query pipeline state or pause / resume / cancel a pipeline that is in flight.
 
 
 Querying

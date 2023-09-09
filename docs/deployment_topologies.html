@@ -11,6 +11,8 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
@@ -40,10 +42,8 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">About</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Concepts</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tasks_vs_functions.html">Tasks vs Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tasks.html">Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pipelines.html">Pipelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="actions.html">Actions</a></li>
@@ -125,64 +125,59 @@
 </pre></div>
 </div>
 <p>corresponds to the following setup in the Flink module.yaml</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3.0&quot;</span>
-<span class="nt">module</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">meta</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">remote</span>
-<span class="w">  </span><span class="nt">spec</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">endpoints</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">endpoint</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">meta</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
-<span class="w">          </span><span class="nt">spec</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">functions</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example/cpu_worker</span>
-<span class="w">            </span><span class="l l-Scalar l-Scalar-Plain">...</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">endpoint</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">meta</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
-<span class="w">          </span><span class="nt">spec</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">functions</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example/gpu_worker</span>
-<span class="w">            </span><span class="l l-Scalar l-Scalar-Plain">...</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">endpoint</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">meta</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
-<span class="w">          </span><span class="nt">spec</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">functions</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example/aio_worker</span>
-<span class="w">            </span><span class="l l-Scalar l-Scalar-Plain">...</span>
-
-<span class="w">    </span><span class="nt">ingresses</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">ingress</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">meta</span><span class="p">:</span>
-<span class="w">            </span><span class="l l-Scalar l-Scalar-Plain">...</span>
-<span class="w">          </span><span class="nt">spec</span><span class="p">:</span>
-<span class="w">            </span><span class="l l-Scalar l-Scalar-Plain">...</span>
-<span class="w">            </span><span class="l l-Scalar l-Scalar-Plain">topics</span><span class="p p-Indicator">:</span>
-<span class="w">              </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">statefun-tasks.requests</span>
-<span class="w">                </span><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.statefun_tasks.types/statefun_tasks.TaskRequest</span>
-<span class="w">                </span><span class="nt">targets</span><span class="p">:</span>
-<span class="w">                  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example/embedded_pipeline</span>
-<span class="w">              </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">topic</span><span class="p">:</span><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">statefun-tasks.actions</span>
-<span class="w">                </span><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.statefun_tasks.types/statefun_tasks.TaskActionRequest</span>
-<span class="w">                </span><span class="nt">targets</span><span class="p">:</span>
-<span class="w">                  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example/embedded_pipeline</span>
-
-<span class="w">    </span><span class="nt">egresses</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">egress</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">meta</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.statefun.kafka/egress</span>
-<span class="w">            </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example/kafka-generic-egress</span>
-<span class="w">          </span><span class="nt">spec</span><span class="p">:</span>
-<span class="w">            </span><span class="l l-Scalar l-Scalar-Plain">...</span>
-
-<span class="w">    </span><span class="nt">pipelines</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">pipeline</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">meta</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example/embedded_pipeline</span><span class="w">               </span><span class="c1"># function namespace/type</span>
-<span class="w">          </span><span class="nt">spec</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">stateExpiration</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PT1M</span><span class="w">                       </span><span class="c1"># state expiration (ISO-8601)</span>
-<span class="w">            </span><span class="nt">egress</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example/kafka-generic-egress</span><span class="w">        </span><span class="c1"># task response egress</span>
-<span class="w">            </span><span class="nt">eventsEgress</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example/kafka-generic-egress</span><span class="w">  </span><span class="c1"># events egress</span>
-<span class="w">            </span><span class="nt">eventsTopic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">statefun-tasks.events</span><span class="w">          </span><span class="c1"># events topic</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.statefun_tasks.v1/pipeline</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example/embedded_pipeline</span><span class="w">               </span><span class="c1"># function namespace/type</span>
+<span class="w">  </span><span class="nt">stateExpiration</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PT1M</span><span class="w">                       </span><span class="c1"># state expiration (ISO-8601)</span>
+<span class="w">  </span><span class="nt">egress</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example/kafka-generic-egress</span><span class="w">        </span><span class="c1"># task response egress</span>
+<span class="w">  </span><span class="nt">eventsEgress</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example/kafka-generic-egress</span><span class="w">  </span><span class="c1"># events egress (optional)</span>
+<span class="w">  </span><span class="nt">eventsTopic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">statefun-tasks.events</span><span class="w">          </span><span class="c1"># events topic (optional)</span>
+<span class="w">  </span><span class="nt">callbackDelayMs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w">                         </span><span class="c1"># callback delay (optional)</span>
+<span class="nn">---</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.statefun.endpoints.v2/http</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">functions</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example/cpu_worker</span>
+<span class="w">  </span><span class="nt">urlPathTemplate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://cpu_worker:8085/statefun</span>
+<span class="nn">---</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.statefun.endpoints.v2/http</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">functions</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example/gpu_worker</span>
+<span class="w">  </span><span class="nt">urlPathTemplate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://gpu_worker:8085/statefun</span>
+<span class="nn">---</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.statefun.endpoints.v2/http</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">functions</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example/aio_worker</span>
+<span class="w">  </span><span class="nt">urlPathTemplate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://aio_worker:8085/statefun</span>
+<span class="nn">---</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.statefun.endpoints.v2/http</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">functions</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example/generic_worker</span>
+<span class="w">  </span><span class="nt">urlPathTemplate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://generic_worker:8085/statefun</span>
+<span class="nn">---</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.statefun.kafka.v1/ingress</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example/worker</span>
+<span class="w">  </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kafka-broker:9092</span>
+<span class="w">  </span><span class="nt">consumerGroupId</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">flink-cluster-id</span>
+<span class="w">  </span><span class="nt">startupPosition</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">earliest</span>
+<span class="w">  </span><span class="nt">topics</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">topic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">statefun-tasks.requests</span>
+<span class="w">      </span><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.statefun_tasks.types/statefun_tasks.TaskRequest</span>
+<span class="w">      </span><span class="nt">targets</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example/embedded_pipeline</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">topic</span><span class="p">:</span><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">statefun-tasks.actions</span>
+<span class="w">      </span><span class="nt">valueType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.statefun_tasks.types/statefun_tasks.TaskActionRequest</span>
+<span class="w">      </span><span class="nt">targets</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example/embedded_pipeline</span>
+<span class="nn">---</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">io.statefun.kafka.v1/egress</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example/kafka-generic-egress</span>
+<span class="w">  </span><span class="nt">address</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kafka-broker:9092</span>
+<span class="w">  </span><span class="nt">deliverySemantic</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">exactly-once</span>
+<span class="w">    </span><span class="nt">transactionTimeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">15min</span>
 </pre></div>
 </div>
 </section>

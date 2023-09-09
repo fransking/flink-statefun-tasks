@@ -11,6 +11,8 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
@@ -40,16 +42,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">About</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Concepts</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tasks_vs_functions.html">Tasks vs Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tasks.html">Tasks</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Pipelines</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#continuations">Continuations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fan-out-fan-in">Fan out / Fan in</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#passing-state">Passing State</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#accessing-the-context">Accessing the Context</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#error-handling">Error Handling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#setting-initial-parameters">Setting Initial Parameters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#orchestrator-tasks">Orchestrator Tasks</a><ul>
@@ -191,16 +190,6 @@ declare so in <em>&#64;tasks.bind()</em>:</p>
 </pre></div>
 </div>
 </section>
-<section id="accessing-the-context">
-<h2>Accessing the Context<a class="headerlink" href="#accessing-the-context" title="Permalink to this heading"></a></h2>
-<p>A wrapper around the Flink context can also be accessed by declaring so in <em>&#64;tasks.bind()</em>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">with_context</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">task_using_context</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
-    <span class="n">caller</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">get_caller_id</span><span class="p">()</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">caller</span><span class="si">}</span><span class="s1">, you called me&#39;</span>
-</pre></div>
-</div>
-</section>
 <section id="error-handling">
 <h2>Error Handling<a class="headerlink" href="#error-handling" title="Permalink to this heading"></a></h2>
 <p>Any task within a pipeline may throw exceptions and if not caught by a retry these will terminate the pipeline.
@@ -256,8 +245,7 @@ To reduce message size this parameter can be set on the pipeline using the ‘wi
 </section>
 <section id="orchestrator-tasks">
 <h2>Orchestrator Tasks<a class="headerlink" href="#orchestrator-tasks" title="Permalink to this heading"></a></h2>
-<p>As well as pipelines constructed client side, tasks may also return their own pipelines.  Orchestrator tasks support the following
-patterns:</p>
+<p>Tasks may also return pipelines allowing for dynamic workflows with features such as:</p>
 <section id="composition">
 <h3>Composition<a class="headerlink" href="#composition" title="Permalink to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
@@ -312,32 +300,8 @@ patterns:</p>
 <h2>Inline Pipelines<a class="headerlink" href="#inline-pipelines" title="Permalink to this heading"></a></h2>
 <p>State is isolated by default between a parent pipeline and any child pipelines that it creates.  This
 is done on the assumption that a pipeline that calls a task that itself creates a pipeline would rather
-treat that child pipeline as a so called black box implementation of the task that parent is called and hence
-the states should be kept independent.</p>
-<p>This behaviour can be overriden by declaring the child pipeline as ‘inline’:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">with_state</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">is_fruitful</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">setup_state</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">initial</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">initial</span>
-
-<span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">with_state</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">return_state</span><span class="p">(</span><span class="n">state</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">state</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;The state is </span><span class="si">{</span><span class="n">state</span><span class="si">}</span><span class="s1">&#39;</span>
-
-<span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
-<span class="k">def</span> <span class="nf">create_child_pipeline</span><span class="p">():</span>
-    <span class="k">return</span> <span class="n">return_state</span><span class="o">.</span><span class="n">send</span><span class="p">()</span>
-
-<span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
-<span class="k">def</span> <span class="nf">create_inline_child_pipeline</span><span class="p">():</span>
-    <span class="k">return</span> <span class="n">return_state</span><span class="o">.</span><span class="n">send</span><span class="p">()</span><span class="o">.</span><span class="n">inline</span><span class="p">()</span>
-
-<span class="n">pipeline</span> <span class="o">=</span> <span class="n">setup_state</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;initial state&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">create_child_pipeline</span><span class="p">)</span>
-<span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">flink</span><span class="o">.</span><span class="n">submit_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>  <span class="c1"># result will be None</span>
-
-<span class="n">pipeline</span> <span class="o">=</span> <span class="n">setup_state</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;initial state&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">create_inline_child_pipeline</span><span class="p">)</span>
-<span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">flink</span><span class="o">.</span><span class="n">submit_async</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>  <span class="c1"># result will be &#39;The state is initial state&#39;</span>
-</pre></div>
-</div>
+treat that child pipeline as a so called black box implementation and hence the states should be kept independent.</p>
+<p>This behaviour can be overriden by declaring the child pipeline as ‘inline’.</p>
 </section>
 </section>
 

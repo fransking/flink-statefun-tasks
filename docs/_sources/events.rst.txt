@@ -1,13 +1,15 @@
 Events
 ======
 
-Flink Tasks raises events at various points during the execution of a task.  These events can be used to track task run time, state size etc.
-Execution flow can in some circumstances be interrupted by raising a TasksException in the event handler.  For example in on_task_finished an exception can be raised if the size of 
-the result is greater than some limit in which case the caller will recieve that error instead.  
+Flink Tasks raises events at various points during the execution of a task. 
+
+
+Worker Events
+-------------
 
 
 On Task Received
-----------------
+^^^^^^^^^^^^^^^^
 
 Raised when a task is received but before it is recorded in state or begins to execute.
 
@@ -19,7 +21,7 @@ Raised when a task is received but before it is recorded in state or begins to e
 
 
 On Task Started
----------------
+^^^^^^^^^^^^^^^
 
 Raised when a task begins to execute.
 
@@ -31,7 +33,7 @@ Raised when a task begins to execute.
 
 
 On Task Retry
--------------
+^^^^^^^^^^^^^
 
 Raised if a task fails and is going to be retried due to a RetryPolicy.  The retry_count is the number of times the task has retried including this one.
 
@@ -43,7 +45,7 @@ Raised if a task fails and is going to be retried due to a RetryPolicy.  The ret
 
 
 On Task Finished
-----------------
+^^^^^^^^^^^^^^^^
 
 Raised when a task finishes with either a task_result or a task_exception.  If the task has returned a pipeline is_pipeline will be True.
 
@@ -55,7 +57,7 @@ Raised when a task finishes with either a task_result or a task_exception.  If t
 
 
 On Emit Result
---------------
+^^^^^^^^^^^^^^
 
 Raised when task or pipeline is finished and the result is about to be emitted but before it is recorded in state.
 
@@ -66,3 +68,39 @@ TasksExceptions raised by this event handler will be ignored.
     @tasks.events.on_emit_result
     def on_emit_result(context, task_result=None, task_exception=None):
         pass
+
+
+Pipeline Events
+---------------
+
+The `pipeline <https://github.com/fransking/flink-statefun-tasks-embedded>`_ function also emits events to egress as the pipeline progresses.
+
+.. code-block:: protobuf
+
+    message PipelineCreated {
+        string caller_id = 1;
+        string caller_address = 2;
+        PipelineInfo pipeline = 3;
+    }
+
+    message PipelineStatusChanged {
+        TaskStatus status = 1;
+    }
+
+    message PipelineTasksSkipped {
+        repeated TaskInfo tasks = 1;
+    }
+
+    message Event {
+        string pipeline_id = 1;
+        string pipeline_address = 2;
+        string root_pipeline_id = 3;
+        string root_pipeline_address = 4;
+
+        oneof event {
+            PipelineCreated pipeline_created = 5;
+            PipelineStatusChanged pipeline_status_changed = 6;
+            PipelineTasksSkipped pipeline_tasks_skipped = 7;
+        }
+    }
+

@@ -11,6 +11,8 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/sphinx_highlight.js"></script>
@@ -40,10 +42,8 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">About</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Concepts</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tasks_vs_functions.html">Tasks vs Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tasks.html">Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pipelines.html">Pipelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../actions.html">Actions</a></li>
@@ -186,7 +186,7 @@
 <td><p>Own worker_name in the form of context.address.typename</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.safe_send_egress_message" title="statefun_tasks.TaskContext.safe_send_egress_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">safe_send_egress_message</span></code></a>(topic, value, ...)</p></td>
-<td><p>Attempts to send a message to an egress topic but if this fails due to a MessageSizeExceeded exception sends the value created by the error error_function instead</p></td>
+<td><p>Attempts to send a message to an egress topic</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#statefun_tasks.TaskContext.send_egress_message" title="statefun_tasks.TaskContext.send_egress_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_egress_message</span></code></a>(topic, value)</p></td>
 <td><p>Sends a message to an egress topic</p></td>
@@ -402,9 +402,13 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.TaskContext.get_root_pipeline_id">
 <span class="sig-name descname"><span class="pre">get_root_pipeline_id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.get_root_pipeline_id" title="Permalink to this definition"></a></dt>
-<dd><p>ID of the top most pipeline if this task is called as part of a pipeline else None.  This will be different from
-get_pipeline_id() if the pipeline is nested
-:return: root pipeline ID</p>
+<dd><p>ID of the top most pipeline if this task is called as part of a pipeline else None.</p>
+<p>This will be different from get_pipeline_id() if the pipeline is nested</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>root pipeline ID</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -432,9 +436,8 @@ get_pipeline_id() if the pipeline is nested
 <dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.TaskContext.safe_send_egress_message">
 <span class="sig-name descname"><span class="pre">safe_send_egress_message</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_function</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.TaskContext.safe_send_egress_message" title="Permalink to this definition"></a></dt>
-<dd><p>Attempts to send a message to an egress topic but if this fails
-due to a MessageSizeExceeded exception sends the value created by
-the error error_function instead</p>
+<dd><p>Attempts to send a message to an egress topic</p>
+<p>If this fails due to a MessageSizeExceeded exception sends the value created by the error error_function instead</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -503,8 +506,8 @@ the error error_function instead</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="statefun_tasks.TaskContext.task_uid">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">task_uid</span></span><a class="headerlink" href="#statefun_tasks.TaskContext.task_uid" title="Permalink to this definition"></a></dt>
-<dd><p>The unique ID of this task.  Not to be confused with context.get_task_id() which returns the Flink
-stateful identity of this task</p>
+<dd><p>The unique ID of this task.</p>
+<p>Not to be confused with context.get_task_id() which returns the Flink statefun identity of this task</p>
 </dd></dl>
 
 <dl class="py method">
