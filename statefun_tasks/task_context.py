@@ -1,4 +1,4 @@
-from statefun_tasks.serialisation import DefaultSerialiser
+from statefun_tasks.default_serialiser import DefaultSerialiser
 from statefun_tasks.type_helpers import flink_value_type_for
 from statefun_tasks.messages_pb2 import TaskState, TaskRequest
 from statefun_tasks.protobuf import pack_any
@@ -49,8 +49,9 @@ class TaskContext(object):
     @property
     def task_uid(self):
         """
-        The unique ID of this task.  Not to be confused with context.get_task_id() which returns the Flink
-        stateful identity of this task
+        The unique ID of this task.  
+        
+        Not to be confused with context.get_task_id() which returns the Flink statefun identity of this task
         """
         return self._task_uid
 
@@ -84,8 +85,10 @@ class TaskContext(object):
 
     def get_root_pipeline_id(self):
         """
-        ID of the top most pipeline if this task is called as part of a pipeline else None.  This will be different from 
-        get_pipeline_id() if the pipeline is nested
+        ID of the top most pipeline if this task is called as part of a pipeline else None.  
+        
+        This will be different from get_pipeline_id() if the pipeline is nested
+
         :return: root pipeline ID
         """
         return self._task_meta.get('root_pipeline_id', None)
@@ -289,9 +292,9 @@ class TaskContext(object):
 
     def safe_send_egress_message(self, topic, value, error_function: Callable[[Exception], Any]):
         """
-        Attempts to send a message to an egress topic but if this fails
-        due to a MessageSizeExceeded exception sends the value created by 
-        the error error_function instead
+        Attempts to send a message to an egress topic 
+        
+        If this fails due to a MessageSizeExceeded exception sends the value created by the error error_function instead
 
         :param topic: the topic name
         :param value: the message to send

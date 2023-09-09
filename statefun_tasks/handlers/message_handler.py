@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from statefun_tasks.context import TaskContext
-from statefun_tasks.serialisation import DefaultSerialiser
+from statefun_tasks.task_context import TaskContext
+from statefun_tasks.default_serialiser import DefaultSerialiser
 from statefun import Message
 
 

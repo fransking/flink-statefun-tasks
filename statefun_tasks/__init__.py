@@ -1,9 +1,9 @@
 # tasks API functions
-from statefun_tasks.task_builder import FlinkTasks
+from statefun_tasks.flink_tasks import FlinkTasks
 
 
 # context
-from statefun_tasks.context import TaskContext
+from statefun_tasks.task_context import TaskContext
 
 
 # pipeline builder
@@ -12,7 +12,7 @@ from statefun_tasks.pipeline_builder import PipelineBuilder, in_parallel
 
 # serialisation
 from statefun_tasks.protobuf import pack_any, unpack_any
-from statefun_tasks.serialisation import DefaultSerialiser
+from statefun_tasks.default_serialiser import DefaultSerialiser
 
 
 # types
