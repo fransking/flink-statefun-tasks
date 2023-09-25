@@ -6,7 +6,7 @@ from statefun_tasks.messages_pb2 import TaskResult, TaskException, TaskRequest, 
 from statefun_tasks.type_helpers import _create_task_result, _create_task_exception
 from statefun_tasks.task_context import TaskContext
 from statefun_tasks.utils import _task_type_for, _unpack_single_tuple_args, _gen_id
-from statefun_tasks.tasks import FlinkTask
+from statefun_tasks.flink_task import FlinkTask
 from statefun_tasks.handlers import TaskRequestHandler, TaskActionHandler
 from statefun_tasks.events import EventHandlers
 
