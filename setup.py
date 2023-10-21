@@ -4,13 +4,14 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 install_requires = [
-    'apache-flink-statefun>=3.2.0',
-    'kafka-python'
+    'apache-flink-statefun>=3.3.0',
+    'kafka-python',
+    'protobuf==3.20.3'
 ]
 
 setuptools.setup(
     name="statefun-tasks",
-    version="1.1.2",
+    version="1.2.0",
     author="Frans King & Luke Ashworth",
     author_email="frans.king@sbbsystems.com",
     description="Tasks API for Stateful Functions on Flink",
