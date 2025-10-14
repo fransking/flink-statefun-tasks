@@ -11,7 +11,7 @@ install_requires = [
 
 setuptools.setup(
     name="statefun-tasks",
-    version="1.2.2",
+    version="1.2.3",
     author="Frans King & Luke Ashworth",
     author_email="frans.king@sbbsystems.com",
     description="Tasks API for Stateful Functions on Flink",
@@ -25,5 +25,8 @@ setuptools.setup(
     python_requires='>=3.10',
     classifiers=[
         'License :: OSI Approved :: Apache Software License',
-        'Programming Language :: Python :: 3.10']
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12'
+    ]
 )
