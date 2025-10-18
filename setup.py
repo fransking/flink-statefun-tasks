@@ -4,7 +4,6 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 install_requires = [
-    'apache-flink-statefun>=3.3.0',
     'kafka-python',
     'protobuf'
 ]

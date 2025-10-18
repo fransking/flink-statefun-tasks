@@ -10,7 +10,7 @@ from statefun_tasks.flink_task import FlinkTask
 from statefun_tasks.handlers import TaskRequestHandler, TaskActionHandler
 from statefun_tasks.events import EventHandlers
 
-from statefun import ValueSpec, Context, Message
+from statefun_tasks.core.statefun import ValueSpec, Context, Message
 from datetime import timedelta
 from functools import partial
 import logging

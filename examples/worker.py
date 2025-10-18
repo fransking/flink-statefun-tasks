@@ -1,5 +1,5 @@
 
-from statefun import StatefulFunctions, RequestReplyHandler
+from statefun_tasks.core.statefun import StatefulFunctions, RequestReplyHandler
 import logging
 import traceback
 
