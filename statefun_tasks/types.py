@@ -2,7 +2,7 @@ from statefun_tasks.utils import _type_name, _gen_id
 from statefun_tasks.messages_pb2 import (TaskState, TaskRequest, TaskResult, TaskException, TaskActionRequest, 
                                          TaskActionResult, TaskActionException, TaskEntry, GroupEntry, PipelineEntry, TaskRetryPolicy, 
                                          Pipeline, ChildPipeline)
-from statefun import make_protobuf_type
+from statefun_tasks.core.statefun import make_protobuf_type
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import timedelta

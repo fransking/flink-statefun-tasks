@@ -1,5 +1,5 @@
 import unittest
-from statefun.request_reply_pb2 import Address
+from statefun_tasks.core.statefun.request_reply_pb2 import Address
 from statefun_tasks.types import Task, Group
 from statefun_tasks import DefaultSerialiser, RetryPolicy
 

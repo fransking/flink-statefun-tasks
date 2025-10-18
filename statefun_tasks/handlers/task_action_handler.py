@@ -3,7 +3,7 @@ from statefun_tasks.handlers import MessageHandler
 from statefun_tasks.types import TASK_ACTION_REQUEST_TYPE
 from statefun_tasks.messages_pb2 import TaskAction, TaskStatus
 from statefun_tasks.type_helpers import _create_task_result, _create_task_exception
-from statefun import Message
+from statefun_tasks.core.statefun import Message
 
 
 class TaskActionHandler(MessageHandler):

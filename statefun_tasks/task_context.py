@@ -4,7 +4,7 @@ from statefun_tasks.messages_pb2 import TaskState, TaskRequest
 from statefun_tasks.protobuf import pack_any
 from statefun_tasks.types import MessageSizeExceeded
 
-from statefun import kafka_egress_message, message_builder, Context, SdkAddress
+from statefun_tasks.core.statefun import kafka_egress_message, message_builder, Context, SdkAddress
 from datetime import timedelta
 from typing import Callable, Any
 import logging

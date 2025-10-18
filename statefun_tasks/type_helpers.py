@@ -3,7 +3,7 @@ from statefun_tasks.utils import _type_name
 from statefun_tasks.protobuf import pack_any
 from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, TaskActionRequest, TaskActionResult, TaskActionException
 
-from statefun import Type
+from statefun_tasks.core.statefun import Type
 import traceback as tb
 
 

@@ -12,7 +12,6 @@ import inspect
 import asyncio
 
 
-
 class FlinkTask(object):
     def __init__(self, fun, serialiser, events:EventHandlers, retry_policy=None, with_state=False, is_fruitful=True, with_context=False, **kwargs):
         self._fun = fun
