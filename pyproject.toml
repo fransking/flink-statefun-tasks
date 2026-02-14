@@ -10,6 +10,7 @@ description = "Tasks API for Stateful Functions on Flink"
 readme = "README.md"
 requires-python = ">=3.10"
 license-files = ["LICENSE"]
+license = "	Apache-2.0"
 authors = [
   { name = "Frans King & Luke Ashworth", email = "frans.king@sbbsystems.com" }
 ]
@@ -18,7 +19,6 @@ dependencies = [
   "protobuf"
 ]
 classifiers = [
-  "Apache 2.0",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
