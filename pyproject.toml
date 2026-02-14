@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "statefun-tasks"
-version = "3.4.0.dev1"
+version = "3.4.0"
 description = "Tasks API for Stateful Functions on Flink"
 readme = "README.md"
 requires-python = ">=3.10"
