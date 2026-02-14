@@ -1,0 +1,34 @@
+
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "statefun-tasks"
+version = "3.4.0.dev1"
+description = "Tasks API for Stateful Functions on Flink"
+readme = "README.md"
+requires-python = ">=3.10"
+license-files = ["LICENSE"]
+authors = [
+  { name = "Frans King & Luke Ashworth", email = "frans.king@sbbsystems.com" }
+]
+dependencies = [
+  "kafka-python",
+  "protobuf"
+]
+classifiers = [
+  "Apache 2.0",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Development Status :: 5 - Production/Stable"
+]
+
+[project.urls]
+Homepage = "https://fransking.github.io/flink-statefun-tasks"
+Source = "https://github.com/fransking/flink-statefun-tasks"
+Issues = "https://github.com/fransking/flink-statefun-tasks/issues"
+
+[tool.setuptools.packages]
+find = { include = ["statefun_tasks", "statefun_tasks.*"] }
