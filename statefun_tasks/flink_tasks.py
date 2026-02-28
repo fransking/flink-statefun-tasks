@@ -218,8 +218,7 @@ class FlinkTasks(object):
                         _log.error(f'Error invoking {task_context} - {ex}')
                         await self.fail(task_context, task_input, ex)
                         
-                    finally:
-                        return
+                    return
             
             _log.error(f'Unsupported message type {message.typed_value.typename}')
 
