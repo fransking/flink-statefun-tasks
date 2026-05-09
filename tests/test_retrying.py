@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock
 from statefun_tasks import FlinkTasks, RetryPolicy
-from statefun_tasks.utils import _task_type_for
+from statefun_tasks.utils import task_type_for
 from statefun_tasks.messages_pb2 import TaskSpecificState, TaskRetryPolicy
 from tests.utils import TaskRunner
 
@@ -37,7 +37,7 @@ class RetryTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(retry_request.id, task_id)
         self.assertEqual(retry_request.uid, task_uid)
-        self.assertEqual(retry_request.type, _task_type_for(_fail))
+        self.assertEqual(retry_request.type, task_type_for(_fail))
 
     async def test_task_fails_if_the_failure_count_exceeds_max_retries(self):
         with self.assertRaises(ValueError):

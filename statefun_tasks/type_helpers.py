@@ -1,5 +1,5 @@
-from statefun_tasks.types import _VALUE_TYPE_MAP
-from statefun_tasks.utils import _type_name
+from statefun_tasks.types import VALUE_TYPE_MAP
+from statefun_tasks.utils import type_name
 from statefun_tasks.protobuf import pack_any
 from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, TaskException, TaskActionRequest, TaskActionResult, TaskActionException
 
@@ -9,7 +9,7 @@ import traceback as tb
 
 def flink_value_type_for(proto):
     proto_type = type(proto)
-    value_type = _VALUE_TYPE_MAP.get(proto_type, None)
+    value_type = VALUE_TYPE_MAP.get(proto_type, None)
 
     if value_type is not None:
         return value_type
@@ -20,19 +20,19 @@ def flink_value_type_for(proto):
 def add_flink_value_type_for(proto, value_type: Type):
     proto_type = type(proto)
 
-    if proto_type in _VALUE_TYPE_MAP:
+    if proto_type in VALUE_TYPE_MAP:
         ValueError(f'{proto_type} already exists')
 
-    _VALUE_TYPE_MAP[proto_type] = value_type
+    VALUE_TYPE_MAP[proto_type] = value_type
 
 
-def _create_task_exception(task_input, ex, state=None):
+def create_task_exception(task_input, ex, state=None):
     if isinstance(task_input, TaskActionRequest):
         return TaskActionException(
             id=task_input.id,
             uid=task_input.uid,
             action = task_input.action,
-            exception_type=_type_name(ex),
+            exception_type=type_name(ex),
             exception_message=str(ex),
             stacktrace=tb.format_exc())
     else:
@@ -40,7 +40,7 @@ def _create_task_exception(task_input, ex, state=None):
             id=task_input.id,
             uid=task_input.uid,
             type=f'{task_input.type}.error',
-            exception_type=_type_name(ex),
+            exception_type=type_name(ex),
             exception_message=str(ex),
             stacktrace=tb.format_exc())
 
@@ -53,7 +53,7 @@ def _create_task_exception(task_input, ex, state=None):
         return task_exception
 
 
-def _create_task_result(task_input, result=None, state=None):
+def create_task_result(task_input, result=None, state=None):
     if isinstance(task_input, TaskActionRequest):
         task_result = TaskActionResult(
             id=task_input.id,

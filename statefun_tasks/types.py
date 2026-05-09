@@ -1,4 +1,4 @@
-from statefun_tasks.utils import _type_name, _gen_id
+from statefun_tasks.utils import type_name, gen_id
 from statefun_tasks.messages_pb2 import (TaskState, TaskRequest, TaskResult, TaskException, TaskActionRequest, 
                                          TaskActionResult, TaskActionException, TaskEntry, GroupEntry, PipelineEntry, TaskRetryPolicy, 
                                          Pipeline, ChildPipeline)
@@ -19,7 +19,7 @@ TASK_ACTION_EXCEPTION_TYPE = make_protobuf_type(TaskActionException, namespace='
 CHILD_PIPELINE_TYPE = make_protobuf_type(ChildPipeline, namespace='io.statefun_tasks.types')
 
 
-_VALUE_TYPE_MAP = {
+VALUE_TYPE_MAP = {
     TaskState: TASK_STATE_TYPE,
     TaskRequest: TASK_REQUEST_TYPE,
     TaskResult: TASK_RESULT_TYPE,
@@ -67,7 +67,7 @@ class Task:
             retry_policy=retry_policy,
             display_name=display_name,
             is_wait=is_wait,
-            uid=uid if uid is not None else _gen_id(),
+            uid=uid if uid is not None else gen_id(),
             is_exceptionally = is_exceptionally
         )
         return Task(proto, task_args, task_kwargs)
@@ -320,7 +320,7 @@ class RetryPolicy:
 
     def to_proto(self):
         return TaskRetryPolicy(
-            retry_for=[_type_name(ex) for ex in self.retry_for],
+            retry_for=[type_name(ex) for ex in self.retry_for],
             max_retries=self.max_retries,
             delay_ms=self.delay.total_seconds() * 1000,
             exponential_back_off=self.exponential_back_off)

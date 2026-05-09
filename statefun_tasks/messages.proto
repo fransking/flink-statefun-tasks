@@ -25,6 +25,32 @@ message TupleOfAny {
     repeated google.protobuf.Any items = 1;
 }
 
+message MapOfStringToValue {
+    map <string, Value> items = 1;
+}
+
+message ArrayOfValue {
+    repeated Value items = 1;
+}
+
+message TupleOfValue {
+    repeated Value items = 1;
+}
+
+message Value {
+    oneof kind {
+        NoneValue none_value = 1;
+        double double_value = 2;
+        int32 int_value = 3;
+        bool bool_value = 4;
+        string string_value = 5;
+        bytes bytes_value = 6;
+        MapOfStringToValue map_value = 7;
+        ArrayOfValue array_value = 8;
+        TupleOfValue tuple_value = 9;
+    }
+}
+
 message TaskEntry {
     string task_id = 1;
     string task_type = 2;

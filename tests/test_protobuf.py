@@ -4,14 +4,12 @@ from google.protobuf.message import Message
 from google.protobuf.wrappers_pb2 import DoubleValue, StringValue
 from statefun_tasks.core.statefun.request_reply_pb2 import Address
 from statefun_tasks import TaskRequest
-from statefun_tasks.protobuf import _convert_from_proto, _convert_to_proto, ScalarTypeProtobufConverter, \
-    _generate_default_converters, ObjectProtobufConverter
+from statefun_tasks.protobuf import convert_from_proto, convert_to_proto, ScalarTypeProtobufConverter, \
+    DEFAULT_CONVERTERS, ObjectProtobufConverter
 from tests.test_messages_pb2 import MyType
 
 
 class ProtobufTests(unittest.TestCase):
-    def setUp(self) -> None:
-        self.default_converters = _generate_default_converters()
 
     def test_copy_statefun_address_into_task_request(self):
         address = Address(namespace="tests", type="test", id="id")
@@ -35,8 +33,8 @@ class ProtobufTests(unittest.TestCase):
             'proto': Address(namespace="tests", type="test", id="id")
         }
 
-        proto = _convert_to_proto(data, self.default_converters)
-        reconsituted_data = _convert_from_proto(proto, [Address], self.default_converters)
+        proto = convert_to_proto(data, DEFAULT_CONVERTERS)
+        reconsituted_data = convert_from_proto(proto, [Address], DEFAULT_CONVERTERS)
 
         self.assertEqual(reconsituted_data['int'], 123)
         self.assertEqual(reconsituted_data['float'], 1.23)
@@ -58,8 +56,8 @@ class ProtobufTests(unittest.TestCase):
             '123'
         ]
 
-        proto = _convert_to_proto(data, _generate_default_converters())
-        reconsituted_data = _convert_from_proto(proto, [Address], self.default_converters)
+        proto = convert_to_proto(data, DEFAULT_CONVERTERS)
+        reconsituted_data = convert_from_proto(proto, [Address], DEFAULT_CONVERTERS)
 
         self.assertTrue(isinstance(reconsituted_data[0], Address))
         self.assertEqual(reconsituted_data[0].namespace, 'tests')
@@ -125,7 +123,7 @@ class CustomProtobufConverterTests(unittest.TestCase):
     def test_converting_without_suitable_converter(self):
         obj = self.MyType('my_val')
         try:
-            _convert_to_proto(obj, [])
+            convert_to_proto(obj, [])
         except ValueError as e:
             self.assertIn('Cannot convert value of type', str(e))
         else:
@@ -134,8 +132,8 @@ class CustomProtobufConverterTests(unittest.TestCase):
     def test_to_and_from_protobuf(self):
         obj = self.MyType('my_val')
         converters = [self.MyConverter()]
-        proto_message = _convert_to_proto(obj, converters)
-        python_val = _convert_from_proto(proto_message, [], converters)
+        proto_message = convert_to_proto(obj, converters)
+        python_val = convert_from_proto(proto_message, [], converters)
         self.assertIsInstance(proto_message, MyType)
         self.assertIsInstance(python_val, self.MyType)
         self.assertEqual(python_val.string_field, 'my_val')

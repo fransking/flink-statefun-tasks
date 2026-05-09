@@ -3,9 +3,9 @@ from statefun_tasks.pipeline_builder import PipelineBuilder
 from statefun_tasks.types import (Task, RetryPolicy, TASK_STATE_TYPE, TASK_REQUEST_TYPE, 
                                   TASK_RESULT_TYPE, TASK_EXCEPTION_TYPE)
 from statefun_tasks.messages_pb2 import TaskResult, TaskException, TaskRequest, Address
-from statefun_tasks.type_helpers import _create_task_result, _create_task_exception
+from statefun_tasks.type_helpers import create_task_result, create_task_exception
 from statefun_tasks.task_context import TaskContext
-from statefun_tasks.utils import _task_type_for, _unpack_single_tuple_args, _gen_id
+from statefun_tasks.utils import task_type_for, unpack_single_tuple_args, gen_id
 from statefun_tasks.flink_task import FlinkTask
 from statefun_tasks.handlers import TaskRequestHandler, TaskActionHandler
 from statefun_tasks.events import EventHandlers
@@ -91,10 +91,10 @@ class FlinkTasks(object):
                 parameters['is_fruitful'] = False
             
             module_name = parameters.get('module_name', None)
-            task_type = _task_type_for(function, module_name)
+            task_type = task_type_for(function, module_name)
 
-            task_id = parameters.pop('task_id') or _gen_id()
-            args = _unpack_single_tuple_args(args)
+            task_id = parameters.pop('task_id') or gen_id()
+            args = unpack_single_tuple_args(args)
 
             return Task.from_fields(task_id, task_type, args, kwargs, is_finally=is_finally, is_exceptionally=is_exceptionally, **parameters)
 
@@ -178,7 +178,7 @@ class FlinkTasks(object):
         if fun is None:
             raise ValueError("function instance must be provided")
 
-        fun.type_name = _task_type_for(fun, module_name)
+        fun.type_name = task_type_for(fun, module_name)
         self._bindings[fun.type_name] = FlinkTask(wrapper or fun, self._serialiser, self.events, **params)
 
 
@@ -281,7 +281,7 @@ class FlinkTasks(object):
         :param optional delay: the delay before Flink sends the result
         :param optional cancellation_token: a cancellation token to associate with this message
         """
-        task_result = _create_task_result(task_request)
+        task_result = create_task_result(task_request)
 
         if state == Ellipsis:  # default value since None is perfectly valid state
             state = task_request.state
@@ -300,7 +300,7 @@ class FlinkTasks(object):
         :param optional delay: the delay before Flink sends the result
         :param optional cancellation_token: a cancellation token to associate with this message
         """
-        task_exception = _create_task_exception(task_input, ex)
+        task_exception = create_task_exception(task_input, ex)
         await self.emit_result(context, task_input, task_exception, delay, cancellation_token)
 
     async def emit_result(self, context, task_input, task_result, delay: timedelta=None, cancellation_token: str = None):
@@ -321,7 +321,7 @@ class FlinkTasks(object):
             
         # send a message to egress if reply_topic was specified
         if task_input.HasField('reply_topic'):
-            context.safe_send_egress_message(task_input.reply_topic, task_result, partial(_create_task_exception, task_input))
+            context.safe_send_egress_message(task_input.reply_topic, task_result, partial(create_task_exception, task_input))
 
         # or call back to a particular flink function if reply_address was specified
         elif task_input.HasField('reply_address'):
