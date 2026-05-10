@@ -1,4 +1,4 @@
-from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, ArgsAndKwargs
+from statefun_tasks.messages_pb2 import TaskRequest, TaskResult, ArgsAndKwargs, ValueArgsAndKwargs
 from statefun_tasks.protobuf import pack_any, convert_from_proto, convert_to_proto, ObjectProtobufConverter, DEFAULT_CONVERTERS
 from statefun_tasks.utils import is_tuple
 from google.protobuf.any_pb2 import Any
@@ -11,12 +11,14 @@ class DefaultSerialiser:
     Default protobuf serialiser for Flink Tasks
     
     :param known_proto_types: an array of known protobuf types that will not be packed inside Any
-    :param protobuf_converters: an array of converters used to transform Python objects to and from protobuf. Default converters for bool, int, float, str, bytes and None are always prepended.
+    :param protobuf_converters: an array of custom converters used to transform Python objects to and from protobuf.
+    :param use_legacy_types: whether to use legacy types for serialization. Legacy types are less efficient at serialising nested structures.
     """
     def __init__(
             self,
             known_proto_types: Iterable[Type[Message]] = None,
-            protobuf_converters: Iterable[ObjectProtobufConverter] = None):
+            protobuf_converters: Iterable[ObjectProtobufConverter] = None,
+            use_legacy_types: bool = False):
 
         known_proto_types = known_proto_types or []
         # prepend default converters
@@ -24,6 +26,7 @@ class DefaultSerialiser:
         
         self._known_proto_types = set(known_proto_types)
         self._protobuf_converters = dict.fromkeys(protobuf_converters)
+        self._use_legacy_types = use_legacy_types
 
     def register_proto_types(self, proto_types: Iterable[Type[Message]]):
         self._known_proto_types.update(proto_types)
@@ -38,7 +41,7 @@ class DefaultSerialiser:
         :param item: the item to convert
         :return: the protobuf message possibly packed in an Any
         """
-        return convert_to_proto(item, self._protobuf_converters)
+        return convert_to_proto(item, self._protobuf_converters, self._use_legacy_types)
 
     def from_proto(self, proto: Message, default=None):
         """
@@ -57,7 +60,8 @@ class DefaultSerialiser:
         Serialises Python args and kwargs into protobuf
         
         If there is a single arg and no kwargs and the arg is already a protobuf it returns
-        that instance packed inside an Any.  Otherwise it returns an ArgsAndKwargs packed in an Any.
+        that instance packed inside an Any.  Otherwise it returns an ArgsAndKwargs (legacy) or ValueArgsAndKwargs 
+        packed in an Any.
 
         :param args: the Python args
         :param kwargs: the Python kwargs
@@ -72,9 +76,15 @@ class DefaultSerialiser:
             request = args
         else:
             args = args if is_tuple(args) else (args,)
-            request = ArgsAndKwargs()
-            request.args.CopyFrom(convert_to_proto(args, self._protobuf_converters))
-            request.kwargs.CopyFrom(convert_to_proto(kwargs, self._protobuf_converters))
+
+            if self._use_legacy_types:
+                request = ArgsAndKwargs()
+                request.args.CopyFrom(self.to_proto(args))
+                request.kwargs.CopyFrom(self.to_proto(kwargs))
+            else:
+                request = ValueArgsAndKwargs()
+                request.args.CopyFrom(self.to_proto(args))
+                request.kwargs.CopyFrom(self.to_proto(kwargs))
 
         return pack_any(request)
 
@@ -87,7 +97,7 @@ class DefaultSerialiser:
         """
         request = self.from_proto(request)
 
-        if isinstance(request, ArgsAndKwargs):
+        if isinstance(request, (ArgsAndKwargs, ValueArgsAndKwargs)):
             args = self.from_proto(request.args)
             kwargs = self.from_proto(request.kwargs)
         else:

@@ -3,27 +3,34 @@ from abc import ABC, abstractmethod
 from statefun_tasks.utils import is_tuple
 from statefun_tasks.messages_pb2 import (MapOfStringToAny, ArrayOfAny, TupleOfAny, TaskEntry, GroupEntry, NoneValue,
                                          TaskRetryPolicy, TaskRequest, TaskResult, TaskException, TaskState, 
-                                         Pipeline, PipelineEntry, Address,ArgsAndKwargs, TaskResultOrException)
+                                         Pipeline, PipelineEntry, Address,ArgsAndKwargs, TaskResultOrException,
+                                         MapOfStringToValue, ArrayOfValue, TupleOfValue, Value, ValueArgsAndKwargs)
 from google.protobuf.wrappers_pb2 import DoubleValue, Int64Value, BoolValue, StringValue, BytesValue
 from google.protobuf.any_pb2 import Any
 from google.protobuf.message import Message
 
-from typing import Union, TypeVar, Generic, Iterable
+from typing import Type, Union, TypeVar, Generic, Iterable
 
 
 _FRAMEWORK_KNOWN_PROTO_TYPES = [
-    # wrappers
+    # legacy wrappers
     DoubleValue,
     Int64Value,
     BoolValue,
     StringValue,
     BytesValue,
+
+    # used to represent python None
     NoneValue,
 
     # flink task types
     MapOfStringToAny,
     TupleOfAny,
     ArrayOfAny,
+    MapOfStringToValue,
+    ArrayOfValue,
+    TupleOfValue,
+    Value,
     TaskEntry,
     GroupEntry,
     TaskRetryPolicy,
@@ -35,6 +42,7 @@ _FRAMEWORK_KNOWN_PROTO_TYPES = [
     PipelineEntry,
     Address,
     ArgsAndKwargs,
+    ValueArgsAndKwargs,
     TaskResultOrException
 ]
 
@@ -127,7 +135,7 @@ def unpack_any(value, known_proto_types):
     return value
 
 
-def wrap_value(v: object, converters: Iterable[ObjectProtobufConverter]) -> Message:
+def wrap_value(v: object, converters: Iterable[ObjectProtobufConverter], use_legacy_types: bool = False) -> Message:
     if isinstance(v, Message):
         # already protobuf so no need to attempt conversion
         return v
@@ -137,7 +145,10 @@ def wrap_value(v: object, converters: Iterable[ObjectProtobufConverter]) -> Mess
         raise ValueError(
             f'Cannot convert value of type {type(v)} to protobuf. '
             'Try converting to protobuf first, or provide a compatible converter.')
-    return compatible_converter.convert_to_proto(v)
+    
+    should_wrap = use_legacy_types or not isinstance(compatible_converter, ScalarTypeProtobufConverter)
+    
+    return compatible_converter.convert_to_proto(v) if should_wrap else pack_value(v, converters)
 
 
 def unwrap_value(v: Message, converters: Iterable[ObjectProtobufConverter]):
@@ -153,54 +164,160 @@ def is_wrapped_known_proto_type(value, known_proto_types):
         (value.Is(proto_type.DESCRIPTOR) for proto_type in itertools.chain(_FRAMEWORK_KNOWN_PROTO_TYPES, known_proto_types)))
 
 
-def convert_to_proto(data, protobuf_converters: Iterable[ObjectProtobufConverter]) \
-        -> Union[MapOfStringToAny, ArrayOfAny, TupleOfAny, Message]:
-    def convert(obj):
-        if isinstance(obj, dict):
-            proto = MapOfStringToAny()
+def pack_value(value, converters: Iterable[ObjectProtobufConverter]) -> Value:
+    if isinstance(value, Value):
+        return value
 
-            for k, v in obj.items():
-                v = pack_any(convert(v))
-                proto.items[k].CopyFrom(v)
+    proto = Value()
+    
+    if value is None:
+        proto.none_value.CopyFrom(NoneValue())
+    elif isinstance(value, bool):
+        proto.bool_value = value
+    elif isinstance(value, int):
+        proto.int_value = value
+    elif isinstance(value, float):
+        proto.double_value = value
+    elif isinstance(value, str):
+        proto.string_value = value
+    elif isinstance(value, bytes):
+        proto.bytes_value = value
+    elif isinstance(value, MapOfStringToValue):
+        proto.map_value.CopyFrom(value)
+    elif isinstance(value, ArrayOfValue):
+        proto.array_value.CopyFrom(value)
+    elif isinstance(value, TupleOfValue):
+        proto.tuple_value.CopyFrom(value)
+    elif isinstance(value, Any):
+        proto.any_value.CopyFrom(value)
+    else:
+        proto.any_value.CopyFrom(pack_any(wrap_value(value, converters)))
 
-            return proto
+    return proto
 
-        elif is_tuple(obj):
-            proto = TupleOfAny()
 
-            for v in obj:
-                v = pack_any(convert(v))
-                proto.items.append(v)
+def unpack_value(value: Value):
+    if value.HasField('none_value'):
+        return None
+    elif value.HasField('bool_value'):
+        return value.bool_value
+    elif value.HasField('int_value'):
+        return value.int_value
+    elif value.HasField('double_value'):
+        return value.double_value
+    elif value.HasField('string_value'):
+        return value.string_value
+    elif value.HasField('bytes_value'):
+        return value.bytes_value
+    elif value.HasField('map_value'):
+        return value.map_value 
+    elif value.HasField('array_value'):
+        return value.array_value
+    elif value.HasField('tuple_value'):
+        return value.tuple_value
+    elif value.HasField('any_value'):
+        return value.any_value
+    else:
+        raise ValueError(f'Unsupported Value type: {value}')
 
-            return proto
-        elif isinstance(obj, list):
-            proto = ArrayOfAny()
 
-            for v in obj:
-                v = pack_any(convert(v))
-                proto.items.append(v)
+def convert_to_proto(
+        data, 
+        protobuf_converters: Iterable[ObjectProtobufConverter],
+        use_legacy_types: bool = False
+    ) -> Union[MapOfStringToAny, ArrayOfAny, TupleOfAny, Message, MapOfStringToValue, ArrayOfValue, TupleOfValue, Value]:
 
-            return proto
-        else:
-            return wrap_value(obj, protobuf_converters)
+    if use_legacy_types:
+        def convert(obj):
+            if isinstance(obj, dict):
+                proto = MapOfStringToAny()
+
+                for k, v in obj.items():
+                    v = pack_any(convert(v))
+                    proto.items[k].CopyFrom(v)
+
+                return proto
+
+            elif is_tuple(obj):
+                proto = TupleOfAny()
+
+                for v in obj:
+                    v = pack_any(convert(v))
+                    proto.items.append(v)
+
+                return proto
+            elif isinstance(obj, list):
+                proto = ArrayOfAny()
+
+                for v in obj:
+                    v = pack_any(convert(v))
+                    proto.items.append(v)
+
+                return proto
+            else:
+                return wrap_value(obj, protobuf_converters, use_legacy_types=True)
+    else:        
+        def convert(obj):
+            if isinstance(obj, dict):
+                proto = MapOfStringToValue()
+
+                for k, v in obj.items():
+                    proto.items[k].CopyFrom(pack_value(convert(v), protobuf_converters))
+
+                return proto
+
+            elif is_tuple(obj):
+                proto = TupleOfValue()
+
+                for v in obj:
+                    proto.items.append(pack_value(convert(v), protobuf_converters))
+
+                return proto
+            elif isinstance(obj, list):
+                proto = ArrayOfValue()
+
+                for v in obj:
+                    proto.items.append(pack_value(convert(v), protobuf_converters))
+
+                return proto
+            else:
+
+                # todo this needs a more specialised way of wrapping / packing
+                return wrap_value(obj, protobuf_converters)
 
     return convert(data)
 
 
-def convert_from_proto(proto: Union[MapOfStringToAny, ArrayOfAny, TupleOfAny, Message], known_proto_types,
-                        protobuf_converters: Iterable[ObjectProtobufConverter]):
+def convert_from_proto(
+        proto: Union[MapOfStringToAny, ArrayOfAny, TupleOfAny, Message, MapOfStringToValue, ArrayOfValue, TupleOfValue, Value], 
+        known_proto_types : Iterable[Type[Message]],
+        protobuf_converters: Iterable[ObjectProtobufConverter]
+    ):
     known_proto_types = (known_proto_types or [])
     protobuf_converters = protobuf_converters or []
 
     def convert(obj):
-        if isinstance(obj, MapOfStringToAny):
+
+        if isinstance(obj, MapOfStringToValue):
+            return {k: convert(unpack_value(v)) for k, v in obj.items.items()}
+
+        elif isinstance(obj, MapOfStringToAny):
             return {k: convert(unpack_any(v, known_proto_types)) for k, v in obj.items.items()}
 
         elif isinstance(obj, ArrayOfAny):
             return [convert(unpack_any(v, known_proto_types)) for v in obj.items]
 
+        elif isinstance(obj, ArrayOfValue):
+            return [convert(unpack_value(v)) for v in obj.items]
+
         elif isinstance(obj, TupleOfAny):
             return tuple(convert(unpack_any(v, known_proto_types)) for v in obj.items)
+
+        elif isinstance(obj, TupleOfValue):
+            return tuple(convert(unpack_value(v)) for v in obj.items)
+
+        elif isinstance(obj, Value):
+            return convert(unpack_value(obj))
 
         elif isinstance(obj, Any):
             if is_wrapped_known_proto_type(obj, known_proto_types):

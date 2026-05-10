@@ -1,21 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pipelines &mdash; Flink Tasks  documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -97,9 +97,9 @@
            <div itemprop="articleBody">
              
   <section id="pipelines">
-<h1>Pipelines<a class="headerlink" href="#pipelines" title="Permalink to this heading"></a></h1>
+<h1>Pipelines<a class="headerlink" href="#pipelines" title="Link to this heading"></a></h1>
 <section id="continuations">
-<h2>Continuations<a class="headerlink" href="#continuations" title="Permalink to this heading"></a></h2>
+<h2>Continuations<a class="headerlink" href="#continuations" title="Link to this heading"></a></h2>
 <p>Tasks can be combined into a pipeline using continuations:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># task results are passed as arguments to continuations</span>
 <span class="n">pipeline</span> <span class="o">=</span> <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">divide</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
@@ -109,7 +109,7 @@
 </div>
 </section>
 <section id="fan-out-fan-in">
-<h2>Fan out / Fan in<a class="headerlink" href="#fan-out-fan-in" title="Permalink to this heading"></a></h2>
+<h2>Fan out / Fan in<a class="headerlink" href="#fan-out-fan-in" title="Link to this heading"></a></h2>
 <p>The <em>in_parallel</em> function is used to submit tasks in parallel:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">in_parallel</span><span class="p">([</span>
     <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
@@ -165,7 +165,7 @@ using the num_stages parameter:</p>
 </div>
 </section>
 <section id="passing-state">
-<h2>Passing State<a class="headerlink" href="#passing-state" title="Permalink to this heading"></a></h2>
+<h2>Passing State<a class="headerlink" href="#passing-state" title="Link to this heading"></a></h2>
 <p>State can be shared and passed across tasks in a pipeline.  Tasks that access state should
 declare so in <em>&#64;tasks.bind()</em>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">with_state</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>       <span class="c1"># sets initial state</span>
@@ -191,7 +191,7 @@ declare so in <em>&#64;tasks.bind()</em>:</p>
 </div>
 </section>
 <section id="error-handling">
-<h2>Error Handling<a class="headerlink" href="#error-handling" title="Permalink to this heading"></a></h2>
+<h2>Error Handling<a class="headerlink" href="#error-handling" title="Link to this heading"></a></h2>
 <p>Any task within a pipeline may throw exceptions and if not caught by a retry these will terminate the pipeline.
 Unhandled exceptions are returned to the client as they are with single tasks.</p>
 <p>Exceptions can be caught using <em>exceptionally</em> tasks</p>
@@ -221,7 +221,7 @@ success or failure.  This is a good place to put any clean up logic.</p>
 </div>
 </section>
 <section id="setting-initial-parameters">
-<h2>Setting Initial Parameters<a class="headerlink" href="#setting-initial-parameters" title="Permalink to this heading"></a></h2>
+<h2>Setting Initial Parameters<a class="headerlink" href="#setting-initial-parameters" title="Link to this heading"></a></h2>
 <p>Consider a pipeline that multiplies in parallel the numbers 1 to 10000 by 2.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">in_parallel</span><span class="p">([</span>
     <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
@@ -244,10 +244,10 @@ To reduce message size this parameter can be set on the pipeline using the ‘wi
 <p>Initial kwargs and task state may also be set this way.</p>
 </section>
 <section id="orchestrator-tasks">
-<h2>Orchestrator Tasks<a class="headerlink" href="#orchestrator-tasks" title="Permalink to this heading"></a></h2>
+<h2>Orchestrator Tasks<a class="headerlink" href="#orchestrator-tasks" title="Link to this heading"></a></h2>
 <p>Tasks may also return pipelines allowing for dynamic workflows with features such as:</p>
 <section id="composition">
-<h3>Composition<a class="headerlink" href="#composition" title="Permalink to this heading"></a></h3>
+<h3>Composition<a class="headerlink" href="#composition" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">multiply_and_subtract</span><span class="p">(</span><span class="n">mult_a</span><span class="p">,</span> <span class="n">mult_b</span><span class="p">,</span> <span class="n">sub_c</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">mult_a</span><span class="p">,</span> <span class="n">mult_b</span><span class="p">)</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">subtract</span><span class="p">,</span> <span class="n">sub_c</span><span class="p">)</span>
@@ -258,7 +258,7 @@ To reduce message size this parameter can be set on the pipeline using the ‘wi
 </div>
 </section>
 <section id="conditional-execution">
-<h3>Conditional Execution<a class="headerlink" href="#conditional-execution" title="Permalink to this heading"></a></h3>
+<h3>Conditional Execution<a class="headerlink" href="#conditional-execution" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">add_positive</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">add</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">make_positive</span><span class="p">)</span>
@@ -277,7 +277,7 @@ To reduce message size this parameter can be set on the pipeline using the ‘wi
 </div>
 </section>
 <section id="recursion">
-<h3>Recursion<a class="headerlink" href="#recursion" title="Permalink to this heading"></a></h3>
+<h3>Recursion<a class="headerlink" href="#recursion" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">count_to_100</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">add</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">check_result</span><span class="p">)</span>
@@ -297,7 +297,7 @@ To reduce message size this parameter can be set on the pipeline using the ‘wi
 </section>
 </section>
 <section id="inline-pipelines">
-<h2>Inline Pipelines<a class="headerlink" href="#inline-pipelines" title="Permalink to this heading"></a></h2>
+<h2>Inline Pipelines<a class="headerlink" href="#inline-pipelines" title="Link to this heading"></a></h2>
 <p>State is isolated by default between a parent pipeline and any child pipelines that it creates.  This
 is done on the assumption that a pipeline that calls a task that itself creates a pipeline would rather
 treat that child pipeline as a so called black box implementation and hence the states should be kept independent.</p>

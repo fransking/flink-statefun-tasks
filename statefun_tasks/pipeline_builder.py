@@ -1,6 +1,6 @@
 from statefun_tasks.types import Task, Group, RetryPolicy, ProtobufSerialisable
 from statefun_tasks.utils import gen_id
-from statefun_tasks.messages_pb2 import TaskRequest, Pipeline
+from statefun_tasks.messages_pb2 import TaskRequest, Pipeline, MapOfStringToValue
 from statefun_tasks.builtin import builtin
 from statefun_tasks.protobuf import pack_any
 from statefun_tasks.default_serialiser import DefaultSerialiser
@@ -349,7 +349,13 @@ class PipelineBuilder(ProtobufSerialisable):
             pipeline.initial_args.CopyFrom(pack_any(serialiser.to_proto(self._initial_args)))
         
         if self._initial_kwargs is not None:
-            pipeline.initial_kwargs.CopyFrom(serialiser.to_proto(self._initial_kwargs))
+            kwargs_proto = serialiser.to_proto(self._initial_kwargs)
+            
+            if isinstance(kwargs_proto, MapOfStringToValue):
+                pipeline.initial_value_kwargs.CopyFrom(kwargs_proto)
+            else:
+                # legacy type mode
+                pipeline.initial_kwargs.CopyFrom(kwargs_proto)
 
         if self._initial_state is not None:
             pipeline.initial_state.CopyFrom(pack_any(serialiser.to_proto(self._initial_state)))

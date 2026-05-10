@@ -1,11 +1,12 @@
 import unittest
 from google.protobuf.any_pb2 import Any
-from statefun_tasks import FlinkTasks
+from statefun_tasks import FlinkTasks, DefaultSerialiser
 from tests.test_messages_pb2 import Proto, ResultProto, UnknownProto
 from tests.utils import TaskRunner
 
 
 tasks = FlinkTasks()
+tasks_with_legacy_types = FlinkTasks(serialiser=DefaultSerialiser(use_legacy_types=True))
 
 
 class MyClass:
@@ -36,6 +37,13 @@ def protobuf_fully_annotated_continuation(test_proto: ResultProto) -> ResultProt
 @tasks.bind()
 def receive_and_reply_primitives(a, b, c, d):
     return [a, b, {'c': c}, (d,)]
+
+
+tasks_with_legacy_types.register(return_my_class_my_field, **return_my_class_my_field.defaults())
+tasks_with_legacy_types.register(receive_and_reply_protobuf_fully_annotated, **receive_and_reply_protobuf_fully_annotated.defaults())
+tasks_with_legacy_types.register(receive_and_reply_protobuf_not_annotated, **receive_and_reply_protobuf_not_annotated.defaults())
+tasks_with_legacy_types.register(protobuf_fully_annotated_continuation, **protobuf_fully_annotated_continuation.defaults())
+tasks_with_legacy_types.register(receive_and_reply_primitives, **receive_and_reply_primitives.defaults())
 
 
 class RequestResultSerialisationTests(unittest.IsolatedAsyncioTestCase):
@@ -86,3 +94,8 @@ class RequestResultSerialisationTests(unittest.IsolatedAsyncioTestCase):
 
         p, = d
         self.assertIsInstance(p, Any)
+
+
+class LegacyRequestResultSerialisationTests(RequestResultSerialisationTests):
+    def setUp(self) -> None:
+        self.runner = TaskRunner(tasks_with_legacy_types)
