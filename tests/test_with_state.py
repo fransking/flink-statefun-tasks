@@ -5,6 +5,7 @@ from tests.utils import TaskRunner
 
 
 tasks = FlinkTasks()
+tasks_with_legacy_types = FlinkTasks(serialiser=DefaultSerialiser(use_legacy_types=True))
 
 
 @tasks.bind(with_state=True)
@@ -33,6 +34,13 @@ def _task_that_retries():
     raise ValueError('fail')
 
 
+tasks_with_legacy_types.register(_task_with_state, **_task_with_state.defaults())
+tasks_with_legacy_types.register(_task_without_state, **_task_without_state.defaults())
+tasks_with_legacy_types.register(_task_with_state_that_fails, **_task_with_state_that_fails.defaults())
+tasks_with_legacy_types.register(_task_without_state_that_fails, **_task_without_state_that_fails.defaults())
+tasks_with_legacy_types.register(_task_that_retries, **_task_that_retries.defaults())
+
+
 class WithStateTests(unittest.IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         self.runner = TaskRunner(tasks)
@@ -57,7 +65,6 @@ class WithStateTests(unittest.IsolatedAsyncioTestCase):
         state = serialiser.from_proto(context.storage.task_exception.state)
         self.assertEqual(state, 'initial')
 
-
     async def test_passing_state_through_task_that_throws_an_exception_includes_state_in_exception(self):
         context = MagicMock()
         serialiser = DefaultSerialiser()
@@ -67,7 +74,6 @@ class WithStateTests(unittest.IsolatedAsyncioTestCase):
         
         state = serialiser.from_proto(context.storage.task_exception.state)
         self.assertEqual(state, 'initial')
-
 
     async def test_task_that_retries_includes_state_in_retry(self):
         task_uid = 'u123'
@@ -80,5 +86,44 @@ class WithStateTests(unittest.IsolatedAsyncioTestCase):
 
         _, _, retry_request = [m for m in messages if  m[2].uid == task_uid][0]
         
+        state = serialiser.from_proto(retry_request.state)
+        self.assertEqual(state, 'initial')
+
+
+class LegacyWithStateTests(WithStateTests):
+    def setUp(self) -> None:
+        self.runner = TaskRunner(tasks_with_legacy_types)
+
+    async def test_task_with_state_that_throws_an_exception_includes_state_in_exception(self):
+        context = MagicMock()
+        serialiser = DefaultSerialiser(use_legacy_types=True)
+
+        with self.assertRaises(ValueError):
+            await self.runner.run_task(_task_with_state_that_fails, context=context, state='initial')
+
+        state = serialiser.from_proto(context.storage.task_exception.state)
+        self.assertEqual(state, 'initial')
+
+    async def test_passing_state_through_task_that_throws_an_exception_includes_state_in_exception(self):
+        context = MagicMock()
+        serialiser = DefaultSerialiser(use_legacy_types=True)
+
+        with self.assertRaises(ValueError):
+            await self.runner.run_task(_task_without_state_that_fails, context=context, state='initial')
+
+        state = serialiser.from_proto(context.storage.task_exception.state)
+        self.assertEqual(state, 'initial')
+
+    async def test_task_that_retries_includes_state_in_retry(self):
+        task_uid = 'u123'
+        messages = []
+        context = MagicMock()
+        context.send_message = lambda *args: messages.append(args[0:3])
+        serialiser = DefaultSerialiser(use_legacy_types=True)
+
+        await self.runner.run_task(_task_that_retries, task_uid=task_uid, context=context, state='initial')
+
+        _, _, retry_request = [m for m in messages if  m[2].uid == task_uid][0]
+
         state = serialiser.from_proto(retry_request.state)
         self.assertEqual(state, 'initial')

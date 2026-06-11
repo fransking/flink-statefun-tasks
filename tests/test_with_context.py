@@ -1,10 +1,11 @@
 import unittest
 from unittest.mock import MagicMock
-from statefun_tasks import FlinkTasks
+from statefun_tasks import FlinkTasks, DefaultSerialiser
 from tests.utils import TaskRunner
 
 
 tasks = FlinkTasks()
+tasks_with_legacy_types = FlinkTasks(serialiser=DefaultSerialiser(use_legacy_types=True))
 
 
 @tasks.bind(with_context=True)
@@ -25,6 +26,12 @@ def _task_with_context_and_state(context, state):
 @tasks.bind(with_context=True, with_state=True)
 def _task_with_context_args_and_state(context, state, a, b):
     return state, id(context), a, b, state
+
+
+tasks_with_legacy_types.register(_task_with_context, **_task_with_context.defaults())
+tasks_with_legacy_types.register(_task_with_context_and_args, **_task_with_context_and_args.defaults())
+tasks_with_legacy_types.register(_task_with_context_and_state, **_task_with_context_and_state.defaults())
+tasks_with_legacy_types.register(_task_with_context_args_and_state, **_task_with_context_args_and_state.defaults())
 
 
 class WithContextTests(unittest.IsolatedAsyncioTestCase):
@@ -50,3 +57,8 @@ class WithContextTests(unittest.IsolatedAsyncioTestCase):
         context = MagicMock()
         result, _ = await self.runner.run_task(_task_with_context_args_and_state, 'a', 'b', state='initial', context=context)
         self.assertEqual(result, (id(context), 'a', 'b', 'initial'))
+
+
+class LegacyWithContextTests(WithContextTests):
+    def setUp(self) -> None:
+        self.runner = TaskRunner(tasks_with_legacy_types)

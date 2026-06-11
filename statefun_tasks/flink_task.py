@@ -1,9 +1,9 @@
 from statefun_tasks.task_context import TaskContext
 from statefun_tasks.events.event_handlers import EventHandlers
 from statefun_tasks.pipeline_builder import PipelineBuilder
-from statefun_tasks.utils import _is_tuple, _type_name, _annotated_protos_for
+from statefun_tasks.utils import is_tuple, type_name, annotated_protos_for
 from statefun_tasks.messages_pb2 import TaskRequest
-from statefun_tasks.type_helpers import _create_task_result, _create_task_exception
+from statefun_tasks.type_helpers import create_task_result, create_task_exception
 from statefun_tasks.types import YieldTaskInvocation
 from statefun_tasks.effects import Effect
 
@@ -30,7 +30,7 @@ class FlinkTask(object):
         self.is_async = inspect.iscoroutinefunction(fun)
 
         # register any annotated proto types for fn
-        proto_types = _annotated_protos_for(fun)
+        proto_types = annotated_protos_for(fun)
         self._serialiser.register_proto_types(proto_types)
 
     @property
@@ -88,7 +88,7 @@ class FlinkTask(object):
             is_fruitful = task_request.is_fruitful
 
         # if single result then wrap in tuple as this is the maximal case
-        if not _is_tuple(fn_result):
+        if not is_tuple(fn_result):
             fn_result = (fn_result,)
 
         # if this task accesses state then we expect the first element in the result tuple
@@ -114,7 +114,7 @@ class FlinkTask(object):
         elif not is_fruitful:
             fn_result = ()
             
-        task_result = _create_task_result(task_request)
+        task_result = create_task_result(task_request)
 
         self._serialiser.serialise_result(task_result, fn_result, fn_state)
 
@@ -129,10 +129,10 @@ class FlinkTask(object):
         maybe_retry = False
 
         if task_retry_policy is not None:
-            ex_class_hierarchy = [_type_name(ex) for ex in inspect.getmro(ex.__class__)]
+            ex_class_hierarchy = [type_name(ex) for ex in inspect.getmro(ex.__class__)]
             maybe_retry = any([ex_type for ex_type in task_retry_policy.retry_for if ex_type in ex_class_hierarchy])
 
-        task_exception = _create_task_exception(task_request, ex)
+        task_exception = create_task_exception(task_request, ex)
 
         if maybe_retry:
             task_exception.maybe_retry = True
@@ -144,7 +144,7 @@ class FlinkTask(object):
         args, kwargs, state = self._serialiser.deserialise_request(task_request)
 
         # listify
-        if _is_tuple(args):
+        if is_tuple(args):
             args = [arg for arg in args]
         else:
             args = [args]

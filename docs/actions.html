@@ -1,21 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Actions &mdash; Flink Tasks  documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -96,12 +96,12 @@
            <div itemprop="articleBody">
              
   <section id="actions">
-<h1>Actions<a class="headerlink" href="#actions" title="Permalink to this heading"></a></h1>
+<h1>Actions<a class="headerlink" href="#actions" title="Link to this heading"></a></h1>
 <p>Actions are used to query pipeline state or pause / resume / cancel a pipeline that is in flight.</p>
 <section id="querying">
-<h2>Querying<a class="headerlink" href="#querying" title="Permalink to this heading"></a></h2>
+<h2>Querying<a class="headerlink" href="#querying" title="Link to this heading"></a></h2>
 <section id="pipeline-status">
-<h3>Pipeline Status<a class="headerlink" href="#pipeline-status" title="Permalink to this heading"></a></h3>
+<h3>Pipeline Status<a class="headerlink" href="#pipeline-status" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">divide</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">client</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>                                     <span class="c1"># non-blocking &#39;fire and forget&#39;</span>
 
@@ -110,7 +110,7 @@
 </div>
 </section>
 <section id="pipeline-request">
-<h3>Pipeline Request<a class="headerlink" href="#pipeline-request" title="Permalink to this heading"></a></h3>
+<h3>Pipeline Request<a class="headerlink" href="#pipeline-request" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">divide</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">client</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>                                     <span class="c1"># non-blocking &#39;fire and forget&#39;</span>
 
@@ -119,7 +119,7 @@
 </div>
 </section>
 <section id="pipeline-result">
-<h3>Pipeline Result<a class="headerlink" href="#pipeline-result" title="Permalink to this heading"></a></h3>
+<h3>Pipeline Result<a class="headerlink" href="#pipeline-result" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">multiply</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">divide</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 <span class="n">client</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>                                     <span class="c1"># non-blocking &#39;fire and forget&#39;</span>
 
@@ -129,10 +129,10 @@
 </section>
 </section>
 <section id="flow-control">
-<h2>Flow Control<a class="headerlink" href="#flow-control" title="Permalink to this heading"></a></h2>
+<h2>Flow Control<a class="headerlink" href="#flow-control" title="Link to this heading"></a></h2>
 <p>Pipelines may be paused, unpaused and cancelled</p>
 <section id="pausing-resuming-pipelines">
-<h3>Pausing &amp; Resuming Pipelines<a class="headerlink" href="#pausing-resuming-pipelines" title="Permalink to this heading"></a></h3>
+<h3>Pausing &amp; Resuming Pipelines<a class="headerlink" href="#pausing-resuming-pipelines" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">a_long_running_task</span><span class="o">.</span><span class="n">send</span><span class="p">()</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">save</span><span class="p">)</span>
 <span class="n">client</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>                                     <span class="c1"># non-blocking &#39;fire and forget&#39;</span>
 
@@ -145,7 +145,7 @@
 </div>
 </section>
 <section id="cancelling-a-pipeline">
-<h3>Cancelling a Pipeline<a class="headerlink" href="#cancelling-a-pipeline" title="Permalink to this heading"></a></h3>
+<h3>Cancelling a Pipeline<a class="headerlink" href="#cancelling-a-pipeline" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">a_long_running_task</span><span class="o">.</span><span class="n">send</span><span class="p">()</span><span class="o">.</span><span class="n">continue_with</span><span class="p">(</span><span class="n">save</span><span class="p">)</span>
 <span class="n">client</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">pipeline</span><span class="p">)</span>                                     <span class="c1"># non-blocking &#39;fire and forget&#39;</span>
 

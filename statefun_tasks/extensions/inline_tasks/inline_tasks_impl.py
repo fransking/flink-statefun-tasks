@@ -1,5 +1,5 @@
 from statefun_tasks import FlinkTasks
-import asyncio
+import inspect
 import cloudpickle
 import logging
 
@@ -62,7 +62,7 @@ def enable_inline_tasks(tasks: FlinkTasks):
         exec('__res = fn(*args, **kwargs)', {}, safer_locals)
         res = safer_locals['__res']
 
-        if asyncio.iscoroutinefunction(fn):
+        if inspect.iscoroutinefunction(fn):
             res = await res
 
         if __with_state:

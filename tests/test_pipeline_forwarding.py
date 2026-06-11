@@ -1,10 +1,11 @@
 import unittest
 from unittest.mock import MagicMock
-from statefun_tasks import FlinkTasks, Pipeline, Address, unpack_any, in_parallel
+from statefun_tasks import FlinkTasks, Pipeline, Address, unpack_any, in_parallel, DefaultSerialiser
 from tests.utils import TaskRunner
 
 
 tasks = FlinkTasks(default_namespace='test', default_worker_name='worker')
+tasks_with_legacy_types = FlinkTasks(default_namespace='test', default_worker_name='worker', serialiser=DefaultSerialiser(use_legacy_types=True))
 
 
 @tasks.bind()
@@ -25,6 +26,12 @@ def _non_fruitful_workflow():
 @tasks.bind()
 def _parallel_workflow_in_stages():
     return in_parallel([_task.send(), _task.send()], num_stages=2)
+
+
+tasks_with_legacy_types.register(_task, **_task.defaults())
+tasks_with_legacy_types.register(_workflow, **_workflow.defaults())
+tasks_with_legacy_types.register(_non_fruitful_workflow, **_non_fruitful_workflow.defaults())
+tasks_with_legacy_types.register(_parallel_workflow_in_stages, **_parallel_workflow_in_stages.defaults())
 
 
 class PipelineForwardingTests(unittest.IsolatedAsyncioTestCase):
@@ -50,7 +57,7 @@ class PipelineForwardingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(target_id, context.storage.task_request.uid)
         self.assertEqual(pipeline_request.invocation_id, context.storage.task_request.invocation_id)
         self.assertTrue(pipeline_request.is_fruitful)
-        self.assertEqual(unpack_any(pipeline_request.state, []).value, 'initial')
+        self.assertEqual(unpack_any(pipeline_request.state, []).string_value, 'initial')
         self.assertEqual(pipeline_request.meta['key'], 'value')
 
     async def test_task_creating_a_nested_pipeline_does_not_egress(self):
@@ -173,3 +180,30 @@ class PipelineForwardingTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(stage_two_pipeline.entries[0].group_entry.group[0].entries[0].task_entry.task_type, 'tests.test_pipeline_forwarding._task')
         self.assertEqual(stage_two_pipeline.entries[0].group_entry.group[0].entries[0].task_entry.namespace, 'test')
         self.assertEqual(stage_two_pipeline.entries[0].group_entry.group[0].entries[0].task_entry.worker_name, 'worker')
+
+
+class LegacyPipelineForwardingTests(PipelineForwardingTests):
+    def setUp(self) -> None:
+        self.runner = TaskRunner(tasks_with_legacy_types)
+
+    async def test_nested_pipeline(self):
+        messages = []
+        context = MagicMock()
+        context.send_message = lambda *args: messages.append(args[0:3])
+
+        result, _ = await self.runner.run_task(_workflow, context=context, state='initial', task_meta={'key': 'value'})
+
+        self.assertIsInstance(result, Pipeline)
+        self.assertEqual(len(result.entries), 1)
+        self.assertEqual(result.entries[0].task_entry.task_type, "tests.test_pipeline_forwarding._task")
+
+        message = [m for m in messages if "embedded" in m[0]]
+        self.assertEqual(len(message), 1)
+        destination, target_id, pipeline_request = message[0]
+
+        self.assertEqual("test/embedded_pipeline", destination)
+        self.assertEqual(target_id, context.storage.task_request.uid)
+        self.assertEqual(pipeline_request.invocation_id, context.storage.task_request.invocation_id)
+        self.assertTrue(pipeline_request.is_fruitful)
+        self.assertEqual(unpack_any(pipeline_request.state, []).value, 'initial')
+        self.assertEqual(pipeline_request.meta['key'], 'value')

@@ -8,6 +8,8 @@ from tests.utils import TaskRunner
 
 tasks = FlinkTasks()
 enable_inline_tasks(tasks)
+tasks_with_legacy_types = FlinkTasks(serialiser=DefaultSerialiser(use_legacy_types=True))
+enable_inline_tasks(tasks_with_legacy_types)
 
 
 @inline_task(retry_policy=RetryPolicy(retry_for=[Exception], max_retries=4, delay=timedelta(seconds=1)))
@@ -23,6 +25,9 @@ def say_goodbye(greeting):
 @inline_task()
 def wf(name):
     return say_hello.send(name).continue_with(say_goodbye)
+
+
+tasks_with_legacy_types.register(say_goodbye, **say_goodbye.defaults())
 
 
 class InlineTasksTests(unittest.IsolatedAsyncioTestCase):
@@ -50,6 +55,28 @@ class InlineTasksTests(unittest.IsolatedAsyncioTestCase):
         args, kwargs = DefaultSerialiser().deserialise_args_and_kwargs(request)
         result, _ = await self.runner.run_task("__builtins.run_code", *args, **kwargs)
         
+        self.assertIsInstance(result, Pipeline)
+        self.assertEqual(len(result.entries), 2)
+        self.assertEqual(result.entries[0].task_entry.task_type, "__builtins.run_code")
+        self.assertEqual(result.entries[1].task_entry.task_type, "tests.test_inline_tasks.say_goodbye")
+
+
+class LegacyInlineTasksTests(InlineTasksTests):
+    def setUp(self) -> None:
+        self.runner = TaskRunner(tasks_with_legacy_types)
+
+    async def test_inline_task_execution(self):
+        request = say_hello.send("Jane").to_proto(DefaultSerialiser(use_legacy_types=True)).entries[0].task_entry.request
+        args, kwargs = DefaultSerialiser(use_legacy_types=True).deserialise_args_and_kwargs(request)
+        result, _ = await self.runner.run_task("__builtins.run_code", *args, **kwargs)
+
+        self.assertEqual(result, 'Hello Jane')
+
+    async def test_inline_task_execution_creating_a_pipeline(self):
+        request = wf.send("Jane").to_proto(DefaultSerialiser(use_legacy_types=True)).entries[0].task_entry.request
+        args, kwargs = DefaultSerialiser(use_legacy_types=True).deserialise_args_and_kwargs(request)
+        result, _ = await self.runner.run_task("__builtins.run_code", *args, **kwargs)
+
         self.assertIsInstance(result, Pipeline)
         self.assertEqual(len(result.entries), 2)
         self.assertEqual(result.entries[0].task_entry.task_type, "__builtins.run_code")

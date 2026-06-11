@@ -25,6 +25,33 @@ message TupleOfAny {
     repeated google.protobuf.Any items = 1;
 }
 
+message MapOfStringToValue {
+    map <string, Value> items = 1;
+}
+
+message ArrayOfValue {
+    repeated Value items = 1;
+}
+
+message TupleOfValue {
+    repeated Value items = 1;
+}
+
+message Value {
+    oneof kind {
+        NoneValue none_value = 1;
+        double double_value = 2;
+        int64 int_value = 3;
+        bool bool_value = 4;
+        string string_value = 5;
+        bytes bytes_value = 6;
+        MapOfStringToValue map_value = 7;
+        ArrayOfValue array_value = 8;
+        TupleOfValue tuple_value = 9;
+        google.protobuf.Any any_value = 10;
+    }
+}
+
 message TaskEntry {
     string task_id = 1;
     string task_type = 2;
@@ -66,7 +93,10 @@ message Pipeline {
 
     // parameters to pass to the initial tasks in this pipeline
     optional google.protobuf.Any initial_args = 3;
-    optional MapOfStringToAny initial_kwargs = 4;
+    oneof kwargs_kind {
+        MapOfStringToAny initial_kwargs = 4;
+        MapOfStringToValue initial_value_kwargs = 6;
+    }
     optional google.protobuf.Any initial_state = 5;
 }
 
@@ -80,6 +110,11 @@ message TaskRetryPolicy {
 message ArgsAndKwargs {
     TupleOfAny args = 1;
     MapOfStringToAny kwargs = 2;
+}
+
+message ValueArgsAndKwargs {
+    TupleOfValue args = 1;
+    MapOfStringToValue kwargs = 2;
 }
 
 message TaskRequest {

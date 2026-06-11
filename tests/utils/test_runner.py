@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock
 from statefun_tasks import FlinkTasks, TaskRequest
-from statefun_tasks.utils import _gen_id, _task_type_for
+from statefun_tasks.utils import gen_id, task_type_for
 from statefun_tasks.handlers import TaskRequestHandler, TaskActionHandler
 from statefun_tasks.messages_pb2 import TaskSpecificState, TaskRetryPolicy, TaskActionRequest
 
@@ -22,7 +22,7 @@ class TaskRunner():
                             task_meta=None,
                             **kwargs):
         
-        request = TaskRequest(id=task_id or _gen_id(), uid=task_uid or _gen_id(), invocation_id=_gen_id(), type=task_type)
+        request = TaskRequest(id=task_id or gen_id(), uid=task_uid or gen_id(), invocation_id=gen_id(), type=task_type)
 
         if reply_topic is not None:
             request.reply_topic = reply_topic
@@ -55,7 +55,7 @@ class TaskRunner():
                        task_meta=None,
                        **kwargs):
         
-        task_type = task_or_task_type if isinstance(task_or_task_type, str) else _task_type_for(task_or_task_type)
+        task_type = task_or_task_type if isinstance(task_or_task_type, str) else task_type_for(task_or_task_type)
 
         task_request = self.create_task_request(task_type, 
                                                 *args, 
@@ -68,7 +68,7 @@ class TaskRunner():
                                                 task_meta=task_meta,
                                                 **kwargs)
 
-        caller_id = caller_id or _gen_id()
+        caller_id = caller_id or gen_id()
 
         context = context or MagicMock()
 

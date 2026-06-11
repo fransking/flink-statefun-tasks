@@ -2,7 +2,7 @@ from statefun_tasks.task_context import TaskContext
 from statefun_tasks.handlers import MessageHandler
 from statefun_tasks.types import TASK_ACTION_REQUEST_TYPE
 from statefun_tasks.messages_pb2 import TaskAction, TaskStatus
-from statefun_tasks.type_helpers import _create_task_result, _create_task_exception
+from statefun_tasks.type_helpers import create_task_result, create_task_exception
 from statefun_tasks.core.statefun import Message
 
 
@@ -23,10 +23,10 @@ class TaskActionHandler(MessageHandler):
         try:
             
             result = await self._handle(context, action_request)
-            await tasks.emit_result(context, action_request, _create_task_result(action_request, result))
+            await tasks.emit_result(context, action_request, create_task_result(action_request, result))
 
         except Exception as ex:
-            await tasks.emit_result(context, action_request, _create_task_exception(action_request, ex))
+            await tasks.emit_result(context, action_request, create_task_exception(action_request, ex))
 
     async def _handle(self, context, action_request):
 

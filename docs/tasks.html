@@ -1,21 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tasks &mdash; Flink Tasks  documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -89,9 +89,9 @@
            <div itemprop="articleBody">
              
   <section id="tasks">
-<h1>Tasks<a class="headerlink" href="#tasks" title="Permalink to this heading"></a></h1>
+<h1>Tasks<a class="headerlink" href="#tasks" title="Link to this heading"></a></h1>
 <section id="registering-a-task">
-<h2>Registering a Task<a class="headerlink" href="#registering-a-task" title="Permalink to this heading"></a></h2>
+<h2>Registering a Task<a class="headerlink" href="#registering-a-task" title="Link to this heading"></a></h2>
 <p>Any Python function can be attributed with <em>tasks.bind()</em> to register it as a Flink Task.  Multiple tasks may be invoked by a single
 Stateful Function:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
@@ -111,7 +111,7 @@ Stateful Function:</p>
 </div>
 </section>
 <section id="error-handling">
-<h2>Error Handling<a class="headerlink" href="#error-handling" title="Permalink to this heading"></a></h2>
+<h2>Error Handling<a class="headerlink" href="#error-handling" title="Link to this heading"></a></h2>
 <p>Exceptions thrown by a task can either be passed back to the caller or they can trigger a retry.  Retry parameters are set using
 a RetryPolicy:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">retry_policy</span><span class="o">=</span><span class="n">RetryPolicy</span><span class="p">(</span><span class="n">retry_for</span><span class="o">=</span><span class="p">[</span><span class="ne">ValueError</span><span class="p">],</span> <span class="n">max_retries</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">delay</span><span class="o">=</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span> <span class="n">exponential_back_off</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
@@ -121,7 +121,7 @@ a RetryPolicy:</p>
 </div>
 </section>
 <section id="calling-a-task">
-<h2>Calling a Task<a class="headerlink" href="#calling-a-task" title="Permalink to this heading"></a></h2>
+<h2>Calling a Task<a class="headerlink" href="#calling-a-task" title="Link to this heading"></a></h2>
 <p>Tasks can be called using the FlinkTasksClient:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">multiply</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>             <span class="c1"># direct function call for testing</span>
 
@@ -131,7 +131,7 @@ a RetryPolicy:</p>
 </div>
 </section>
 <section id="accessing-the-context">
-<h2>Accessing the Context<a class="headerlink" href="#accessing-the-context" title="Permalink to this heading"></a></h2>
+<h2>Accessing the Context<a class="headerlink" href="#accessing-the-context" title="Link to this heading"></a></h2>
 <p>A wrapper around the Flink Statefun context can be accessed by declaring so in <em>&#64;tasks.bind()</em>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@tasks</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">with_context</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">task_using_context</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>

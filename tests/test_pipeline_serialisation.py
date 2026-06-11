@@ -17,7 +17,7 @@ class PipelineSerialisationTests(unittest.TestCase):
         entry_proto = entry.to_proto(serialiser)
         reconsituted_entry = Task.from_proto(entry_proto).unpack(serialiser)
 
-        self.assertEqual(entry_proto.task_entry.request.type_url, 'type.googleapis.com/statefun_tasks.ArgsAndKwargs')
+        self.assertEqual(entry_proto.task_entry.request.type_url, 'type.googleapis.com/statefun_tasks.ValueArgsAndKwargs')
         self.assertEqual(reconsituted_entry.task_id, entry.task_id)
         self.assertEqual(reconsituted_entry.task_type, entry.task_type)
         self.assertEqual(reconsituted_entry.is_fruitful, True)
@@ -77,3 +77,24 @@ class PipelineSerialisationTests(unittest.TestCase):
         reconsituted_entry = Task.from_proto(entry_proto).unpack(serialiser)
         retry_policy = reconsituted_entry.retry_policy
         self.assertEqual(['builtins.Exception', 'builtins.ValueError'], retry_policy.retry_for)
+
+
+class LegacyPipelineSerialisationTests(PipelineSerialisationTests):
+    def test_task_entry_serialisation(self):
+        serialiser = DefaultSerialiser(known_proto_types=[Address], use_legacy_types=True)
+
+        args = (1,'2', Address(namespace='test'))
+        kwargs = {'arg': [1, 2, 3]}
+        parameters = {'is_fruitful': True}
+
+        entry = Task.from_fields('task_id', 'task_type', args, kwargs, **parameters, is_finally=True)
+
+        entry_proto = entry.to_proto(serialiser)
+        reconsituted_entry = Task.from_proto(entry_proto).unpack(serialiser)
+
+        self.assertEqual(entry_proto.task_entry.request.type_url, 'type.googleapis.com/statefun_tasks.ArgsAndKwargs')
+        self.assertEqual(reconsituted_entry.task_id, entry.task_id)
+        self.assertEqual(reconsituted_entry.task_type, entry.task_type)
+        self.assertEqual(reconsituted_entry.is_fruitful, True)
+        self.assertEqual(reconsituted_entry.is_finally, True)
+        self.assertEqual(reconsituted_entry.to_tuple(), entry.to_tuple())

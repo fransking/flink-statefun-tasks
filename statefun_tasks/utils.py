@@ -6,23 +6,23 @@ from uuid import uuid4
 from typing import get_type_hints
 
 
-def _gen_id():
+def gen_id():
     return str(uuid4())
 
 
-def _type_name(thing):
+def type_name(thing):
     if inspect.isclass(thing):
         return ".".join([thing.__module__, thing.__name__])
     else:
         return ".".join([thing.__class__.__module__, thing.__class__.__name__])
 
 
-def _task_type_for(fun, module_name=None):
+def task_type_for(fun, module_name=None):
     module = fun.__module__ if module_name is None else module_name
     return ".".join([module, fun.__name__])
 
 
-def _is_named_tuple(value):
+def is_named_tuple(value):
     # duck test to see if a value is a NamedTuple and not just a tuple
     if not isinstance(value, tuple):
         return False
@@ -30,11 +30,11 @@ def _is_named_tuple(value):
     return hasattr(type(value), '_fields')
 
 
-def _is_tuple(value):
-    return isinstance(value, tuple) and not _is_named_tuple(value)
+def is_tuple(value):
+    return isinstance(value, tuple) and not is_named_tuple(value)
 
 
-def _annotated_protos_for(fn):
+def annotated_protos_for(fn):
     args = []
 
     try:
@@ -52,9 +52,9 @@ def _annotated_protos_for(fn):
     return [arg for arg in args if inspect.isclass(arg) and issubclass(arg, Message) and arg != Any]
 
 
-def _unpack_single_tuple_args(args):
+def unpack_single_tuple_args(args):
     # send a single argument by itself instead of wrapped inside a tuple
-    if _is_tuple(args) and len(args) == 1:
+    if is_tuple(args) and len(args) == 1:
         args = args[0]
 
     return args

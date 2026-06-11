@@ -1,9 +1,9 @@
-from re import L
 from statefun_tasks.types import Task, Group, RetryPolicy, ProtobufSerialisable
-from statefun_tasks.utils import _gen_id
-from statefun_tasks.messages_pb2 import TaskRequest, Pipeline
+from statefun_tasks.utils import gen_id
+from statefun_tasks.messages_pb2 import TaskRequest, Pipeline, MapOfStringToValue
 from statefun_tasks.builtin import builtin
-from statefun_tasks.default_serialiser import pack_any, DefaultSerialiser
+from statefun_tasks.protobuf import pack_any
+from statefun_tasks.default_serialiser import DefaultSerialiser
 from typing import Iterable
 import math
 
@@ -16,7 +16,7 @@ class PipelineBuilder(ProtobufSerialisable):
     """
     def __init__(self, pipeline: list = None):
         self._pipeline = [] if pipeline is None else pipeline
-        self._builder_id = _gen_id()
+        self._builder_id = gen_id()
         self._inline = False
         self._initial_args = None
         self._initial_kwargs = None
@@ -79,7 +79,7 @@ class PipelineBuilder(ProtobufSerialisable):
         :param option ordered: if False then the results of the group will come back unordered. Unordered groups are more efficiently aggregated by Flink.
         :return: the builder
         """
-        group = Group(_gen_id(), max_parallelism=max_parallelism, return_exceptions=return_exceptions, is_unordered=not ordered)
+        group = Group(gen_id(), max_parallelism=max_parallelism, return_exceptions=return_exceptions, is_unordered=not ordered)
 
         for pipeline in pipelines:
             self._raise_if_initial_parameters_are_set(pipeline)
@@ -212,7 +212,7 @@ class PipelineBuilder(ProtobufSerialisable):
         args = self.validate().to_proto(serialiser)
         kwargs = {}
 
-        task_request = TaskRequest(id=task_id, type=task_type, uid=_gen_id())
+        task_request = TaskRequest(id=task_id, type=task_type, uid=gen_id())
         args_and_kwargs = serialiser.serialise_args_and_kwargs(args, kwargs)
         serialiser.serialise_request(task_request, args_and_kwargs)
 
@@ -349,7 +349,13 @@ class PipelineBuilder(ProtobufSerialisable):
             pipeline.initial_args.CopyFrom(pack_any(serialiser.to_proto(self._initial_args)))
         
         if self._initial_kwargs is not None:
-            pipeline.initial_kwargs.CopyFrom(serialiser.to_proto(self._initial_kwargs))
+            kwargs_proto = serialiser.to_proto(self._initial_kwargs)
+            
+            if isinstance(kwargs_proto, MapOfStringToValue):
+                pipeline.initial_value_kwargs.CopyFrom(kwargs_proto)
+            else:
+                # legacy type mode
+                pipeline.initial_kwargs.CopyFrom(kwargs_proto)
 
         if self._initial_state is not None:
             pipeline.initial_state.CopyFrom(pack_any(serialiser.to_proto(self._initial_state)))

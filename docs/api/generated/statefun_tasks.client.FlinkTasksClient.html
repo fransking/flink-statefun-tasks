@@ -1,21 +1,21 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FlinkTasksClient &mdash; Flink Tasks  documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+
   
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -97,10 +97,10 @@
            <div itemprop="articleBody">
              
   <section id="flinktasksclient">
-<h1>FlinkTasksClient<a class="headerlink" href="#flinktasksclient" title="Permalink to this heading"></a></h1>
+<h1>FlinkTasksClient<a class="headerlink" href="#flinktasksclient" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="statefun_tasks.client.FlinkTasksClient">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">statefun_tasks.client.</span></span><span class="sig-name descname"><span class="pre">FlinkTasksClient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kafka_broker_url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">request_topics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_topics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reply_topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">serialiser</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kafka_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kafka_consumer_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kafka_producer_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient" title="Permalink to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">statefun_tasks.client.</span></span><span class="sig-name descname"><span class="pre">FlinkTasksClient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kafka_broker_url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">request_topics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_topics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reply_topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">serialiser</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kafka_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kafka_consumer_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kafka_producer_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient" title="Link to this definition"></a></dt>
 <dd><p>Client for submitting TaskRequests / TaskActionRequests</p>
 <p>Replies are handled on a dedicated thread created per instance so FlinkTasksClientFactory.get_client() is preferred to
 instantiating this class directly.</p>
@@ -122,7 +122,7 @@ e.g. {‘example/worker’: ‘example.requests’, None: ‘example.default.req
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.client.FlinkTasksClient.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kafka_broker_url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">request_topics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_topics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reply_topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">serialiser</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kafka_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kafka_consumer_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kafka_producer_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kafka_broker_url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">request_topics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_topics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reply_topic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">serialiser</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kafka_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kafka_consumer_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kafka_producer_properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -188,17 +188,17 @@ e.g. {‘example/worker’: ‘example.requests’, None: ‘example.default.req
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.client.FlinkTasksClient.cancel_pipeline">
-<span class="sig-name descname"><span class="pre">cancel_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_or_task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.cancel_pipeline" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">cancel_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_or_task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.cancel_pipeline" title="Link to this definition"></a></dt>
 <dd><p>Cancels a pipeline</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>pipeline_or_task</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>]) – the pipeline or task</p></li>
+<li><p><strong>pipeline_or_task</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>]</span>) – the pipeline or task</p></li>
 <li><p><strong>topic</strong> (<em>optional</em>) – override the default ingress topic</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>a Future indicating whether the pipeline was successfully paused or not</p>
@@ -208,12 +208,12 @@ e.g. {‘example/worker’: ‘example.requests’, None: ‘example.default.req
 
 <dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.client.FlinkTasksClient.cancel_pipeline_async">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cancel_pipeline_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_or_task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.cancel_pipeline_async" title="Permalink to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">cancel_pipeline_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_or_task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.cancel_pipeline_async" title="Link to this definition"></a></dt>
 <dd><p>Cancels a pipeline</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>pipeline_or_task</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>]) – the pipeline or task</p></li>
+<li><p><strong>pipeline_or_task</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>]</span>) – the pipeline or task</p></li>
 <li><p><strong>topic</strong> (<em>optional</em>) – override the default ingress topic</p></li>
 </ul>
 </dd>
@@ -222,17 +222,17 @@ e.g. {‘example/worker’: ‘example.requests’, None: ‘example.default.req
 
 <dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.client.FlinkTasksClient.get_request">
-<span class="sig-name descname"><span class="pre">get_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_or_task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.get_request" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_or_task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.get_request" title="Link to this definition"></a></dt>
 <dd><p>Get the original TaskRequest for a previously submitted pipeline or task</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>pipeline_or_task</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>]) – the pipeline or task</p></li>
+<li><p><strong>pipeline_or_task</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>]</span>) – the pipeline or task</p></li>
 <li><p><strong>topic</strong> (<em>optional</em>) – override the default ingress topic</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>a Future encapsulating the original TaskRequest</p>
@@ -242,12 +242,12 @@ e.g. {‘example/worker’: ‘example.requests’, None: ‘example.default.req
 
 <dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.client.FlinkTasksClient.get_request_async">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_request_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_or_task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.get_request_async" title="Permalink to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_request_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_or_task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.get_request_async" title="Link to this definition"></a></dt>
 <dd><p>Get the original TaskRequest for a previously submitted pipeline or task</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>pipeline_or_task</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>]) – the pipeline or task</p></li>
+<li><p><strong>pipeline_or_task</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>]</span>) – the pipeline or task</p></li>
 <li><p><strong>topic</strong> (<em>optional</em>) – override the default ingress topic</p></li>
 </ul>
 </dd>
@@ -259,17 +259,17 @@ e.g. {‘example/worker’: ‘example.requests’, None: ‘example.default.req
 
 <dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.client.FlinkTasksClient.get_result">
-<span class="sig-name descname"><span class="pre">get_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_or_task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.get_result" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_or_task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.get_result" title="Link to this definition"></a></dt>
 <dd><p>Get the TaskResult for a previously submitted pipeline or task</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>pipeline_or_task</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>]) – the pipeline or task</p></li>
+<li><p><strong>pipeline_or_task</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>]</span>) – the pipeline or task</p></li>
 <li><p><strong>topic</strong> (<em>optional</em>) – override the default ingress topic</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>a Future encapsulating the original TaskResult</p>
@@ -279,12 +279,12 @@ e.g. {‘example/worker’: ‘example.requests’, None: ‘example.default.req
 
 <dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.client.FlinkTasksClient.get_result_async">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_result_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_or_task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.get_result_async" title="Permalink to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_result_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_or_task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.get_result_async" title="Link to this definition"></a></dt>
 <dd><p>Get the TaskResult for a previously submitted pipeline or task</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>pipeline_or_task</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>]) – the pipeline or task</p></li>
+<li><p><strong>pipeline_or_task</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>]</span>) – the pipeline or task</p></li>
 <li><p><strong>topic</strong> (<em>optional</em>) – override the default ingress topic</p></li>
 </ul>
 </dd>
@@ -296,17 +296,17 @@ e.g. {‘example/worker’: ‘example.requests’, None: ‘example.default.req
 
 <dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.client.FlinkTasksClient.get_status">
-<span class="sig-name descname"><span class="pre">get_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_or_task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.get_status" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_or_task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.get_status" title="Link to this definition"></a></dt>
 <dd><p>Get the status of a previously submitted pipeline or task</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>pipeline_or_task</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>]) – the pipeline or task</p></li>
+<li><p><strong>pipeline_or_task</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>]</span>) – the pipeline or task</p></li>
 <li><p><strong>topic</strong> (<em>optional</em>) – override the default ingress topic</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>a Future encapsulating the status of the pipeline</p>
@@ -316,12 +316,12 @@ e.g. {‘example/worker’: ‘example.requests’, None: ‘example.default.req
 
 <dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.client.FlinkTasksClient.get_status_async">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_status_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_or_task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.get_status_async" title="Permalink to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_status_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_or_task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.get_status_async" title="Link to this definition"></a></dt>
 <dd><p>Get the status of a previously submitted pipeline or task</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>pipeline_or_task</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>]) – the pipeline or task</p></li>
+<li><p><strong>pipeline_or_task</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>]</span>) – the pipeline or task</p></li>
 <li><p><strong>topic</strong> (<em>optional</em>) – override the default ingress topic</p></li>
 </ul>
 </dd>
@@ -333,17 +333,17 @@ e.g. {‘example/worker’: ‘example.requests’, None: ‘example.default.req
 
 <dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.client.FlinkTasksClient.pause_pipeline">
-<span class="sig-name descname"><span class="pre">pause_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_or_task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.pause_pipeline" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">pause_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_or_task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.pause_pipeline" title="Link to this definition"></a></dt>
 <dd><p>Pauses a pipeline</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>pipeline_or_task</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>]) – the pipeline or task</p></li>
+<li><p><strong>pipeline_or_task</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>]</span>) – the pipeline or task</p></li>
 <li><p><strong>topic</strong> (<em>optional</em>) – override the default ingress topic</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>a Future indicating whether the pipeline was successfully paused or not</p>
@@ -353,12 +353,12 @@ e.g. {‘example/worker’: ‘example.requests’, None: ‘example.default.req
 
 <dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.client.FlinkTasksClient.pause_pipeline_async">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pause_pipeline_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_or_task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.pause_pipeline_async" title="Permalink to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">pause_pipeline_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_or_task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.pause_pipeline_async" title="Link to this definition"></a></dt>
 <dd><p>Pauses a pipeline</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>pipeline_or_task</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>]) – the pipeline or task</p></li>
+<li><p><strong>pipeline_or_task</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>]</span>) – the pipeline or task</p></li>
 <li><p><strong>topic</strong> (<em>optional</em>) – override the default ingress topic</p></li>
 </ul>
 </dd>
@@ -367,23 +367,23 @@ e.g. {‘example/worker’: ‘example.requests’, None: ‘example.default.req
 
 <dl class="py property">
 <dt class="sig sig-object py" id="statefun_tasks.client.FlinkTasksClient.serialiser">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">serialiser</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="statefun_tasks.DefaultSerialiser.html#statefun_tasks.DefaultSerialiser" title="statefun_tasks.default_serialiser.DefaultSerialiser"><span class="pre">DefaultSerialiser</span></a></em><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.serialiser" title="Permalink to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">serialiser</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="statefun_tasks.DefaultSerialiser.html#statefun_tasks.DefaultSerialiser" title="statefun_tasks.default_serialiser.DefaultSerialiser"><span class="pre">DefaultSerialiser</span></a></span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.serialiser" title="Link to this definition"></a></dt>
 <dd><p>Returns the serialiser used by this client</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.client.FlinkTasksClient.submit">
-<span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.submit" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.submit" title="Link to this definition"></a></dt>
 <dd><p>Submit a pipeline to Flink</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>pipeline</strong> (<a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>) – the pipeline</p></li>
+<li><p><strong>pipeline</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a></span>) – the pipeline</p></li>
 <li><p><strong>topic</strong> (<em>optional</em>) – override the default ingress topic</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>a Future encapsulating the result of the pipeline</p>
@@ -393,12 +393,12 @@ e.g. {‘example/worker’: ‘example.requests’, None: ‘example.default.req
 
 <dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.client.FlinkTasksClient.submit_async">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">submit_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.submit_async" title="Permalink to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">submit_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.submit_async" title="Link to this definition"></a></dt>
 <dd><p>Submit a pipeline to Flink</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>pipeline</strong> (<a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>) – the pipeline</p></li>
+<li><p><strong>pipeline</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a></span>) – the pipeline</p></li>
 <li><p><strong>topic</strong> (<em>optional</em>) – override the default ingress topic</p></li>
 </ul>
 </dd>
@@ -410,17 +410,17 @@ e.g. {‘example/worker’: ‘example.requests’, None: ‘example.default.req
 
 <dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.client.FlinkTasksClient.unpause_pipeline">
-<span class="sig-name descname"><span class="pre">unpause_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_or_task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.unpause_pipeline" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">unpause_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_or_task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.unpause_pipeline" title="Link to this definition"></a></dt>
 <dd><p>Unpauses a pipeline</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>pipeline_or_task</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>]) – the pipeline or task</p></li>
+<li><p><strong>pipeline_or_task</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>]</span>) – the pipeline or task</p></li>
 <li><p><strong>topic</strong> (<em>optional</em>) – override the default ingress topic</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Future</span></code></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>a Future indicating whether the pipeline was successfully paused or not</p>
@@ -430,12 +430,12 @@ e.g. {‘example/worker’: ‘example.requests’, None: ‘example.default.req
 
 <dl class="py method">
 <dt class="sig sig-object py" id="statefun_tasks.client.FlinkTasksClient.unpause_pipeline_async">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">unpause_pipeline_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_or_task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.unpause_pipeline_async" title="Permalink to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">unpause_pipeline_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_or_task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#statefun_tasks.client.FlinkTasksClient.unpause_pipeline_async" title="Link to this definition"></a></dt>
 <dd><p>Unpauses a pipeline</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>pipeline_or_task</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>]) – the pipeline or task</p></li>
+<li><p><strong>pipeline_or_task</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="statefun_tasks.PipelineBuilder.html#statefun_tasks.PipelineBuilder" title="statefun_tasks.pipeline_builder.PipelineBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineBuilder</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Task</span></code>]</span>) – the pipeline or task</p></li>
 <li><p><strong>topic</strong> (<em>optional</em>) – override the default ingress topic</p></li>
 </ul>
 </dd>
