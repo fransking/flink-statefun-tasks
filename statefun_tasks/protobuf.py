@@ -146,8 +146,8 @@ def wrap_value(v: object, converters: Iterable[ObjectProtobufConverter], use_leg
             f'Cannot convert value of type {type(v)} to protobuf. '
             'Try converting to protobuf first, or provide a compatible converter.')
     
-    should_wrap = use_legacy_types or not isinstance(compatible_converter, ScalarTypeProtobufConverter)
-    
+    should_wrap = use_legacy_types or not isinstance(compatible_converter, (ScalarTypeProtobufConverter, NoneTypeProtobufConverter))
+
     return compatible_converter.convert_to_proto(v) if should_wrap else pack_value(v, converters)
 
 
@@ -163,6 +163,20 @@ def is_wrapped_known_proto_type(value, known_proto_types):
     return isinstance(value, Any) and any(
         (value.Is(proto_type.DESCRIPTOR) for proto_type in itertools.chain(_FRAMEWORK_KNOWN_PROTO_TYPES, known_proto_types)))
 
+def can_pack_value_without_wrapping_first(value) -> bool:
+    if isinstance(value, Value):
+        return True
+    
+    if value is None:
+        return True
+    elif isinstance(value, (bool, int, float, str, bytes)):
+        return True
+    elif isinstance(value, (MapOfStringToValue, ArrayOfValue, TupleOfValue)):
+        return True
+    elif isinstance(value, Any):
+        return True
+    else:
+        return False
 
 def pack_value(value, converters: Iterable[ObjectProtobufConverter]) -> Value:
     if isinstance(value, Value):
