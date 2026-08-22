@@ -87,8 +87,7 @@ message PipelineEntry {
 message Pipeline {
     repeated PipelineEntry entries = 1;
 
-    // whether to inline this pipeline - i.e. pass arguments from and share state with the parent task
-    // or treat as independent - defaults to false
+    // whether to inline this pipeline - i.e. share state with the parent task or treat as independent - defaults to false
     bool inline = 2;
 
     // parameters to pass to the initial tasks in this pipeline

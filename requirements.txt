@@ -1,6 +1,6 @@
 protobuf
-flask
-gunicorn
+fastapi
+uvicorn
 kafka-python
 aiohttp
 sphinx

@@ -33,3 +33,7 @@ from statefun_tasks.messages_pb2 import (TaskRequest, TaskResult, TaskException,
 
 # builtin tasks
 from statefun_tasks.builtin_tasks import run_pipeline, flatten_results
+
+
+# utils
+from statefun_tasks.utils import gen_id, id_to_uuid
