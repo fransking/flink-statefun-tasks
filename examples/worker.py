@@ -1,11 +1,11 @@
 
 from statefun_tasks.core.statefun import StatefulFunctions, RequestReplyHandler
+from fastapi import FastAPI, Request
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.responses import Response
 import logging
 import traceback
-
-# import FlinkTasks
 from .api import tasks
-
 
 logging.basicConfig(level=logging.INFO)
 
@@ -32,21 +32,15 @@ handler = RequestReplyHandler(functions)
 # Serve the endpoint
 #
 
-from flask import request
-from flask import make_response
-from flask import Flask
-
-app = Flask(__name__)
+app = FastAPI()
+app.add_middleware(GZipMiddleware)
 
 
-@app.route('/statefun', methods=['POST'])
-def handle():
-    response_data = handler.handle_sync(request.data)
-    response = make_response(response_data)
-    response.headers.set('Content-Type', 'application/octet-stream')
-    return response
-
-
-
-if __name__ == "__main__":
-    app.run()
+@app.post("/statefun")
+async def handle(request: Request):
+    data = await request.body()
+    response_data = handler.handle_sync(data)
+    return Response(
+        content=response_data,
+        media_type='application/octet-stream',
+    )

@@ -2,12 +2,18 @@ from google.protobuf.message import Message
 from google.protobuf.any_pb2 import Any
 
 import inspect
-from uuid import uuid4
+from uuid import uuid4, UUID
+from base64 import urlsafe_b64encode, urlsafe_b64decode
 from typing import get_type_hints
 
 
 def gen_id():
-    return str(uuid4())
+    return urlsafe_b64encode(uuid4().bytes).rstrip(b'=').decode('ascii')
+
+
+def id_to_uuid(id_str):
+    padded = id_str + '=' * (4 - len(id_str) % 4)
+    return UUID(bytes=urlsafe_b64decode(padded))
 
 
 def type_name(thing):

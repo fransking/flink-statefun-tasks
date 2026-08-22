@@ -1,8 +1,8 @@
-from statefun_tasks import TaskRequest, TaskResult, TaskException
-from statefun_tasks.client import FlinkTasksClientFactory, TaskError
+from statefun_tasks.client import FlinkTasksClientFactory
 
-from aiohttp import web
-import json
+from fastapi import FastAPI
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.responses import JSONResponse
 
 from .api import greeting_workflow
 
@@ -12,9 +12,15 @@ flink_client = FlinkTasksClientFactory.get_client(
     KAFKA_BROKER, 
     request_topics={None: 'statefun-test.requests'}, 
     action_topics={None: 'statefun-test.actions'}, 
-    reply_topic=f'statefun-test.reply')
+    reply_topic=f'statefun-test.reply',
+    kafka_producer_properties={'compression_type': 'gzip'})
 
-async def index(request):
+app = FastAPI()
+app.add_middleware(GZipMiddleware)
+
+
+@app.get("/")
+async def index():
     try:
         pipeline = greeting_workflow.send('Jane', last_name='Doe')
         result = await flink_client.submit_async(pipeline)
@@ -25,11 +31,4 @@ async def index(request):
     except Exception as ex:
         response_data = {'error': str(ex)}
 
-    return web.Response(text=json.dumps(response_data, indent=True), content_type='application/json')
-
-
-async def app():
-
-    web_app = web.Application()
-    web_app.router.add_get('/', index)
-    return web_app
+    return JSONResponse(content=response_data)

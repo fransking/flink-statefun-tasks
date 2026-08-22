@@ -5,4 +5,6 @@ docsrc/_build
 .vscode
 TODO
 my_examples
+my_examples.bak
 dist
+tools
